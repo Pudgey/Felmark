@@ -9,6 +9,9 @@ import Sidebar from "@/components/sidebar/Sidebar";
 import Editor from "@/components/editor/Editor";
 import WorkspaceOnboarding from "@/components/onboarding/WorkspaceOnboarding";
 import ErrorBoundary from "@/components/shared/ErrorBoundary";
+import { INITIAL_COMMENTS, type Comment } from "@/components/comments/CommentPanel";
+import { INITIAL_ACTIVITIES, type BlockActivity } from "@/components/activity/ActivityMargin";
+import CreationAnimation from "@/components/onboarding/CreationAnimation";
 
 const INITIAL_TABS: Tab[] = [
   { id: "p1", name: "Brand Guidelines v2", client: "Meridian Studio", active: true },
@@ -48,29 +51,27 @@ export default function Dashboard() {
   const [blocksMap, setBlocksMap] = useState<Record<string, Block[]>>(INITIAL_BLOCKS);
   const [archived, setArchived] = useState<ArchivedProject[]>([]);
   const [onboardingName, setOnboardingName] = useState<string | null>(null);
+  const [creationAnim, setCreationAnim] = useState<{ name: string; template: string; color: string; pendingData: { name: string; contact: string; rate: string; budget: string; color: string; template: WorkspaceTemplate } } | null>(null);
+  const [comments, setComments] = useState<Comment[]>(INITIAL_COMMENTS);
+  const [activitiesMap, setActivitiesMap] = useState<Record<string, BlockActivity[]>>({ p1: INITIAL_ACTIVITIES });
   const [sidebarWidth, setSidebarWidth] = useState(260);
   const [isResizing, setIsResizing] = useState(false);
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<string | null>(null);
+  const [calendarScrollTarget, setCalendarScrollTarget] = useState<string | null>(null);
   const resizeRef = useRef<{ startX: number; startW: number } | null>(null);
 
   const overdueCount = workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "overdue").length, 0);
 
-  const toggleWorkspace = (wid: string) => {
-    const ws = workspaces.find(w => w.id === wid);
-    if (ws && !ws.open) {
-      // Opening workspace → show workspace home
-      setActiveWorkspaceId(wid);
-      setTabs(prev => prev.map(t => ({ ...t, active: false })));
-      setActiveProject("");
-    } else if (ws && ws.open && activeWorkspaceId !== wid) {
-      // Workspace is open but not active → show its home
-      setActiveWorkspaceId(wid);
-      setTabs(prev => prev.map(t => ({ ...t, active: false })));
-      setActiveProject("");
-    } else {
-      // Already active → collapse it
-      setActiveWorkspaceId(null);
-    }
+  // Single click — pure expand/collapse toggle
+  const toggleWorkspace = (wid: string) =>
+    setWorkspaces(prev => prev.map(w => w.id === wid ? { ...w, open: !w.open } : w));
+
+  // Double click — navigate to workspace home
+  const selectWorkspaceHome = (wid: string) => {
+    setActiveWorkspaceId(wid);
+    setTabs(prev => prev.map(t => ({ ...t, active: false })));
+    setActiveProject("");
+    // Ensure workspace is expanded
     setWorkspaces(prev => prev.map(w => w.id === wid ? { ...w, open: true } : w));
   };
 
@@ -86,6 +87,16 @@ export default function Dashboard() {
     if (!blocksMap[project.id]) {
       setBlocksMap(prev => ({ ...prev, [project.id]: makeEmptyBlocks() }));
     }
+  };
+
+  // Double-click calendar event → open the first project in that workspace
+  const calendarOpenProject = (workspaceId: string) => {
+    const wsIdx = parseInt(workspaceId.replace("w", "")) - 1;
+    const ws = workspaces[wsIdx];
+    if (!ws || ws.projects.length === 0) return;
+    const project = ws.projects[0];
+    setRailActive("workspaces");
+    selectProject(project, ws.client);
   };
 
   const handleTabClick = (id: string) => {
@@ -138,7 +149,19 @@ export default function Dashboard() {
     setOnboardingName(name);
   };
 
+  const TEMPLATE_LABELS: Record<WorkspaceTemplate, string> = {
+    blank: "Blank Project", proposal: "Proposal", meeting: "Meeting Notes",
+    brief: "Project Brief", retainer: "Retainer", invoice: "Invoice",
+  };
+
   const completeOnboarding = (data: { name: string; contact: string; rate: string; budget: string; color: string; template: WorkspaceTemplate }) => {
+    setOnboardingName(null);
+    setCreationAnim({ name: data.name, template: TEMPLATE_LABELS[data.template], color: data.color, pendingData: data });
+  };
+
+  const finishCreation = () => {
+    if (!creationAnim) return;
+    const data = creationAnim.pendingData;
     const wsId = uid();
     const projectId = uid();
     const { blocks, projectName } = makeBlocks(data.template, data.name);
@@ -172,7 +195,7 @@ export default function Dashboard() {
       id: projectId, name: projectName, client: data.name, active: true,
     }]);
     setActiveProject(projectId);
-    setOnboardingName(null);
+    setCreationAnim(null);
   };
 
   const skipOnboarding = () => {
@@ -339,6 +362,7 @@ export default function Dashboard() {
         railActive={railActive}
         onClose={() => setSidebarOpen(false)}
         onToggleWorkspace={toggleWorkspace}
+        onSelectWorkspaceHome={selectWorkspaceHome}
         onSelectProject={selectProject}
         onArchiveProject={archiveProject}
         onArchiveCompleted={archiveCompletedInWorkspace}
@@ -364,6 +388,7 @@ export default function Dashboard() {
         onAddWorkspace={addWorkspace}
         onTogglePin={togglePin}
         onCycleStatus={cycleStatus}
+        onScrollToCalendarEvent={(projectId) => setCalendarScrollTarget(projectId)}
       />
       {/* Resize handle */}
       {sidebarOpen && (
@@ -415,7 +440,14 @@ export default function Dashboard() {
           }} />
         </div>
       )}
-      {onboardingName !== null ? (
+      {creationAnim ? (
+        <CreationAnimation
+          clientName={creationAnim.name}
+          templateName={creationAnim.template}
+          color={creationAnim.color}
+          onComplete={finishCreation}
+        />
+      ) : onboardingName !== null ? (
         <div style={{ flex: 1, overflow: "auto", background: "var(--parchment)" }}>
           <WorkspaceOnboarding
             initialName={onboardingName}
@@ -442,6 +474,23 @@ export default function Dashboard() {
           onBlocksChange={handleBlocksChange}
           onWordCountChange={handleWordCountChange}
           onSelectProject={selectProject}
+          onNewWorkspace={() => setOnboardingName("New Client")}
+          railActive={railActive}
+          calendarScrollTarget={calendarScrollTarget}
+          onCalendarScrollComplete={() => setCalendarScrollTarget(null)}
+          onCalendarOpenProject={calendarOpenProject}
+          onRenameWorkspace={(wsId, name) => {
+            setWorkspaces(prev => prev.map(w => w.id === wsId ? { ...w, client: name, avatar: name[0].toUpperCase() } : w));
+            setTabs(prev => prev.map(t => {
+              const ws = workspaces.find(w => w.id === wsId);
+              if (ws && ws.projects.some(p => p.id === t.id)) return { ...t, client: name };
+              return t;
+            }));
+          }}
+          comments={comments}
+          onCommentsChange={setComments}
+          activities={activitiesMap[activeProject] || []}
+          onActivitiesChange={(newActivities) => setActivitiesMap(prev => ({ ...prev, [activeProject]: newActivities }))}
         />
       )}
     </div>

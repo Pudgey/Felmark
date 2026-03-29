@@ -86,12 +86,12 @@ Three tiers:
 ### Active
 | Mission | Milestone | Status | Doc |
 |---------|-----------|--------|-----|
-| (none) | — | — | — |
+| MVP Launch — Extension Shell + Web App | M1 | Planning | [MISSION_MVP_LAUNCH.md](missions/MISSION_MVP_LAUNCH.md) |
 
 ### Planning
 | Mission | Milestone | Doc |
 |---------|-----------|-----|
-| (none) | — | — |
+| nox AI — Rapid Project Creation | M1 | [MISSION_NOX_AI.md](missions/MISSION_NOX_AI.md) |
 
 ### Completed
 | Mission | Completed | Doc |
@@ -107,6 +107,8 @@ Three tiers:
 | [BUSINESS_STRATEGY.md](../business/BUSINESS_STRATEGY.md) | Full business strategy, pricing, market analysis, competitive landscape | Reference |
 | [WORKTAB_CONCEPT.md](../business/WORKTAB_CONCEPT.md) | WorkTab concept doc — core product vision and feature set | Reference |
 | [COMPETITIVE_ANALYSIS.md](Reports/COMPETITIVE_ANALYSIS.md) | Industry competitor analysis | Reference |
+| [PIPELINE_CONCEPT.md](missions/PIPELINE_CONCEPT.md) | Kanban deal pipeline — Lead → Proposed → Active → Payment → Done | M2 |
+| [SEARCH_CONCEPT.md](missions/SEARCH_CONCEPT.md) | Universal search — projects, docs, invoices, clients, messages, commands | M1 |
 | — | Async messaging per workspace | M3+ |
 | — | Team workspaces + real-time collab | M4 |
 | — | Template marketplace | M4+ |

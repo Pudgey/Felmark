@@ -170,6 +170,8 @@ export default function ConversationPanel({ open, onClose }: ConversationPanelPr
   const [hovered, setHovered] = useState<string | null>(null);
   const [kbIndex, setKbIndex] = useState(-1);
   const [draft, setDraft] = useState("");
+  const [showScrollBtn, setShowScrollBtn] = useState(false);
+  const [hoveredMsg, setHoveredMsg] = useState<string | null>(null);
 
   const searchRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -299,6 +301,16 @@ export default function ConversationPanel({ open, onClose }: ConversationPanelPr
     return () => document.removeEventListener("mousedown", handler);
   }, [showNew, showNewDm]);
 
+  // Simulate typing timeout — clear typing indicators after 4 seconds
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setConvos(prev => prev.map(c =>
+        c.typing.length > 0 ? { ...c, typing: [] } : c
+      ));
+    }, 4000);
+    return () => clearTimeout(timeout);
+  }, []);
+
   // Scroll to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -315,6 +327,17 @@ export default function ConversationPanel({ open, onClose }: ConversationPanelPr
   if (activeId && active) {
     const dmUser = active.type === "dm" ? getUser(active.userId || "") : null;
     const msgs = SEED_MESSAGES[active.id] || [];
+
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+      const el = e.currentTarget;
+      setShowScrollBtn(el.scrollHeight - el.scrollTop - el.clientHeight > 100);
+    };
+
+    const scrollToBottom = () => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    const QUICK_REACTIONS = ["👍", "❤️", "😂", "🎯", "✅"];
 
     return (
       <div className={styles.panel}>
@@ -349,12 +372,14 @@ export default function ConversationPanel({ open, onClose }: ConversationPanelPr
           </button>
         </div>
 
-        <div className={styles.messages}>
+        <div className={styles.messages} onScroll={handleScroll} style={{ position: "relative" }}>
           {msgs.map(msg => {
             const user = getUser(msg.user);
             const isSelf = msg.user === "u1";
+            const isMsgHovered = hoveredMsg === msg.id;
             return (
-              <div key={msg.id} className={`${styles.msg} ${isSelf ? styles.msgSelf : ""}`}>
+              <div key={msg.id} className={`${styles.msg} ${isSelf ? styles.msgSelf : ""}`}
+                onMouseEnter={() => setHoveredMsg(msg.id)} onMouseLeave={() => setHoveredMsg(null)}>
                 <div className={styles.msgAvatar} style={{ background: user.color }}>{user.avatar}</div>
                 <div className={styles.msgBody}>
                   <div className={styles.msgHeader}>
@@ -363,10 +388,24 @@ export default function ConversationPanel({ open, onClose }: ConversationPanelPr
                   </div>
                   <p className={styles.msgText}>{msg.text}</p>
                 </div>
+                {isMsgHovered && (
+                  <div className={styles.msgReactions}>
+                    {QUICK_REACTIONS.map(emoji => (
+                      <button key={emoji} className={styles.msgReactionBtn} onClick={e => e.stopPropagation()}>{emoji}</button>
+                    ))}
+                  </div>
+                )}
               </div>
             );
           })}
           <div ref={messagesEndRef} />
+
+          {showScrollBtn && (
+            <button className={styles.scrollToBottom} onClick={scrollToBottom}>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M3 7l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              New messages
+            </button>
+          )}
         </div>
 
         <div className={styles.composer}>

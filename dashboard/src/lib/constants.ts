@@ -12,6 +12,9 @@ export const BLOCK_TYPES: BlockTypeInfo[] = [
   { type: "code", label: "Code", icon: "<>", desc: "Code block", section: "Blocks", shortcut: "```" },
   { type: "callout", label: "Callout", icon: "!", desc: "Callout box", section: "Blocks", shortcut: "!" },
   { type: "divider", label: "Divider", icon: "—", desc: "Horizontal rule", section: "Blocks", shortcut: "---" },
+  { type: "graph", label: "Graph", icon: "▥", desc: "Insert a live chart", section: "Blocks", shortcut: "/graph" },
+  { type: "deliverable", label: "Deliverable", icon: "☰", desc: "Task with files & approvals", section: "Blocks", shortcut: "/deliv" },
+  { type: "money", label: "Money", icon: "$", desc: "Financial block", section: "Blocks", shortcut: "/money" },
 ];
 
 export interface Command {
@@ -66,7 +69,7 @@ export const INITIAL_WORKSPACES: Workspace[] = [
     ],
   },
   {
-    id: "w4", client: "Personal", avatar: "✦", avatarBg: "#5c5c53", open: false, lastActive: "5h ago",
+    id: "w4", client: "Personal", avatar: "\u2726", avatarBg: "#5c5c53", open: false, lastActive: "5h ago", personal: true,
     projects: [
       { id: "p8", name: "Portfolio Updates", status: "active", due: "—", daysLeft: null, amount: "—", progress: 50, pinned: false },
       { id: "p9", name: "Invoice Template", status: "completed", due: "—", daysLeft: null, amount: "—", progress: 100, pinned: false },

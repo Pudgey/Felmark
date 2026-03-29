@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 
 /* ═══════════════════════════════════════
    TERMINAL WELCOME v2 — 10x
@@ -13,6 +13,7 @@ const SUGGESTIONS = [
   { cmd: "new proposal --client nora", desc: "Start Nora's proposal", icon: "+", hot: false },
   { cmd: "view calendar", desc: "3 events today", icon: "◎", hot: false },
   { cmd: "send reminder --client bolt", desc: "Nudge overdue payment", icon: "→", hot: false },
+  { cmd: "new workspace", desc: "Onboard a new client", icon: "⊞", hot: false },
 ];
 
 function EmberParticles() {
@@ -89,7 +90,18 @@ function EmberParticles() {
   return <canvas ref={canvasRef} className="tw-particles" />;
 }
 
-export default function TerminalWelcome() {
+interface TerminalWelcomeProps {
+  activeCount?: number;
+  reviewCount?: number;
+  overdueCount?: number;
+  totalEarned?: number;
+  totalPending?: number;
+  pipeline?: number;
+  onOpenCmdPalette?: () => void;
+  onNewWorkspace?: () => void;
+}
+
+export default function TerminalWelcome({ activeCount = 4, reviewCount = 1, overdueCount = 1, totalEarned = 14800, totalPending = 7200, pipeline = 22000, onOpenCmdPalette, onNewWorkspace }: TerminalWelcomeProps) {
   const [phase, setPhase] = useState(0);
   const [inputValue, setInputValue] = useState("");
   const [inputFocused, setInputFocused] = useState(false);
@@ -97,33 +109,39 @@ export default function TerminalWelcome() {
   const [suggIdx, setSuggIdx] = useState(0);
   const [executedCmd, setExecutedCmd] = useState<string | null>(null);
   const [cmdOutput, setCmdOutput] = useState<{ text: string; icon: string; color: string } | null>(null);
-  const [hoveredAttention, setHoveredAttention] = useState<number | null>(null);
   const [expandedComment, setExpandedComment] = useState<number | null>(null);
   const [replyText, setReplyText] = useState("");
   const [streak] = useState(14);
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? "good morning" : hour < 17 ? "good afternoon" : "good evening";
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+  const now = mounted ? new Date() : new Date(0);
+  const hour = now.getHours();
+  const greeting = !mounted ? "" : hour < 12 ? "good morning" : hour < 17 ? "good afternoon" : "good evening";
   const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  const now = new Date();
-  const dateStr = `${dayNames[now.getDay()]}, ${monthNames[now.getMonth()]} ${now.getDate()}`;
+  const dateStr = mounted ? `${dayNames[now.getDay()]}, ${monthNames[now.getMonth()]} ${now.getDate()}` : "";
 
-  // Cascading reveal
+  // Cascading reveal — gentle pacing
   useEffect(() => {
     const timers: NodeJS.Timeout[] = [];
     for (let i = 1; i <= 12; i++) {
-      timers.push(setTimeout(() => setPhase(i), i * 220));
+      timers.push(setTimeout(() => setPhase(i), i * 380));
     }
-    timers.push(setTimeout(() => inputRef.current?.focus(), 12 * 220 + 400));
+    // Let the user discover the command input themselves
     return () => timers.forEach(clearTimeout);
   }, []);
 
+  // Auto-scroll: only after a command is executed, not during reveal
+  const scrollTrigger = executedCmd ? `${executedCmd}-${cmdOutput?.text ?? ""}` : null;
   useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [phase, executedCmd, cmdOutput]);
+    if (scrollTrigger && scrollRef.current) {
+      scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    }
+  }, [scrollTrigger]);
 
   const filtered = inputValue
     ? SUGGESTIONS.filter(s => s.cmd.toLowerCase().includes(inputValue.toLowerCase()) || s.desc.toLowerCase().includes(inputValue.toLowerCase()))
@@ -140,6 +158,7 @@ export default function TerminalWelcome() {
       else if (cmd.includes("proposal")) setCmdOutput({ text: "Scaffolding proposal for Nora Kim\nTemplate: Brand & Identity \u00b7 6 sections\nPre-filling from discovery notes...", icon: "+", color: "#b07d4f" });
       else if (cmd.includes("calendar")) setCmdOutput({ text: "09:00  Brand review call \u2014 Meridian\n11:30  Deep work block (current)\n14:00  Nora kickoff \u2014 Course Landing Page", icon: "\u25ce", color: "#7c8594" });
       else if (cmd.includes("reminder")) setCmdOutput({ text: "Sending payment reminder to Bolt Fitness\nRe: Invoice #044 \u2014 $4,000 (4 days overdue)\nDraft ready \u2014 review before sending?", icon: "\u2192", color: "#b07d4f" });
+      else if (cmd.includes("workspace")) { onNewWorkspace?.(); return; }
       else setCmdOutput({ text: `Command not found: ${cmd}\nTry: open, create, new, view, send`, icon: "?", color: "#9b988f" });
     }, 700);
   };
@@ -152,34 +171,19 @@ export default function TerminalWelcome() {
     else if (e.key === "Escape") setShowSuggestions(false);
   };
 
-  const Line = ({ n, children, className = "" }: { n: number; children: React.ReactNode; className?: string }) => {
-    if (phase < n) return null;
-    return <div className={`tw-line ${className}`} style={{ animationDelay: "0s" }}>{children}</div>;
-  };
-
   return (
     <>
       <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
       <style>{`
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        :root {
-          --parchment: #faf9f7; --warm-50: #f7f6f3; --warm-100: #f0eee9;
-          --warm-200: #e5e2db; --warm-300: #d5d1c8; --warm-400: #b8b3a8;
-          --ink-900: #2c2a25; --ink-800: #3d3a33; --ink-700: #4f4c44;
-          --ink-600: #65625a; --ink-500: #7d7a72; --ink-400: #9b988f; --ink-300: #b5b2a9;
-          --ember: #b07d4f; --ember-light: #c89360; --ember-bg: rgba(176,125,79,0.08);
-          --mono: 'JetBrains Mono', monospace;
-        }
-
-        .tw { font-family: var(--mono); font-size: 13px; color: var(--ink-600); background: var(--parchment); height: 100vh; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        .tw { font-family: var(--mono); font-size: 13px; color: var(--ink-600); background: var(--parchment); height: 100%; flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
         .tw-particles { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
-        .tw-scroll { flex: 1; overflow-y: auto; position: relative; z-index: 1; display: flex; flex-direction: column; justify-content: center; padding: 48px 60px; }
+        .tw-scroll { flex: 1; overflow-y: auto; position: relative; z-index: 1; padding: 48px 60px; }
         .tw-scroll::-webkit-scrollbar { width: 4px; }
         .tw-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.04); border-radius: 99px; }
         .tw-content { max-width: 600px; width: 100%; margin: 0 auto; }
 
-        .tw-line { min-height: 20px; animation: lineIn 0.25s ease both; }
-        @keyframes lineIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        .tw-line { min-height: 20px; opacity: 0; transform: translateY(8px); transition: opacity 0.5s cubic-bezier(0.23, 1, 0.32, 1), transform 0.5s cubic-bezier(0.23, 1, 0.32, 1); }
+        .tw-line.visible { opacity: 1; transform: translateY(0); }
 
         .tw-greeting {
           font-family: 'Cormorant Garamond', serif; font-size: 32px;
@@ -379,7 +383,7 @@ export default function TerminalWelcome() {
         .tw-input-hints { display: flex; gap: 4px; flex-shrink: 0; }
         .tw-kbd { font-size: 9px; color: var(--ink-300); background: var(--warm-100); border: 1px solid var(--warm-200); border-radius: 3px; padding: 1px 5px; }
 
-        .tw-executed { margin-top: 14px; animation: lineIn 0.2s ease; }
+        .tw-executed { margin-top: 14px; animation: lineIn 0.5s cubic-bezier(0.23, 1, 0.32, 1) both; }
         .tw-exec-cmd { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
         .tw-exec-prompt { color: var(--ember); font-weight: 600; }
         .tw-exec-text { color: var(--ink-800); font-weight: 500; }
@@ -416,20 +420,20 @@ export default function TerminalWelcome() {
         <div className="tw-scroll" ref={scrollRef}>
           <div className="tw-content">
             {/* Greeting */}
-            <Line n={1}>
+            <div className={`tw-line${phase >= 1 ? " visible" : ""}`}>
               <div className="tw-greeting">{greeting}. <em>let&apos;s build.</em></div>
-            </Line>
+            </div>
 
-            <Line n={1}>
+            <div className={`tw-line${phase >= 1 ? " visible" : ""}`} style={{ transitionDelay: "80ms" }}>
               <div className="tw-date-row">
                 <span>{dateStr}</span>
                 <span>&middot;</span>
                 <span className="tw-streak"><span className="tw-streak-fire">&#x1f525;</span> {streak}-day streak</span>
               </div>
-            </Line>
+            </div>
 
             {/* Focus suggestion */}
-            <Line n={2}>
+            <div className={`tw-line${phase >= 2 ? " visible" : ""}`}>
               <div className="tw-focus" onClick={() => executeCommand("open brand-guidelines")}>
                 <div className="tw-focus-icon">&#x25c6;</div>
                 <div className="tw-focus-body">
@@ -439,62 +443,62 @@ export default function TerminalWelcome() {
                 </div>
                 <span className="tw-focus-kbd">&#x23ce;</span>
               </div>
-            </Line>
+            </div>
 
             {/* Status */}
-            <Line n={3}><div className="tw-section">STATUS</div></Line>
-            <Line n={3}>
+            <div className={`tw-line${phase >= 3 ? " visible" : ""}`}><div className="tw-section">STATUS</div></div>
+            <div className={`tw-line${phase >= 3 ? " visible" : ""}`} style={{ transitionDelay: "80ms" }}>
               <div className="tw-stat">
                 <span className="tw-stat-label">active projects</span>
-                <span className="tw-stat-val" style={{ color: "#5a9a3c" }}>4</span>
+                <span className="tw-stat-val" style={{ color: "#5a9a3c" }}>{activeCount}</span>
               </div>
-            </Line>
-            <Line n={3}>
+            </div>
+            <div className={`tw-line${phase >= 3 ? " visible" : ""}`} style={{ transitionDelay: "160ms" }}>
               <div className="tw-stat">
                 <span className="tw-stat-label">in review</span>
-                <span className="tw-stat-val" style={{ color: "#b07d4f" }}>1</span>
+                <span className="tw-stat-val" style={{ color: "#b07d4f" }}>{reviewCount}</span>
               </div>
-            </Line>
-            <Line n={3}>
+            </div>
+            <div className={`tw-line${phase >= 3 ? " visible" : ""}`} style={{ transitionDelay: "240ms" }}>
               <div className="tw-stat">
                 <span className="tw-stat-label">overdue</span>
-                <span className="tw-stat-val" style={{ color: "#c24b38" }}>1</span>
+                <span className="tw-stat-val" style={{ color: "#c24b38" }}>{overdueCount}</span>
                 <span className="tw-stat-badge" style={{ background: "rgba(194,75,56,0.06)", color: "#c24b38" }}>NEEDS ACTION</span>
               </div>
-            </Line>
+            </div>
 
             {/* Revenue */}
-            <Line n={4}><div className="tw-section">REVENUE</div></Line>
-            <Line n={4}>
+            <div className={`tw-line${phase >= 4 ? " visible" : ""}`}><div className="tw-section">REVENUE</div></div>
+            <div className={`tw-line${phase >= 4 ? " visible" : ""}`} style={{ transitionDelay: "80ms" }}>
               <div className="tw-stat">
                 <span className="tw-stat-label">earned this month</span>
-                <span className="tw-stat-val" style={{ color: "#5a9a3c" }}>$14,800</span>
+                <span className="tw-stat-val" style={{ color: "#5a9a3c" }}>${totalEarned.toLocaleString()}</span>
                 <span className="tw-stat-badge" style={{ background: "rgba(90,154,60,0.06)", color: "#5a9a3c" }}>+40% VS FEB</span>
               </div>
-            </Line>
-            <Line n={4}>
+            </div>
+            <div className={`tw-line${phase >= 4 ? " visible" : ""}`} style={{ transitionDelay: "160ms" }}>
               <div className="tw-stat">
                 <span className="tw-stat-label">pending payment</span>
-                <span className="tw-stat-val" style={{ color: "#b07d4f" }}>$7,200</span>
+                <span className="tw-stat-val" style={{ color: "#b07d4f" }}>${totalPending.toLocaleString()}</span>
               </div>
-            </Line>
-            <Line n={4}>
+            </div>
+            <div className={`tw-line${phase >= 4 ? " visible" : ""}`} style={{ transitionDelay: "240ms" }}>
               <div className="tw-stat">
                 <span className="tw-stat-label">total pipeline</span>
-                <span className="tw-stat-val" style={{ color: "var(--ink-800)" }}>$22,000</span>
+                <span className="tw-stat-val" style={{ color: "var(--ink-800)" }}>${pipeline.toLocaleString()}</span>
               </div>
-            </Line>
-            <Line n={5}>
+            </div>
+            <div className={`tw-line${phase >= 5 ? " visible" : ""}`}>
               <div className="tw-insight">
                 <span className="tw-insight-icon">&nearr;</span>
                 You&apos;re $200 away from your $15k monthly goal &mdash; best month since October
               </div>
-            </Line>
+            </div>
 
             {/* Attention */}
-            <Line n={6}><div className="tw-section">ATTENTION</div></Line>
-            <Line n={6}>
-              <div className="tw-alert" onMouseEnter={() => setHoveredAttention(1)} onMouseLeave={() => setHoveredAttention(null)}>
+            <div className={`tw-line${phase >= 6 ? " visible" : ""}`}><div className="tw-section">ATTENTION</div></div>
+            <div className={`tw-line${phase >= 6 ? " visible" : ""}`} style={{ transitionDelay: "80ms" }}>
+              <div className="tw-alert">
                 <div className="tw-alert-icon" style={{ background: "rgba(194,75,56,0.06)", color: "#c24b38" }}>!</div>
                 <div className="tw-alert-body">
                   <div className="tw-alert-text">Bolt Fitness &mdash; App Onboarding UX is 4 days overdue</div>
@@ -505,8 +509,8 @@ export default function TerminalWelcome() {
                   <button className="tw-alert-act" onClick={(e) => { e.stopPropagation(); executeCommand("send reminder --client bolt"); }}>Remind</button>
                 </div>
               </div>
-            </Line>
-            <Line n={7}>
+            </div>
+            <div className={`tw-line${phase >= 7 ? " visible" : ""}`}>
               <div className="tw-alert">
                 <div className="tw-alert-icon" style={{ background: "rgba(176,125,79,0.06)", color: "#b07d4f" }}>&rarr;</div>
                 <div className="tw-alert-body">
@@ -517,8 +521,8 @@ export default function TerminalWelcome() {
                   <button className="tw-alert-act primary">Open</button>
                 </div>
               </div>
-            </Line>
-            <Line n={7}>
+            </div>
+            <div className={`tw-line${phase >= 7 ? " visible" : ""}`} style={{ transitionDelay: "80ms" }}>
               <div className="tw-alert">
                 <div className="tw-alert-icon" style={{ background: "rgba(90,154,60,0.06)", color: "#5a9a3c" }}>$</div>
                 <div className="tw-alert-body">
@@ -529,23 +533,23 @@ export default function TerminalWelcome() {
                   <button className="tw-alert-act">Track</button>
                 </div>
               </div>
-            </Line>
+            </div>
 
             {/* While you were away */}
-            <Line n={8}><div className="tw-section">SINCE LAST SESSION</div></Line>
-            <Line n={8}>
+            <div className={`tw-line${phase >= 8 ? " visible" : ""}`}><div className="tw-section">SINCE LAST SESSION</div></div>
+            <div className={`tw-line${phase >= 8 ? " visible" : ""}`} style={{ transitionDelay: "80ms" }}>
               <div className="tw-away"><span className="tw-away-icon" style={{ color: "#5a9a3c" }}>$</span> <span className="tw-away-val">$1,800</span> payment received from Nora Kim</div>
-            </Line>
-            <Line n={8}>
+            </div>
+            <div className={`tw-line${phase >= 8 ? " visible" : ""}`} style={{ transitionDelay: "160ms" }}>
               <div className="tw-away"><span className="tw-away-icon" style={{ color: "#5b7fa4" }}>&#x25ce;</span> Proposal viewed <span className="tw-away-val">3x</span> by nora@coachkim.com</div>
-            </Line>
-            <Line n={8}>
+            </div>
+            <div className={`tw-line${phase >= 8 ? " visible" : ""}`} style={{ transitionDelay: "240ms" }}>
               <div className="tw-away"><span className="tw-away-icon" style={{ color: "#b07d4f" }}>&#x2713;</span> Nora <span className="tw-away-val">signed</span> the Course Landing Page proposal</div>
-            </Line>
+            </div>
 
             {/* Comments */}
-            <Line n={9}><div className="tw-section">RECENT COMMENTS</div></Line>
-            <Line n={9}>
+            <div className={`tw-line${phase >= 9 ? " visible" : ""}`}><div className="tw-section">RECENT COMMENTS</div></div>
+            <div className={`tw-line${phase >= 9 ? " visible" : ""}`} style={{ transitionDelay: "80ms" }}>
               <div className={`tw-comment${expandedComment === 1 ? " expanded" : ""}`}
                 onClick={() => setExpandedComment(expandedComment === 1 ? null : 1)}>
                 <div className="tw-comment-avatar" style={{ background: "#8a7e63" }}>S</div>
@@ -564,8 +568,8 @@ export default function TerminalWelcome() {
                   )}
                 </div>
               </div>
-            </Line>
-            <Line n={9}>
+            </div>
+            <div className={`tw-line${phase >= 9 ? " visible" : ""}`} style={{ transitionDelay: "160ms" }}>
               <div className={`tw-comment${expandedComment === 2 ? " expanded" : ""}`}
                 onClick={() => setExpandedComment(expandedComment === 2 ? null : 2)}>
                 <div className="tw-comment-avatar" style={{ background: "#7c8594" }}>J</div>
@@ -584,24 +588,24 @@ export default function TerminalWelcome() {
                   )}
                 </div>
               </div>
-            </Line>
+            </div>
 
             {/* Today */}
-            <Line n={10}><div className="tw-section">TODAY</div></Line>
-            <Line n={10}>
+            <div className={`tw-line${phase >= 10 ? " visible" : ""}`}><div className="tw-section">TODAY</div></div>
+            <div className={`tw-line${phase >= 10 ? " visible" : ""}`} style={{ transitionDelay: "80ms" }}>
               <div className="tw-event past"><span className="tw-event-time">09:00</span><span className="tw-event-dot" /><span className="tw-event-text">Brand review call &mdash; Meridian Studio</span></div>
-            </Line>
-            <Line n={10}>
+            </div>
+            <div className={`tw-line${phase >= 10 ? " visible" : ""}`} style={{ transitionDelay: "160ms" }}>
               <div className="tw-event now"><span className="tw-event-time">11:30</span><span className="tw-event-dot" /><span className="tw-event-text">Now &mdash; deep work block</span></div>
-            </Line>
-            <Line n={10}>
+            </div>
+            <div className={`tw-line${phase >= 10 ? " visible" : ""}`} style={{ transitionDelay: "240ms" }}>
               <div className="tw-event"><span className="tw-event-time">14:00</span><span className="tw-event-dot" style={{ background: "var(--warm-300)" }} /><span className="tw-event-text">Nora kickoff call &mdash; Course Landing Page</span></div>
-            </Line>
+            </div>
 
             {/* Prompt */}
-            <Line n={11}>
+            <div className={`tw-line${phase >= 11 ? " visible" : ""}`}>
               <div className="tw-prompt-text">Ready when you are.</div>
-            </Line>
+            </div>
 
             {/* Executed command */}
             {executedCmd && (
@@ -622,7 +626,7 @@ export default function TerminalWelcome() {
             )}
 
             {/* Command input */}
-            {phase >= 12 && (
+            <div className={`tw-line${phase >= 12 ? " visible" : ""}`}>
               <div className="tw-input-area">
                 {showSuggestions && filtered.length > 0 && (
                   <div className="tw-suggestions">
@@ -660,7 +664,7 @@ export default function TerminalWelcome() {
                   </div>
                 </div>
               </div>
-            )}
+            </div>
           </div>
         </div>
 
@@ -671,7 +675,7 @@ export default function TerminalWelcome() {
             <span>&middot;</span>
             <span>4 workspaces &middot; 8 projects</span>
           </div>
-          <span>{dateStr} &middot; {String(now.getHours()).padStart(2, "0")}:{String(now.getMinutes()).padStart(2, "0")}</span>
+          <span>{mounted ? `${dateStr} \u00b7 ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}` : "\u00a0"}</span>
         </div>
       </div>
     </>

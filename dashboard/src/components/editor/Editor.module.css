@@ -240,6 +240,26 @@
   justify-content: center;
   color: var(--ink-400);
   transition: all 0.1s;
+  position: relative;
+}
+
+.tabBarBadge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-family: var(--font-mono), monospace;
+  font-size: 7px;
+  font-weight: 700;
+  color: #fff;
+  background: #c24b38;
+  min-width: 13px;
+  height: 13px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  pointer-events: none;
 }
 
 .tabBarAction:hover {
@@ -493,8 +513,8 @@
   flex-shrink: 0;
   transition: opacity 0.06s;
   margin-right: 4px;
-  margin-left: -48px;
-  width: 46px;
+  margin-left: -70px;
+  width: 68px;
   justify-content: flex-end;
   gap: 1px;
 }
@@ -516,6 +536,8 @@
 
 .grip { cursor: grab; }
 .grip:active { cursor: grabbing; }
+
+.gutterDelete:hover { background: rgba(194, 75, 56, 0.08); color: #c24b38; }
 
 .prefix {
   color: var(--ink-300);

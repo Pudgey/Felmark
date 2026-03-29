@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useFocusTrap } from "../shared/useFocusTrap";
 import styles from "./HistoryModal.module.css";
 
 interface Change {
@@ -138,6 +139,8 @@ export default function HistoryModal({ open, onClose }: HistoryModalProps) {
     return () => window.removeEventListener("keydown", handler);
   }, [open, onClose]);
 
+  const trapRef = useFocusTrap(open);
+
   if (!open) return null;
 
   const isExpanded = (fileId: string) => expandedFiles.has("all") || expandedFiles.has(fileId);
@@ -145,7 +148,7 @@ export default function HistoryModal({ open, onClose }: HistoryModalProps) {
   let lastDate = "";
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
+    <div className={styles.overlay} onClick={onClose} ref={trapRef}>
       <div className={styles.modal} onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className={styles.header}>

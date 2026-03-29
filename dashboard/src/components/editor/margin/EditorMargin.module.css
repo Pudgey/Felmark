@@ -1,0 +1,210 @@
+.margin {
+  width: 200px;
+  min-width: 200px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--warm-100);
+  background: var(--warm-50);
+  overflow: hidden;
+}
+
+/* Document Spine */
+.spine {
+  padding: 14px 10px 10px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--warm-100);
+}
+
+.spineHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.spineLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--ink-400);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.spineProgress {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-300);
+}
+
+.spineBar {
+  height: 3px;
+  background: var(--warm-200);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.spineBarFill {
+  height: 100%;
+  border-radius: 2px;
+  background: #5a9a3c;
+  transition: width 0.4s ease;
+}
+
+.spineSections {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.spineItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.08s;
+}
+
+.spineItem:hover { background: var(--warm-100); }
+.spineItemOn { background: var(--ember-bg); }
+
+.spineDotWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 12px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.spineDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 2px solid;
+  flex-shrink: 0;
+  z-index: 1;
+  transition: all 0.15s;
+}
+
+.spineDot_complete { border-color: #5a9a3c; background: #5a9a3c; }
+.spineDot_active { border-color: var(--ember); background: var(--ember); }
+.spineDot_empty { border-color: var(--warm-300); background: var(--warm-50); }
+
+.spineItemOn .spineDot {
+  transform: scale(1.25);
+  box-shadow: 0 0 0 3px rgba(176, 125, 79, 0.12);
+}
+
+.spineConnector {
+  position: absolute;
+  top: 10px;
+  left: 5.5px;
+  width: 1px;
+  height: calc(100% + 1px);
+  z-index: 0;
+}
+
+.spineName {
+  font-size: 11.5px;
+  color: var(--ink-500);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.spineItemOn .spineName { color: var(--ink-800); font-weight: 500; }
+.spineNameDone { color: var(--ink-400); }
+
+.spineCheck { font-size: 10px; color: #5a9a3c; flex-shrink: 0; }
+
+/* Block Gutter */
+.gutter {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.gutter::-webkit-scrollbar { width: 3px; }
+.gutter::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.04); border-radius: 99px; }
+
+.gutterHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px 4px;
+}
+
+.gutterLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--ink-400);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.gutterCount {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-300);
+}
+
+.gutterItems {
+  display: flex;
+  flex-direction: column;
+}
+
+.gutterItem {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 10px;
+  cursor: pointer;
+  transition: background 0.06s;
+  min-height: 24px;
+}
+
+.gutterItem:hover { background: var(--warm-100); }
+.gutterItemOn { background: var(--ember-bg); }
+
+.gutterItemSection .gutterPreview {
+  color: var(--ink-600);
+  font-weight: 500;
+}
+
+.gutterLine {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-300);
+  width: 18px;
+  text-align: right;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.gutterType {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 500;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.gutterPreview {
+  font-size: 10.5px;
+  color: var(--ink-400);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gutterItemOn .gutterPreview { color: var(--ink-600); }
+.gutterPreviewEmpty { color: var(--warm-400); font-style: italic; }
+.gutterPreviewDivider { color: var(--warm-300); }

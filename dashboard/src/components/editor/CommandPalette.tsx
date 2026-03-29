@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { COMMANDS } from "@/lib/constants";
+import { useFocusTrap } from "../shared/useFocusTrap";
 import styles from "./CommandPalette.module.css";
 
 interface CommandPaletteProps {
@@ -27,8 +28,10 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
     else if (e.key === "Escape") { onClose(); }
   };
 
+  const trapRef = useFocusTrap(true);
+
   return (
-    <div className={styles.overlay} onClick={onClose}>
+    <div className={styles.overlay} onClick={onClose} ref={trapRef}>
       <div className={styles.modal} onClick={e => e.stopPropagation()}>
         <div className={styles.searchWrap}>
           <svg className={styles.searchIcon} width="16" height="16" viewBox="0 0 16 16" fill="none">

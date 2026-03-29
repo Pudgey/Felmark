@@ -23,13 +23,25 @@ export default function Rail({ activeItem, overdueCount, onItemClick }: RailProp
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.2"/><rect x="10" y="2" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.2"/><rect x="2" y="10" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.2"/><rect x="10" y="10" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.2"/></svg>
       </button>
 
-      <button className={styles.btn} aria-label="Search">
+      <button className={`${styles.btn} ${activeItem === "search" ? styles.active : ""}`} onClick={() => onItemClick("search")} aria-label="Search">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="8" cy="8" r="5" stroke="currentColor" strokeWidth="1.2"/><path d="M12 12l4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
       </button>
 
       <button className={`${styles.btn} ${activeItem === "calendar" ? styles.active : ""}`} onClick={() => onItemClick("calendar")} aria-label="Calendar">
         {overdueCount > 0 && <span className={styles.badge} />}
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2.5" y="3" width="13" height="12" rx="2" stroke="currentColor" strokeWidth="1.2"/><path d="M2.5 7h13M6 1.5v3M12 1.5v3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
+      </button>
+
+      <button className={`${styles.btn} ${activeItem === "pipeline" ? styles.active : ""}`} onClick={() => onItemClick("pipeline")} aria-label="Pipeline">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 14V8h3v6H2zM7.5 14V5h3v9h-3zM13 14V2h3v12h-3z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      </button>
+
+      <button className={`${styles.btn} ${activeItem === "services" ? styles.active : ""}`} onClick={() => onItemClick("services")} aria-label="Services">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 3h6l7 7-6 6-7-7V3z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/><circle cx="6" cy="7" r="1.2" fill="currentColor"/></svg>
+      </button>
+
+      <button className={`${styles.btn} ${activeItem === "templates" ? styles.active : ""}`} onClick={() => onItemClick("templates")} aria-label="Templates">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="3" y="2" width="12" height="14" rx="1.5" stroke="currentColor" strokeWidth="1.2"/><path d="M6 6h6M6 9h4M6 12h5" stroke="currentColor" strokeWidth="1" strokeLinecap="round"/></svg>
       </button>
 
       <div className={styles.sep} />

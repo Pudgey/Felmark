@@ -1,7 +1,14 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import type { Block, BlockType, Tab, Workspace } from "@/lib/types";
+import type { Block, BlockType, GraphType, MoneyBlockType, Tab, Workspace } from "@/lib/types";
+import GraphBlockComponent, { getDefaultGraphData, GRAPH_TYPE_OPTIONS } from "./graphs/GraphBlock";
+import GraphDataEditor from "./graphs/GraphDataEditor";
+import graphStyles from "./graphs/GraphBlock.module.css";
+import MoneyBlockComponent, { getDefaultMoneyData, MONEY_TYPE_OPTIONS } from "./money/MoneyBlock";
+import moneyStyles from "./money/MoneyBlock.module.css";
+import DeliverableBlockComponent from "./deliverable/DeliverableBlock";
+import ServicesPage from "../services/ServicesPage";
 import { STATUS } from "@/lib/constants";
 import { uid, cursorTo } from "@/lib/utils";
 import EditableBlock from "./EditableBlock";
@@ -10,10 +17,14 @@ import FormatBar from "./FormatBar";
 import CommandBar from "./CommandBar";
 import CommandPalette from "./CommandPalette";
 import ConversationPanel from "./ConversationPanel";
-import CommentPanel from "../comments/CommentPanel";
+import CommentPanel, { type Comment as CommentType } from "../comments/CommentPanel";
+import ActivityMargin, { type BlockActivity } from "../activity/ActivityMargin";
 import HistoryModal from "../history/HistoryModal";
 import TerminalWelcome from "./TerminalWelcome";
+import EditorMargin from "./margin/EditorMargin";
 import WorkspaceHome from "../workspace/WorkspaceHome";
+import CalendarFull from "../calendar/CalendarFull";
+import SearchPage from "../search/SearchPage";
 import type { Project } from "@/lib/types";
 import styles from "./Editor.module.css";
 
@@ -34,9 +45,19 @@ interface EditorProps {
   onWordCountChange: (words: number, chars: number) => void;
   activeWorkspaceId?: string | null;
   onSelectProject?: (project: Project, client: string) => void;
+  onNewWorkspace?: () => void;
+  railActive?: string;
+  onCalendarOpenProject?: (workspaceId: string) => void;
+  calendarScrollTarget?: string | null;
+  onCalendarScrollComplete?: () => void;
+  onRenameWorkspace?: (wsId: string, name: string) => void;
+  comments: CommentType[];
+  onCommentsChange: (comments: CommentType[]) => void;
+  activities: BlockActivity[];
+  onActivitiesChange: (activities: BlockActivity[]) => void;
 }
 
-export default function Editor({ workspaces, tabs, activeProject, blocks: blocksProp, sidebarOpen, wordCount, charCount, onOpenSidebar, onTabClick, onTabClose, onNewTab, onTabRename, onBlocksChange, onWordCountChange, activeWorkspaceId, onSelectProject }: EditorProps) {
+export default function Editor({ workspaces, tabs, activeProject, blocks: blocksProp, sidebarOpen, wordCount, charCount, onOpenSidebar, onTabClick, onTabClose, onNewTab, onTabRename, onBlocksChange, onWordCountChange, activeWorkspaceId, onSelectProject, onNewWorkspace, railActive, onCalendarOpenProject, calendarScrollTarget, onCalendarScrollComplete, onRenameWorkspace, comments, onCommentsChange, activities, onActivitiesChange }: EditorProps) {
   const [blocks, setBlocksLocal] = useState<Block[]>(blocksProp);
   const [editingTabId, setEditingTabId] = useState<string | null>(null);
   const [editingTabName, setEditingTabName] = useState("");
@@ -53,6 +74,9 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
   const [commentHighlight, setCommentHighlight] = useState<string | null>(null);
   const [commentedBlocks, setCommentedBlocks] = useState<Set<string>>(new Set());
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [graphPicker, setGraphPicker] = useState<{ blockId: string } | null>(null);
+  const [editingGraphId, setEditingGraphId] = useState<string | null>(null);
+  const [moneyPicker, setMoneyPicker] = useState<{ blockId: string } | null>(null);
 
   const blockElMap = useRef<Record<string, HTMLDivElement>>({});
   const editorRef = useRef<HTMLDivElement>(null);
@@ -92,12 +116,25 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     });
   }, [activeProject, onBlocksChange]);
 
-  // ⌘K listener
+  // ⌘K listener + ⌘⇧⌫ delete block
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
         setCmdPalette(p => !p);
+      }
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === "Backspace") {
+        e.preventDefault();
+        // Find which block is focused
+        const sel = window.getSelection();
+        if (!sel || !sel.anchorNode) return;
+        const entries = Object.entries(blockElMap.current);
+        for (const [id, el] of entries) {
+          if (el && el.contains(sel.anchorNode)) {
+            deleteBlock(id);
+            break;
+          }
+        }
       }
       if (e.key === "Escape") setCmdPalette(false);
     };
@@ -208,6 +245,37 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     const el = blockElMap.current[blockId];
     if (el) el.textContent = "";
     contentCache.current[blockId] = "";
+    if (type === "graph") {
+      setGraphPicker({ blockId });
+      setSlashMenu(null);
+      return;
+    }
+    if (type === "money") {
+      setMoneyPicker({ blockId });
+      setSlashMenu(null);
+      return;
+    }
+    if (type === "deliverable") {
+      setBlocks(prev => {
+        const idx = prev.findIndex(b => b.id === blockId);
+        const n = [...prev];
+        n[idx] = {
+          ...n[idx], type: "deliverable", content: "",
+          deliverableData: {
+            title: "New Deliverable", description: "Describe what needs to be delivered...",
+            status: "todo", assignee: "You", assigneeAvatar: "A", assigneeColor: "#b07d4f",
+            dueDate: "—", files: [], comments: [], approvals: [],
+          },
+        };
+        const nid = uid();
+        contentCache.current[nid] = "";
+        n.splice(idx + 1, 0, { id: nid, type: "paragraph", content: "", checked: false });
+        setTimeout(() => { const ne = blockElMap.current[nid]; if (ne) cursorTo(ne, false); }, 20);
+        return n;
+      });
+      setSlashMenu(null);
+      return;
+    }
     if (type === "divider") {
       setBlocks(prev => {
         const idx = prev.findIndex(b => b.id === blockId);
@@ -225,6 +293,40 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     }
     setSlashMenu(null);
   }, [slashMenu]);
+
+  const selectGraphType = useCallback((graphType: GraphType) => {
+    if (!graphPicker) return;
+    const { blockId } = graphPicker;
+    const graphData = getDefaultGraphData(graphType);
+    setBlocks(prev => {
+      const idx = prev.findIndex(b => b.id === blockId);
+      const n = [...prev];
+      n[idx] = { ...n[idx], type: "graph" as BlockType, content: "", graphData };
+      const nid = uid();
+      contentCache.current[nid] = "";
+      n.splice(idx + 1, 0, { id: nid, type: "paragraph", content: "", checked: false });
+      setTimeout(() => { const ne = blockElMap.current[nid]; if (ne) cursorTo(ne, false); }, 20);
+      return n;
+    });
+    setGraphPicker(null);
+  }, [graphPicker]);
+
+  const selectMoneyType = useCallback((moneyType: MoneyBlockType) => {
+    if (!moneyPicker) return;
+    const { blockId } = moneyPicker;
+    const moneyData = getDefaultMoneyData(moneyType);
+    setBlocks(prev => {
+      const idx = prev.findIndex(b => b.id === blockId);
+      const n = [...prev];
+      n[idx] = { ...n[idx], type: "money" as BlockType, content: "", moneyData };
+      const nid = uid();
+      contentCache.current[nid] = "";
+      n.splice(idx + 1, 0, { id: nid, type: "paragraph", content: "", checked: false });
+      setTimeout(() => { const ne = blockElMap.current[nid]; if (ne) cursorTo(ne, false); }, 20);
+      return n;
+    });
+    setMoneyPicker(null);
+  }, [moneyPicker]);
 
   const handleSelect = () => {
     const sel = window.getSelection();
@@ -247,6 +349,30 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       return n;
     });
     setTimeout(() => { const el = blockElMap.current[nid]; if (el) cursorTo(el, false); }, 20);
+  };
+
+  const deleteBlock = (blockId: string) => {
+    setBlocks(prev => {
+      // Last block — reset to empty paragraph instead of removing
+      if (prev.length <= 1) {
+        delete contentCache.current[blockId];
+        const el = blockElMap.current[blockId];
+        if (el) { el.textContent = ""; }
+        return [{ id: prev[0].id, type: "paragraph" as const, content: "", checked: false }];
+      }
+      const idx = prev.findIndex(b => b.id === blockId);
+      const n = prev.filter(b => b.id !== blockId);
+      delete contentCache.current[blockId];
+      // Focus the previous block (or next if deleting first)
+      const focusIdx = Math.max(0, idx - 1);
+      setTimeout(() => {
+        const el = blockElMap.current[n[focusIdx]?.id];
+        if (el) cursorTo(el, true);
+      }, 20);
+      return n;
+    });
+    // Clear editing states if the deleted block was being edited
+    if (editingGraphId === blockId) setEditingGraphId(null);
   };
 
   const getNum = (bid: string) => {
@@ -355,6 +481,156 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
   const activeWs = workspaces.find(w => w.projects.some(p => p.id === activeProject));
 
   const renderBlock = (block: Block) => {
+    // Graph block — click to select, double-click to edit data
+    if (block.type === "graph" && block.graphData) {
+      const isEditing = editingGraphId === block.id;
+      return (
+        <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+          <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
+            <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
+              <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
+            </button>
+            <div className={`${styles.gutterBtn} ${styles.grip}`}>
+              <svg width="10" height="14" viewBox="0 0 10 14"><circle cx="3" cy="2.5" r="1" fill="currentColor"/><circle cx="7" cy="2.5" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="11.5" r="1" fill="currentColor"/><circle cx="7" cy="11.5" r="1" fill="currentColor"/></svg>
+            </div>
+            <button className={`${styles.gutterBtn} ${styles.gutterDelete}`} onClick={() => deleteBlock(block.id)} title="Delete block">
+              <svg width="10" height="10" viewBox="0 0 10 10"><path d="M3 3l4 4M7 3l-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>
+            </button>
+          </div>
+          <div style={{ flex: 1 }}>
+            <div
+              onClick={() => { if (!isEditing) setEditingGraphId(block.id); }}
+              style={{ cursor: isEditing ? "default" : "pointer", borderRadius: 10, outline: isEditing ? "2px solid var(--ember)" : "2px solid transparent", outlineOffset: 2, transition: "outline-color 0.12s" }}
+            >
+              <GraphBlockComponent graphData={block.graphData} />
+            </div>
+            {isEditing && (
+              <GraphDataEditor
+                graphData={block.graphData}
+                onUpdate={(updated) => {
+                  setBlocks(prev => prev.map(b => b.id === block.id ? { ...b, graphData: updated } : b));
+                }}
+                onClose={() => setEditingGraphId(null)}
+                onDelete={() => {
+                  setEditingGraphId(null);
+                  setBlocks(prev => {
+                    if (prev.length <= 1) return [{ ...prev[0], type: "paragraph" as const, content: "", checked: false, graphData: undefined }];
+                    return prev.filter(b => b.id !== block.id);
+                  });
+                }}
+              />
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // Deliverable block
+    if (block.type === "deliverable" && block.deliverableData) {
+      return (
+        <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+          <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
+            <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
+              <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
+            </button>
+            <div className={`${styles.gutterBtn} ${styles.grip}`}>
+              <svg width="10" height="14" viewBox="0 0 10 14"><circle cx="3" cy="2.5" r="1" fill="currentColor"/><circle cx="7" cy="2.5" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="11.5" r="1" fill="currentColor"/><circle cx="7" cy="11.5" r="1" fill="currentColor"/></svg>
+            </div>
+            <button className={`${styles.gutterBtn} ${styles.gutterDelete}`} onClick={() => deleteBlock(block.id)} title="Delete block">
+              <svg width="10" height="10" viewBox="0 0 10 10"><path d="M3 3l4 4M7 3l-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>
+            </button>
+          </div>
+          <div style={{ flex: 1 }}>
+            <DeliverableBlockComponent
+              data={block.deliverableData}
+              onChange={(updated) => {
+                setBlocks(prev => prev.map(b => b.id === block.id ? { ...b, deliverableData: updated } : b));
+              }}
+              onCommentAdded={(text) => {
+                const newActivity = { blockId: block.id, editedBy: "u1", editedAt: "now", comment: { user: "u1", text, time: "now" } };
+                onActivitiesChange([newActivity, ...activities]);
+              }}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    // Graph sub-picker — shown when user selected "Graph" from slash menu
+    if (graphPicker && graphPicker.blockId === block.id && block.type !== "graph") {
+      return (
+        <div key={block.id} className={styles.blockRow}>
+          <div className={styles.gutter} style={{ opacity: 0 }} />
+          <div style={{ flex: 1 }}>
+            <div className={graphStyles.gb}>
+              <div className={graphStyles.gbHead}>
+                <span className={graphStyles.gbTitle}>Choose a chart type</span>
+                <button onClick={() => setGraphPicker(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-300)", fontSize: 14 }}>&times;</button>
+              </div>
+              <div className={graphStyles.subPicker}>
+                {GRAPH_TYPE_OPTIONS.map(opt => (
+                  <button key={opt.type} className={graphStyles.subPickerItem} onClick={() => selectGraphType(opt.type)}>
+                    <span className={graphStyles.subPickerIcon}>{opt.icon}</span>
+                    <span className={graphStyles.subPickerLabel}>{opt.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Money block
+    if (block.type === "money" && block.moneyData) {
+      return (
+        <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+          <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
+            <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
+              <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
+            </button>
+            <div className={`${styles.gutterBtn} ${styles.grip}`}>
+              <svg width="10" height="14" viewBox="0 0 10 14"><circle cx="3" cy="2.5" r="1" fill="currentColor"/><circle cx="7" cy="2.5" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="11.5" r="1" fill="currentColor"/><circle cx="7" cy="11.5" r="1" fill="currentColor"/></svg>
+            </div>
+            <button className={`${styles.gutterBtn} ${styles.gutterDelete}`} onClick={() => deleteBlock(block.id)} title="Delete block">
+              <svg width="10" height="10" viewBox="0 0 10 10"><path d="M3 3l4 4M7 3l-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>
+            </button>
+          </div>
+          <div style={{ flex: 1 }}>
+            <MoneyBlockComponent
+              moneyData={block.moneyData}
+              onUpdate={(updated) => setBlocks(prev => prev.map(b => b.id === block.id ? { ...b, moneyData: updated } : b))}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    // Money sub-picker
+    if (moneyPicker && moneyPicker.blockId === block.id && block.type !== "money") {
+      return (
+        <div key={block.id} className={styles.blockRow}>
+          <div className={styles.gutter} style={{ opacity: 0 }} />
+          <div style={{ flex: 1 }}>
+            <div className={moneyStyles.mb}>
+              <div className={moneyStyles.head}>
+                <span className={moneyStyles.label}>Choose a money block</span>
+                <button onClick={() => setMoneyPicker(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-300)", fontSize: 14 }}>&times;</button>
+              </div>
+              <div className={moneyStyles.subPicker}>
+                {MONEY_TYPE_OPTIONS.map(opt => (
+                  <button key={opt.type} className={moneyStyles.subPickerItem} onClick={() => selectMoneyType(opt.type)}>
+                    <span className={moneyStyles.subPickerIcon}>{opt.icon}</span>
+                    <span className={moneyStyles.subPickerLabel}>{opt.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     if (block.type === "divider") {
       return (
         <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
@@ -365,6 +641,9 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
             <div className={`${styles.gutterBtn} ${styles.grip}`}>
               <svg width="10" height="14" viewBox="0 0 10 14"><circle cx="3" cy="2.5" r="1" fill="currentColor"/><circle cx="7" cy="2.5" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="11.5" r="1" fill="currentColor"/><circle cx="7" cy="11.5" r="1" fill="currentColor"/></svg>
             </div>
+            <button className={`${styles.gutterBtn} ${styles.gutterDelete}`} onClick={() => deleteBlock(block.id)} title="Delete block">
+              <svg width="10" height="10" viewBox="0 0 10 10"><path d="M3 3l4 4M7 3l-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>
+            </button>
           </div>
           <div style={{ flex: 1, padding: "6px 0" }}><div className={styles.dividerLine} /></div>
         </div>
@@ -536,6 +815,13 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
 
         {/* Sacred right column — never pushed by tabs */}
         <div className={styles.tabBarRight}>
+          <button className={styles.tabBarAction} title="Notifications" aria-label="Notifications">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M4 6.5a4 4 0 018 0v2.5l1.5 2H2.5L4 9V6.5z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+              <path d="M6.5 13a1.5 1.5 0 003 0" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+            </svg>
+            <span className={styles.tabBarBadge}>3</span>
+          </button>
           <button className={`${styles.tabBarAction} ${commentPanelOpen ? styles.tabBarActionActive : ""}`} title="Comments" aria-label="Comments" onClick={() => setCommentPanelOpen(p => !p)}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M13.5 10.5c0 .7-.5 1.2-1 1.2H5l-3 3V4.5c0-.7.5-1.2 1-1.2h9.5c.5 0 1 .5 1 1.2v6z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
@@ -576,28 +862,48 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
         <ConversationPanel open={convoPanelOpen} onClose={() => setConvoPanelOpen(false)} />
 
         <div className={styles.editorCol}>
-          {activeWorkspaceId && (() => {
+          {railActive === "calendar" && (
+            <CalendarFull workspaces={workspaces} onOpenProject={onCalendarOpenProject} scrollToProjectId={calendarScrollTarget} onScrollComplete={onCalendarScrollComplete} />
+          )}
+          {railActive === "search" && (
+            <SearchPage workspaces={workspaces} />
+          )}
+          {railActive === "services" && (
+            <ServicesPage />
+          )}
+          {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && activeWorkspaceId && (() => {
             const ws = workspaces.find(w => w.id === activeWorkspaceId);
             return ws && onSelectProject ? (
-              <WorkspaceHome workspace={ws} onSelectProject={onSelectProject} onNewTab={onNewTab} />
+              <WorkspaceHome workspace={ws} onSelectProject={onSelectProject} onNewTab={onNewTab} onRenameWorkspace={onRenameWorkspace} />
             ) : null;
           })()}
-          {!activeWorkspaceId && !tabs.some(t => t.active) && (
+          {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && !activeWorkspaceId && !tabs.some(t => t.active) && (
             /* Terminal welcome — no active tab */
             <TerminalWelcome
               activeCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "active").length, 0)}
               reviewCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "review").length, 0)}
               overdueCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "overdue").length, 0)}
-              totalEarned={21400}
-              totalPending={14000}
-              pipeline={35400}
+              totalEarned={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "completed").reduce((a, p) => { const m = p.amount.match(/[\d,]+/); return a + (m ? parseInt(m[0].replace(",", "")) : 0); }, 0), 0)}
+              totalPending={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status !== "completed").reduce((a, p) => { const m = p.amount.match(/[\d,]+/); return a + (m ? parseInt(m[0].replace(",", "")) : 0); }, 0), 0)}
+              pipeline={workspaces.reduce((s, w) => s + w.projects.reduce((a, p) => { const m = p.amount.match(/[\d,]+/); return a + (m ? parseInt(m[0].replace(",", "")) : 0); }, 0), 0)}
               onOpenCmdPalette={() => setCmdPalette(true)}
+              onNewWorkspace={onNewWorkspace}
             />
           )}
-          {!activeWorkspaceId && tabs.some(t => t.active) && (
-            <>
+          {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && !activeWorkspaceId && tabs.some(t => t.active) && (
+            <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+              {/* Left margin — document spine + block gutter */}
+              <EditorMargin
+                blocks={blocks}
+                hoveredBlock={hoverBlock}
+                onHoverBlock={setHoverBlock}
+                onScrollTo={(id) => {
+                  const el = blockElMap.current[id];
+                  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+              />
               {/* Editor area */}
-              <div className={styles.editor} ref={editorRef}>
+              <div className={styles.editor} ref={editorRef} onMouseDown={() => { setConvoPanelOpen(false); setCommentPanelOpen(false); }} style={{ flex: 1 }}>
                 <div className={styles.page}>{blocks.map(renderBlock)}</div>
                 {slashMenu && (
                   <SlashMenu
@@ -612,19 +918,28 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
                 )}
                 {formatBar && <FormatBar top={formatBar.top} left={formatBar.left} />}
               </div>
-            </>
+            </div>
           )}
 
           {/* Command bar — only show when not in workspace home */}
           {!activeWorkspaceId && <CommandBar charCount={charCount} />}
         </div>
 
-        {/* Comment panel (right) */}
-        <CommentPanel
+        {/* Activity margin (right) */}
+        <ActivityMargin
           open={commentPanelOpen}
           onClose={() => { setCommentPanelOpen(false); setCommentHighlight(null); }}
+          blocks={blocks}
+          activities={activities}
+          onActivitiesChange={onActivitiesChange}
+          hoveredBlock={hoverBlock}
+          onHoverBlock={setHoverBlock}
           pendingHighlight={commentHighlight}
           onHighlightConsumed={() => setCommentHighlight(null)}
+          onScrollToBlock={(blockId) => {
+            const el = blockElMap.current[blockId];
+            if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+          }}
         />
       </div>
 

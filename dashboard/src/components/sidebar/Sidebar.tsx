@@ -16,6 +16,7 @@ interface SidebarProps {
   railActive: string;
   onClose: () => void;
   onToggleWorkspace: (id: string) => void;
+  onSelectWorkspaceHome: (id: string) => void;
   onSelectProject: (project: Project, client: string) => void;
   onArchiveProject: (projectId: string) => void;
   onArchiveCompleted: (wsId: string) => void;
@@ -27,6 +28,7 @@ interface SidebarProps {
   onAddWorkspace: (name: string) => void;
   onTogglePin: (projectId: string) => void;
   onCycleStatus: (projectId: string) => void;
+  onScrollToCalendarEvent?: (projectId: string) => void;
 }
 
 const STATUSES = ["active", "review", "paused", "completed"] as const;
@@ -34,7 +36,7 @@ const STATUSES = ["active", "review", "paused", "completed"] as const;
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-function CalendarView({ workspaces, onSelectProject }: { workspaces: Workspace[]; onSelectProject: (project: Project, client: string) => void }) {
+function CalendarView({ workspaces, onSelectProject, onScrollToEvent }: { workspaces: Workspace[]; onSelectProject: (project: Project, client: string) => void; onScrollToEvent?: (projectId: string) => void }) {
   const today = new Date();
   const [viewMonth, setViewMonth] = useState(today.getMonth());
   const [viewYear, setViewYear] = useState(today.getFullYear());
@@ -140,7 +142,7 @@ function CalendarView({ workspaces, onSelectProject }: { workspaces: Workspace[]
             {selectedDeadlines.map((d, i) => {
               const st = STATUS[d.project.status];
               return (
-                <div key={i} className={styles.calDeadlineItem} onClick={() => onSelectProject(d.project, d.client)}>
+                <div key={i} className={styles.calDeadlineItem} onClick={() => onScrollToEvent ? onScrollToEvent(d.project.id) : onSelectProject(d.project, d.client)}>
                   <div className={styles.calDeadlineDot} style={{ background: st?.color || "var(--ember)" }} />
                   <div className={styles.calDeadlineInfo}>
                     <span className={styles.calDeadlineName}>{d.project.name}</span>
@@ -165,7 +167,7 @@ function CalendarView({ workspaces, onSelectProject }: { workspaces: Workspace[]
             {allDeadlines.map((d, i) => {
               const st = STATUS[d.project.status];
               return (
-                <div key={i} className={styles.calDeadlineItem} onClick={() => onSelectProject(d.project, d.client)}>
+                <div key={i} className={styles.calDeadlineItem} onClick={() => onScrollToEvent ? onScrollToEvent(d.project.id) : onSelectProject(d.project, d.client)}>
                   <div className={styles.calDeadlineDot} style={{ background: st?.color || "var(--ember)" }} />
                   <div className={styles.calDeadlineInfo}>
                     <span className={styles.calDeadlineName}>{d.project.name}</span>
@@ -210,7 +212,7 @@ function getDueLabel(daysLeft: number | null, due: string) {
   return due;
 }
 
-export default function Sidebar({ workspaces, archived, activeProject, open, width, isResizing, wordCount, railActive, onClose, onToggleWorkspace, onSelectProject, onArchiveProject, onArchiveCompleted, onArchiveWorkspace, onRestoreProject, onReorderWorkspaces, onRenameWorkspace, onRenameProject, onAddWorkspace, onTogglePin, onCycleStatus }: SidebarProps) {
+export default function Sidebar({ workspaces, archived, activeProject, open, width, isResizing, wordCount, railActive, onClose, onToggleWorkspace, onSelectWorkspaceHome, onSelectProject, onArchiveProject, onArchiveCompleted, onArchiveWorkspace, onRestoreProject, onReorderWorkspaces, onRenameWorkspace, onRenameProject, onAddWorkspace, onTogglePin, onCycleStatus, onScrollToCalendarEvent }: SidebarProps) {
   const [wsMenu, setWsMenu] = useState<string | null>(null);
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [showAddWs, setShowAddWs] = useState(false);
@@ -252,10 +254,11 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
   const completedCount = (wsId: string) =>
     workspaces.find(w => w.id === wsId)?.projects.filter(p => p.status === "completed").length || 0;
 
-  // Revenue flow
+  // Revenue flow — bar chart uses sample weekly data, totals computed from real projects
   const maxBarVal = Math.max(...REVENUE_WEEKS.map(w => w.earned + w.pending));
-  const totalEarned = REVENUE_WEEKS.reduce((s, w) => s + w.earned, 0);
-  const totalPending = REVENUE_WEEKS.reduce((s, w) => s + w.pending, 0);
+  const parseAmount = (amt: string) => { const m = amt.match(/[\d,]+/); return m ? parseInt(m[0].replace(",", "")) : 0; };
+  const totalEarned = workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "completed").reduce((a, p) => a + parseAmount(p.amount), 0), 0);
+  const totalPending = workspaces.reduce((s, w) => s + w.projects.filter(p => p.status !== "completed").reduce((a, p) => a + parseAmount(p.amount), 0), 0);
 
   // Pinned projects
   const pinnedProjects = workspaces.flatMap(w =>
@@ -290,7 +293,7 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
         </div>
 
         {/* Calendar view */}
-        {railActive === "calendar" && <CalendarView workspaces={workspaces} onSelectProject={onSelectProject} />}
+        {railActive === "calendar" && <CalendarView workspaces={workspaces} onSelectProject={onSelectProject} onScrollToEvent={onScrollToCalendarEvent} />}
 
         {/* Revenue Flow */}
         {railActive !== "calendar" && <>
@@ -415,7 +418,7 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
                 onDragEnd={() => { setDragWsId(null); setDropWsId(null); dragRef.current = null; }}
               >
                 <div className={styles.wsHeadClick} onClick={() => { if (editingWsId !== ws.id) onToggleWorkspace(ws.id); }}>
-                  <div className={styles.wsAvatar} style={{ background: ws.avatarBg }}>{ws.avatar}</div>
+                  <div className={styles.wsAvatar} style={{ background: ws.avatarBg }} onDoubleClick={e => { e.stopPropagation(); onSelectWorkspaceHome(ws.id); }}>{ws.avatar}</div>
                   <div className={styles.wsInfo}>
                     {editingWsId === ws.id ? (
                       <input className={styles.wsRenameInput} value={editingWsName} autoFocus
@@ -442,6 +445,10 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
               {/* Workspace dropdown */}
               {wsMenu === ws.id && (
                 <div className={styles.wsDropdown}>
+                  <button className={styles.wsDropItem} onClick={() => { setEditingWsId(ws.id); setEditingWsName(ws.client); setWsMenu(null); }}>
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2-7 7H1.5v-2l7-7z" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    <span>Rename</span>
+                  </button>
                   {completedCount(ws.id) > 0 && (
                     <button className={styles.wsDropItem} onClick={() => { onArchiveCompleted(ws.id); setWsMenu(null); }}>
                       <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 3.5h9M2.5 3.5v6a1 1 0 001 1h5a1 1 0 001-1v-6" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /><path d="M5 6h2" stroke="currentColor" strokeWidth="1" strokeLinecap="round" /></svg>

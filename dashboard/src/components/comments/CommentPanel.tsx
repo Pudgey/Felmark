@@ -27,7 +27,7 @@ export interface Comment {
   replies: Reply[];
 }
 
-const INITIAL_COMMENTS: Comment[] = [
+export const INITIAL_COMMENTS: Comment[] = [
   {
     id: uid(), author: "Sarah Chen", avatar: "S", color: "#8a7e63",
     text: "Can we make the logo usage section more specific? I want exact minimum sizes.",
@@ -55,10 +55,15 @@ interface CommentPanelProps {
   onClose: () => void;
   pendingHighlight?: string | null;
   onHighlightConsumed?: () => void;
+  comments: Comment[];
+  onCommentsChange: (comments: Comment[]) => void;
 }
 
-export default function CommentPanel({ open, onClose, pendingHighlight, onHighlightConsumed }: CommentPanelProps) {
-  const [comments, setComments] = useState<Comment[]>(INITIAL_COMMENTS);
+export default function CommentPanel({ open, onClose, pendingHighlight, onHighlightConsumed, comments, onCommentsChange }: CommentPanelProps) {
+  const setComments = (updater: Comment[] | ((prev: Comment[]) => Comment[])) => {
+    const next = typeof updater === "function" ? updater(comments) : updater;
+    onCommentsChange(next);
+  };
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
   const [showResolved, setShowResolved] = useState(false);

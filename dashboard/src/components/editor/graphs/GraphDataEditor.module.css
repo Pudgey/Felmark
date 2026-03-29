@@ -1,0 +1,245 @@
+.editor {
+  border: 1px solid var(--warm-200);
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  background: var(--warm-50);
+  margin-top: -1px;
+  animation: slideDown 0.15s ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; max-height: 0; }
+  to { opacity: 1; max-height: 500px; }
+}
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--warm-200);
+  gap: 8px;
+}
+
+.titleInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-800);
+  padding: 4px 0;
+}
+.titleInput::placeholder {
+  color: var(--warm-400);
+}
+
+.toolbarRight {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.toolBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--warm-200);
+  background: #fff;
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-500);
+  cursor: pointer;
+  transition: all 0.08s;
+  white-space: nowrap;
+}
+.toolBtn:hover {
+  background: var(--warm-100);
+  color: var(--ink-700);
+}
+
+.doneBtn {
+  padding: 4px 12px;
+  border-radius: 4px;
+  border: none;
+  background: var(--ember);
+  color: #fff;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.08s;
+}
+.doneBtn:hover {
+  background: var(--ember-light);
+}
+
+/* Type switcher */
+.typeSwitcher {
+  position: relative;
+}
+
+.typeDropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--warm-200);
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 120px;
+}
+
+.typeOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--ink-600);
+  transition: background 0.06s;
+  text-align: left;
+  width: 100%;
+}
+.typeOption:hover {
+  background: var(--warm-100);
+}
+.typeOptionOn {
+  background: var(--ember-bg);
+  color: var(--ember);
+  font-weight: 500;
+}
+
+/* Data table */
+.table {
+  padding: 8px 14px 12px;
+}
+
+.tableHead {
+  display: flex;
+  gap: 6px;
+  padding: 0 0 6px;
+  border-bottom: 1px solid var(--warm-200);
+  margin-bottom: 4px;
+}
+
+.tableHeadCell {
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--ink-300);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.tableRow {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 2px 0;
+}
+
+.tableCell {
+  padding: 5px 8px;
+  border: 1px solid var(--warm-200);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--ink-700);
+  background: #fff;
+  outline: none;
+  transition: border-color 0.08s;
+}
+.tableCell:focus {
+  border-color: var(--ember);
+}
+
+.tableCellNum {
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  text-align: right;
+}
+
+.rowRemove {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--ink-300);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.06s;
+}
+.rowRemove:hover {
+  background: rgba(194, 75, 56, 0.08);
+  color: #c24b38;
+}
+
+.addRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  margin-top: 6px;
+  border-radius: 4px;
+  border: 1px dashed var(--warm-300);
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--ink-400);
+  transition: all 0.08s;
+  width: 100%;
+  justify-content: center;
+}
+.addRow:hover {
+  border-color: var(--ember);
+  color: var(--ember);
+  background: var(--ember-bg);
+}
+
+/* Mini cell for column headers (area chart labels) */
+.tableCellMini {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--ink-400);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  width: 100%;
+  padding: 0;
+}
+.tableCellMini:focus {
+  color: var(--ink-700);
+}
+
+/* Actions row for stacked area (multiple add buttons) */
+.tableActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+.tableActions .addRow {
+  width: auto;
+  flex: 1;
+}
