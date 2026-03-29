@@ -1,0 +1,114 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(44, 42, 37, 0.4);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 20vh;
+  z-index: 500;
+  backdrop-filter: blur(2px);
+}
+
+.modal {
+  width: 480px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06), 0 16px 48px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+.searchWrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--warm-200);
+}
+
+.searchIcon { color: var(--ink-300); flex-shrink: 0; }
+
+.search {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  font-family: var(--font-outfit), -apple-system, sans-serif;
+  font-size: 15px;
+  color: var(--ink-800);
+}
+
+.search::placeholder { color: var(--warm-400); }
+
+.esc {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-300);
+  background: var(--warm-100);
+  border: 1px solid var(--warm-200);
+  border-radius: 3px;
+  padding: 2px 6px;
+  flex-shrink: 0;
+}
+
+.list {
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.list::-webkit-scrollbar { width: 3px; }
+.list::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.06); border-radius: 99px; }
+
+.section {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--ink-400);
+  padding: 8px 10px 3px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.06s;
+}
+
+.item:hover, .itemActive { background: var(--ember-bg); }
+
+.itemIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 5px;
+  background: var(--warm-100);
+  border: 1px solid var(--warm-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ink-500);
+  flex-shrink: 0;
+}
+
+.itemIconActive {
+  background: var(--ember-bg);
+  border-color: rgba(176, 125, 79, 0.15);
+  color: var(--ember);
+}
+
+.itemLabel { font-size: 14px; color: var(--ink-700); flex: 1; }
+.itemLabelActive { color: var(--ink-900); }
+
+.itemShortcut {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-300);
+  flex-shrink: 0;
+}

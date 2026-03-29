@@ -1,0 +1,36 @@
+.bar {
+  position: absolute;
+  display: flex;
+  align-items: stretch;
+  background: var(--ink-900);
+  border-radius: 6px;
+  padding: 3px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  gap: 1px;
+}
+
+.btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+
+.btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.sep {
+  width: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 3px 1px;
+}
