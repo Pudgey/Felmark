@@ -8,6 +8,7 @@ import Rail from "@/components/rail/Rail";
 import Sidebar from "@/components/sidebar/Sidebar";
 import Editor from "@/components/editor/Editor";
 import WorkspaceOnboarding from "@/components/onboarding/WorkspaceOnboarding";
+import ErrorBoundary from "@/components/shared/ErrorBoundary";
 
 const INITIAL_TABS: Tab[] = [
   { id: "p1", name: "Brand Guidelines v2", client: "Meridian Studio", active: true },
@@ -49,14 +50,32 @@ export default function Dashboard() {
   const [onboardingName, setOnboardingName] = useState<string | null>(null);
   const [sidebarWidth, setSidebarWidth] = useState(260);
   const [isResizing, setIsResizing] = useState(false);
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState<string | null>(null);
   const resizeRef = useRef<{ startX: number; startW: number } | null>(null);
 
   const overdueCount = workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "overdue").length, 0);
 
-  const toggleWorkspace = (wid: string) =>
-    setWorkspaces(prev => prev.map(w => w.id === wid ? { ...w, open: !w.open } : w));
+  const toggleWorkspace = (wid: string) => {
+    const ws = workspaces.find(w => w.id === wid);
+    if (ws && !ws.open) {
+      // Opening workspace → show workspace home
+      setActiveWorkspaceId(wid);
+      setTabs(prev => prev.map(t => ({ ...t, active: false })));
+      setActiveProject("");
+    } else if (ws && ws.open && activeWorkspaceId !== wid) {
+      // Workspace is open but not active → show its home
+      setActiveWorkspaceId(wid);
+      setTabs(prev => prev.map(t => ({ ...t, active: false })));
+      setActiveProject("");
+    } else {
+      // Already active → collapse it
+      setActiveWorkspaceId(null);
+    }
+    setWorkspaces(prev => prev.map(w => w.id === wid ? { ...w, open: true } : w));
+  };
 
   const selectProject = (project: Project, client: string) => {
+    setActiveWorkspaceId(null);
     setActiveProject(project.id);
     if (!tabs.find(t => t.id === project.id)) {
       setTabs(prev => [...prev.map(t => ({ ...t, active: false })), { id: project.id, name: project.name, client, active: true }]);
@@ -70,6 +89,7 @@ export default function Dashboard() {
   };
 
   const handleTabClick = (id: string) => {
+    setActiveWorkspaceId(null);
     setActiveProject(id);
     setTabs(prev => prev.map(t => ({ ...t, active: t.id === id })));
   };
@@ -301,7 +321,8 @@ export default function Dashboard() {
   const activeBlocks = blocksMap[activeProject] || makeEmptyBlocks();
 
   return (
-    <div style={{ display: "flex", height: "100vh" }}>
+    <ErrorBoundary>
+    <div style={{ display: "flex", height: "100dvh" }}>
       <Rail
         activeItem={railActive}
         overdueCount={overdueCount}
@@ -315,6 +336,7 @@ export default function Dashboard() {
         width={sidebarWidth}
         isResizing={isResizing}
         wordCount={wordCount}
+        railActive={railActive}
         onClose={() => setSidebarOpen(false)}
         onToggleWorkspace={toggleWorkspace}
         onSelectProject={selectProject}
@@ -407,6 +429,7 @@ export default function Dashboard() {
           workspaces={workspaces}
           tabs={tabs}
           activeProject={activeProject}
+          activeWorkspaceId={activeWorkspaceId}
           blocks={activeBlocks}
           sidebarOpen={sidebarOpen}
           wordCount={wordCount}
@@ -418,8 +441,10 @@ export default function Dashboard() {
           onTabRename={handleTabRename}
           onBlocksChange={handleBlocksChange}
           onWordCountChange={handleWordCountChange}
+          onSelectProject={selectProject}
         />
       )}
     </div>
+    </ErrorBoundary>
   );
 }

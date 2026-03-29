@@ -75,7 +75,7 @@
   font-size: 14px;
   line-height: 1;
   padding: 2px;
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -144,7 +144,7 @@
   margin-top: 2px;
   background: var(--parchment);
   border: 1px solid var(--warm-200);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   min-width: 180px;
   max-width: 260px;
@@ -231,7 +231,7 @@
 .tabBarAction {
   width: 30px;
   height: 30px;
-  border-radius: 5px;
+  border-radius: var(--radius-md);
   border: none;
   background: none;
   cursor: pointer;
@@ -260,7 +260,7 @@
 .profileAvatar {
   width: 24px;
   height: 24px;
-  border-radius: 5px;
+  border-radius: var(--radius-md);
   background: var(--ember);
   color: #fff;
   display: flex;
@@ -315,7 +315,7 @@
   display: flex;
   align-items: center;
   padding: 2px;
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
 }
 
 .breadNav:hover { color: var(--ink-500); background: rgba(0, 0, 0, 0.03); }
@@ -363,7 +363,7 @@
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--warm-200);
   background: none;
   cursor: pointer;
@@ -405,7 +405,7 @@
 .page {
   max-width: 700px;
   margin: 0 auto;
-  padding: 36px 48px 40vh;
+  padding: 36px clamp(16px, 4vw, 48px) 40vh;
   width: 100%;
 }
 
@@ -416,7 +416,7 @@
   position: relative;
   width: 100%;
   padding: 1px 0;
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
 }
 
 .dropTarget::before {
@@ -443,7 +443,7 @@
 .blockCommentBtn {
   width: 26px;
   height: 26px;
-  border-radius: 5px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--warm-200);
   background: #fff;
   cursor: pointer;
@@ -505,7 +505,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   color: var(--warm-400);
   background: none;

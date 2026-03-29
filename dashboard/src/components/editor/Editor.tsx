@@ -13,6 +13,8 @@ import ConversationPanel from "./ConversationPanel";
 import CommentPanel from "../comments/CommentPanel";
 import HistoryModal from "../history/HistoryModal";
 import TerminalWelcome from "./TerminalWelcome";
+import WorkspaceHome from "../workspace/WorkspaceHome";
+import type { Project } from "@/lib/types";
 import styles from "./Editor.module.css";
 
 interface EditorProps {
@@ -30,9 +32,11 @@ interface EditorProps {
   onTabRename: (id: string, name: string) => void;
   onBlocksChange: (projectId: string, blocks: Block[]) => void;
   onWordCountChange: (words: number, chars: number) => void;
+  activeWorkspaceId?: string | null;
+  onSelectProject?: (project: Project, client: string) => void;
 }
 
-export default function Editor({ workspaces, tabs, activeProject, blocks: blocksProp, sidebarOpen, wordCount, charCount, onOpenSidebar, onTabClick, onTabClose, onNewTab, onTabRename, onBlocksChange, onWordCountChange }: EditorProps) {
+export default function Editor({ workspaces, tabs, activeProject, blocks: blocksProp, sidebarOpen, wordCount, charCount, onOpenSidebar, onTabClick, onTabClose, onNewTab, onTabRename, onBlocksChange, onWordCountChange, activeWorkspaceId, onSelectProject }: EditorProps) {
   const [blocks, setBlocksLocal] = useState<Block[]>(blocksProp);
   const [editingTabId, setEditingTabId] = useState<string | null>(null);
   const [editingTabName, setEditingTabName] = useState("");
@@ -454,18 +458,18 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     );
   };
 
-  const unreadTotal = 6; // placeholder — sum of conversation unreads
+  const unreadTotal = 0;
 
   return (
     <div className={styles.main}>
       {/* Tab bar */}
       <div className={styles.tabbar}>
         {!sidebarOpen && (
-          <button className={styles.sidebarToggle} onClick={onOpenSidebar}>
+          <button className={styles.sidebarToggle} onClick={onOpenSidebar} aria-label="Open sidebar">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
           </button>
         )}
-        <button className={`${styles.toolsBtn} ${convoPanelOpen ? styles.toolsBtnActive : ""}`} onClick={() => setConvoPanelOpen(p => !p)} title="Conversations">
+        <button className={`${styles.toolsBtn} ${convoPanelOpen ? styles.toolsBtnActive : ""}`} onClick={() => setConvoPanelOpen(p => !p)} title="Conversations" aria-label="Conversations">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <path d="M2.5 3h11a1 1 0 011 1v7a1 1 0 01-1 1H5l-2.5 2V4a1 1 0 011-1z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
             <path d="M5.5 7h5M5.5 9.5h3" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
@@ -532,13 +536,13 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
 
         {/* Sacred right column — never pushed by tabs */}
         <div className={styles.tabBarRight}>
-          <button className={`${styles.tabBarAction} ${commentPanelOpen ? styles.tabBarActionActive : ""}`} title="Comments" onClick={() => setCommentPanelOpen(p => !p)}>
+          <button className={`${styles.tabBarAction} ${commentPanelOpen ? styles.tabBarActionActive : ""}`} title="Comments" aria-label="Comments" onClick={() => setCommentPanelOpen(p => !p)}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M13.5 10.5c0 .7-.5 1.2-1 1.2H5l-3 3V4.5c0-.7.5-1.2 1-1.2h9.5c.5 0 1 .5 1 1.2v6z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
               <path d="M5.5 6.5h5M5.5 9h3" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
             </svg>
           </button>
-          <button className={styles.tabBarAction} title="History" onClick={() => setHistoryOpen(true)}>
+          <button className={styles.tabBarAction} title="History" aria-label="Version history" onClick={() => setHistoryOpen(true)}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <circle cx="8" cy="8.5" r="5.5" stroke="currentColor" strokeWidth="1.2" />
               <path d="M8 5.5v3.5l2.5 1.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
@@ -572,7 +576,13 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
         <ConversationPanel open={convoPanelOpen} onClose={() => setConvoPanelOpen(false)} />
 
         <div className={styles.editorCol}>
-          {!tabs.some(t => t.active) ? (
+          {activeWorkspaceId && (() => {
+            const ws = workspaces.find(w => w.id === activeWorkspaceId);
+            return ws && onSelectProject ? (
+              <WorkspaceHome workspace={ws} onSelectProject={onSelectProject} onNewTab={onNewTab} />
+            ) : null;
+          })()}
+          {!activeWorkspaceId && !tabs.some(t => t.active) && (
             /* Terminal welcome — no active tab */
             <TerminalWelcome
               activeCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "active").length, 0)}
@@ -582,9 +592,9 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
               totalPending={14000}
               pipeline={35400}
               onOpenCmdPalette={() => setCmdPalette(true)}
-              onNewDoc={onNewTab}
             />
-          ) : (
+          )}
+          {!activeWorkspaceId && tabs.some(t => t.active) && (
             <>
               {/* Editor area */}
               <div className={styles.editor} ref={editorRef}>
@@ -605,8 +615,8 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
             </>
           )}
 
-          {/* Command bar */}
-          <CommandBar charCount={charCount} />
+          {/* Command bar — only show when not in workspace home */}
+          {!activeWorkspaceId && <CommandBar charCount={charCount} />}
         </div>
 
         {/* Comment panel (right) */}

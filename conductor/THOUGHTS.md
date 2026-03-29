@@ -24,6 +24,7 @@
 
 | Agent | Task | Completed |
 |-------|------|-----------|
+| claude-main | Sprint: Wire Workspace Home — T-001 through T-005 | 2026-03-29 |
 | claude-main | MISSION_CONVERSATIONS_V2 — all 5 deliverables complete | 2026-03-29 |
 | claude-main | Tab bar shrink + overflow per TAB_BAR_BEHAVIOR standard | 2026-03-29 |
 | claude-main | Created Codex CLI init (AGENTS.md) + 24 skill files | 2026-03-29 |
