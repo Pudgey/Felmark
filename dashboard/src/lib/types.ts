@@ -39,7 +39,13 @@ export type BlockType =
   | "brandboard"
   | "moodboard"
   | "wireframe"
-  | "pullquote";
+  | "pullquote"
+  | "hero-spotlight"
+  | "kinetic-type"
+  | "number-cascade"
+  | "pricing-config"
+  | "scope-boundary"
+  | "asset-checklist";
 
 export type GraphType = "bar" | "line" | "donut" | "hbar" | "sparkline" | "area" | "metrics";
 
@@ -394,6 +400,74 @@ export interface PullQuoteData {
   rating: number;
 }
 
+export interface HeroSpotlightData {
+  preLine: string;
+  name: string;
+  postLine: string;
+}
+
+export interface KineticLine {
+  text: string;
+  weight: number;
+  size: number;
+  color: string;
+  serif: boolean;
+}
+export interface KineticTypeData {
+  lines: KineticLine[];
+}
+
+export interface CascadeStat {
+  num: string;
+  label: string;
+}
+export interface NumberCascadeData {
+  stats: CascadeStat[];
+}
+
+// ── Unique blocks ──
+
+export interface PricingOption {
+  id: string;
+  name: string;
+  desc: string;
+  price: number;
+  required?: boolean;
+  category: string;
+}
+
+export interface PricingConfigData {
+  options: PricingOption[];
+  selected: string[];
+}
+
+export interface ScopeItem {
+  item: string;
+  status?: "done" | "active" | "upcoming";
+  reason?: string;
+}
+
+export interface ScopeBoundaryData {
+  inScope: ScopeItem[];
+  outScope: ScopeItem[];
+  note: string;
+}
+
+export interface AssetItem {
+  id: string;
+  name: string;
+  desc: string;
+  status: "received" | "partial" | "missing" | "not-needed";
+  fileType?: string;
+  receivedDate?: string;
+  note?: string;
+  daysWaiting?: number;
+}
+
+export interface AssetChecklistData {
+  items: AssetItem[];
+}
+
 export interface Block {
   id: string;
   type: BlockType;
@@ -431,6 +505,9 @@ export interface Block {
   moodBoardData?: MoodBoardData;
   wireframeData?: WireframeBlockData;
   pullQuoteData?: PullQuoteData;
+  heroSpotlightData?: HeroSpotlightData;
+  kineticTypeData?: KineticTypeData;
+  numberCascadeData?: NumberCascadeData;
 }
 
 export interface BlockTypeInfo {
@@ -468,6 +545,34 @@ export interface Workspace {
 }
 
 export type WorkspaceTemplate = "blank" | "proposal" | "meeting" | "brief" | "retainer" | "invoice";
+
+export type TemplateCategory = "proposals" | "contracts" | "notes" | "planning" | "financial" | "onboarding" | "custom";
+
+export interface TemplateBlock {
+  type: BlockType;
+  content: string;
+  checked?: boolean;
+  graphData?: GraphBlockData;
+  moneyData?: MoneyBlockData;
+  deliverableData?: DeliverableData;
+  tableData?: TableBlockData;
+  accordionData?: AccordionBlockData;
+  deadlineData?: DeadlineBlockData;
+}
+
+export interface DocumentTemplate {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  category: TemplateCategory;
+  blocks: TemplateBlock[];
+  createdAt: string;
+  updatedAt: string;
+  usageCount: number;
+  lastUsed: string | null;
+  source: "user" | "felmark";
+}
 
 export interface Tab {
   id: string;

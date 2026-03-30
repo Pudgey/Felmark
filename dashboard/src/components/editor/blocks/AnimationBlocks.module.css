@@ -1,0 +1,220 @@
+/* ── Shared ── */
+
+.inlineInput {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--warm-300);
+  outline: none;
+  font: inherit;
+  color: inherit;
+  text-align: center;
+  width: 100%;
+  padding: 0;
+}
+
+.inlineInputLarge {
+  composes: inlineInput;
+  font-family: var(--font-heading), 'Cormorant Garamond', serif;
+  font-size: 56px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.inlineInputNum {
+  composes: inlineInput;
+  font-family: var(--font-heading), 'Cormorant Garamond', serif;
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--ember);
+  width: 80px;
+}
+
+.inlineInputLabel {
+  composes: inlineInput;
+  font-size: 13px;
+  color: var(--ink-500);
+  width: 100%;
+}
+
+/* ═══════════════════════════════════════════
+   1. Hero Spotlight
+   ═══════════════════════════════════════════ */
+
+.spotlight {
+  padding: 60px 32px;
+  text-align: center;
+  border: 1px solid var(--warm-200);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.spotlightPre {
+  font-size: 14px;
+  color: var(--ink-400);
+  font-style: italic;
+  margin-bottom: 12px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.5s ease;
+}
+
+.spotlightPreVisible {
+  composes: spotlightPre;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.spotlightName {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.spotlightLetter {
+  font-family: var(--font-heading), 'Cormorant Garamond', serif;
+  font-size: 56px;
+  font-weight: 600;
+  color: var(--ink-900);
+  opacity: 0;
+  transform: translateY(30px) scale(0.7);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-block;
+  letter-spacing: 0.06em;
+}
+
+.spotlightLetterVisible {
+  composes: spotlightLetter;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.spotlightLine {
+  width: 0;
+  height: 2px;
+  background: var(--ember);
+  margin: 0 auto 16px;
+  transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1.4s;
+}
+
+.spotlightLineVisible {
+  composes: spotlightLine;
+  width: 120px;
+}
+
+.spotlightPost {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-300);
+  letter-spacing: 0.06em;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.5s ease 1.8s;
+}
+
+.spotlightPostVisible {
+  composes: spotlightPost;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ═══════════════════════════════════════════
+   2. Kinetic Type
+   ═══════════════════════════════════════════ */
+
+.kinetic {
+  padding: 48px 32px;
+  border: 1px solid var(--warm-200);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.kineticInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.kineticLine {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: center;
+  line-height: 1.15;
+}
+
+.kineticLineVisible {
+  composes: kineticLine;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ═══════════════════════════════════════════
+   3. Number Cascade
+   ═══════════════════════════════════════════ */
+
+.cascade {
+  padding: 28px 20px;
+  border: 1px solid var(--warm-200);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.cascadeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.cascadeItem {
+  text-align: center;
+  padding: 20px 12px;
+  border: 1px solid var(--warm-100);
+  border-radius: 10px;
+  opacity: 0;
+  transform: translateY(24px) scale(0.95);
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cascadeItemVisible {
+  composes: cascadeItem;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.cascadeNum {
+  font-family: var(--font-heading), 'Cormorant Garamond', serif;
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--ember);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.cascadeLabel {
+  font-size: 13px;
+  color: var(--ink-500);
+  line-height: 1.35;
+}
+
+.cascadeAdd {
+  display: block;
+  margin: 12px auto 0;
+  padding: 6px 16px;
+  background: transparent;
+  border: 1px dashed var(--warm-300);
+  border-radius: 8px;
+  color: var(--ink-400);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.cascadeAdd:hover {
+  background: var(--warm-100);
+  color: var(--ink-600);
+}

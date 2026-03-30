@@ -49,6 +49,9 @@ export const BLOCK_TYPES: BlockTypeInfo[] = [
   { type: "moodboard", label: "Mood Board", icon: "◇", desc: "Visual direction grid", section: "Visual", shortcut: "/mood" },
   { type: "wireframe", label: "Wireframe", icon: "☐", desc: "Annotated page layout", section: "Visual", shortcut: "/wireframe" },
   { type: "pullquote", label: "Pull Quote", icon: "❝", desc: "Testimonial with attribution", section: "Visual", shortcut: "/testimonial" },
+  { type: "hero-spotlight", label: "Hero Spotlight", icon: "★", desc: "Dramatic name reveal animation", section: "Visual", shortcut: "/spotlight" },
+  { type: "kinetic-type", label: "Kinetic Type", icon: "Aa", desc: "Staggered text reveal", section: "Visual", shortcut: "/kinetic" },
+  { type: "number-cascade", label: "Number Cascade", icon: "#", desc: "Animated stat grid", section: "Visual", shortcut: "/cascade" },
 ];
 
 export interface Command {

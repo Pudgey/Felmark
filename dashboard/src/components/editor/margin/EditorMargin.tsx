@@ -10,6 +10,7 @@ const BLOCK_LABELS: Record<string, string> = {
   "comment-thread": "💬", mention: "@", question: "?", feedback: "↺", decision: "⚖", poll: "▣", handoff: "→", signoff: "✓", annotation: "📌",
   "ai-action": "⚡",
   timeline: "⏱", flow: "◎", brandboard: "✦", moodboard: "◇", wireframe: "☐", pullquote: "❝",
+  "hero-spotlight": "★", "kinetic-type": "Aa", "number-cascade": "#",
 };
 
 const BLOCK_LABEL_COLORS: Record<string, string> = {
@@ -20,6 +21,7 @@ const BLOCK_LABEL_COLORS: Record<string, string> = {
   "comment-thread": "var(--ember)", mention: "var(--ember)", question: "#b89a20", feedback: "#5b7fa4", decision: "#7c8594", poll: "var(--ember)", handoff: "#5a9a3c", signoff: "#5a9a3c", annotation: "#c24b38",
   "ai-action": "#7864b4",
   timeline: "#5b7fa4", flow: "#7c6b9e", brandboard: "var(--ember)", moodboard: "#8a7e63", wireframe: "#7c8594", pullquote: "var(--ember)",
+  "hero-spotlight": "var(--ember)", "kinetic-type": "var(--ink-500)", "number-cascade": "var(--ember)",
 };
 
 interface EditorMarginProps {

@@ -22,6 +22,7 @@ import { TableBlock, AccordionBlock, MathBlock, GalleryBlock, SwatchesBlock, Bef
 import { CommentThreadBlock, MentionBlock, QuestionBlock, FeedbackBlock, DecisionBlock, PollBlock, HandoffBlock, SignoffBlock, AnnotationBlock, getDefaultCommentThread, getDefaultMention, getDefaultQuestion, getDefaultFeedback, getDefaultDecision, getDefaultPoll, getDefaultHandoff, getDefaultSignoff, getDefaultAnnotation } from "./blocks/CollabBlocks";
 import AiActionBlock, { getDefaultAiActionData } from "./ai-action/AiActionBlock";
 import { TimelineBlock, FlowBlock, BrandBoardBlock, MoodBoardBlock, WireframeBlock, PullQuoteBlock, getDefaultTimeline, getDefaultFlow, getDefaultBrandBoard, getDefaultMoodBoard, getDefaultWireframe, getDefaultPullQuote } from "./blocks/VisualBlocks";
+import { HeroSpotlightBlock, KineticTypeBlock, NumberCascadeBlock, getDefaultHeroSpotlight, getDefaultKineticType, getDefaultNumberCascade } from "./blocks/AnimationBlocks";
 import { STATUS } from "@/lib/constants";
 import { uid, cursorTo } from "@/lib/utils";
 import EditableBlock from "./EditableBlock";
@@ -40,7 +41,7 @@ import DashboardHome from "../dashboard/DashboardHome";
 import TeamScreen from "../team/TeamScreen";
 import CalendarFull from "../calendar/CalendarFull";
 import SearchPage from "../search/SearchPage";
-import type { Project } from "@/lib/types";
+import type { Project, DocumentTemplate } from "@/lib/types";
 import SplitPane from "./SplitPane";
 import NotificationPanel, { type Notification } from "../notifications/NotificationPanel";
 import styles from "./Editor.module.css";
@@ -65,6 +66,8 @@ interface EditorProps {
   onNewWorkspace?: () => void;
   onNewTabInWorkspace?: (wsId: string) => void;
   onSelectWorkspaceHome?: (wsId: string) => void;
+  onSaveAsTemplate?: () => void;
+  docTemplates?: DocumentTemplate[];
   railActive?: string;
   onCalendarOpenProject?: (workspaceId: string) => void;
   calendarScrollTarget?: string | null;
@@ -86,7 +89,7 @@ interface EditorProps {
   onSplitMakePrimary?: () => void;
 }
 
-export default function Editor({ workspaces, tabs, activeProject, blocks: blocksProp, sidebarOpen, wordCount, charCount, onOpenSidebar, onTabClick, onTabClose, onNewTab, onTabRename, onBlocksChange, onWordCountChange, activeWorkspaceId, onSelectProject, onNewWorkspace, onNewTabInWorkspace, onSelectWorkspaceHome, railActive, onCalendarOpenProject, calendarScrollTarget, onCalendarScrollComplete, onRenameWorkspace, onUpdateProjectDue, comments, onCommentsChange, activities, onActivitiesChange, zenMode, onToggleZen, splitProject, splitBlocks, splitProjectName, splitClientName, onSplitOpen, onSplitClose, onSplitMakePrimary }: EditorProps) {
+export default function Editor({ workspaces, tabs, activeProject, blocks: blocksProp, sidebarOpen, wordCount, charCount, onOpenSidebar, onTabClick, onTabClose, onNewTab, onTabRename, onBlocksChange, onWordCountChange, activeWorkspaceId, onSelectProject, onNewWorkspace, onNewTabInWorkspace, onSelectWorkspaceHome, onSaveAsTemplate, docTemplates, railActive, onCalendarOpenProject, calendarScrollTarget, onCalendarScrollComplete, onRenameWorkspace, onUpdateProjectDue, comments, onCommentsChange, activities, onActivitiesChange, zenMode, onToggleZen, splitProject, splitBlocks, splitProjectName, splitClientName, onSplitOpen, onSplitClose, onSplitMakePrimary }: EditorProps) {
   const [blocks, setBlocksLocal] = useState<Block[]>(blocksProp);
   const [editingTabId, setEditingTabId] = useState<string | null>(null);
   const [editingTabName, setEditingTabName] = useState("");
@@ -400,6 +403,9 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       moodboard: { moodBoardData: getDefaultMoodBoard() },
       wireframe: { wireframeData: getDefaultWireframe() },
       pullquote: { pullQuoteData: getDefaultPullQuote() },
+      "hero-spotlight": { heroSpotlightData: getDefaultHeroSpotlight() },
+      "kinetic-type": { kineticTypeData: getDefaultKineticType() },
+      "number-cascade": { numberCascadeData: getDefaultNumberCascade() },
     };
     if (CONTENT_DEFAULTS[type]) {
       setBlocks(prev => {
@@ -767,6 +773,9 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       moodboard: (b) => b.moodBoardData ? <MoodBoardBlock data={b.moodBoardData} onChange={d => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, moodBoardData: d } : bl))} /> : null,
       wireframe: (b) => b.wireframeData ? <WireframeBlock data={b.wireframeData} onChange={d => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, wireframeData: d } : bl))} /> : null,
       pullquote: (b) => b.pullQuoteData ? <PullQuoteBlock data={b.pullQuoteData} onChange={d => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, pullQuoteData: d } : bl))} /> : null,
+      "hero-spotlight": (b) => b.heroSpotlightData ? <HeroSpotlightBlock data={b.heroSpotlightData} onChange={d => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, heroSpotlightData: d } : bl))} /> : null,
+      "kinetic-type": (b) => b.kineticTypeData ? <KineticTypeBlock data={b.kineticTypeData} onChange={d => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, kineticTypeData: d } : bl))} /> : null,
+      "number-cascade": (b) => b.numberCascadeData ? <NumberCascadeBlock data={b.numberCascadeData} onChange={d => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, numberCascadeData: d } : bl))} /> : null,
     };
 
     if (contentBlockMap[block.type]) {
