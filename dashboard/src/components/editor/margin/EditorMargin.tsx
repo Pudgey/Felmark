@@ -11,6 +11,7 @@ const BLOCK_LABELS: Record<string, string> = {
   "ai-action": "⚡",
   timeline: "⏱", flow: "◎", brandboard: "✦", moodboard: "◇", wireframe: "☐", pullquote: "❝",
   "hero-spotlight": "★", "kinetic-type": "Aa", "number-cascade": "#",
+  "stat-reveal": "◎", "value-counter": "$",
 };
 
 const BLOCK_LABEL_COLORS: Record<string, string> = {
@@ -22,6 +23,7 @@ const BLOCK_LABEL_COLORS: Record<string, string> = {
   "ai-action": "#7864b4",
   timeline: "#5b7fa4", flow: "#7c6b9e", brandboard: "var(--ember)", moodboard: "#8a7e63", wireframe: "#7c8594", pullquote: "var(--ember)",
   "hero-spotlight": "var(--ember)", "kinetic-type": "var(--ink-500)", "number-cascade": "var(--ember)",
+  "stat-reveal": "#5a9a3c", "value-counter": "var(--ember)",
 };
 
 interface EditorMarginProps {
