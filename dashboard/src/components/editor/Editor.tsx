@@ -28,6 +28,7 @@ import HistoryModal from "../history/HistoryModal";
 import TerminalWelcome from "./TerminalWelcome";
 import EditorMargin from "./margin/EditorMargin";
 import WorkspaceHome from "../workspace/WorkspaceHome";
+import DashboardHome from "../dashboard/DashboardHome";
 import CalendarFull from "../calendar/CalendarFull";
 import SearchPage from "../search/SearchPage";
 import type { Project } from "@/lib/types";
@@ -984,7 +985,15 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
               <WorkspaceHome workspace={ws} onSelectProject={onSelectProject} onNewTab={onNewTab} onRenameWorkspace={onRenameWorkspace} onUpdateProjectDue={onUpdateProjectDue} />
             ) : null;
           })()}
-          {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && !activeWorkspaceId && !tabs.some(t => t.active) && (
+          {railActive === "home" && !activeWorkspaceId && !tabs.some(t => t.active) && (
+            <DashboardHome
+              workspaces={workspaces}
+              onSelectWorkspace={onSelectWorkspaceHome || (() => {})}
+              onSelectProject={onSelectProject || (() => {})}
+              onNewTabInWorkspace={onNewTabInWorkspace || (() => {})}
+            />
+          )}
+          {railActive !== "home" && railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && !activeWorkspaceId && !tabs.some(t => t.active) && (
             <TerminalWelcome
               activeCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status !== "completed").length, 0)}
               reviewCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "review").length, 0)}
