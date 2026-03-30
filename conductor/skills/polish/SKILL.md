@@ -1,125 +1,98 @@
 ---
 name: polish
-description: Pre-release polish and hardening checklist -- apply when a feature hits 70% completion.
+description: Pre-release polish and hardening checklist for a nearly complete Felmark feature.
 ---
 
 # Polish -- Pre-Release Polish & Hardening
 
-Apply this checklist when a feature reaches **70% completion** -- meaning core logic is functional, navigation routes are registered, and data is flowing from Firestore to the UI. This is the finalization phase that transforms working code into shippable code.
+Use this when a feature is materially built and needs to be turned into something shippable. Polish is the final pass that removes rough edges, silent failures, and visual sloppiness without changing the feature's scope.
 
-Reference: `dev/conductor/standards/SUPER_HARDENING_SOP.md`
+References:
+- `AGENTS.md`
+- Relevant mission docs
+- The target code under `dashboard/src/` or `extension/`
 
 ---
 
 ## Gate Condition
 
-Before starting this skill, confirm:
-- [ ] Core logic is functional and tested
-- [ ] Navigation routes are registered
-- [ ] Data is successfully flowing from Firestore to the UI
+Do not run polish until the feature already has:
 
-If any of these are false, finish the core work first. Do not polish incomplete features.
+- Core behavior working
+- Intended route or entry point wired
+- Data flow either real or explicitly stubbed
 
----
-
-## Phase 1: UI/UX Polish (The "Soul")
-
-Focus on the tactile and visual feel of the interface.
-
-### Token Enforcement
-- [ ] Zero hardcoded color values -- all colors use `BaseColors.*`
-- [ ] Zero hardcoded text styles -- all text uses `BaseTypography.*`
-- [ ] Zero hardcoded spacing values -- all spacing uses `BaseSpacing.*`
-- [ ] Zero hardcoded radii -- all border radii use `BaseRadius.*`
-- [ ] No `const` keyword on widgets referencing non-const base_ui tokens
-
-### Motion and Easing
-- [ ] All transitions use `Curves.easeOutQuart` or `Curves.easeInOutCubic`
-- [ ] No raw `Curves.linear` on user-facing animations
-- [ ] Transition durations are consistent (150-300ms for micro, 300-500ms for page)
-
-### Placeholders and Skeletons
-- [ ] Every async data point has a stable skeleton loader
-- [ ] No layout shifts when data loads (skeleton must match data layout dimensions)
-- [ ] Never use `SizedBox.shrink()` for loading state (causes layout collapse)
-
-### Tactile Feedback
-- [ ] Interactive elements have haptic feedback (`BaseHaptics` or `HapticFeedback`)
-- [ ] Press states use `BaseTapScale` (not manual AnimationController for simple press)
-- [ ] Cards use `BasePressableCard` for interactive cards
+If the feature is still missing core behavior, finish that first.
 
 ---
 
-## Phase 2: System Hardening (The "Armor")
+## Phase 1: Interface Finish
 
-Focus on resilience and crash prevention.
+Check:
 
-### Async Guards
-- [ ] `if (!mounted) return;` after every `await` in StatefulWidget or StateNotifier logic
-- [ ] `if (!mounted) return;` inside every `Future.delayed` callback that accesses state
-- [ ] `if (!mounted) return;` inside every `.then()` callback that calls `setState`
-
-### Type Resilience
-- [ ] All Firestore parsing uses safe casts (`as Type?` with fallback, not hard `as Type`)
-- [ ] Timestamp handling uses `is Timestamp` check before cast
-- [ ] `doc.id` is injected into map data before `fromMap()`
-
-### Error States
-- [ ] Every screen that loads data has an error state with a "Retry" button
-- [ ] Error messages are user-friendly (not raw exception strings)
-- [ ] Error states are visually distinct from empty states
-
-### Boundary Checks
-- [ ] Counters use `.clamp()` to prevent negative or absurd values
-- [ ] Lists use `.take()` to prevent memory bloat from large datasets
-- [ ] String inputs have max length limits
+- Visual hierarchy is obvious on first scan
+- Empty, loading, and error states look intentional
+- Toolbars, menus, and controls do not feel crowded
+- Mobile and desktop versions both hold together
+- Copy is specific and on-brand, not placeholder text
 
 ---
 
-## Phase 3: Safety and Security (The "Shield")
+## Phase 2: Interaction Finish
 
-Focus on preventing user error and data corruption.
+Check:
 
-### Double-Tap Protection
-- [ ] All write/submit actions have `_isSubmitting` flag guard
-- [ ] All navigation actions have `_isNavigating` flag or debounce
-- [ ] Flags are reset in `finally` blocks (not just on success)
+- Buttons and controls have clear hover, focus, pressed, and disabled states
+- Async actions show progress and cannot be double-fired accidentally
+- Destructive actions have the right confirmation pattern
+- Success and failure feedback is immediate and unambiguous
 
-### Input Hardening
-- [ ] All TextFields have `FilteringTextInputFormatter` where appropriate
-- [ ] All TextFields have character limits (`maxLength`)
-- [ ] All TextFields set all 3 borders explicitly (border, enabledBorder, focusedBorder)
-
-### Permission Hygiene
-- [ ] OS permissions (camera, location) are requested contextually, never automatically
-- [ ] No browser prompts fire on app launch (use 2-second delay or user-initiated)
+Look especially at share, save, rename, delete, export, and workspace-switch flows.
 
 ---
 
-## Phase 4: Accessibility (The "Inclusion")
+## Phase 3: Resilience
 
-Focus on screen readers and varied device settings.
+Check:
 
-### Semantics Audit
-- [ ] Every custom button (GestureDetector) has a `Semantics(button: true, label: '...')` wrapper
-- [ ] Every icon-only button has a semantic label
-- [ ] Images have semantic descriptions where meaningful
+- Network failures do not strand the user
+- Missing data does not collapse the layout
+- Partial state does not look like finished state
+- Long strings, empty lists, and stale records degrade cleanly
 
-### Contrast Check
-- [ ] Text is readable against its background (especially over gradients or images)
-- [ ] No text color relies solely on opacity for contrast
-
-### Font Scaling
-- [ ] UI remains usable at 1.5x system text scaling
-- [ ] No text truncation at default scaling on small devices
-- [ ] Touch targets are at least 44x44px
+If a user can lose work or think a save succeeded when it did not, polish is not complete.
 
 ---
 
-## Verification
+## Phase 4: Quality Pass
 
-After completing all phases:
+Run available verification:
+
 ```bash
-flutter analyze lib/screens/<target>/
+npm run lint
+npm run build
 ```
-Must show 0 new errors. Pre-existing warnings are acceptable.
+
+Then manually verify the target flow end-to-end.
+
+If the repo or subproject uses different scripts, use those instead.
+
+---
+
+## Phase 5: Product Fit
+
+Confirm:
+
+- The feature still feels like Felmark, not a generic dashboard widget
+- It supports freelancer work, not abstract productivity theater
+- The UI does not imply capabilities that are not actually wired
+
+Remove dead affordances rather than shipping fake ambition.
+
+---
+
+## Done Criteria
+
+- The feature feels intentional, not merely functional
+- No obvious silent failures remain
+- Visual and interaction quality are aligned with the rest of the product
