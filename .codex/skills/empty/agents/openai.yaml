@@ -1,0 +1,4 @@
+interface:
+  display_name: "Empty"
+  short_description: "Help with Empty tasks and workflows"
+  default_prompt: "Use $empty for this task in the Felmark repo."

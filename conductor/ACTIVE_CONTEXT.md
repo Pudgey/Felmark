@@ -23,6 +23,7 @@ Felmark is actively building the browser-native dashboard experience in `dashboa
 
 - Large dashboard feature sprint completed on 2026-03-30
 - Conductor skill library cleaned of stale Flutter/INDEP references on 2026-03-30
+- Repo-local `.codex/skills` wrappers converted into real Codex skills with metadata on 2026-03-30
 
 ## Pending Manual Actions
 

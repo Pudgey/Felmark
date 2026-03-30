@@ -1,0 +1,4 @@
+interface:
+  display_name: "Flow"
+  short_description: "Help with Flow tasks and workflows"
+  default_prompt: "Use $flow for this task in the Felmark repo."

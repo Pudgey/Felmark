@@ -1,0 +1,4 @@
+interface:
+  display_name: "Swarm"
+  short_description: "Help with Swarm tasks and workflows"
+  default_prompt: "Use $swarm for this task in the Felmark repo."

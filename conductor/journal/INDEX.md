@@ -6,12 +6,14 @@
 |-----|-------|-------|
 | `branding` | 1 | `2026-03-29_felmark-setup.md` |
 | `cleanup` | 1 | `2026-03-30_skill-library-felmark-cleanup.md` |
-| `conductor` | 1 | `2026-03-30_skill-library-felmark-cleanup.md` |
+| `codex` | 1 | `2026-03-30_codex-skill-packaging.md` |
+| `conductor` | 2 | `2026-03-30_skill-library-felmark-cleanup.md`, `2026-03-30_codex-skill-packaging.md` |
 | `docs` | 1 | `2026-03-30_skill-library-felmark-cleanup.md` |
 | `felmark` | 1 | `2026-03-29_felmark-setup.md` |
 | `naming` | 1 | `2026-03-29_felmark-setup.md` |
 | `project-setup` | 1 | `2026-03-29_felmark-setup.md` |
-| `skills` | 1 | `2026-03-30_skill-library-felmark-cleanup.md` |
+| `skills` | 2 | `2026-03-30_skill-library-felmark-cleanup.md`, `2026-03-30_codex-skill-packaging.md` |
+| `tooling` | 1 | `2026-03-30_codex-skill-packaging.md` |
 
 ## Pattern Alerts
 

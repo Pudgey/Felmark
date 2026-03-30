@@ -7,6 +7,7 @@ Massive feature sprint across two days. Built and shipped:
 ### Conductor Maintenance
 - Cleaned the shared skill library so `conductor/skills` and `.claude/commands` no longer carry stale Flutter/INDEP references
 - Rewrote 13 skill docs for Felmark's React/Next.js + extension workflow
+- Converted repo-local `.codex/skills/*.md` wrappers into real Codex skill folders with `SKILL.md` and `agents/openai.yaml`
 - Local checkpoint commits created during cleanup:
   - `1c32233` — skill cleanup batch 1
   - `5732e22` — skill cleanup batch 2
@@ -82,6 +83,7 @@ None — all tasks completed.
 
 ## Gotchas
 
+- If repo-local Codex skills do not appear immediately in the UI, reload the workspace or start a fresh Codex session so it re-reads `.codex/skills/`
 - `EditableBlock.tsx` was fully rewritten to support @date chip detection and inline date picker — if touching this file, be aware of the `handleInput` flow that detects both `/` (slash menu) and `@date` triggers
 - Graph blocks have NaN guards on every chart component — don't remove the `|| 0` and `|| 1` guards on value accessors
 - The `deleteBlock` function in Editor has a safety check: last block resets to empty paragraph instead of deleting

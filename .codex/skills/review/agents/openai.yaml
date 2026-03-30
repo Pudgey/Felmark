@@ -1,0 +1,4 @@
+interface:
+  display_name: "Review"
+  short_description: "Help with Review tasks and workflows"
+  default_prompt: "Use $review for this task in the Felmark repo."

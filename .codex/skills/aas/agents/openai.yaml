@@ -1,0 +1,4 @@
+interface:
+  display_name: "AAS"
+  short_description: "Help with AAS tasks and workflows"
+  default_prompt: "Use $aas for this task in the Felmark repo."
