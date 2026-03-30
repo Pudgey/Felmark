@@ -381,6 +381,91 @@ The worktree isolation means main branch is never at risk.
 
 ---
 
+## Phase 2: Block File Reorganization (Step 11)
+
+After the core/ extraction is complete, reorganize block files from flat multi-component files into category folders with one block per file.
+
+### Step 11: Split block files by category
+
+**Current state** — multi-block mega-files:
+```
+editor/blocks/
+├── ContentBlocks.tsx        ← 7 blocks in one file
+├── CollabBlocks.tsx         ← 9 blocks in one file
+├── VisualBlocks.tsx         ← 6 blocks in one file
+├── AnimationBlocks.tsx      ← 5 blocks in one file
+```
+
+**Target state** — category folders, one block per file:
+```
+editor/blocks/
+├── content/
+│   ├── TableBlock.tsx
+│   ├── AccordionBlock.tsx
+│   ├── MathBlock.tsx
+│   ├── GalleryBlock.tsx
+│   ├── SwatchesBlock.tsx
+│   ├── BeforeAfterBlock.tsx
+│   ├── BookmarkBlock.tsx
+│   └── content.module.css
+├── collab/
+│   ├── CommentThreadBlock.tsx
+│   ├── MentionBlock.tsx
+│   ├── QuestionBlock.tsx
+│   ├── FeedbackBlock.tsx
+│   ├── DecisionBlock.tsx
+│   ├── PollBlock.tsx
+│   ├── HandoffBlock.tsx
+│   ├── SignoffBlock.tsx
+│   ├── AnnotationBlock.tsx
+│   └── collab.module.css
+├── visual/
+│   ├── TimelineBlock.tsx
+│   ├── FlowBlock.tsx
+│   ├── BrandBoardBlock.tsx
+│   ├── MoodBoardBlock.tsx
+│   ├── WireframeBlock.tsx
+│   ├── PullQuoteBlock.tsx
+│   └── visual.module.css
+├── animation/
+│   ├── HeroSpotlightBlock.tsx
+│   ├── KineticTypeBlock.tsx
+│   ├── NumberCascadeBlock.tsx
+│   ├── StatRevealBlock.tsx
+│   ├── ValueCounterBlock.tsx
+│   └── animation.module.css
+└── unique/                    ← already structured this way
+    ├── PricingConfigBlock.tsx
+    ├── ScopeBoundaryBlock.tsx
+    ├── AssetChecklistBlock.tsx
+    ├── DecisionPickerBlock.tsx
+    ├── AvailabilityPickerBlock.tsx
+    ├── ProgressStreamBlock.tsx
+    ├── DependencyMapBlock.tsx
+    ├── RevisionHeatmapBlock.tsx
+    └── UniqueBlocks.module.css
+```
+
+**Why this comes AFTER core/ extraction:**
+Once `blockRegistry.ts` is the single import point, moving block files only requires updating paths in one file instead of in Editor.tsx directly. The registry absorbs all the import churn.
+
+**Execution:**
+1. Create category folders
+2. Split each mega-file into individual files (preserve all code, just move)
+3. Move CSS — either keep one shared `.module.css` per category, or split per block if any exceed 200 lines
+4. Update all imports in `core/blockRegistry.ts`
+5. Delete the old mega-files
+6. Verify: build, type check, all blocks render
+
+**CSS approach:**
+- Start with one shared CSS file per category (e.g. `collab.module.css`)
+- If a single block's CSS exceeds 200 lines (like DeliverableBlock), give it its own `.module.css`
+- Category CSS files use the same class names — no renaming needed since CSS modules scope automatically
+
+**Risk:** Low — this is pure file reorganization. No logic changes. The only breakage vector is import paths.
+
+---
+
 ## Success Criteria
 
 | Metric | Before | After |
@@ -390,9 +475,59 @@ The worktree isolation means main branch is never at risk.
 | Editor.tsx useState | 24 | 0 (all in hooks) |
 | Editor.tsx useCallback | 18 | 0 (all in hooks) |
 | Total files in core/ | 0 | 10 |
-| Block types working | 55 | 55 (unchanged) |
+| Block files per category folder | 0 | 4 folders, 27+ files |
+| Multi-block mega-files | 4 | 0 |
+| Block types working | 55+ | 55+ (unchanged) |
 | Features broken | 0 | 0 |
 | Build passes | Yes | Yes |
+
+---
+
+## Full Target Architecture
+
+```
+editor/
+├── core/
+│   ├── EditorShell.tsx          ← Layout, panels, page routing
+│   ├── blockRegistry.ts         ← All imports, defaults, component map
+│   ├── blockRenderer.tsx         ← renderBlock dispatch + gutter
+│   ├── useBlockState.ts          ← Block CRUD
+│   ├── useSlashMenu.ts           ← Slash menu + selectSlashItem
+│   ├── useEditorKeys.ts          ← Global keyboard shortcuts
+│   ├── usePanelState.ts          ← Panel toggles
+│   ├── useTabBar.ts              ← Tab overflow, rename
+│   ├── useFocusManager.ts        ← blockElMap, focusNew
+│   └── REFACTORING_SOP.md        ← Rules for modifying core/
+├── Editor.tsx                    ← Thin entry (<200 lines)
+├── Editor.module.css
+├── blocks/
+│   ├── content/                  ← 7 blocks, each own file
+│   ├── collab/                   ← 9 blocks, each own file
+│   ├── visual/                   ← 6 blocks, each own file
+│   ├── animation/                ← 5 blocks, each own file
+│   └── unique/                   ← 8 blocks, already split
+├── graphs/                       ← GraphBlock + GraphDataEditor
+├── money/                        ← MoneyBlock
+├── deliverable/                  ← DeliverableBlock
+├── deadline-block/               ← DeadlineBlock
+├── ai/                           ← AiBlock
+├── ai-action/                    ← AiActionBlock
+├── audio/                        ← AudioBlock
+├── canvas/                       ← CanvasBlock
+├── drawing/                      ← DrawingBlock
+├── cat/                          ← CatTerminal (easter egg)
+├── margin/                       ← EditorMargin
+├── EditableBlock.tsx             ← Contenteditable block
+├── SlashMenu.tsx                 ← Block type picker
+├── FormatBar.tsx                 ← Text format toolbar
+├── CommandBar.tsx                ← Bottom command input
+├── CommandPalette.tsx            ← Cmd+K palette
+├── ConversationPanel.tsx         ← Left chat panel
+├── TerminalWelcome.tsx           ← Dead-state splash
+├── SplitPane.tsx                 ← Side-by-side editing
+├── ShareModal.tsx                ← Share/export modal
+└── HistoryModal.tsx              ← Version history
+```
 
 ---
 
@@ -410,6 +545,18 @@ The worktree isolation means main branch is never at risk.
 2. **selectSlashItem complexity** — 7 branching paths with different state mutations. Must preserve every path.
 3. **useEffect ordering** — some effects depend on state from other effects. Must maintain execution order.
 4. **Prop drilling** — EditorShell will need many props. Consider context if it gets unwieldy (but start with props).
+5. **Import path churn in Step 11** — mitigated by blockRegistry.ts being the single import point.
+
+---
+
+## Execution Order
+
+| Phase | Steps | What happens | Risk |
+|-------|-------|-------------|------|
+| **Phase 1: Core extraction** | 1–10 | Editor.tsx → core/ modules | Medium-High |
+| **Phase 2: Block reorganization** | 11 | Mega-files → category folders | Low |
+
+Phase 2 depends on Phase 1. Do not attempt Step 11 before blockRegistry.ts exists.
 
 ---
 
@@ -418,6 +565,5 @@ The worktree isolation means main branch is never at risk.
 - No new features
 - No block type changes
 - No UI changes
-- No CSS changes
 - No type refactoring (Block interface stays flat)
 - No performance optimization (that's a separate mission)
