@@ -18,14 +18,14 @@
 
 | Agent | Task | Started | Status |
 |-------|------|---------|--------|
-| codex-main | Implementing the first editor polish pack for autosave feedback, block focus clarity, insert cues, and lightweight undo | 2026-03-30 16:54 EDT | ACTIVE |
+| | | | |
 
 ## Recent
 
 | Agent | Task | Completed |
 |-------|------|-----------|
+| claude-main | Fixed slash menu clipping, hydration mismatch, category pill polish, and added delete X to all blocks | 2026-03-30 |
 | codex-main | Fixed slash-menu ranking so queries prefer relevant block names and removed the stale reset effect from the menu | 2026-03-30 16:46 EDT |
 | codex-main | Fixed the templates card highlight so hover and selected states both show the outline immediately | 2026-03-30 16:27 EDT |
 | codex-main | Hardened the share modal with visible API errors and a manual-copy fallback for blocked clipboard access | 2026-03-30 16:17 EDT |
 | codex-main | Audited the dashboard for micro-polish gaps in small interactions, feedback loops, and dead-end controls | 2026-03-30 16:09 EDT |
-| codex-main | Added simple hover tooltips to the rail icons using native button titles | 2026-03-30 16:00 EDT |
