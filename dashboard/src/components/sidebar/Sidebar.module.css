@@ -552,15 +552,15 @@
 
 .projectActions {
   display: flex;
-  gap: 1px;
   opacity: 0;
   transition: opacity 0.1s;
   flex-shrink: 0;
+  position: relative;
 }
 
-.pjActBtn {
-  width: 28px;
-  height: 28px;
+.pjMenuBtn {
+  width: 24px;
+  height: 24px;
   border-radius: var(--radius-sm);
   border: none;
   background: none;
@@ -569,11 +569,70 @@
   align-items: center;
   justify-content: center;
   color: var(--ink-300);
+  font-size: 12px;
+  letter-spacing: 1px;
   transition: all 0.06s;
 }
 
-.pjActBtn:hover { background: var(--warm-200); color: var(--ink-600); }
-.pjPinActive { color: var(--ember); }
+.pjMenuBtn:hover { background: var(--warm-200); color: var(--ink-600); }
+.pjMenuBtnOpen { background: var(--warm-200); color: var(--ink-600); }
+
+.pjMenu {
+  position: fixed;
+  width: 170px;
+  background: #fff;
+  border: 1px solid var(--warm-200);
+  border-radius: var(--radius-md);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  z-index: 50;
+  padding: 3px;
+  animation: pjMenuIn 0.08s ease;
+}
+
+@keyframes pjMenuIn {
+  from { opacity: 0; transform: translateY(2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.pjMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--ink-600);
+  cursor: pointer;
+  transition: background 0.06s;
+}
+
+.pjMenuItem:hover { background: var(--warm-100); color: var(--ink-800); }
+
+.pjMenuIcon {
+  width: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-400);
+  flex-shrink: 0;
+}
+
+.pjMenuItem:hover .pjMenuIcon { color: var(--ink-600); }
+
+.pjMenuDanger { color: #c24b38; }
+.pjMenuDanger:hover { background: rgba(194, 75, 56, 0.04); color: #c24b38; }
+.pjMenuDanger .pjMenuIcon { color: #c24b38; }
+
+.pjMenuSep {
+  height: 1px;
+  background: var(--warm-100);
+  margin: 3px 6px;
+}
 
 /* Add workspace */
 .addWsRow {

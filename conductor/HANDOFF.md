@@ -2,35 +2,43 @@
 
 ## What just happened
 
-Canvas block got a major upgrade in two passes:
+Two parallel sessions ran: claude-main (this session) did drawing block + editor hardening, codex-main did polish packs.
 
-### Pass 1: Stencil Library
-- Created `stencils.ts` — 40+ pre-built shape templates across 8 categories (Wireframe, Flowchart, Site Map, Devices, Stickies, Journey Map, Icons, Org Chart)
-- Created `StencilPicker.tsx` — dropdown panel with category tabs, 3-column grid, clean SVG mini-previews
-- Integrated into CanvasBlock toolbar via ⬡ button — click stencil to stamp centered on canvas
+### Claude-main: Drawing block + editor hardening
 
-### Pass 2: Production Interactions
-- Multi-select: click, shift+click toggle, rubber band drag
-- Element moving: drag selected elements (group move), ref-based drag state for 60fps
-- Keyboard shortcuts: Delete, arrow nudge (1px/10px), Cmd+A select all, Cmd+D duplicate, Escape deselect
-- Z-order controls: ↑ bring forward / ↓ send backward toolbar buttons
-- Selection indicators now work for ALL element types (was broken for freehand/text)
-- Smart cursor feedback: move on hover, grabbing during drag, crosshair for rubber band
+#### New: `/drawing` block (8 visual component types)
+- Files: `drawing/DrawingBlock.tsx` (691 lines), `drawing/DrawingBlock.module.css` (570 lines)
+- Sub-picker pattern (same as graph/money): `/drawing` → picks type → inserts
+- Components: Flowchart, User Flow, Device Frames, Sitemap Tree, Sticky Notes, Sketch Chart, Stamps, Wireframe Kit
 
-## In-progress work
+#### Hardened: Drag-and-drop for all block types
+- `wrapBlock()` helper inside `renderBlock` — all block renders use it now
+- Chrome fix: added `e.dataTransfer.setData()` (was causing silent drag failure)
 
-None — all tasks completed and pushed.
+#### Hardened: Slash menu viewport positioning
+- Viewport-relative coordinates instead of editor-relative
+- Flips above when not enough space below (was rendering off-screen below tall blocks)
+
+#### Hardened: Empty block focus + placeholder
+- CSS `:empty` replaced with `.is-empty` class (strips zero-width chars)
+- `focusNew()` retry helper replaces all `setTimeout(20)` fire-and-forget patterns
+
+#### Added: Click on empty space → new block
+#### Added: Outline sidebar right-click context menu (Go to block, Delete block)
+
+### Codex-main: Polish packs
+- Slash menu ranking fix
+- Template card hover/selected state fix
+- Share modal error handling + clipboard fallback
+- Rail icon tooltips
+- Micro-polish audit
+- Editor polish pack (autosave, focus clarity, insert cues) — may still be in progress
 
 ## Gotchas
 
-- Canvas files were already committed at `34ff4b0` by the user between builder runs. The worktree commits existed on detached branches but the content was identical.
-- The `codex-main` editor polish pack (autosave feedback, block focus, insert cues, lightweight undo) was in-progress from another agent — committed its staged changes as part of session close.
-- User mentioned loving "the old design" of The Wire — they may want to revisit The Wire's visual design in next session. The Wire AI mission was added by a different session (`9f887dd`).
-
-## Remaining Tasks
-
-- [ ] User wants to revisit The Wire's design (mentioned "loved the old design")
-- [ ] 3 deferred animation blocks: Ambient Gradient, Celebration Burst, Particle Logo Reveal
-- [ ] P1: Consolidate 40+ inline styles in CollabBlocks to CSS modules
-- [ ] P1: aria-labels on all CollabBlock buttons + focus-visible states
-- [ ] P2: --ai-accent CSS variable for AiBlock
+- **`wrapBlock()`** is the canonical way to render blocks — never manually build blockRow+gutter
+- **`focusNew(nid)`** replaces all setTimeout+blockElMap patterns for new block creation
+- **Slash menu** uses viewport coordinates now — don't add scrollTop offsets
+- **`is-empty` class** on contentEditable — call `syncEmpty()` after direct innerHTML manipulation
+- **GUARDRAIL.md** was added by Codex — new ground rule requires updating it on every feature/block change
+- **Drawing block** components are read-only for now (no inline editing of nodes/text)

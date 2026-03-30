@@ -210,6 +210,8 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
   const [editingWsName, setEditingWsName] = useState("");
   const [editingPjId, setEditingPjId] = useState<string | null>(null);
   const [editingPjName, setEditingPjName] = useState("");
+  const [pjMenuOpen, setPjMenuOpen] = useState<string | null>(null);
+  const [pjMenuPos, setPjMenuPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const [search, setSearch] = useState("");
   const [expandedStats, setExpandedStats] = useState(false);
   const [hoveredBar, setHoveredBar] = useState<number | null>(null);
@@ -226,6 +228,19 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [wsMenu]);
+
+  // Close project menu on outside click
+  useEffect(() => {
+    if (!pjMenuOpen) return;
+    const handler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest(`.${styles.pjMenu}`) && !target.closest(`.${styles.pjMenuBtn}`)) {
+        setPjMenuOpen(null);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [pjMenuOpen]);
 
   const totalEarnings = workspaces.reduce((s, w) =>
     s + w.projects.reduce((a, p) => {
@@ -490,13 +505,28 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
                       </div>
                     </div>
                     <div className={styles.projectActions}>
-                      <button className={`${styles.pjActBtn} ${pj.pinned ? styles.pjPinActive : ""}`} title={pj.pinned ? "Unpin" : "Pin"}
-                        onClick={e => { e.stopPropagation(); onTogglePin(pj.id); }}>
-                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M4 8L2 10M7 1.5l2 2-1.5 2-.5-.5L4 8l-1.5-1.5L5.5 3.5 5 3z" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round" fill={pj.pinned ? "currentColor" : "none"} /></svg>
-                      </button>
-                      <button className={styles.pjActBtn} title="Archive" onClick={e => { e.stopPropagation(); onArchiveProject(pj.id); }}>
-                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 3h8M1.8 3v5a.8.8 0 00.8.8h4.8a.8.8 0 00.8-.8V3" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round" /><path d="M4 5h2" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round" /></svg>
-                      </button>
+                      <button className={`${styles.pjMenuBtn} ${pjMenuOpen === pj.id ? styles.pjMenuBtnOpen : ""}`} onClick={e => { e.stopPropagation(); const rect = (e.target as HTMLElement).getBoundingClientRect(); setPjMenuPos({ top: rect.bottom + 2, left: rect.right - 170 }); setPjMenuOpen(pjMenuOpen === pj.id ? null : pj.id); }}>···</button>
+                      {pjMenuOpen === pj.id && (
+                        <div className={styles.pjMenu} style={{ top: pjMenuPos.top, left: pjMenuPos.left }}>
+                          <button className={styles.pjMenuItem} onClick={e => { e.stopPropagation(); onTogglePin(pj.id); setPjMenuOpen(null); }}>
+                            <span className={styles.pjMenuIcon}><svg width="12" height="12" viewBox="0 0 10 10" fill="none"><path d="M4 8L2 10M7 1.5l2 2-1.5 2-.5-.5L4 8l-1.5-1.5L5.5 3.5 5 3z" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round" fill={pj.pinned ? "currentColor" : "none"} /></svg></span>
+                            {pj.pinned ? "Unpin" : "Pin"}
+                          </button>
+                          <button className={styles.pjMenuItem} onClick={e => { e.stopPropagation(); setEditingPjId(pj.id); setEditingPjName(pj.name); setPjMenuOpen(null); }}>
+                            <span className={styles.pjMenuIcon}><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2-7 7H1.5V8.5z" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
+                            Rename
+                          </button>
+                          <button className={styles.pjMenuItem} onClick={e => { e.stopPropagation(); onCycleStatus(pj.id); setPjMenuOpen(null); }}>
+                            <span className={styles.pjMenuIcon}><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" strokeWidth="1" /><circle cx="6" cy="6" r="1.5" fill="currentColor" /></svg></span>
+                            Cycle status
+                          </button>
+                          <div className={styles.pjMenuSep} />
+                          <button className={`${styles.pjMenuItem} ${styles.pjMenuDanger}`} onClick={e => { e.stopPropagation(); onArchiveProject(pj.id); setPjMenuOpen(null); }}>
+                            <span className={styles.pjMenuIcon}><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 3.5h9M2.5 3.5v6a1 1 0 001 1h5a1 1 0 001-1v-6" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /><path d="M4.5 5.5h3" stroke="currentColor" strokeWidth="1" strokeLinecap="round" /></svg></span>
+                            Archive
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -580,13 +610,28 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
                           </div>
                         </div>
                         <div className={styles.projectActions}>
-                          <button className={`${styles.pjActBtn} ${pj.pinned ? styles.pjPinActive : ""}`} title={pj.pinned ? "Unpin" : "Pin"}
-                            onClick={e => { e.stopPropagation(); onTogglePin(pj.id); }}>
-                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M4 8L2 10M7 1.5l2 2-1.5 2-.5-.5L4 8l-1.5-1.5L5.5 3.5 5 3z" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round" fill={pj.pinned ? "currentColor" : "none"} /></svg>
-                          </button>
-                          <button className={styles.pjActBtn} title="Archive" onClick={e => { e.stopPropagation(); onArchiveProject(pj.id); }}>
-                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 3h8M1.8 3v5a.8.8 0 00.8.8h4.8a.8.8 0 00.8-.8V3" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round" /><path d="M4 5h2" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round" /></svg>
-                          </button>
+                          <button className={`${styles.pjMenuBtn} ${pjMenuOpen === pj.id ? styles.pjMenuBtnOpen : ""}`} onClick={e => { e.stopPropagation(); const rect = (e.target as HTMLElement).getBoundingClientRect(); setPjMenuPos({ top: rect.bottom + 2, left: rect.right - 170 }); setPjMenuOpen(pjMenuOpen === pj.id ? null : pj.id); }}>···</button>
+                          {pjMenuOpen === pj.id && (
+                            <div className={styles.pjMenu} style={{ top: pjMenuPos.top, left: pjMenuPos.left }}>
+                              <button className={styles.pjMenuItem} onClick={e => { e.stopPropagation(); onTogglePin(pj.id); setPjMenuOpen(null); }}>
+                                <span className={styles.pjMenuIcon}><svg width="12" height="12" viewBox="0 0 10 10" fill="none"><path d="M4 8L2 10M7 1.5l2 2-1.5 2-.5-.5L4 8l-1.5-1.5L5.5 3.5 5 3z" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round" fill={pj.pinned ? "currentColor" : "none"} /></svg></span>
+                                {pj.pinned ? "Unpin" : "Pin"}
+                              </button>
+                              <button className={styles.pjMenuItem} onClick={e => { e.stopPropagation(); setEditingPjId(pj.id); setEditingPjName(pj.name); setPjMenuOpen(null); }}>
+                                <span className={styles.pjMenuIcon}><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2-7 7H1.5V8.5z" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
+                                Rename
+                              </button>
+                              <button className={styles.pjMenuItem} onClick={e => { e.stopPropagation(); onCycleStatus(pj.id); setPjMenuOpen(null); }}>
+                                <span className={styles.pjMenuIcon}><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" strokeWidth="1" /><circle cx="6" cy="6" r="1.5" fill="currentColor" /></svg></span>
+                                Cycle status
+                              </button>
+                              <div className={styles.pjMenuSep} />
+                              <button className={`${styles.pjMenuItem} ${styles.pjMenuDanger}`} onClick={e => { e.stopPropagation(); onArchiveProject(pj.id); setPjMenuOpen(null); }}>
+                                <span className={styles.pjMenuIcon}><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 3.5h9M2.5 3.5v6a1 1 0 001 1h5a1 1 0 001-1v-6" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /><path d="M4.5 5.5h3" stroke="currentColor" strokeWidth="1" strokeLinecap="round" /></svg></span>
+                                Archive
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     );

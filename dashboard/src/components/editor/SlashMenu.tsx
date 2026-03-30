@@ -61,6 +61,21 @@ function getFilteredBlocks(filter: string) {
     .map(match => match.type);
 }
 
+function highlightMatch(value: string, query: string) {
+  const needle = query.trim().toLowerCase();
+  if (!needle) return value;
+  const index = value.toLowerCase().indexOf(needle);
+  if (index === -1) return value;
+  const end = index + needle.length;
+  return (
+    <>
+      {value.slice(0, index)}
+      <mark className={styles.match}>{value.slice(index, end)}</mark>
+      {value.slice(end)}
+    </>
+  );
+}
+
 export default function SlashMenu({ top, left, filter, selectedIndex, onSelect, onClose, onIndexChange }: SlashMenuProps) {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -191,8 +206,8 @@ export default function SlashMenu({ top, left, filter, selectedIndex, onSelect, 
             >
               <div className={styles.icon}>{t.icon}</div>
               <div className={styles.info}>
-                <div className={styles.label}>{t.label}</div>
-                <div className={styles.desc}>{t.desc}</div>
+                <div className={styles.label}>{highlightMatch(t.label, filter)}</div>
+                <div className={styles.desc}>{highlightMatch(t.desc, filter)}</div>
               </div>
               {t.shortcut && <span className={styles.shortcut}>{t.shortcut}</span>}
               {filter && <span className={styles.itemCat}>{t.section}</span>}

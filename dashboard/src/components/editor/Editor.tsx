@@ -153,6 +153,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
   const saveStateTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const freshBlockTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const deleteBlockRef = useRef<(blockId: string) => void>(() => {});
 
   const registerRef = useCallback((id: string, el: HTMLDivElement) => { blockElMap.current[id] = el; }, []);
 
@@ -202,13 +203,16 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
 
   // Retry-based focus helper — waits for EditableBlock to register its ref in blockElMap
   const focusNew = useCallback((id: string, retries = 5) => {
-    setActiveBlockId(id);
-    setFreshBlockId(id);
-    if (freshBlockTimer.current) clearTimeout(freshBlockTimer.current);
-    freshBlockTimer.current = setTimeout(() => setFreshBlockId(current => current === id ? null : current), 1400);
-    const el = blockElMap.current[id];
-    if (el) { cursorTo(el, false); return; }
-    if (retries > 0) setTimeout(() => focusNew(id, retries - 1), 20);
+    const attemptFocus = (remaining: number) => {
+      setActiveBlockId(id);
+      setFreshBlockId(id);
+      if (freshBlockTimer.current) clearTimeout(freshBlockTimer.current);
+      freshBlockTimer.current = setTimeout(() => setFreshBlockId(current => current === id ? null : current), 1400);
+      const el = blockElMap.current[id];
+      if (el) { cursorTo(el, false); return; }
+      if (remaining > 0) setTimeout(() => attemptFocus(remaining - 1), 20);
+    };
+    attemptFocus(retries);
   }, []);
 
   // Track tabs opened with a real name (sidebar) — they skip auto-naming
@@ -226,13 +230,15 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
   const prevProjectRef = useRef(activeProject);
   useEffect(() => {
     if (prevProjectRef.current !== activeProject) {
-      setBlocksLocal(blocksProp);
       restoreContentCache(blocksProp);
       blockElMap.current = {};
-      setActiveBlockId(null);
-      setFreshBlockId(null);
-      setUndoAction(null);
-      setSaveState("saved");
+      queueMicrotask(() => {
+        setBlocksLocal(blocksProp);
+        setActiveBlockId(null);
+        setFreshBlockId(null);
+        setUndoAction(null);
+        setSaveState("saved");
+      });
       prevProjectRef.current = activeProject;
     }
   }, [activeProject, blocksProp, restoreContentCache]);
@@ -305,13 +311,13 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
         // Find which block is focused
         const sel = window.getSelection();
         if (!sel || !sel.anchorNode) return;
-        const entries = Object.entries(blockElMap.current);
-        for (const [id, el] of entries) {
-          if (el && el.contains(sel.anchorNode)) {
-            deleteBlock(id);
-            break;
+          const entries = Object.entries(blockElMap.current);
+          for (const [id, el] of entries) {
+            if (el && el.contains(sel.anchorNode)) {
+              deleteBlockRef.current(id);
+              break;
+            }
           }
-        }
       }
       if (e.key === "Escape") setCmdPalette(false);
     };
@@ -360,9 +366,22 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       if (retries > 0) setTimeout(() => focusEnter(id, html, retries - 1), 20);
     };
     focusEnter(nid, aH);
-  }, []);
+  }, [setBlocks]);
 
   const onBackspace = useCallback((id: string) => {
+    const currentIndex = blocks.findIndex(b => b.id === id);
+    const currentBlock = blocks[currentIndex];
+    if (!currentBlock) return;
+    const snapshot = snapshotCurrentBlocks();
+
+    if (blocks.length <= 1) {
+      if (currentBlock.type !== "paragraph") pushUndoAction("Changed block", snapshot, id);
+    } else if (currentBlock.type !== "paragraph" && currentBlock.type !== "divider") {
+      pushUndoAction("Changed block", snapshot, id);
+    } else {
+      pushUndoAction("Deleted block", snapshot, id);
+    }
+
     setBlocks(prev => {
       const idx = prev.findIndex(b => b.id === id);
       const block = prev[idx];
@@ -399,7 +418,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       }, 20);
       return n;
     });
-  }, []);
+  }, [blocks, pushUndoAction, setBlocks, snapshotCurrentBlocks]);
 
   const duplicateBlockById = useCallback((sourceId: string) => {
     const source = blocks.find(block => block.id === sourceId);
@@ -608,6 +627,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     if (!graphPicker) return;
     const { blockId } = graphPicker;
     const graphData = getDefaultGraphData(graphType);
+    pushUndoAction("Inserted graph block", snapshotCurrentBlocks(), blockId);
     setBlocks(prev => {
       const idx = prev.findIndex(b => b.id === blockId);
       const n = [...prev];
@@ -619,12 +639,13 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       return n;
     });
     setGraphPicker(null);
-  }, [graphPicker]);
+  }, [graphPicker, pushUndoAction, setBlocks, snapshotCurrentBlocks, focusNew]);
 
   const selectMoneyType = useCallback((moneyType: MoneyBlockType) => {
     if (!moneyPicker) return;
     const { blockId } = moneyPicker;
     const moneyData = getDefaultMoneyData(moneyType);
+    pushUndoAction("Inserted money block", snapshotCurrentBlocks(), blockId);
     setBlocks(prev => {
       const idx = prev.findIndex(b => b.id === blockId);
       const n = [...prev];
@@ -636,7 +657,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       return n;
     });
     setMoneyPicker(null);
-  }, [moneyPicker]);
+  }, [moneyPicker, pushUndoAction, setBlocks, snapshotCurrentBlocks, focusNew]);
 
   const handleSelect = () => {
     const sel = window.getSelection();
@@ -655,6 +676,10 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     if (typingSaveTimer.current) {
       clearTimeout(typingSaveTimer.current);
       typingSaveTimer.current = null;
+    }
+    if (undoTimer.current) {
+      clearTimeout(undoTimer.current);
+      undoTimer.current = null;
     }
     restoreContentCache(restored);
     setBlocksLocal(restored);
@@ -676,7 +701,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     ].filter(Boolean).join(" ")
   ), [activeBlockId, dropId, freshBlockId]);
 
-  const addBlockAfter = (afterId: string) => {
+  const addBlockAfter = useCallback((afterId: string) => {
     const nid = uid();
     contentCache.current[nid] = "";
     setBlocks(prev => {
@@ -686,7 +711,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       return n;
     });
     focusNew(nid);
-  };
+  }, [focusNew, setBlocks]);
 
   const handlePageClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     // Only fire if clicking the page container itself, not a child block
@@ -704,7 +729,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
 
     // Create a new empty paragraph after the last block
     addBlockAfter(lastBlock.id);
-  }, [blocks]);
+  }, [addBlockAfter, blocks]);
 
   const handleAiGenerate = useCallback((blockId: string, generatedBlocks: Block[]) => {
     pushUndoAction(generatedBlocks.length === 0 ? "Removed AI block" : "Inserted AI content", snapshotCurrentBlocks(), blockId);
@@ -728,7 +753,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     });
   }, [focusNew, pushUndoAction, setBlocks, snapshotCurrentBlocks]);
 
-  const deleteBlock = (blockId: string) => {
+  const deleteBlock = useCallback((blockId: string) => {
     pushUndoAction("Deleted block", snapshotCurrentBlocks(), blockId);
     setBlocks(prev => {
       // Last block — reset to empty paragraph instead of removing
@@ -751,7 +776,11 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     });
     // Clear editing states if the deleted block was being edited
     if (editingGraphId === blockId) setEditingGraphId(null);
-  };
+  }, [editingGraphId, pushUndoAction, setBlocks, snapshotCurrentBlocks]);
+
+  useEffect(() => {
+    deleteBlockRef.current = deleteBlock;
+  }, [deleteBlock]);
 
   const deleteBlocks = (ids: string[]) => {
     pushUndoAction(ids.length === 1 ? "Deleted block" : `Deleted ${ids.length} blocks`, snapshotCurrentBlocks(), ids[0]);
@@ -826,7 +855,8 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
   }, []);
 
   useEffect(() => {
-    measureOverflow();
+    const frame = requestAnimationFrame(() => measureOverflow());
+    return () => cancelAnimationFrame(frame);
   }, [tabs, measureOverflow]);
 
   useEffect(() => {
@@ -889,7 +919,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
   const handleBreadcrumbParentClick = useCallback(() => {
     if (!activeWs?.id || !onSelectWorkspaceHome) return;
     onSelectWorkspaceHome(activeWs.id);
-  }, [activeWs?.id, onSelectWorkspaceHome]);
+  }, [activeWs, onSelectWorkspaceHome]);
 
   const handleCommandSelect = useCallback((commandId: string) => {
     switch (commandId) {
@@ -931,14 +961,14 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       default:
         return false;
     }
-  }, [activeProject, activeWs?.id, duplicateBlockById, hoverBlock, onNavigateRail, onNewTab, onSelectWorkspaceHome]);
+  }, [activeProject, activeWs, duplicateBlockById, hoverBlock, onNavigateRail, onNewTab, onSelectWorkspaceHome]);
 
   const renderBlock = (block: Block) => {
     // Graph block — click to select, double-click to edit data
     if (block.type === "graph" && block.graphData) {
       const isEditing = editingGraphId === block.id;
       return (
-        <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+        <div key={block.id} className={getBlockRowClass(block.id)} onMouseDown={() => setActiveBlockId(block.id)} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
           <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
             <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
               <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
@@ -965,6 +995,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
                 }}
                 onClose={() => setEditingGraphId(null)}
                 onDelete={() => {
+                  pushUndoAction("Deleted block", snapshotCurrentBlocks(), block.id);
                   setEditingGraphId(null);
                   setBlocks(prev => {
                     if (prev.length <= 1) return [{ ...prev[0], type: "paragraph" as const, content: "", checked: false, graphData: undefined }];
@@ -981,7 +1012,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     // Deliverable block
     if (block.type === "deliverable" && block.deliverableData) {
       return (
-        <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+        <div key={block.id} className={getBlockRowClass(block.id)} onMouseDown={() => setActiveBlockId(block.id)} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
           <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
             <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
               <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
@@ -1053,7 +1084,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       const rendered = contentBlockMap[block.type](block);
       if (rendered !== null) {
         return (
-          <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+          <div key={block.id} className={getBlockRowClass(block.id)} onMouseDown={() => setActiveBlockId(block.id)} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
             <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
               <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
                 <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
@@ -1072,7 +1103,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     // Graph sub-picker — shown when user selected "Graph" from slash menu
     if (graphPicker && graphPicker.blockId === block.id && block.type !== "graph") {
       return (
-        <div key={block.id} className={styles.blockRow}>
+        <div key={block.id} className={getBlockRowClass(block.id)} onMouseDown={() => setActiveBlockId(block.id)}>
           <div className={styles.gutter} style={{ opacity: 0 }} />
           <div style={{ flex: 1 }}>
             <div className={graphStyles.gb}>
@@ -1097,7 +1128,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     // Money block
     if (block.type === "money" && block.moneyData) {
       return (
-        <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+        <div key={block.id} className={getBlockRowClass(block.id)} onMouseDown={() => setActiveBlockId(block.id)} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
           <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
             <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
               <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
@@ -1122,7 +1153,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     // Money sub-picker
     if (moneyPicker && moneyPicker.blockId === block.id && block.type !== "money") {
       return (
-        <div key={block.id} className={styles.blockRow}>
+        <div key={block.id} className={getBlockRowClass(block.id)} onMouseDown={() => setActiveBlockId(block.id)}>
           <div className={styles.gutter} style={{ opacity: 0 }} />
           <div style={{ flex: 1 }}>
             <div className={moneyStyles.mb}>
@@ -1147,7 +1178,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     // Deadline block
     if (block.type === "deadline" && block.deadlineData) {
       return (
-        <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+        <div key={block.id} className={getBlockRowClass(block.id)} onMouseDown={() => setActiveBlockId(block.id)} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
           <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
             <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
               <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
@@ -1171,7 +1202,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
 
     if (block.type === "ai") {
       return (
-        <div key={block.id} className={styles.blockRow}>
+        <div key={block.id} className={getBlockRowClass(block.id)} onMouseDown={() => setActiveBlockId(block.id)}>
           <div className={styles.gutter} style={{ opacity: 0 }} />
           <div style={{ flex: 1 }}>
             <AiBlock blockId={block.id} onGenerate={handleAiGenerate} />
@@ -1182,7 +1213,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
 
     if (block.type === "canvas" && block.canvasData) {
       return (
-        <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+        <div key={block.id} className={getBlockRowClass(block.id)} onMouseDown={() => setActiveBlockId(block.id)} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
           <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
             <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
               <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
@@ -1206,7 +1237,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
 
     if (block.type === "audio" && block.audioData) {
       return (
-        <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+        <div key={block.id} className={getBlockRowClass(block.id)} onMouseDown={() => setActiveBlockId(block.id)} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
           <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
             <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
               <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
@@ -1230,7 +1261,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
 
     if (block.type === "divider") {
       return (
-        <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+        <div key={block.id} className={getBlockRowClass(block.id)} onMouseDown={() => setActiveBlockId(block.id)} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
           <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
             <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
               <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
@@ -1250,7 +1281,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     const isH = block.type.startsWith("h");
     const isHovered = hoverBlock === block.id;
     return (
-      <div key={block.id} className={`${styles.blockRow} ${dropId === block.id ? styles.dropTarget : ""}`} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+      <div key={block.id} className={getBlockRowClass(block.id)} onMouseDown={() => setActiveBlockId(block.id)} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
         <div className={styles.gutter} style={{ opacity: isHovered ? 1 : 0, marginTop: isH ? (block.type === "h1" ? 32 : block.type === "h2" ? 24 : 18) : 2 }}>
           <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
             <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
@@ -1274,6 +1305,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
           onDrop={e => {
             e.preventDefault();
             if (!dragId || dragId === block.id) return;
+            pushUndoAction("Moved block", snapshotCurrentBlocks(), dragId);
             setBlocks(prev => {
               const fi = prev.findIndex(b => b.id === dragId);
               const ti = prev.findIndex(b => b.id === block.id);
@@ -1307,6 +1339,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
               onSlash={onSlash}
               onSlashClose={() => setSlashMenu(null)}
               onSelect={handleSelect}
+              onFocusBlock={setActiveBlockId}
               registerRef={registerRef}
               onCat={() => setCatOpen(true)}
             />
@@ -1501,6 +1534,10 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
             const st = STATUS[pj.status];
             return <span className={styles.breadStatus} style={{ background: `${st.color}12`, color: st.color, border: `1px solid ${st.color}20` }}>{st.label}</span>;
           })()}
+          <span className={`${styles.saveBadge} ${saveState === "saving" ? styles.saveBadgeSaving : styles.saveBadgeSaved}`}>
+            <span className={styles.saveDot} />
+            {saveState === "saving" ? "Saving..." : "Saved"}
+          </span>
         </div>
       )}
 
@@ -1529,7 +1566,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
             <FinancePage />
           )}
           {railActive === "wire" && (
-            <WirePage />
+            <WirePage workspaces={workspaces} onOpenWorkspace={onSelectWorkspaceHome} onNewTab={onNewTab} />
           )}
           {railActive === "team" && (
             <TeamScreen />
@@ -1569,6 +1606,8 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
                   if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
                 }}
                 onReorderBlock={(fromIdx, toIdx) => {
+                  const movedId = blocks[fromIdx]?.id;
+                  if (movedId) pushUndoAction("Moved block", snapshotCurrentBlocks(), movedId);
                   setBlocks(prev => {
                     const n = [...prev];
                     const [moved] = n.splice(fromIdx, 1);
@@ -1678,6 +1717,14 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
 
       {/* Command palette */}
       {cmdPalette && <CommandPalette onClose={() => setCmdPalette(false)} onSelectCommand={handleCommandSelect} />}
+
+      {undoAction && (
+        <div className={styles.undoToast} role="status" aria-live="polite">
+          <span className={styles.undoLabel}>{undoAction.label}</span>
+          <button className={styles.undoBtn} onClick={restoreUndoSnapshot}>Undo</button>
+          <button className={styles.undoDismiss} aria-label="Dismiss undo" onClick={() => setUndoAction(null)}>×</button>
+        </div>
+      )}
 
       {/* History modal */}
       <HistoryModal open={historyOpen} onClose={() => setHistoryOpen(false)} />

@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import type { Workspace } from "@/lib/types";
+import { buildWireContext, type WireService } from "@/lib/wire-context";
 import styles from "./WirePage.module.css";
 
 const NICHES = ["Design & Branding", "Web Development", "Copywriting", "Marketing", "All"];
@@ -108,30 +110,149 @@ function SignalItem({ item, selected, onSelect, bookmarked, onBookmark }: { item
   );
 }
 
-export default function WirePage() {
+interface WirePageProps {
+  workspaces?: Workspace[];
+  services?: WireService[];
+  onOpenWorkspace?: (wsId: string) => void;
+  onNewTab?: () => void;
+}
+
+const WIRE_CACHE_KEY = "felmark_wire_cache";
+const WIRE_CACHE_TTL = 24 * 60 * 60 * 1000;
+
+// Normalize AI response signals to match the FEED shape (title → headline, etc.)
+function normalizeSignals(raw: Record<string, unknown>[]): Signal[] {
+  return raw.map((s, i) => ({
+    id: (s.id as number) || i + 100,
+    type: (s.type as string) || "insight",
+    source: (s.source as string) || "Felmark Intelligence",
+    time: (s.time as string) || `${i + 1}m`,
+    live: (s.live as boolean) || false,
+    headline: (s.headline as string) || (s.title as string) || "",
+    body: (s.body as string) || "",
+    tags: Array.isArray(s.tags) ? s.tags as string[] : [],
+    relevance: typeof s.relevance === "number" ? s.relevance : 80,
+    metric: s.metric as Signal["metric"] | undefined,
+    spark: Array.isArray(s.spark) ? s.spark as number[] : undefined,
+    isClientSignal: (s.isClientSignal as boolean) || false,
+    group: (s.group as string) || "today",
+    relatedAction: (s.relatedAction as string) || undefined,
+  }));
+}
+
+export default function WirePage({ workspaces = [], services = [], onOpenWorkspace, onNewTab }: WirePageProps) {
   const [activeFilter, setActiveFilter] = useState("All");
   const [selectedItem, setSelectedItem] = useState<number | null>(3);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedNiche, setSelectedNiche] = useState("Design & Branding");
   const [bookmarked, setBookmarked] = useState<Set<number>>(new Set([3, 7, 10]));
+  const [dismissed, setDismissed] = useState<Set<number>>(new Set());
   const [now, setNow] = useState(new Date());
+  const [aiSignals, setAiSignals] = useState<Signal[] | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const fetchedRef = useRef(false);
 
   useEffect(() => { const i = setInterval(() => setNow(new Date()), 1000); return () => clearInterval(i); }, []);
 
+  // Fetch AI signals once (with 24hr cache)
+  useEffect(() => {
+    if (fetchedRef.current) return;
+    fetchedRef.current = true;
+
+    // Check cache
+    try {
+      const raw = localStorage.getItem(WIRE_CACHE_KEY);
+      if (raw) {
+        const cached = JSON.parse(raw);
+        if (cached.timestamp && Date.now() - cached.timestamp < WIRE_CACHE_TTL && cached.signals?.length > 0) {
+          setAiSignals(normalizeSignals(cached.signals));
+          return;
+        }
+      }
+    } catch { /* ignore */ }
+
+    // Fetch fresh if we have context
+    if (workspaces.length === 0 && services.length === 0) return;
+    const context = buildWireContext(workspaces, services);
+
+    fetch("/api/wire", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ context }),
+    })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data?.signals?.length > 0) {
+          setAiSignals(normalizeSignals(data.signals));
+          try { localStorage.setItem(WIRE_CACHE_KEY, JSON.stringify({ signals: data.signals, timestamp: Date.now() })); } catch { /* ignore */ }
+        }
+      })
+      .catch(() => { /* fail silently — FEED is the fallback */ });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Manual refresh
+  const refreshSignals = () => {
+    if (refreshing) return;
+    setRefreshing(true);
+    const context = buildWireContext(workspaces, services);
+    fetch("/api/wire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ context }) })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data?.signals?.length > 0) {
+          setAiSignals(normalizeSignals(data.signals));
+          try { localStorage.setItem(WIRE_CACHE_KEY, JSON.stringify({ signals: data.signals, timestamp: Date.now() })); } catch { /* ignore */ }
+        }
+      })
+      .catch(() => {})
+      .finally(() => setRefreshing(false));
+  };
+
   const toggleBookmark = (id: number, e: React.MouseEvent) => { e.stopPropagation(); setBookmarked(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; }); };
 
-  const filtered = FEED.filter(item => {
+  const dismissSignal = (id: number) => {
+    setDismissed(prev => new Set(prev).add(id));
+    if (selectedItem === id) setSelectedItem(null);
+  };
+
+  // Try to match a signal's client mention to a workspace
+  const findClientWorkspace = (signal: Signal): string | null => {
+    if (!signal.isClientSignal) return null;
+    for (const ws of workspaces) {
+      if ((signal.headline || "").toLowerCase().includes(ws.client.toLowerCase()) || (signal.body || "").toLowerCase().includes(ws.client.toLowerCase())) {
+        return ws.id;
+      }
+    }
+    return workspaces[0]?.id || null;
+  };
+
+  const handleAction = (signal: Signal) => {
+    if (signal.isClientSignal) {
+      const wsId = findClientWorkspace(signal);
+      if (wsId && onOpenWorkspace) onOpenWorkspace(wsId);
+    } else if (signal.type === "opportunity") {
+      if (onNewTab) onNewTab();
+    } else {
+      // Save signal = bookmark
+      setBookmarked(prev => new Set(prev).add(signal.id));
+    }
+  };
+
+  // Use AI signals if available, otherwise fall back to hardcoded FEED
+  const data = aiSignals || FEED;
+
+  const filtered = data.filter(item => {
+    if (dismissed.has(item.id)) return false;
     if (activeFilter !== "All" && item.type !== filterMap[activeFilter]) return false;
-    if (searchQuery && !item.headline.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    if (searchQuery && !(item.headline || "").toLowerCase().includes(searchQuery.toLowerCase())) return false;
     return true;
   });
 
   const liveItems = filtered.filter(i => i.group === "live");
   const todayItems = filtered.filter(i => i.group === "today");
   const earlierItems = filtered.filter(i => i.group === "earlier");
-  const selected = FEED.find(i => i.id === selectedItem) || null;
-  const clientSignals = FEED.filter(f => f.isClientSignal).length;
-  const avgRelevance = Math.round(FEED.reduce((s, f) => s + f.relevance, 0) / FEED.length);
+  const selected = data.find(i => i.id === selectedItem) || null;
+  const clientSignals = data.filter(f => f.isClientSignal).length;
+  const avgRelevance = data.length > 0 ? Math.round(data.reduce((s, f) => s + f.relevance, 0) / data.length) : 0;
 
   return (
     <div className={styles.page}>
@@ -142,8 +263,12 @@ export default function WirePage() {
             <span className={styles.title}>The Wire</span>
             <span className={styles.live}><span className={styles.liveDot} />{liveItems.length} live</span>
             <span className={styles.pro}>PRO</span>
+            {aiSignals && <span style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--ink-300)", marginLeft: 8 }}>AI-powered</span>}
           </div>
           <div className={styles.headRight}>
+            <button className={styles.refreshBtn} onClick={refreshSignals} disabled={refreshing} title="Refresh signals">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ animation: refreshing ? "spin 1s linear infinite" : "none" }}><path d="M2 7a5 5 0 019-2.5M12 7a5 5 0 01-9 2.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /><path d="M11 2v3h-3M3 12V9h3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </button>
             <select className={styles.niche} value={selectedNiche} onChange={e => setSelectedNiche(e.target.value)}>
               {NICHES.map(n => <option key={n}>{n}</option>)}
             </select>
@@ -193,7 +318,7 @@ export default function WirePage() {
             const tc = SIGNAL_TYPES[selected.type];
             const sc = SOURCES[selected.source];
             const actionText = selected.relatedAction || (selected.isClientSignal ? "Reach out to this client about expanded services while the momentum is fresh." : selected.type === "opportunity" ? "Consider adjusting your positioning or outreach to capture this opportunity." : selected.type === "alert" ? "Stay informed and consider how this affects your service positioning." : "Use this data to refine your pricing, positioning, or outreach strategy.");
-            const related = FEED.filter(f => f.id !== selected.id && f.tags.some(t => selected.tags.includes(t))).slice(0, 3);
+            const related = data.filter(f => f.id !== selected.id && f.tags.some(t => selected.tags.includes(t))).slice(0, 3);
 
             return <>
               <div className={styles.pvHead}>
@@ -223,8 +348,8 @@ export default function WirePage() {
                 <div className={styles.pvAction}>
                   <div className={styles.pvActionLabel}>what to do</div>
                   <div className={styles.pvActionText}>{actionText}</div>
-                  <button className={styles.pvActionBtn}>{selected.isClientSignal ? "→ Open Workspace" : selected.type === "opportunity" ? "◆ Create Proposal" : "★ Save Signal"}</button>
-                  <button className={styles.pvActionSecondary}>Dismiss</button>
+                  <button className={styles.pvActionBtn} onClick={() => handleAction(selected)}>{selected.isClientSignal ? "→ Open Workspace" : selected.type === "opportunity" ? "◆ Create Proposal" : "★ Save Signal"}</button>
+                  <button className={styles.pvActionSecondary} onClick={() => dismissSignal(selected.id)}>Dismiss</button>
                 </div>
                 {related.length > 0 && <>
                   <div className={styles.pvSec}>related signals</div>

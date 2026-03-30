@@ -170,6 +170,13 @@
   color: var(--ink-400);
 }
 
+.match {
+  padding: 0 2px;
+  border-radius: 3px;
+  background: rgba(176, 125, 79, 0.14);
+  color: var(--ember);
+}
+
 .shortcut {
   font-family: var(--mono);
   font-size: 9px;
