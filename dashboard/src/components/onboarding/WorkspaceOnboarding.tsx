@@ -48,6 +48,9 @@ export default function WorkspaceOnboarding({ initialName, workspaces, onComplet
   const [color, setColor] = useState(COLORS[9].value);
   const [selectedTemplate, setSelectedTemplate] = useState<WorkspaceTemplate>("proposal");
   const [showRecent, setShowRecent] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiProcessing, setAiProcessing] = useState(false);
+  const [aiResult, setAiResult] = useState<{ template: WorkspaceTemplate; suggestion: string } | null>(null);
   const nameRef = useRef<HTMLInputElement>(null);
 
   const initials = name.trim()
@@ -75,6 +78,59 @@ export default function WorkspaceOnboarding({ initialName, workspaces, onComplet
   const handleSubmit = () => {
     if (!name.trim()) return;
     onComplete({ name: name.trim(), contact, rate, budget, color, template: selectedTemplate });
+  };
+
+  const handleAiSetup = () => {
+    if (!aiPrompt.trim() || aiProcessing) return;
+    setAiProcessing(true);
+
+    // Simulate AI analysis (mock — will connect to real API later)
+    setTimeout(() => {
+      const prompt = aiPrompt.toLowerCase();
+      let template: WorkspaceTemplate = "blank";
+      let suggestion = "";
+
+      if (prompt.includes("proposal") || prompt.includes("pitch") || prompt.includes("bid")) {
+        template = "proposal";
+        suggestion = "Proposal template with scope, timeline, and pricing sections";
+      } else if (prompt.includes("invoice") || prompt.includes("bill") || prompt.includes("payment")) {
+        template = "invoice";
+        suggestion = "Invoice template with line items and payment terms";
+      } else if (prompt.includes("meeting") || prompt.includes("call") || prompt.includes("standup") || prompt.includes("sync")) {
+        template = "meeting";
+        suggestion = "Meeting notes with agenda, discussion, and action items";
+      } else if (prompt.includes("brief") || prompt.includes("kick") || prompt.includes("onboard") || prompt.includes("scope")) {
+        template = "brief";
+        suggestion = "Project brief with goals, audience, and deliverables";
+      } else if (prompt.includes("retainer") || prompt.includes("monthly") || prompt.includes("ongoing")) {
+        template = "retainer";
+        suggestion = "Retainer agreement with monthly scope and billing";
+      } else if (prompt.includes("brand") || prompt.includes("identity") || prompt.includes("logo") || prompt.includes("design")) {
+        template = "proposal";
+        suggestion = "Brand identity proposal — we'll pre-fill scope and deliverables";
+      } else if (prompt.includes("website") || prompt.includes("landing") || prompt.includes("web") || prompt.includes("app")) {
+        template = "proposal";
+        suggestion = "Web project proposal — scope, timeline, and milestones";
+      } else {
+        template = "brief";
+        suggestion = "Project brief — we'll structure it based on your description";
+      }
+
+      setSelectedTemplate(template);
+      setAiResult({ template, suggestion });
+
+      // Auto-fill name from prompt if still default
+      if (name === initialName || !name.trim()) {
+        const words = aiPrompt.trim().split(" ").slice(0, 4).join(" ");
+        if (words.length > 3) setName(words.charAt(0).toUpperCase() + words.slice(1));
+      }
+
+      // Try to detect budget from prompt
+      const budgetMatch = aiPrompt.match(/\$[\d,]+/);
+      if (budgetMatch && !budget) setBudget(budgetMatch[0]);
+
+      setAiProcessing(false);
+    }, 800);
   };
 
   const selectRecent = (client: { name: string; color: string; contact: string }) => {
@@ -167,6 +223,34 @@ export default function WorkspaceOnboarding({ initialName, workspaces, onComplet
         <div className={styles.field}>
           <label className={styles.label}>Estimated budget <span className={styles.optional}>optional</span></label>
           <input className={styles.input} value={budget} onChange={e => setBudget(e.target.value)} placeholder="$2,000 – $5,000" />
+        </div>
+
+        {/* AI Assist */}
+        <div className={styles.aiSection}>
+          <div className={styles.aiHeader}>
+            <span className={styles.aiIcon}>⚡</span>
+            <span className={styles.aiLabel}>Describe your project</span>
+            <span className={styles.optional}>optional</span>
+          </div>
+          <div className={styles.aiInputRow}>
+            <textarea
+              className={styles.aiInput}
+              value={aiPrompt}
+              onChange={e => setAiPrompt(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleAiSetup(); } }}
+              placeholder="e.g. Brand identity project for a yoga studio, $3,000 budget, need proposal with timeline..."
+              rows={2}
+            />
+            <button className={styles.aiBtn} onClick={handleAiSetup} disabled={!aiPrompt.trim() || aiProcessing}>
+              {aiProcessing ? "..." : "⚡"}
+            </button>
+          </div>
+          {aiResult && (
+            <div className={styles.aiResult}>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <span>{aiResult.suggestion}</span>
+            </div>
+          )}
         </div>
 
         {/* Divider */}
