@@ -16,7 +16,9 @@ import ServicesPage from "../services/ServicesPage";
 import PipelineBoard from "../pipeline/PipelineBoard";
 import TemplatesPage from "../templates/TemplatesPage";
 import FinancePage from "../finance/FinancePage";
+import WirePage from "../wire/WirePage";
 import { TableBlock, AccordionBlock, MathBlock, GalleryBlock, SwatchesBlock, BeforeAfterBlock, BookmarkBlock } from "./blocks/ContentBlocks";
+import { CommentThreadBlock, MentionBlock, QuestionBlock, FeedbackBlock, DecisionBlock, PollBlock, HandoffBlock, SignoffBlock, AnnotationBlock, getDefaultCommentThread, getDefaultMention, getDefaultQuestion, getDefaultFeedback, getDefaultDecision, getDefaultPoll, getDefaultHandoff, getDefaultSignoff, getDefaultAnnotation } from "./blocks/CollabBlocks";
 import { STATUS } from "@/lib/constants";
 import { uid, cursorTo } from "@/lib/utils";
 import EditableBlock from "./EditableBlock";
@@ -32,6 +34,7 @@ import TerminalWelcome from "./TerminalWelcome";
 import EditorMargin from "./margin/EditorMargin";
 import WorkspaceHome from "../workspace/WorkspaceHome";
 import DashboardHome from "../dashboard/DashboardHome";
+import TeamScreen from "../team/TeamScreen";
 import CalendarFull from "../calendar/CalendarFull";
 import SearchPage from "../search/SearchPage";
 import type { Project } from "@/lib/types";
@@ -104,12 +107,16 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
   const [shareOpen, setShareOpen] = useState(false);
   const [notifPanelOpen, setNotifPanelOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([
-    { id: "n1", type: "deadline", title: "Brand Guidelines due tomorrow", desc: "Bolt Industries project deadline is approaching", time: "2h ago", read: false, project: "Brand Guidelines", projectColor: "#e87040", workspace: "Bolt Industries" },
-    { id: "n2", type: "payment", title: "Payment received from Nora Chen", desc: "$2,400 for Website Redesign milestone 2", time: "3h ago", read: false, project: "Website Redesign", projectColor: "#5a9a3c", workspace: "Nora Chen" },
-    { id: "n3", type: "mention", title: "You were mentioned in a comment", desc: "@you check the updated copy on the hero section", time: "5h ago", read: false, project: "Landing Page", projectColor: "#b07d4f", workspace: "Bolt Industries" },
-    { id: "n4", type: "status", title: "Project moved to Review", desc: "Bolt Industries moved Brand Guidelines to review", time: "Yesterday 4:30 PM", read: true, project: "Brand Guidelines", projectColor: "#e87040", workspace: "Bolt Industries" },
-    { id: "n5", type: "comment", title: "New comment on proposal", desc: "Nora left feedback on the pricing section", time: "Yesterday 2:15 PM", read: true, project: "Proposal v2", projectColor: "#5a9a3c", workspace: "Nora Chen" },
-    { id: "n6", type: "deadline", title: "Invoice overdue by 3 days", desc: "Remind Greenleaf Studio about the outstanding balance", time: "Mar 27", read: true, project: "Monthly Retainer", projectColor: "#7c8594", workspace: "Greenleaf Studio" },
+    { id: "n1", type: "payment", title: "Payment received — $1,800", desc: "Nora Kim paid Invoice #046 · Retainer (March)", time: "32m ago", read: false, action: "View invoice", workspace: "Nora Kim" },
+    { id: "n2", type: "comment", title: "Sarah commented on Brand Guidelines v2", desc: "\"Can we make the logo usage section more specific? I want exact minimum sizes.\"", time: "2h ago", read: false, action: "Reply", workspace: "Meridian Studio", avatar: "S", avatarBg: "#8a7e63" },
+    { id: "n3", type: "view", title: "Sarah viewed Invoice #047", desc: "2nd view · 1m 45s on page · Meridian Studio", time: "2h ago", read: false, action: "Track", workspace: "Meridian Studio" },
+    { id: "n4", type: "signed", title: "Nora signed the Course Landing Page proposal", desc: "Proposal accepted · $3,200 project value · Ready to start", time: "3h ago", read: true, action: "Open project", workspace: "Nora Kim" },
+    { id: "n5", type: "overdue", title: "Invoice #044 is 4 days overdue", desc: "Bolt Fitness · $4,000 · Sent Mar 25 · No views in 48h", time: "Today", read: false, action: "Send reminder", workspace: "Bolt Fitness" },
+    { id: "n6", type: "edit", title: "Jamie edited Typography section", desc: "Brand Guidelines v2 · 8 changes · Typography Scale v3 updated", time: "6h ago", read: true, action: "Review changes", workspace: "Meridian Studio", avatar: "J", avatarBg: "#7c8594" },
+    { id: "n7", type: "deadline", title: "Brand Guidelines v2 due in 5 days", desc: "65% complete · 3 deliverables remaining · Meridian Studio", time: "Today", read: true, action: "Open project", workspace: "Meridian Studio" },
+    { id: "n8", type: "proposal", title: "Proposal sent to Luna Boutique", desc: "E-commerce Rebrand · $6,500 · Awaiting response", time: "Yesterday", read: true, action: "Track", workspace: "Luna Boutique" },
+    { id: "n9", type: "wire", title: "3 new signals on The Wire", desc: "Nora Kim raised $2M · Meridian hiring · Brand demand +34%", time: "Yesterday", read: true, action: "Open The Wire", pro: true },
+    { id: "n10", type: "milestone", title: "Logo usage rules — approved by all", desc: "Brand Guidelines v2 · Sarah ✓ · Jamie ✓ · Ready for next milestone", time: "2 days ago", read: true, action: "View deliverable", workspace: "Meridian Studio" },
   ]);
   const splitPickerRef = useRef<HTMLDivElement>(null);
 
@@ -358,6 +365,15 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       swatches: { swatchesData: { colors: [{ name: "Primary", hex: "#b07d4f" }, { name: "Dark", hex: "#2c2a25" }, { name: "Light", hex: "#faf9f7" }, { name: "Accent", hex: "#5a9a3c" }] } },
       beforeafter: { beforeAfterData: { beforeLabel: "Before", afterLabel: "After" } },
       bookmark: { bookmarkData: { url: "https://example.com", title: "Link Title", description: "A brief description of the linked resource.", source: "Website", favicon: "◇" } },
+      "comment-thread": { commentThreadData: getDefaultCommentThread() },
+      mention: { mentionData: getDefaultMention() },
+      question: { questionData: getDefaultQuestion() },
+      feedback: { feedbackData: getDefaultFeedback() },
+      decision: { decisionData: getDefaultDecision() },
+      poll: { pollData: getDefaultPoll() },
+      handoff: { handoffData: getDefaultHandoff() },
+      signoff: { signoffData: getDefaultSignoff() },
+      annotation: { annotationData: getDefaultAnnotation() },
     };
     if (CONTENT_DEFAULTS[type]) {
       setBlocks(prev => {
@@ -709,22 +725,35 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       swatches: (b) => b.swatchesData ? <SwatchesBlock data={b.swatchesData} /> : null,
       beforeafter: (b) => b.beforeAfterData ? <BeforeAfterBlock data={b.beforeAfterData} /> : null,
       bookmark: (b) => b.bookmarkData ? <BookmarkBlock data={b.bookmarkData} /> : null,
+      "comment-thread": (b) => b.commentThreadData ? <CommentThreadBlock data={b.commentThreadData} onChange={(d) => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, commentThreadData: d } : bl))} /> : null,
+      mention: (b) => b.mentionData ? <MentionBlock data={b.mentionData} onChange={(d) => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, mentionData: d } : bl))} /> : null,
+      question: (b) => b.questionData ? <QuestionBlock data={b.questionData} onChange={(d) => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, questionData: d } : bl))} /> : null,
+      feedback: (b) => b.feedbackData ? <FeedbackBlock data={b.feedbackData} onChange={(d) => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, feedbackData: d } : bl))} /> : null,
+      decision: (b) => b.decisionData ? <DecisionBlock data={b.decisionData} onChange={(d) => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, decisionData: d } : bl))} /> : null,
+      poll: (b) => b.pollData ? <PollBlock data={b.pollData} onChange={(d) => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, pollData: d } : bl))} /> : null,
+      handoff: (b) => b.handoffData ? <HandoffBlock data={b.handoffData} onChange={(d) => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, handoffData: d } : bl))} /> : null,
+      signoff: (b) => b.signoffData ? <SignoffBlock data={b.signoffData} onChange={(d) => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, signoffData: d } : bl))} /> : null,
+      annotation: (b) => b.annotationData ? <AnnotationBlock data={b.annotationData} onChange={(d) => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, annotationData: d } : bl))} /> : null,
     };
 
     if (contentBlockMap[block.type]) {
-      return (
-        <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
-          <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
-            <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
-              <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
-            </button>
-            <div className={`${styles.gutterBtn} ${styles.grip}`}>
-              <svg width="10" height="14" viewBox="0 0 10 14"><circle cx="3" cy="2.5" r="1" fill="currentColor"/><circle cx="7" cy="2.5" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="11.5" r="1" fill="currentColor"/><circle cx="7" cy="11.5" r="1" fill="currentColor"/></svg>
+      const rendered = contentBlockMap[block.type](block);
+      if (rendered !== null) {
+        return (
+          <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+            <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
+              <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
+                <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
+              </button>
+              <div className={`${styles.gutterBtn} ${styles.grip}`}>
+                <svg width="10" height="14" viewBox="0 0 10 14"><circle cx="3" cy="2.5" r="1" fill="currentColor"/><circle cx="7" cy="2.5" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="11.5" r="1" fill="currentColor"/><circle cx="7" cy="11.5" r="1" fill="currentColor"/></svg>
+              </div>
             </div>
+            <div style={{ flex: 1 }}>{rendered}</div>
           </div>
-          <div style={{ flex: 1 }}>{contentBlockMap[block.type](block)}</div>
-        </div>
-      );
+        );
+      }
+      // Data missing — fall through to EditableBlock with content text
     }
 
     // Graph sub-picker — shown when user selected "Graph" from slash menu
@@ -1145,7 +1174,13 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
           {railActive === "finance" && (
             <FinancePage />
           )}
-          {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && activeWorkspaceId && (() => {
+          {railActive === "wire" && (
+            <WirePage />
+          )}
+          {railActive === "team" && (
+            <TeamScreen />
+          )}
+          {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && activeWorkspaceId && (() => {
             const ws = workspaces.find(w => w.id === activeWorkspaceId);
             return ws && onSelectProject ? (
               <WorkspaceHome workspace={ws} onSelectProject={onSelectProject} onNewTab={onNewTab} onRenameWorkspace={onRenameWorkspace} onUpdateProjectDue={onUpdateProjectDue} />
@@ -1159,7 +1194,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
               onNewTabInWorkspace={onNewTabInWorkspace || (() => {})}
             />
           )}
-          {railActive !== "home" && railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && !activeWorkspaceId && !tabs.some(t => t.active) && (
+          {railActive !== "home" && railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && !activeWorkspaceId && !tabs.some(t => t.active) && (
             <TerminalWelcome
               activeCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status !== "completed").length, 0)}
               reviewCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "review").length, 0)}
@@ -1168,7 +1203,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
               onNewWorkspace={onNewWorkspace}
             />
           )}
-          {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && !activeWorkspaceId && tabs.some(t => t.active) && (
+          {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && !activeWorkspaceId && tabs.some(t => t.active) && (
             <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
               {/* Left margin — document spine + block gutter */}
               {!zenMode && <EditorMargin

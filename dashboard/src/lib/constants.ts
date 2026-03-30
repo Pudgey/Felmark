@@ -23,6 +23,17 @@ export const BLOCK_TYPES: BlockTypeInfo[] = [
   { type: "beforeafter", label: "Before/After", icon: "◐", desc: "Comparison slider", section: "Blocks", shortcut: "/ba" },
   { type: "bookmark", label: "Bookmark", icon: "\u2197", desc: "Link preview card", section: "Blocks", shortcut: "/link" },
   { type: "deadline", label: "Deadline", icon: "\u2691", desc: "Due date milestone", section: "Blocks", shortcut: "/deadline" },
+  { type: "audio", label: "Audio", icon: "●", desc: "Voice memo & transcript", section: "Blocks", shortcut: "/audio" },
+  { type: "ai", label: "AI Generate", icon: "◈", desc: "Generate blocks from a prompt", section: "Blocks", shortcut: "/ai" },
+  { type: "comment-thread", label: "Comment Thread", icon: "💬", desc: "Discussion anchored to a block", section: "Collaboration", shortcut: "/thread" },
+  { type: "mention", label: "Mention", icon: "@", desc: "Tag someone with a notification", section: "Collaboration", shortcut: "/mention" },
+  { type: "question", label: "Question", icon: "?", desc: "Flag a question for the client", section: "Collaboration", shortcut: "/question" },
+  { type: "feedback", label: "Feedback Request", icon: "↺", desc: "Assign a reviewer with due date", section: "Collaboration", shortcut: "/feedback" },
+  { type: "decision", label: "Decision", icon: "⚖", desc: "Log a decision with context", section: "Collaboration", shortcut: "/decision" },
+  { type: "poll", label: "Poll", icon: "▣", desc: "Vote between options", section: "Collaboration", shortcut: "/poll" },
+  { type: "handoff", label: "Handoff", icon: "→", desc: "Mark ready for next person", section: "Collaboration", shortcut: "/handoff" },
+  { type: "signoff", label: "Sign-off", icon: "✓", desc: "Lock section after approval", section: "Collaboration", shortcut: "/signoff" },
+  { type: "annotation", label: "Annotation", icon: "📌", desc: "Pin comments on an image", section: "Collaboration", shortcut: "/annotate" },
 ];
 
 export interface Command {

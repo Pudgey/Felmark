@@ -5,22 +5,31 @@ import styles from "./NotificationPanel.module.css";
 
 export interface Notification {
   id: string;
-  type: "deadline" | "payment" | "comment" | "status" | "mention";
+  type: "payment" | "comment" | "view" | "signed" | "overdue" | "edit" | "deadline" | "proposal" | "wire" | "milestone";
   title: string;
   desc: string;
   time: string;
   read: boolean;
+  action: string;
   project?: string;
   projectColor?: string;
   workspace?: string;
+  avatar?: string;
+  avatarBg?: string;
+  pro?: boolean;
 }
 
 const TYPE_CONFIG: Record<string, { icon: string; bg: string; color: string }> = {
-  deadline: { icon: "⏰", bg: "rgba(194, 75, 56, 0.08)", color: "#c24b38" },
-  payment:  { icon: "$",  bg: "rgba(90, 154, 60, 0.08)",  color: "#5a9a3c" },
-  comment:  { icon: "💬", bg: "rgba(176, 125, 79, 0.08)", color: "#b07d4f" },
-  status:   { icon: "◆",  bg: "rgba(124, 133, 148, 0.08)", color: "#7c8594" },
-  mention:  { icon: "@",  bg: "rgba(176, 125, 79, 0.12)", color: "#b07d4f" },
+  payment:   { icon: "$",  bg: "rgba(90, 154, 60, 0.08)",   color: "#5a9a3c" },
+  comment:   { icon: "→",  bg: "rgba(138, 126, 99, 0.08)",  color: "#8a7e63" },
+  view:      { icon: "◎",  bg: "rgba(91, 127, 164, 0.08)",  color: "#5b7fa4" },
+  signed:    { icon: "✓",  bg: "rgba(90, 154, 60, 0.08)",   color: "#5a9a3c" },
+  overdue:   { icon: "!",  bg: "rgba(194, 75, 56, 0.08)",   color: "#c24b38" },
+  edit:      { icon: "✎",  bg: "rgba(124, 133, 148, 0.08)", color: "#7c8594" },
+  deadline:  { icon: "⏱",  bg: "rgba(200, 147, 96, 0.08)",  color: "#c89360" },
+  proposal:  { icon: "↗",  bg: "rgba(176, 125, 79, 0.08)",  color: "#b07d4f" },
+  wire:      { icon: "◆",  bg: "rgba(176, 125, 79, 0.08)",  color: "#b07d4f" },
+  milestone: { icon: "⬡",  bg: "rgba(90, 154, 60, 0.08)",   color: "#5a9a3c" },
 };
 
 interface NotificationPanelProps {
@@ -30,11 +39,21 @@ interface NotificationPanelProps {
   onMarkAllRead: () => void;
   onMarkRead: (id: string) => void;
   onNotificationClick?: (notif: Notification) => void;
+  onNotificationAction?: (notif: Notification) => void;
 }
 
-type Filter = "all" | "unread" | "mentions";
+type Filter = "all" | "unread" | "payments" | "comments" | "deadlines" | "clients";
 
-export default function NotificationPanel({ open, onClose, notifications, onMarkAllRead, onMarkRead, onNotificationClick }: NotificationPanelProps) {
+const FILTER_LABELS: Record<Filter, string> = {
+  all: "All",
+  unread: "Unread",
+  payments: "Payments",
+  comments: "Comments",
+  deadlines: "Deadlines",
+  clients: "Clients",
+};
+
+export default function NotificationPanel({ open, onClose, notifications, onMarkAllRead, onMarkRead, onNotificationClick, onNotificationAction }: NotificationPanelProps) {
   const [filter, setFilter] = useState<Filter>("all");
 
   if (!open) return null;
@@ -43,7 +62,10 @@ export default function NotificationPanel({ open, onClose, notifications, onMark
 
   const filtered = notifications.filter(n => {
     if (filter === "unread") return !n.read;
-    if (filter === "mentions") return n.type === "mention" || n.type === "comment";
+    if (filter === "payments") return n.type === "payment";
+    if (filter === "comments") return n.type === "comment" || n.type === "edit";
+    if (filter === "deadlines") return n.type === "deadline" || n.type === "overdue";
+    if (filter === "clients") return n.type === "signed" || n.type === "view";
     return true;
   });
 
@@ -54,7 +76,7 @@ export default function NotificationPanel({ open, onClose, notifications, onMark
   const earlier: Notification[] = [];
 
   for (const n of filtered) {
-    if (n.time.includes("m ago") || n.time.includes("h ago") || n.time === "Just now") {
+    if (n.time.includes("m ago") || n.time.includes("h ago") || n.time === "Just now" || n.time === "Today") {
       today.push(n);
     } else if (n.time.includes("Yesterday")) {
       yesterday.push(n);
@@ -83,13 +105,13 @@ export default function NotificationPanel({ open, onClose, notifications, onMark
       {/* Filters + mark all */}
       <div className={styles.actions}>
         <div className={styles.filters}>
-          {(["all", "unread", "mentions"] as Filter[]).map(f => (
+          {(["all", "unread", "payments", "comments", "deadlines", "clients"] as Filter[]).map(f => (
             <button
               key={f}
               className={`${styles.filterBtn} ${filter === f ? styles.filterBtnActive : ""}`}
               onClick={() => setFilter(f)}
             >
-              {f === "all" ? "All" : f === "unread" ? "Unread" : "Mentions"}
+              {FILTER_LABELS[f]}
             </button>
           ))}
         </div>
@@ -108,7 +130,7 @@ export default function NotificationPanel({ open, onClose, notifications, onMark
             </svg>
           </div>
           <div className={styles.emptyTitle}>
-            {filter === "all" ? "All caught up" : filter === "unread" ? "No unread notifications" : "No mentions"}
+            {filter === "all" ? "All caught up" : filter === "unread" ? "No unread notifications" : `No ${FILTER_LABELS[filter].toLowerCase()}`}
           </div>
           <div className={styles.emptySub}>
             {filter === "all" ? "You're on top of everything. Nice." : "Check back later for new updates."}
@@ -120,7 +142,7 @@ export default function NotificationPanel({ open, onClose, notifications, onMark
             <div key={group.label}>
               <div className={styles.groupLabel}>{group.label}</div>
               {group.items.map(n => {
-                const cfg = TYPE_CONFIG[n.type] || TYPE_CONFIG.status;
+                const cfg = TYPE_CONFIG[n.type] || TYPE_CONFIG.edit;
                 return (
                   <div
                     key={n.id}
@@ -138,13 +160,29 @@ export default function NotificationPanel({ open, onClose, notifications, onMark
                       }
                     }}
                   >
-                    <div className={styles.itemIcon} style={{ background: cfg.bg, color: cfg.color }}>
-                      {cfg.icon}
-                    </div>
+                    {/* Icon or Avatar */}
+                    {n.avatar ? (
+                      <div className={styles.itemIconAvatar} style={{ background: n.avatarBg || "var(--ink-400)" }}>
+                        {n.avatar}
+                      </div>
+                    ) : (
+                      <div className={styles.itemIcon} style={{ background: cfg.bg, color: cfg.color }}>
+                        {cfg.icon}
+                      </div>
+                    )}
+
                     <div className={styles.itemBody}>
                       <div className={styles.itemTitle}>{n.title}</div>
                       <div className={styles.itemDesc}>{n.desc}</div>
-                      <div className={styles.itemTime}>{n.time}</div>
+                      <div className={styles.itemFooter}>
+                        <span className={styles.itemTime}>{n.time}</span>
+                        {n.workspace && (
+                          <span className={styles.itemWs}>{n.workspace}</span>
+                        )}
+                        {n.pro && (
+                          <span className={styles.itemPro}>PRO</span>
+                        )}
+                      </div>
                       {n.project && (
                         <span className={styles.itemProject}>
                           <span className={styles.itemProjectDot} style={{ background: n.projectColor || "var(--warm-300)" }} />
@@ -152,6 +190,17 @@ export default function NotificationPanel({ open, onClose, notifications, onMark
                         </span>
                       )}
                     </div>
+
+                    {/* Action button */}
+                    <button
+                      className={styles.itemAction}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onNotificationAction?.(n);
+                      }}
+                    >
+                      {n.action}
+                    </button>
                   </div>
                 );
               })}
@@ -159,6 +208,9 @@ export default function NotificationPanel({ open, onClose, notifications, onMark
           ))}
         </div>
       )}
+
+      {/* Footer */}
+      <div className={styles.footer}>You&apos;re up to date</div>
     </div>
   );
 }

@@ -20,7 +20,18 @@ export type BlockType =
   | "swatches"
   | "beforeafter"
   | "bookmark"
-  | "deadline";
+  | "deadline"
+  | "audio"
+  | "ai"
+  | "comment-thread"
+  | "mention"
+  | "question"
+  | "feedback"
+  | "decision"
+  | "poll"
+  | "handoff"
+  | "signoff"
+  | "annotation";
 
 export type GraphType = "bar" | "line" | "donut" | "hbar" | "sparkline" | "area" | "metrics";
 
@@ -141,6 +152,79 @@ export interface DeadlineBlockData {
   completed: boolean;
 }
 
+export interface AudioBlockData {
+  state: "idle" | "recording" | "paused" | "done";
+  duration: number;
+  audioUrl: string | null;
+  waveform: number[];
+  transcript: string;
+}
+
+// ── Collaboration block data ──
+
+export interface CommentThreadData {
+  messages: { id: string; author: string; text: string; time: string; }[];
+  resolved: boolean;
+}
+
+export interface MentionData {
+  person: string;
+  message: string;
+  notified: boolean;
+}
+
+export interface QuestionData {
+  question: string;
+  assignee: string;
+  answered: boolean;
+  answer: string;
+}
+
+export interface FeedbackData {
+  description: string;
+  reviewer: string;
+  dueDate: string | null;
+  status: "pending" | "in-progress" | "approved" | "changes-requested";
+  comments: string;
+}
+
+export interface DecisionData {
+  title: string;
+  decision: string;
+  alternatives: { label: string; reason: string; }[];
+  context: string;
+  decidedBy: string;
+  decidedAt: string | null;
+}
+
+export interface PollData {
+  question: string;
+  options: { id: string; label: string; votes: number; }[];
+  closed: boolean;
+  totalVotes: number;
+}
+
+export interface HandoffData {
+  from: string;
+  to: string;
+  notes: string;
+  status: "pending" | "accepted" | "completed";
+  items: string[];
+}
+
+export interface SignoffData {
+  section: string;
+  signer: string;
+  signed: boolean;
+  signedAt: string | null;
+  locked: boolean;
+}
+
+export interface AnnotationData {
+  imageUrl: string;
+  pins: { id: string; x: number; y: number; comment: string; author: string; resolved: boolean; }[];
+}
+
 export interface Block {
   id: string;
   type: BlockType;
@@ -157,6 +241,16 @@ export interface Block {
   beforeAfterData?: BeforeAfterBlockData;
   bookmarkData?: BookmarkBlockData;
   deadlineData?: DeadlineBlockData;
+  audioData?: AudioBlockData;
+  commentThreadData?: CommentThreadData;
+  mentionData?: MentionData;
+  questionData?: QuestionData;
+  feedbackData?: FeedbackData;
+  decisionData?: DecisionData;
+  pollData?: PollData;
+  handoffData?: HandoffData;
+  signoffData?: SignoffData;
+  annotationData?: AnnotationData;
 }
 
 export interface BlockTypeInfo {
@@ -164,7 +258,7 @@ export interface BlockTypeInfo {
   label: string;
   icon: string;
   desc: string;
-  section: "Basic" | "Blocks";
+  section: "Basic" | "Blocks" | "Collaboration";
   shortcut: string;
 }
 

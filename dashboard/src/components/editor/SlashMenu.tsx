@@ -47,7 +47,7 @@ export default function SlashMenu({ top, left, filter, selectedIndex, onSelect, 
 
   if (filtered.length === 0) return null;
 
-  const sections = ["Basic", "Blocks"] as const;
+  const sections = ["Basic", "Blocks", "Collaboration"] as const;
 
   return (
     <div className={styles.menu} style={{ top, left }}>
