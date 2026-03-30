@@ -258,6 +258,7 @@ export default function EditorMargin({ blocks, hoveredBlock, onHoverBlock, onScr
                 onMouseEnter={() => onHoverBlock(block.id)}
                 onMouseLeave={() => onHoverBlock(null)}
                 onClick={(e) => handleItemClick(e, block, i)}
+                onDoubleClick={(e) => { e.preventDefault(); setCtxMenu({ x: e.clientX, y: e.clientY, blockId: block.id }); }}
                 onContextMenu={(e) => { e.preventDefault(); setCtxMenu({ x: e.clientX, y: e.clientY, blockId: block.id }); }}
               >
                 <span className={styles.gutterLine}>{i + 1}</span>
