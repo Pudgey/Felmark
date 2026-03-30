@@ -1,92 +1,105 @@
 ---
 name: fallback
-description: Scan a screen or feature for failure points and propose tier-classified fallback mechanics so nothing silently breaks.
+description: Resilience audit for Felmark. Map failure points and define what the user should see when network, auth, storage, or integrations fail.
 ---
 
 # Fallback -- Resilience Audit & Hardening
 
-Scan a target screen or feature for every failure point (network, auth, data, navigation) and propose fallback mechanics classified by trust level and severity. Based on the "No Dead Ends" philosophy -- a user should never hit a blank screen, frozen button, or silent failure.
+Audit a screen, flow, or feature for failure handling. A user should never be left staring at a blank panel, dead button, or fake success state.
 
 References:
-- `dev/conductor/standards/FALLBACK_HARDENING.md`
+- `AGENTS.md`
+- Relevant code under `dashboard/src/`, `extension/`, and any server or integration surface involved
 
 ---
 
-## How to Run
+## Scope
 
-Target can be a screen, feature area, or the entire app:
+Valid targets:
 
-```
-/fallback activity          # Scan ActivityScreen
-/fallback booking           # Scan full booking lifecycle
-/fallback home              # Scan V4 homepage
-/fallback all               # Full app scan (produces summary report)
-```
+- A single screen
+- A feature area
+- An end-to-end flow
+- The whole product, if the user explicitly wants a broad pass
 
 ---
 
-## The Process
-
-### 1. Inventory (Read-Only)
+## Step 1: Inventory Failure Points
 
 For the target, map every:
-- **Data source** (provider, repository, service) and its failure modes
-- **Write operation** (create, update, delete) and what happens on failure
-- **Navigation path** (deep links, push routes) and what happens if target doesn't exist
-- **External dependency** (Firebase Auth, Storage, FCM) and its failure modes
 
-### 2. Classify
+- Data read
+- Data write
+- Route transition
+- External dependency
+- Local persistence boundary
+- Browser API dependency
 
-For each failure point, assign:
-- **Trust level**: Critical / High / Medium / Low (see SOP Section 2.2)
-- **Current behavior**: What happens RIGHT NOW when this fails
-- **Proposed tier**: Tier 1 (retry) / 2 (cache) / 3 (degrade) / 4 (block) / 5 (queue+sync)
-- **Priority**: P0 (fix now) / P1 (this sprint) / P2 (polish pass) / P3 (defer)
+Examples:
 
-### 3. Run the Agent Gauntlet
-
-Answer the 8 quick-check questions from the SOP for each screen. Score out of 8.
-
-### 4. Propose (Do NOT implement)
-
-Write findings using the `FB-NNN` format. Each finding includes:
-- Trust level, current behavior, proposed fallback, files, specific code changes, safety check
-
-### 5. Report
-
-Save to `dev/conductor/Reports/FALLBACK_AUDIT_[target]_[date].md`
+- Supabase query fails
+- Share link generation fails
+- Save succeeds locally but not remotely
+- Extension redirect fails
+- Export/download is blocked by the browser
 
 ---
 
-## Cardinal Rules (Non-Negotiable)
+## Step 2: Classify Current Behavior
 
-Every proposed fallback must obey ALL five:
+For each failure point, record:
 
-1. **Never fake success** -- Failed writes must never appear to succeed
-2. **Never show stale data as fresh** -- Cached data must be labeled
-3. **Never silently swallow** -- Every catch needs AppLogger or user feedback or both
-4. **Never bypass safety checks** -- Fallbacks don't skip auth, validation, or rules
-5. **Never persist unverified state** -- Local saves marked "pending sync," not written to Firestore unconfirmed
+- Current behavior
+- User-visible impact
+- Severity
+- Whether recovery is obvious
 
----
-
-## Five Fallback Tiers (Quick Reference)
-
-| Tier | Name | When | User Sees |
-|------|------|------|-----------|
-| 1 | Retry | Transient network blip | Brief loading, then success or escalation |
-| 2 | Cache | Offline / extended outage | Last-known data + "Offline" indicator |
-| 3 | Degrade | Non-essential section fails | Screen works, broken section hidden or shows retry |
-| 4 | Block | Critical operation hard-fails | Clear error + what to do + support link |
-| 5 | Queue | Offline write (High trust) | Immediate UI response + background sync |
+If the product currently fails silently, call that out directly.
 
 ---
 
-## Output
+## Step 3: Choose a Fallback Tier
 
-A findings report with:
-- Score (X/8 per screen)
-- Failure point inventory
-- Tier-classified findings (FB-001+)
-- Priority-ordered implementation list
-- Safety check per finding (Cardinal Rule compliance)
+Use the lightest fallback that preserves trust:
+
+| Tier | Pattern | Use When |
+|------|---------|----------|
+| 1 | Retry | Transient failure likely to resolve quickly |
+| 2 | Cached or preserved state | Last-known-good content is safe to show with labeling |
+| 3 | Degrade gracefully | One section can fail without breaking the whole screen |
+| 4 | Block clearly | The action cannot proceed safely |
+| 5 | Queue and reconcile | User work must be preserved and retried later |
+
+---
+
+## Step 4: Guard the Trust Boundary
+
+Every fallback must obey these rules:
+
+1. Never fake success
+2. Never show stale data as fresh
+3. Never swallow failures silently
+4. Never bypass auth or validation
+5. Never drop user work without saying so
+
+---
+
+## Step 5: Report or Implement
+
+If the task is audit-only, report findings with:
+
+- Failure point
+- Current behavior
+- Recommended fallback
+- Files involved
+- Priority
+
+If the task is implementation, fix one failure mode at a time and re-verify the full chain.
+
+---
+
+## Done Criteria
+
+- Failure modes are mapped explicitly
+- Recommended fallbacks preserve user trust
+- No stale stack-specific fallback assumptions remain

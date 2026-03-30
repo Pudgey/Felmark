@@ -138,4 +138,4 @@ If executing cleanup after confirmation, work in small batches and verify the re
 
 - Scan summary produced
 - Safe artifacts clearly separated from risky deletions
-- No mobile-only or Flutter-specific cleanup rules remain
+- No obsolete stack-specific cleanup rules remain

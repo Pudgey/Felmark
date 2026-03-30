@@ -167,4 +167,4 @@ Save substantial reports under `conductor/` if the audit is large enough to matt
 - Every material trust boundary was checked
 - Findings are prioritized by exploitability, not aesthetics
 - Recommended fixes are concrete and scoped
-- No stale mobile or Flutter-specific guidance remains
+- No stale stack-specific guidance remains

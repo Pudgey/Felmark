@@ -116,4 +116,4 @@ For each finding:
 
 - Every flagged element has a traced failure chain
 - Silent failures are turned into explicit success or error behavior
-- No stale Firebase, GoRouter, or Flutter assumptions remain
+- No stale stack-specific assumptions remain
