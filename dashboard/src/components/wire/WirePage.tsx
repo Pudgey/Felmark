@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import type { Workspace } from "@/lib/types";
 import type { WireService } from "@/lib/wire-context";
 import styles from "./WirePage.module.css";
+import WireSignalFlow from "./WireSignalFlow";
 
 const NICHES = ["Design & Branding", "Web Development", "Copywriting", "Marketing", "All"];
 
@@ -124,8 +125,6 @@ export default function WirePage({ workspaces = [], services = [] }: WirePagePro
   const [now, setNow] = useState(new Date());
   const [hasGenerated, setHasGenerated] = useState(false);
   const [aiSignals, setAiSignals] = useState<Signal[] | null>(null);
-  const [generating, setGenerating] = useState(false);
-
   useEffect(() => {
     if (typeof window !== "undefined" && localStorage.getItem("felmark_wire_onboarded")) {
       setHasGenerated(true);
@@ -134,33 +133,12 @@ export default function WirePage({ workspaces = [], services = [] }: WirePagePro
 
   useEffect(() => { const i = setInterval(() => setNow(new Date()), 1000); return () => clearInterval(i); }, []);
 
-  const refreshSignals = () => {
-    setGenerating(true);
-    // Simulate AI generation delay
-    setTimeout(() => {
-      setAiSignals(FEED);
-      setGenerating(false);
-      setHasGenerated(true);
-      localStorage.setItem("felmark_wire_onboarded", "true");
-    }, 1500);
+  const handleFlowComplete = (config: { signalType: string; niches: string[]; sources: string[]; frequency: string; threshold: number }, flowSignals: Signal[]) => {
+    localStorage.setItem("felmark_wire_config", JSON.stringify(config));
+    localStorage.setItem("felmark_wire_onboarded", "true");
+    setAiSignals(flowSignals);
+    setHasGenerated(true);
   };
-
-  // Onboarding phase detection
-  const hasWorkspaces = workspaces.length > 0;
-  const hasServices = services.length > 0;
-  const hasProjects = workspaces.some(w => w.projects.length > 0);
-  const hasRate = workspaces.some(w => w.rate && w.rate !== "" && w.rate !== "$0");
-
-  const isPhaseA = !hasWorkspaces || !hasServices;
-  const isPhaseB = hasWorkspaces && hasServices && !hasGenerated && !aiSignals;
-  // Phase C: hasGenerated || aiSignals (normal feed)
-
-  // Compute context line for Phase B
-  const serviceCount = services.length;
-  const clientCount = workspaces.filter(w => !w.personal).length;
-  const firstRate = workspaces.find(w => w.rate)?.rate || "$0/hr";
-
-  const blurredPreviewItems = FEED.slice(0, 4);
 
   const toggleBookmark = (id: number, e: React.MouseEvent) => { e.stopPropagation(); setBookmarked(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; }); };
 
@@ -177,95 +155,9 @@ export default function WirePage({ workspaces = [], services = [] }: WirePagePro
   const clientSignals = FEED.filter(f => f.isClientSignal).length;
   const avgRelevance = Math.round(FEED.reduce((s, f) => s + f.relevance, 0) / FEED.length);
 
-  // Phase A: No data yet — blurred preview + setup checklist
-  if (isPhaseA) {
-    return (
-      <div className={styles.page}>
-        <div className={styles.head}>
-          <div className={styles.headTop}>
-            <div className={styles.headLeft}>
-              <span className={styles.title}>The Wire</span>
-              <span className={styles.pro}>PRO</span>
-            </div>
-          </div>
-        </div>
-        <div className={styles.onboardWrap}>
-          <div className={styles.onboardBlurred}>
-            {blurredPreviewItems.map(item => {
-              const tc = SIGNAL_TYPES[item.type];
-              const sc = SOURCES[item.source];
-              return (
-                <div key={item.id} className={styles.item} style={{ opacity: 0.15, filter: "blur(2px)", pointerEvents: "none" }}>
-                  <div className={styles.itemRel} style={{ background: tc.color, opacity: item.relevance / 100 }} />
-                  <div className={styles.itemInner}>
-                    <div className={styles.itemType} style={{ background: tc.bg, color: tc.color, border: `1px solid ${tc.color}12` }}>{tc.icon}</div>
-                    <div className={styles.itemBody}>
-                      <div className={styles.itemTop}>
-                        <span className={styles.itemSource}>{sc?.abbr || "?"}</span>
-                        <span className={styles.itemTime}>{item.time}</span>
-                      </div>
-                      <div className={styles.itemHl}>{item.headline}</div>
-                      <div className={styles.itemTags}>{item.tags.slice(0, 3).map((t, i) => <span key={i} className={styles.itemTag}>{t}</span>)}</div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          <div className={styles.onboardCard}>
-            <div className={styles.onboardIcon}>&#9678;</div>
-            <div className={styles.onboardTitle}>Your business intelligence briefing</div>
-            <div className={styles.onboardSub}>Personalized signals powered by AI</div>
-            <div className={styles.onboardChecklist}>
-              <div className={styles.onboardCheckItem}>
-                <span className={`${styles.onboardCheck} ${hasServices ? styles.onboardCheckDone : ""}`}>{hasServices ? "\u2713" : "\u25CB"}</span>
-                Add your services
-              </div>
-              <div className={styles.onboardCheckItem}>
-                <span className={`${styles.onboardCheck} ${hasProjects ? styles.onboardCheckDone : ""}`}>{hasProjects ? "\u2713" : "\u25CB"}</span>
-                Create a client workspace
-              </div>
-              <div className={styles.onboardCheckItem}>
-                <span className={`${styles.onboardCheck} ${hasRate ? styles.onboardCheckDone : ""}`}>{hasRate ? "\u2713" : "\u25CB"}</span>
-                Set your hourly rate
-              </div>
-            </div>
-            <button className={styles.onboardCta}>Set up now &rarr;</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Phase B: Has data, never generated — CTA to generate
-  if (isPhaseB) {
-    return (
-      <div className={styles.page}>
-        <div className={styles.head}>
-          <div className={styles.headTop}>
-            <div className={styles.headLeft}>
-              <span className={styles.title}>The Wire</span>
-              <span className={styles.pro}>PRO</span>
-            </div>
-          </div>
-        </div>
-        <div className={styles.onboardWrap}>
-          <div className={styles.readyCard}>
-            <div className={styles.onboardIcon}>&#9678;</div>
-            <div className={styles.onboardTitle}>Ready to generate your first intelligence briefing</div>
-            <div className={styles.readyContext}>
-              Based on: {serviceCount} service{serviceCount !== 1 ? "s" : ""} &middot; {clientCount} client{clientCount !== 1 ? "s" : ""} &middot; {firstRate} rate
-            </div>
-            <button className={styles.onboardCta} onClick={refreshSignals} disabled={generating}>
-              {generating ? "Generating..." : "Generate briefing \u2192"}
-            </button>
-            <div className={styles.onboardHint}>
-              Refreshes daily &middot; Personalized to your business &middot; Powered by Claude AI
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+  // Signal flow onboarding: show when user hasn't generated signals yet
+  if (!hasGenerated && !aiSignals) {
+    return <WireSignalFlow onComplete={handleFlowComplete} />;
   }
 
   // Phase C: Normal feed
