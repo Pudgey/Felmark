@@ -504,6 +504,33 @@
   transition: max-width 0.5s cubic-bezier(0.4, 0, 0.2, 1), padding 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Breathe mode — full width */
+.pageBreathe {
+  max-width: 100%;
+  padding-left: clamp(24px, 5vw, 64px);
+  padding-right: clamp(24px, 5vw, 64px);
+}
+
+/* Breathe toggle button */
+.breatheBtn {
+  margin-left: auto;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-300);
+  transition: all 0.12s;
+}
+
+.breatheBtn:hover { background: var(--warm-100); color: var(--ink-500); }
+.breatheOn { color: var(--ember); }
+.breatheOn:hover { color: var(--ember); background: var(--ember-bg); }
+
 /* Project meta bar */
 .metaBar {
   display: flex;

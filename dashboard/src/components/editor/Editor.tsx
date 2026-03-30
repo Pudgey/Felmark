@@ -128,6 +128,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
   const [moneyPicker, setMoneyPicker] = useState<{ blockId: string } | null>(null);
   const [splitPickerOpen, setSplitPickerOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [breathe, setBreathe] = useState(false);
   const [catOpen, setCatOpen] = useState(false);
   const [notifPanelOpen, setNotifPanelOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([
@@ -1501,6 +1502,13 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
             const st = STATUS[pj.status];
             return <span className={styles.breadStatus} style={{ background: `${st.color}12`, color: st.color, border: `1px solid ${st.color}20` }}>{st.label}</span>;
           })()}
+          <button className={`${styles.breatheBtn} ${breathe ? styles.breatheOn : ""}`} onClick={() => setBreathe(b => !b)} title={breathe ? "Default width" : "Full width"}>
+            {breathe ? (
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2v3h3M5 12V9H2M9 12V9h3M5 2v3H2" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            ) : (
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 5V2h3M12 5V2h-3M2 9v3h3M12 9v3h-3" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            )}
+          </button>
         </div>
       )}
 
@@ -1580,7 +1588,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
               />}
               {/* Editor area */}
               <div className={styles.editor} ref={editorRef} onMouseDown={() => { setConvoPanelOpen(false); setCommentPanelOpen(false); }} style={{ flex: 1 }}>
-                <div className={styles.page} onClick={handlePageClick}>
+                <div className={`${styles.page} ${breathe ? styles.pageBreathe : ""}`} onClick={handlePageClick}>
                   {/* Project meta bar with due date picker */}
                   {activeWs && (() => {
                     const project = activeWs.projects.find(p => p.id === activeProject);
