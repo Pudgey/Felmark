@@ -1,148 +1,116 @@
 ---
 name: export
-description: Walk through porting a dev_main.dart prototype screen to production safely.
+description: Port a prototype or concept screen into Felmark production code safely, without dragging prototype shortcuts into the real app.
 ---
 
 # Export -- Prototype to Production Port
 
-Step-by-step protocol for safely porting a screen from `dev_main.dart` (dev catalog) to the production app. The dev catalog uses a custom ThemeData (plain Material 3 + GoogleFonts), while production uses `BaseThemeData.light()` with different defaults. Without this protocol, text fields, colors, and spacing will break.
+Use this when a screen or interaction already exists in `Prototype/` and needs to be rebuilt inside the real product. The goal is not a literal copy. The goal is to preserve the product idea while rebuilding it in the repo's actual architecture.
 
-Reference: `dev/conductor/standards/EXPORT_PROTOCOL.md`
-
----
-
-## Theme Differences to Account For
-
-| Property | dev_main (mockup) | Production (BaseThemeData) |
-|----------|-------------------|---------------------------|
-| InputDecoration | unfilled, no border | `filled: true`, `fillColor: backgroundSecondary`, `OutlineInputBorder(12px)` |
-| TextTheme | `GoogleFonts.interTextTheme()` | BaseTypography (Inter via base_ui) |
-| ColorScheme | `fromSeed(0xFF6C5CE7)` | base_ui brand palette |
+References:
+- `AGENTS.md`
+- `Prototype/`
+- Target production area under `dashboard/src/` or `extension/`
 
 ---
 
-## Pre-Export Steps
+## Step 0: Define Source and Destination
 
-### Step 1: TextField Border Hardening
+Identify:
 
-For every `TextField` and `TextFormField` in the screen being ported:
+1. The prototype file
+2. The production destination
+3. The exact user-facing behavior being exported
 
-- [ ] Set `filled: false` (or `filled: true` with explicit `fillColor`)
-- [ ] Set ALL THREE borders: `border`, `enabledBorder`, `focusedBorder`
-  - `border: InputBorder.none` alone does NOT override theme-level `enabledBorder`/`focusedBorder`
-  - Always set: `border: InputBorder.none, enabledBorder: InputBorder.none, focusedBorder: InputBorder.none`
-- [ ] Set `contentPadding` explicitly
-- [ ] Set `hintStyle` using `BaseTypography.*` with explicit color
-- [ ] Set `style` (text style) using `BaseTypography.*` with explicit color
+Examples:
 
-Find all TextFields:
-```bash
-grep -rn "TextField\|TextFormField" lib/screens/<target>/
-```
+- `Prototype/FreelancerPad.jsx` -> `dashboard/src/components/editor/`
+- `Prototype/TheWireV2.jsx` -> `dashboard/src/components/wire/`
 
-### Step 2: Style Hardening -- Colors and Typography
-
-- [ ] All text colors use `BaseColors.*` (never `Theme.of(context).colorScheme.*`)
-- [ ] All text styles use `BaseTypography.*` (never `Theme.of(context).textTheme.*`)
-- [ ] All background colors use explicit `BaseColors.*` or literal `Color(0x...)` (never inherited)
-- [ ] No `const` keyword on widgets referencing non-const `BaseColors.*`, `BaseTypography.*`, or `BaseSpacing.*`
-
-### Step 3: Import Conflict Check
-
-Before adding any import to the target file:
-```bash
-grep -rn "class ClassName" lib/
-```
-
-Known conflict patterns:
-- `AuthColors` -- defined in both `neighborhood_hero.dart` and re-exported from `verify_email_screen.dart`
-- Widget names that match across packages (e.g., `ShimmerSweep` in mockup vs existing `ShimmerSkeleton`)
-
-Fix with `import '...' as prefix;` and a `typedef` alias if needed.
-
-### Step 4: Widget Dependency Inventory
-
-For every widget the screen imports:
-- [ ] Confirm it exists in `indep_app` or `base_ui`
-- [ ] Confirm the import path is correct for the production location
-- [ ] If it is a new widget file, place it in the screen's `widgets/` subdirectory (NOT in shared `lib/widgets/`)
-
-### Step 5: Asset Check
-
-- [ ] All image paths use `assets/avatars/` (never `assets/images/avatars/`)
-- [ ] base_ui assets use `package: 'base_ui'` in `Image.asset()` calls
-- [ ] No new assets required (or they have been added to the correct `pubspec.yaml`)
+Do not export an entire prototype just because one interaction is useful.
 
 ---
 
-## During Export
+## Step 1: Extract the Real Requirements
 
-### Step 6: Snapshot Commit (NON-NEGOTIABLE)
+Before coding, separate the prototype into three buckets:
 
-Before touching ANY production files:
-```bash
-cd /Users/donteennis/Indep/indep_app
-git add -A
-git commit -m "checkpoint: pre-port <screen_name> redesign"
-```
+- Keep: product behavior worth shipping
+- Adapt: visuals or state flow that need production structure
+- Drop: mock data, throwaway helpers, hardcoded shortcuts, fake latency, and demo-only UI
 
-This gives you a clean revert target. If the port goes wrong:
-```bash
-git checkout HEAD~1 -- lib/screens/<target>/<file>.dart
-```
-
-### Step 7: Surgical Edit -- Only Touch the Target
-
-- [ ] Only edit the target screen file (e.g., `login_screen.dart`)
-- [ ] Do NOT modify shared widgets in `lib/widgets/`
-- [ ] Do NOT modify providers, models, services, or repositories
-- [ ] New sub-widgets go in the screen's own `widgets/` subdirectory
-
-### Step 8: Import Path Translation
-
-Map dev paths to production paths and update all `import` statements.
+If the prototype mixes several ideas together, split them into separate production concerns first.
 
 ---
 
-## Post-Export Verification
+## Step 2: Map Production Constraints
 
-### Step 9: Static Analysis
+Read the destination area and answer:
 
-```bash
-flutter analyze lib/screens/<target>/
-flutter analyze lib/dev_main.dart
-```
-Must show 0 NEW errors (pre-existing warnings are OK).
+1. Which route, component tree, and state shape own this work?
+2. Which existing tokens, utilities, and patterns already solve part of it?
+3. What persistence layer or API surface should this use in production?
+4. What needs to remain local-only for now?
 
-### Step 10: Visual Comparison
-
-Run both entry points and compare:
-```bash
-flutter run -d chrome                          # Production app
-flutter run -t lib/dev_main.dart -d chrome     # Dev catalog
-```
-
-The production screen must visually match the dev_main prototype. If text fields look different, revisit Step 1.
-
-### Step 11: Regression Check
-
-- [ ] `grep -rn "import.*<deleted_file>" lib/` -- if any file was removed, verify 0 importers remain
-- [ ] Spot-check 3-4 other screens still render
-- [ ] No new `flutter analyze` errors anywhere in the project
-
-### Step 12: Final Commit
+Useful scans:
 
 ```bash
-git add -A
-git commit -m "feat: port <screen_name> redesign from dev prototype"
+rg -n "ComponentName|featureName" dashboard/src
+rg --files dashboard/src/components dashboard/src/lib dashboard/src/app
 ```
 
 ---
 
-## Rollback
+## Step 3: Rebuild, Do Not Copy Blindly
 
-If `flutter analyze` shows new errors after porting:
+When exporting:
+
+- Recreate the UI in the production folder structure
+- Replace prototype-only data with real types and props
+- Remove dead styling or layout hacks that existed only to sell the concept
+- Keep naming consistent with the live codebase
+
+Avoid:
+
+- Moving one huge prototype file into production unchanged
+- Preserving fake data sources after real types exist
+- Recreating one-off helpers that only serve the prototype
+
+---
+
+## Step 4: Match the Product, Not the Demo
+
+Verify:
+
+- The shipped version keeps the prototype's core interaction model
+- The final component works with real data shape or a clearly defined stub boundary
+- Desktop and mobile layouts both hold up
+- Keyboard, focus, and empty states are not lost during the port
+
+---
+
+## Step 5: Verify
+
+Run available verification for the touched surface:
+
 ```bash
-git checkout -- lib/screens/<target>/
+npm run lint
+npm run build
 ```
-Then reassess against this checklist.
+
+Then manually compare:
+
+1. Prototype behavior
+2. Production implementation
+3. Known gaps still intentionally deferred
+
+Document any deliberate omissions in the relevant mission or handoff doc.
+
+---
+
+## Done Criteria
+
+- Prototype behavior is represented in production code
+- No prototype-only mock logic leaked into the final implementation
+- The production component fits the repo's architecture and naming
+- Remaining gaps are explicit, not accidental
