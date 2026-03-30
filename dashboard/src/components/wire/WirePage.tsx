@@ -7,14 +7,23 @@ import styles from "./WirePage.module.css";
 
 // ── Types ──
 
-type SignalType = "rate" | "trend" | "insight" | "signal" | "alert" | "benchmark";
+type SignalType = "trend" | "opportunity" | "insight" | "alert" | "client" | "market" | "tool" | "community";
 
 interface Signal {
+  id: number;
   type: SignalType;
+  source: string;
+  time: string;
+  live?: boolean;
   title: string;
   body: string;
+  tags: string[];
   relevance: number;
-  source: string;
+  metric?: { label: string; sub: string };
+  spark?: number[];
+  isClientSignal?: boolean;
+  group: string;
+  relatedAction?: string | null;
 }
 
 interface CachedWireData {
@@ -28,21 +37,24 @@ const CACHE_KEY = "felmark_wire_cache";
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
 const TYPE_META: Record<SignalType, { icon: string; color: string; label: string; bg: string }> = {
-  rate:      { icon: "$", color: "#7c6b9e", label: "Rate",      bg: "rgba(124,107,158,0.06)" },
-  trend:     { icon: "↗", color: "#5a9a3c", label: "Trend",     bg: "rgba(90,154,60,0.06)" },
-  insight:   { icon: "◎", color: "#5b7fa4", label: "Insight",   bg: "rgba(91,127,164,0.06)" },
-  signal:    { icon: "⚑", color: "#b07d4f", label: "Signal",    bg: "rgba(176,125,79,0.06)" },
-  alert:     { icon: "!", color: "#c24b38", label: "Alert",      bg: "rgba(194,75,56,0.06)" },
-  benchmark: { icon: "◆", color: "#8a7e63", label: "Benchmark", bg: "rgba(138,126,99,0.06)" },
+  trend:       { icon: "↗", color: "#5a9a3c", label: "Trend",       bg: "rgba(90,154,60,0.06)" },
+  opportunity: { icon: "◆", color: "#7c6b9e", label: "Opportunity", bg: "rgba(124,107,158,0.06)" },
+  insight:     { icon: "◎", color: "#5b7fa4", label: "Insight",     bg: "rgba(91,127,164,0.06)" },
+  alert:       { icon: "!", color: "#c24b38", label: "Alert",        bg: "rgba(194,75,56,0.06)" },
+  client:      { icon: "⚑", color: "#b07d4f", label: "Client",      bg: "rgba(176,125,79,0.06)" },
+  market:      { icon: "$", color: "#8a7e63", label: "Market",       bg: "rgba(138,126,99,0.06)" },
+  tool:        { icon: "⚙", color: "#6b8e8a", label: "Tool",        bg: "rgba(107,142,138,0.06)" },
+  community:   { icon: "◉", color: "#9a6b8e", label: "Community",   bg: "rgba(154,107,142,0.06)" },
 };
 
 const FILTER_TABS: { label: string; value: SignalType | "all" }[] = [
   { label: "All", value: "all" },
-  { label: "Rates", value: "rate" },
   { label: "Trends", value: "trend" },
+  { label: "Opportunities", value: "opportunity" },
   { label: "Insights", value: "insight" },
-  { label: "Signals", value: "signal" },
+  { label: "Clients", value: "client" },
   { label: "Alerts", value: "alert" },
+  { label: "Market", value: "market" },
 ];
 
 // ── Helpers ──
