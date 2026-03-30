@@ -11,6 +11,7 @@ import DeliverableBlockComponent from "./deliverable/DeliverableBlock";
 import DeadlineBlockComponent, { getDefaultDeadlineData } from "./deadline-block/DeadlineBlock";
 import AudioBlockComponent, { getDefaultAudioData } from "./audio/AudioBlock";
 import AiBlock from "./ai/AiBlock";
+import ShareModal from "./ShareModal";
 import ServicesPage from "../services/ServicesPage";
 import PipelineBoard from "../pipeline/PipelineBoard";
 import TemplatesPage from "../templates/TemplatesPage";
@@ -100,6 +101,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
   const [editingGraphId, setEditingGraphId] = useState<string | null>(null);
   const [moneyPicker, setMoneyPicker] = useState<{ blockId: string } | null>(null);
   const [splitPickerOpen, setSplitPickerOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const [notifPanelOpen, setNotifPanelOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([
     { id: "n1", type: "deadline", title: "Brand Guidelines due tomorrow", desc: "Bolt Industries project deadline is approaching", time: "2h ago", read: false, project: "Brand Guidelines", projectColor: "#e87040", workspace: "Bolt Industries" },
@@ -489,6 +491,20 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     });
     // Clear editing states if the deleted block was being edited
     if (editingGraphId === blockId) setEditingGraphId(null);
+  };
+
+  const deleteBlocks = (ids: string[]) => {
+    setBlocks(prev => {
+      const idSet = new Set(ids);
+      const remaining = prev.filter(b => !idSet.has(b.id));
+      ids.forEach(id => { delete contentCache.current[id]; });
+      // If all blocks deleted, keep one empty paragraph
+      if (remaining.length === 0) {
+        return [{ id: prev[0].id, type: "paragraph" as const, content: "", checked: false }];
+      }
+      return remaining;
+    });
+    if (editingGraphId && ids.includes(editingGraphId)) setEditingGraphId(null);
   };
 
   const getNum = (bid: string) => {
@@ -1078,6 +1094,12 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
               <path d="M2.5 5.5L4 3.5M2.5 5.5H5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
+          <button className={styles.tabBarAction} title="Share" aria-label="Share document" onClick={() => setShareOpen(true)}>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M15 6.5v-2a2 2 0 00-2-2H5a2 2 0 00-2 2v7a2 2 0 002 2h2.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+              <path d="M10 10l2 2 4-4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
           <div className={styles.profileAvatar} title="Profile">A</div>
         </div>
       </div>}
@@ -1165,6 +1187,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
                     return n;
                   });
                 }}
+                onDeleteBlocks={deleteBlocks}
               />}
               {/* Editor area */}
               <div className={styles.editor} ref={editorRef} onMouseDown={() => { setConvoPanelOpen(false); setCommentPanelOpen(false); }} style={{ flex: 1 }}>
@@ -1242,6 +1265,18 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
 
       {/* History modal */}
       <HistoryModal open={historyOpen} onClose={() => setHistoryOpen(false)} />
+
+      {/* Share modal */}
+      <ShareModal
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        projectId={activeProject}
+        projectName={activeTab?.name || "Untitled"}
+        clientName={activeWs?.client || ""}
+        clientAvatar={activeWs?.avatar || ""}
+        clientColor={activeWs?.avatarBg || "#b07d4f"}
+        blocks={blocks}
+      />
     </div>
   );
 }
