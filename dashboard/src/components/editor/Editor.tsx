@@ -30,7 +30,6 @@ import EditorMargin from "./margin/EditorMargin";
 import WorkspaceHome from "../workspace/WorkspaceHome";
 import CalendarFull from "../calendar/CalendarFull";
 import SearchPage from "../search/SearchPage";
-import DashboardHome from "../dashboard/DashboardHome";
 import type { Project } from "@/lib/types";
 import styles from "./Editor.module.css";
 
@@ -986,11 +985,12 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
             ) : null;
           })()}
           {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && !activeWorkspaceId && !tabs.some(t => t.active) && (
-            <DashboardHome
-              workspaces={workspaces}
-              onSelectWorkspace={onSelectWorkspaceHome || (() => {})}
-              onSelectProject={onSelectProject || (() => {})}
-              onNewTabInWorkspace={onNewTabInWorkspace || (() => {})}
+            <TerminalWelcome
+              activeCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status !== "completed").length, 0)}
+              reviewCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "review").length, 0)}
+              overdueCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "overdue").length, 0)}
+              onOpenCmdPalette={() => {}}
+              onNewWorkspace={onNewWorkspace}
             />
           )}
           {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && !activeWorkspaceId && tabs.some(t => t.active) && (
