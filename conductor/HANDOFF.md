@@ -1,42 +1,36 @@
-# Session Handoff — 2026-03-30 (Evening)
+# Session Handoff — 2026-03-30 (Late Evening)
 
 ## What just happened
 
-Massive UI sprint. Shipped ~4,000 lines across 30+ files in one session.
+Canvas block got a major upgrade in two passes:
 
-### Built this session:
-- **UI Scale-up** — 11px floor, 28px click targets, 11 CSS files
-- **Notification Panel** — 10 types, avatars, action buttons, 6 filters, PRO badge
-- **9 Collaboration Blocks** — thread, mention, question, feedback, decision, poll, handoff, signoff, annotation
-- **Deliverable Upgrade** — drop zone, file cards, activity log, kanban mini-board
-- **AI Action Block** — 5 modes (summarize, suggest, translate, tone, scope)
-- **6 Visual Blocks** — timeline, flow, brand board, mood board, wireframe, pull quote
-- **5 Animation Blocks** — hero spotlight, kinetic type, number cascade, stat reveal, value counter
-- **Outline Multi-select** — range select, copy, delete, keyboard shortcuts
-- **P0 Polish** — prompt() removed, race condition fixed, font violations, click targets, kanban a11y
+### Pass 1: Stencil Library
+- Created `stencils.ts` — 40+ pre-built shape templates across 8 categories (Wireframe, Flowchart, Site Map, Devices, Stickies, Journey Map, Icons, Org Chart)
+- Created `StencilPicker.tsx` — dropdown panel with category tabs, 3-column grid, clean SVG mini-previews
+- Integrated into CanvasBlock toolbar via ⬡ button — click stencil to stamp centered on canvas
 
-### User also added between builder runs:
-- PricingConfigBlock, ScopeBoundaryBlock, AssetChecklistBlock
-- DecisionPickerBlock, AvailabilityPickerBlock, ProgressStreamBlock
-- DrawingBlock with 8 visual types
-- DocumentTemplate, TemplateBlock types
-- BLOCK_CATEGORIES for slash menu
+### Pass 2: Production Interactions
+- Multi-select: click, shift+click toggle, rubber band drag
+- Element moving: drag selected elements (group move), ref-based drag state for 60fps
+- Keyboard shortcuts: Delete, arrow nudge (1px/10px), Cmd+A select all, Cmd+D duplicate, Escape deselect
+- Z-order controls: ↑ bring forward / ↓ send backward toolbar buttons
+- Selection indicators now work for ALL element types (was broken for freehand/text)
+- Smart cursor feedback: move on hover, grabbing during drag, crosshair for rubber band
 
 ## In-progress work
 
 None — all tasks completed and pushed.
 
-## Remaining Tasks
-
-- [ ] 3 animation blocks deferred: Ambient Gradient, Celebration Burst, Particle Logo Reveal
-- [ ] P1 polish: Consolidate 40+ inline styles in CollabBlocks to CSS modules
-- [ ] P1 polish: Add aria-labels to all CollabBlock buttons
-- [ ] P1 polish: Add focus-visible states globally
-- [ ] P2: Create --ai-accent CSS variable for AiActionBlock purple
-
 ## Gotchas
 
-- **Worktree merge pattern**: User's codebase evolves during builder runs. NEVER copy types.ts or Editor.tsx wholesale from worktree. Only copy NEW files, then manually splice changes into user's version.
-- **Missing type exports**: After any types.ts modification, check for cascade failures (DocumentTemplate, ColumnsBlockData, DataChipsBlockData, VisualBlockData all got dropped at various points and had to be re-added).
-- **Block count**: The editor now has 40+ block types. The slash menu uses BLOCK_CATEGORIES for tabbed navigation.
-- **SignoffBlock was rewritten by user** to support multi-party e-signatures with `parties` array. The `SignoffParty` type was added to support this.
+- Canvas files were already committed at `34ff4b0` by the user between builder runs. The worktree commits existed on detached branches but the content was identical.
+- The `codex-main` editor polish pack (autosave feedback, block focus, insert cues, lightweight undo) was in-progress from another agent — committed its staged changes as part of session close.
+- User mentioned loving "the old design" of The Wire — they may want to revisit The Wire's visual design in next session. The Wire AI mission was added by a different session (`9f887dd`).
+
+## Remaining Tasks
+
+- [ ] User wants to revisit The Wire's design (mentioned "loved the old design")
+- [ ] 3 deferred animation blocks: Ambient Gradient, Celebration Burst, Particle Logo Reveal
+- [ ] P1: Consolidate 40+ inline styles in CollabBlocks to CSS modules
+- [ ] P1: aria-labels on all CollabBlock buttons + focus-visible states
+- [ ] P2: --ai-accent CSS variable for AiBlock
