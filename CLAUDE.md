@@ -124,13 +124,17 @@ Chrome Extension (~50 lines)          Web App (app.tryfelmark.com)
 - **STOP -> PROPOSE -> WAIT** before expanding scope beyond the current task.
 
 ### 2. Structure Before Code
-Before building any feature that creates 3+ files, answer these four questions (out loud or in a plan):
+
+**End goal**: This codebase will be handed to a developer or a team of developers. Every structural decision should make the code easier to navigate, understand, and extend as it grows. Scalable, enterprise-grade architecture is not a future milestone — it's how we build from day one.
+
+Before building any feature that creates 3+ files, answer these five questions (out loud or in a plan):
 1. **Where does it live?** — Which folder? New folder or existing? Match the slash menu category.
 2. **Does shared/ already have what I need?** — Check for hooks (useClickOutside, useEditableField, etc.) and components (Avatar, IconButton, EmptyState) before re-implementing.
 3. **Which hotspot files does it touch?** — If it touches Editor.tsx, types.ts, or constants.ts, note the exact additions (import, CONTENT_DEFAULTS entry, contentBlockMap entry, margin labels).
 4. **One file or a folder?** — If the component + CSS exceeds ~250 lines, give it its own folder. If it's a block type, follow the category folder pattern (`blocks/content/`, `blocks/collab/`, etc.).
+5. **Will this grow?** — If the feature is likely to gain variants, modes, sub-features, or integrations, start with a folder structure even if the first file is small. A folder with one file is cheaper than a file that becomes a folder later. Signals that something will grow: it has a type/mode picker, it's a category that will expand, the user mentioned future additions, or it touches a domain with natural expansion (e.g. payments → invoices → subscriptions).
 
-This is not a document — it's a 30-second mental checklist. The goal is to build into the right structure the first time, not refactor after.
+This is not a document — it's a 30-second mental checklist. The goal is to build into the right structure the first time so that a new developer joining the project can navigate the codebase by folder names alone.
 
 ### 3. Conductor Brain (Self-Sustaining -- CRITICAL)
 
