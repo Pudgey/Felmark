@@ -71,6 +71,11 @@ body {
   display: block;
 }
 
+[contenteditable].is-command {
+  color: var(--ember-light) !important;
+  font-family: var(--mono);
+}
+
 [contenteditable]:focus {
   outline: none;
 }

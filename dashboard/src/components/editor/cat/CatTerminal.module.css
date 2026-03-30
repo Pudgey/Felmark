@@ -74,12 +74,13 @@
   overflow-x: hidden;
   padding: 16px 14px;
   line-height: 1.65;
-  white-space: pre;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 .output::-webkit-scrollbar { width: 4px; }
 .output::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.04); border-radius: 99px; }
 
-.line { min-height: 18px; animation: lineIn 0.12s ease; overflow: hidden; text-overflow: ellipsis; }
+.line { min-height: 18px; animation: lineIn 0.12s ease; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; }
 @keyframes lineIn { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: translateY(0); } }
 
 /* Line types */
@@ -95,9 +96,9 @@
 
 /* Cat */
 .cat-ascii-line { color: var(--ember); line-height: 1.3; }
-.cat-speech { color: var(--ember); font-style: italic; }
+.cat-speech { color: var(--ember); font-style: italic; white-space: pre-wrap; word-wrap: break-word; }
 .cat-action { color: var(--ink-400); font-style: italic; }
-.cat-narration { color: var(--ink-300); font-style: italic; }
+.cat-narration { color: var(--ink-300); font-style: italic; white-space: pre-wrap; word-wrap: break-word; }
 .cat-eyes { color: var(--ember); font-size: 15px; }
 .cat-hunt { color: var(--ink-300); }
 .cat-pounce { color: var(--ember); font-weight: 600; }
@@ -116,7 +117,7 @@
 
 .fortune-box { color: var(--warm-300); }
 .fortune-header { color: var(--ember); font-weight: 500; }
-.fortune-text { color: var(--ink-600); font-style: italic; }
+.fortune-text { color: var(--ink-600); font-style: italic; white-space: pre-wrap; word-wrap: break-word; }
 .fortune-lucky { color: var(--ink-400); }
 
 .catAscii { padding: 0; margin: 4px 0; color: var(--ember); line-height: 1.3; white-space: pre; font-size: 11px; transition: all 0.15s; }
@@ -131,12 +132,22 @@
   gap: 6px;
   background: #fff;
   flex-shrink: 0;
+  transition: background 0.2s, border-color 0.2s;
 }
-.prompt { color: var(--ember); font-weight: 600; font-size: 14px; flex-shrink: 0; }
-.input { flex: 1; border: none; outline: none; font-family: var(--mono); font-size: 12px; color: var(--ink-800); background: transparent; }
+.inputAreaActive {
+  background: var(--ink-900);
+  border-color: var(--ink-800);
+}
+.prompt { color: var(--ember); font-weight: 600; font-size: 14px; flex-shrink: 0; transition: color 0.2s; }
+.promptActive { color: var(--ember-light); }
+.input { flex: 1; border: none; outline: none; font-family: var(--mono); font-size: 12px; color: var(--ink-800); background: transparent; transition: color 0.2s; caret-color: var(--ember); }
+.inputActive { color: rgba(255,255,255,0.9); caret-color: var(--ember-light); }
 .input::placeholder { color: var(--warm-400); }
-.send { width: 26px; height: 26px; border-radius: 5px; border: 1px solid var(--warm-200); background: #fff; color: var(--ink-400); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
+.inputActive::placeholder { color: rgba(255,255,255,0.15); }
+.send { width: 26px; height: 26px; border-radius: 5px; border: 1px solid var(--warm-200); background: #fff; color: var(--ink-400); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; transition: all 0.2s; }
+.sendActive { border-color: rgba(255,255,255,0.1); background: rgba(255,255,255,0.06); color: var(--ember); }
 .send:hover { background: var(--warm-100); color: var(--ink-600); }
+.sendActive:hover { background: rgba(255,255,255,0.1); color: var(--ember-light); }
 
 .foot {
   padding: 5px 14px;

@@ -170,16 +170,16 @@ export default function CatTerminal({ open, onClose }: CatTerminalProps) {
       addLine("  *the cat notices your cursor*", "cat-action");
       setTimeout(() => {
         setCatState("pounce");
-        addLine("          ◉_◉", "cat-eyes");
-        addLine("           │         ↖ cursor", "cat-hunt");
-        addLine("           ╰──── ◆", "cat-hunt");
+        addLine("      ◉_◉", "cat-eyes");
+        addLine("       │    ↖ cursor", "cat-hunt");
+        addLine("       ╰── ◆", "cat-hunt");
         setTimeout(() => {
           addLine("  *wiggles*", "cat-action");
           setTimeout(() => {
             addLine("", "spacer");
-            addLine("  ━━━━━━━╋━━━━━━━━ POUNCE!", "cat-pounce");
-            addLine("        ╱( ⊙.⊙ )╲", "cat-pounce");
-            addLine("  *caught the cursor · brings it to you as a gift*", "cat-action");
+            addLine(" ━━━╋━━━ POUNCE!", "cat-pounce");
+            addLine("  ╱( ⊙.⊙ )╲", "cat-pounce");
+            addLine(" *caught it*", "cat-action");
             setTimeout(() => { setCatState("happy"); addLine("  You're welcome. 🐾", "cat-speech"); }, 400);
           }, 700);
         }, 500);
@@ -313,10 +313,10 @@ export default function CatTerminal({ open, onClose }: CatTerminalProps) {
         )}
       </div>
 
-      <div className={styles.inputArea}>
-        <span className={styles.prompt}>❯</span>
-        <input ref={inputRef} className={styles.input} placeholder="/cat walk, /cat fortune..." value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter") handleSubmit(); if (e.key === "Escape") onClose(); }} />
-        <button className={styles.send} onClick={handleSubmit}>↵</button>
+      <div className={`${styles.inputArea} ${input.startsWith("/") || input.startsWith("$") ? styles.inputAreaActive : ""}`}>
+        <span className={`${styles.prompt} ${input.startsWith("/") || input.startsWith("$") ? styles.promptActive : ""}`}>❯</span>
+        <input ref={inputRef} className={`${styles.input} ${input.startsWith("/") || input.startsWith("$") ? styles.inputActive : ""}`} placeholder="/cat walk, /cat fortune..." value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter") handleSubmit(); if (e.key === "Escape") onClose(); }} />
+        <button className={`${styles.send} ${input.startsWith("/") || input.startsWith("$") ? styles.sendActive : ""}`} onClick={handleSubmit}>↵</button>
       </div>
 
       <div className={styles.foot}>

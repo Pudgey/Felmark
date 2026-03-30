@@ -14,23 +14,63 @@ interface SlashMenuProps {
   onSelect: (type: BlockType) => void;
   onClose: () => void;
   onIndexChange: (index: number) => void;
-  onCat?: () => void;
 }
 
-export default function SlashMenu({ top, left, filter, selectedIndex, onSelect, onClose, onIndexChange, onCat }: SlashMenuProps) {
+type MatchResult = {
+  score: number;
+  order: number;
+  type: typeof BLOCK_TYPES[number];
+};
+
+function tokenize(value: string) {
+  return value
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+}
+
+function scoreMatch(query: string, value: string, base: number) {
+  const normalized = value.toLowerCase();
+  if (!normalized) return -1;
+  if (normalized === query) return base + 400;
+  if (normalized.startsWith(query)) return base + 300;
+  const tokens = tokenize(value);
+  if (tokens.includes(query)) return base + 250;
+  if (tokens.some(token => token.startsWith(query))) return base + 200;
+  if (normalized.includes(query)) return base + 100;
+  return -1;
+}
+
+function getFilteredBlocks(filter: string) {
+  const query = filter.trim().toLowerCase();
+  if (!query) return BLOCK_TYPES;
+
+  const matches: MatchResult[] = BLOCK_TYPES.map((type, order) => {
+    const bestScore = Math.max(
+      scoreMatch(query, type.label, 1000),
+      scoreMatch(query, type.type, 900),
+      scoreMatch(query, type.shortcut?.replace(/^\//, "") || "", 850),
+      scoreMatch(query, type.section, 600),
+      scoreMatch(query, type.desc, 300)
+    );
+    return { score: bestScore, order, type };
+  }).filter(match => match.score >= 0);
+
+  return matches
+    .sort((a, b) => (b.score - a.score) || (a.order - b.order))
+    .map(match => match.type);
+}
+
+export default function SlashMenu({ top, left, filter, selectedIndex, onSelect, onClose, onIndexChange }: SlashMenuProps) {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
-
-  // Reset category when filter changes
-  useEffect(() => {
-    if (filter) setActiveCategory(null);
-  }, [filter]);
+  const effectiveCategory = filter ? null : activeCategory;
 
   // Build filtered list
   const filtered = filter
-    ? BLOCK_TYPES.filter(t => t.label.toLowerCase().includes(filter.toLowerCase()) || t.desc.toLowerCase().includes(filter.toLowerCase()) || t.section.toLowerCase().includes(filter.toLowerCase()))
-    : activeCategory
-      ? BLOCK_TYPES.filter(t => t.section === activeCategory)
+    ? getFilteredBlocks(filter)
+    : effectiveCategory
+      ? BLOCK_TYPES.filter(t => t.section === effectiveCategory)
       : BLOCK_TYPES;
 
   // Keyboard navigation
@@ -71,7 +111,7 @@ export default function SlashMenu({ top, left, filter, selectedIndex, onSelect, 
   if (filtered.length === 0) return null;
 
   // Group by section for "All" view (no filter, no active category)
-  const showGrouped = !filter && !activeCategory;
+  const showGrouped = !filter && !effectiveCategory;
   const sections = BLOCK_CATEGORIES.map(c => c.id);
 
   return createPortal(
@@ -88,13 +128,13 @@ export default function SlashMenu({ top, left, filter, selectedIndex, onSelect, 
       {/* Category tabs */}
       <div className={styles.categories}>
         <button
-          className={`${styles.cat} ${!activeCategory && !filter ? styles.catOn : ""}`}
+          className={`${styles.cat} ${!effectiveCategory && !filter ? styles.catOn : ""}`}
           onClick={() => { setActiveCategory(null); onIndexChange(0); }}
         >All</button>
         {BLOCK_CATEGORIES.map(c => (
           <button
             key={c.id}
-            className={`${styles.cat} ${activeCategory === c.id ? styles.catOn : ""}`}
+            className={`${styles.cat} ${effectiveCategory === c.id ? styles.catOn : ""}`}
             onClick={() => { setActiveCategory(activeCategory === c.id ? null : c.id); onIndexChange(0); }}
           >
             <span className={styles.catIcon}>{c.icon}</span>

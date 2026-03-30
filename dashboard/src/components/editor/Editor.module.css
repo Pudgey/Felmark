@@ -339,6 +339,37 @@
 
 .breadNav:hover { color: var(--ink-500); background: rgba(0, 0, 0, 0.03); }
 
+.breadNav:disabled {
+  cursor: default;
+  color: var(--ink-200);
+  background: none;
+}
+
+.breadChevron {
+  color: var(--ink-300);
+  display: flex;
+  align-items: center;
+  padding: 2px;
+}
+
+.breadLink {
+  background: none;
+  border: none;
+  padding: 0 4px;
+  color: var(--ink-400);
+  font: inherit;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+
+.breadLink:hover { color: var(--ink-700); background: rgba(0, 0, 0, 0.03); }
+
+.breadLink:disabled {
+  cursor: default;
+  color: var(--ink-400);
+  background: none;
+}
+
 .breadStatus {
   font-size: 11px;
   font-weight: 500;
@@ -428,6 +459,58 @@
   width: 100%;
   min-height: 100%;
   transition: max-width 0.5s cubic-bezier(0.4, 0, 0.2, 1), padding 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Project meta bar */
+.metaBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #fff;
+  border: 1px solid var(--warm-200);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+
+.metaClient {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  color: var(--ink-800);
+}
+
+.metaAvatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 600;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.metaSep { color: var(--warm-300); font-size: 10px; }
+
+.metaStatus {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  padding: 1px 8px;
+  border-radius: 3px;
+  border: 1px solid;
+}
+
+.metaBudget {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-400);
 }
 
 /* Zen mode */
@@ -699,4 +782,3 @@
   height: 1px;
   background: var(--warm-200);
 }
-

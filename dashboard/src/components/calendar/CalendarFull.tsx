@@ -14,6 +14,7 @@ interface CalendarEvent {
   id: string;
   title: string;
   workspaceId: string;
+  projectId: string | null;
   dayIdx: number;
   startHour: number;
   startMin: number;
@@ -30,7 +31,7 @@ const EVENT_ICONS: Record<string, string> = {
 
 interface CalendarFullProps {
   workspaces: Workspace[];
-  onOpenProject?: (workspaceId: string) => void;
+  onOpenProject?: (projectId: string) => void;
   scrollToProjectId?: string | null;
   onScrollComplete?: () => void;
 }
@@ -60,7 +61,7 @@ function generateDeadlineEvents(workspaces: Workspace[], weekStart: Date): Calen
   weekEnd.setDate(weekEnd.getDate() + 7);
 
   const events: CalendarEvent[] = [];
-  workspaces.forEach((ws, wsIdx) => {
+  workspaces.forEach(ws => {
     ws.projects.forEach(p => {
       if (p.status === "completed") return;
       const dueDate = parseDueDate(p.due);
@@ -73,7 +74,8 @@ function generateDeadlineEvents(workspaces: Workspace[], weekStart: Date): Calen
         events.push({
           id: `deadline-${p.id}`,
           title: p.name,
-          workspaceId: `w${wsIdx + 1}`,
+          workspaceId: ws.id,
+          projectId: p.id,
           dayIdx,
           startHour: 10,
           startMin: 0,
@@ -99,7 +101,16 @@ export default function CalendarFull({ workspaces, onOpenProject, scrollToProjec
   const [wsFilter, setWsFilter] = useState("all");
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
-  const [createData, setCreateData] = useState({ title: "", workspaceId: "w1", dayIdx: 0, startHour: 9, startMin: 0, duration: 60, type: "work" as CalendarEvent["type"] });
+  const [createData, setCreateData] = useState({
+    title: "",
+    workspaceId: workspaces[0]?.id || "",
+    projectId: null as string | null,
+    dayIdx: 0,
+    startHour: 9,
+    startMin: 0,
+    duration: 60,
+    type: "work" as CalendarEvent["type"],
+  });
   const [popoverPos, setPopoverPos] = useState<{ top: number; left: number } | null>(null);
   const [now, setNow] = useState(new Date());
   const gridRef = useRef<HTMLDivElement>(null);
@@ -189,10 +200,9 @@ export default function CalendarFull({ workspaces, onOpenProject, scrollToProjec
   const filtered = wsFilter === "all" ? events : events.filter(e => e.workspaceId === wsFilter);
 
   // Workspace lookup
-  const getWs = useCallback((id: string) => {
-    const idx = parseInt(id.replace("w", "")) - 1;
-    return workspaces[idx] || { client: "Unknown", avatarBg: "#999" };
-  }, [workspaces]);
+  const getWs = useCallback((id: string) => (
+    workspaces.find(workspace => workspace.id === id) || { client: "Unknown", avatarBg: "#999" }
+  ), [workspaces]);
 
   // Single click — select event and show popover
   const handleEventClick = (e: React.MouseEvent<HTMLDivElement>, evtId: string) => {
@@ -208,17 +218,17 @@ export default function CalendarFull({ workspaces, onOpenProject, scrollToProjec
   const handleEventDoubleClick = (e: React.MouseEvent<HTMLDivElement>, evtId: string) => {
     e.stopPropagation();
     const evt = events.find(ev => ev.id === evtId);
-    if (evt && onOpenProject) {
+    if (evt?.projectId && onOpenProject) {
       setSelectedEvent(null);
       setPopoverPos(null);
-      onOpenProject(evt.workspaceId);
+      onOpenProject(evt.projectId);
     }
   };
 
   // Cell click → create (guard against rapid double click)
   const handleCellClick = (dayIdx: number, hour: number) => {
     if (showCreate) return;
-    setCreateData({ title: "", workspaceId: workspaces[0]?.id || "w1", dayIdx, startHour: hour, startMin: 0, duration: 60, type: "work" });
+    setCreateData({ title: "", workspaceId: workspaces[0]?.id || "", projectId: null, dayIdx, startHour: hour, startMin: 0, duration: 60, type: "work" });
     setShowCreate(true);
   };
 

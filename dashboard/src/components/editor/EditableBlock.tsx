@@ -149,6 +149,9 @@ export default function EditableBlock({ block, onContentChange, onEnter, onBacks
     onContentChange(block.id, html, rawText);
     syncEmpty();
 
+    // Visual feedback: color text ember when typing a command
+    ref.current.classList.toggle("is-command", text.startsWith("/") || text.startsWith("$"));
+
     // Detect @date trigger
     if (text.includes("@date")) {
       // Find and select the @date text to replace it

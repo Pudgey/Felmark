@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { Block } from "@/lib/types";
 import styles from "./ShareModal.module.css";
 
@@ -24,13 +24,23 @@ export default function ShareModal({ open, onClose, projectId, projectName, clie
   const [existing, setExisting] = useState<{ id: string; url: string; views: number; lastViewedAt: string | null; updatedAt: string; hasPin: boolean } | null>(null);
   const [checking, setChecking] = useState(false);
   const [wasUpdated, setWasUpdated] = useState(false);
+  const [feedback, setFeedback] = useState<{ tone: "neutral" | "success" | "error"; message: string } | null>(null);
+  const urlInputRef = useRef<HTMLInputElement>(null);
 
   // Check for existing share when modal opens
   useEffect(() => {
     if (!open || !projectId) return;
     setChecking(true);
+    setFeedback(null);
+    setCopied(false);
     fetch(`/api/share?projectId=${projectId}`)
-      .then(r => r.json())
+      .then(async (r) => {
+        const data = await r.json();
+        if (!r.ok) {
+          throw new Error(typeof data.error === "string" ? data.error : "Couldn't load share details.");
+        }
+        return data;
+      })
       .then(data => {
         if (data.exists) {
           setExisting(data);
@@ -40,14 +50,26 @@ export default function ShareModal({ open, onClose, projectId, projectName, clie
           setShareUrl(null);
         }
       })
-      .catch(() => {})
+      .catch(() => {
+        setExisting(null);
+        setShareUrl(null);
+        setFeedback({ tone: "error", message: "Couldn't load the current share status. You can still create a fresh link." });
+      })
       .finally(() => setChecking(false));
   }, [open, projectId]);
 
   if (!open) return null;
 
+  const selectShareUrl = () => {
+    const input = urlInputRef.current;
+    if (!input) return;
+    input.focus();
+    input.select();
+  };
+
   const handleCreateOrUpdate = async () => {
     setLoading(true);
+    setFeedback(null);
     try {
       const res = await fetch("/api/share", {
         method: "POST",
@@ -64,26 +86,44 @@ export default function ShareModal({ open, onClose, projectId, projectName, clie
         }),
       });
       const data = await res.json();
+      if (!res.ok) {
+        throw new Error(typeof data.error === "string" ? data.error : "Couldn't save the share link.");
+      }
+      if (!data.url) {
+        throw new Error("Share link was not returned.");
+      }
       if (data.url) {
         setShareUrl(window.location.origin + data.url);
         setWasUpdated(data.updated);
         if (data.updated) {
           setExisting(prev => prev ? { ...prev, updatedAt: new Date().toISOString() } : prev);
+          setFeedback({ tone: "success", message: "Shared link updated." });
         } else {
           setExisting({ id: data.id, url: data.url, views: 0, lastViewedAt: null, updatedAt: new Date().toISOString(), hasPin: !!pin });
+          setFeedback({ tone: "success", message: "Share link ready." });
         }
       }
-    } catch {
-      // Handle error silently
+    } catch (error) {
+      setFeedback({ tone: "error", message: error instanceof Error ? error.message : "Couldn't save the share link. Try again." });
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  const handleCopy = () => {
-    if (shareUrl) {
-      navigator.clipboard.writeText(shareUrl);
+  const handleCopy = async () => {
+    if (!shareUrl) return;
+    try {
+      if (!navigator.clipboard?.writeText) {
+        throw new Error("Clipboard unavailable");
+      }
+      await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
+      setFeedback({ tone: "success", message: "Link copied to clipboard." });
       setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+      selectShareUrl();
+      setFeedback({ tone: "neutral", message: "Clipboard access was blocked. The link is selected so you can copy it manually." });
     }
   };
 
@@ -94,8 +134,20 @@ export default function ShareModal({ open, onClose, projectId, projectName, clie
     setWasUpdated(false);
     setExisting(null);
     setShareUrl(null);
+    setFeedback(null);
     onClose();
   };
+
+  const feedbackNode = feedback ? (
+    <div
+      className={`${styles.feedback} ${feedback.tone === "error" ? styles.feedbackError : feedback.tone === "success" ? styles.feedbackSuccess : styles.feedbackNeutral}`}
+      role={feedback.tone === "error" ? "alert" : "status"}
+      aria-live="polite"
+    >
+      <span className={styles.feedbackDot} />
+      <span>{feedback.message}</span>
+    </div>
+  ) : null;
 
   if (checking) {
     return (
@@ -130,11 +182,12 @@ export default function ShareModal({ open, onClose, projectId, projectName, clie
           <div className={styles.body}>
             {/* Link */}
             <div className={styles.urlRow}>
-              <input className={styles.urlInput} value={shareUrl} readOnly onClick={e => (e.target as HTMLInputElement).select()} />
+              <input ref={urlInputRef} className={styles.urlInput} value={shareUrl} readOnly onClick={e => (e.target as HTMLInputElement).select()} />
               <button className={styles.copyBtn} onClick={handleCopy}>
                 {copied ? "Copied!" : "Copy"}
               </button>
             </div>
+            {feedbackNode}
 
             {/* Stats */}
             <div className={styles.stats}>
@@ -203,11 +256,12 @@ export default function ShareModal({ open, onClose, projectId, projectName, clie
               <span>Share updated</span>
             </div>
             <div className={styles.urlRow}>
-              <input className={styles.urlInput} value={shareUrl} readOnly onClick={e => (e.target as HTMLInputElement).select()} />
+              <input ref={urlInputRef} className={styles.urlInput} value={shareUrl} readOnly onClick={e => (e.target as HTMLInputElement).select()} />
               <button className={styles.copyBtn} onClick={handleCopy}>
                 {copied ? "Copied!" : "Copy"}
               </button>
             </div>
+            {feedbackNode}
             <div className={styles.info}>
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1"/><path d="M7 5v4M7 10.5v0" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
               <span>Same link, updated content. Your client will see the latest version.</span>
@@ -263,6 +317,7 @@ export default function ShareModal({ open, onClose, projectId, projectName, clie
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1"/><path d="M7 5v4M7 10.5v0" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
             <span>Your client will see a read-only, branded version of this document. They can leave comments and approve deliverables.</span>
           </div>
+          {feedbackNode}
 
           <button className={styles.createBtn} onClick={handleCreateOrUpdate} disabled={loading}>
             {loading ? "Creating..." : "Create share link"}

@@ -170,6 +170,7 @@ Skills are reusable protocols stored in `conductor/skills/<name>/SKILL.md`. They
 | bruteforce | 5-agent adversarial codebase audit | `conductor/skills/bruteforce/SKILL.md` |
 | housekeeping | Codebase cleanup sweep | `conductor/skills/housekeeping/SKILL.md` |
 | sop | Production readiness orchestrator | `conductor/skills/sop/SKILL.md` |
+| research | External best practices & competitive intelligence | `conductor/skills/research/SKILL.md` |
 
 ### Invoking a Skill
 

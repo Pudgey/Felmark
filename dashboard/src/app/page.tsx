@@ -143,8 +143,15 @@ export default function Dashboard() {
   const toggleWorkspace = (wid: string) =>
     setWorkspaces(prev => prev.map(w => w.id === wid ? { ...w, open: !w.open } : w));
 
+  const restoreWorkspaceContext = () => {
+    setRailActive("workspaces");
+    setLaunchpadOpen(false);
+    setSidebarOpen(true);
+  };
+
   // Double click — navigate to workspace home
   const selectWorkspaceHome = (wid: string) => {
+    restoreWorkspaceContext();
     setActiveWorkspaceId(wid);
     setTabs(prev => prev.map(t => ({ ...t, active: false })));
     setActiveProject("");
@@ -153,6 +160,7 @@ export default function Dashboard() {
   };
 
   const selectProject = (project: Project, client: string) => {
+    restoreWorkspaceContext();
     setActiveWorkspaceId(null);
     setActiveProject(project.id);
     if (!tabs.find(t => t.id === project.id)) {
@@ -166,17 +174,16 @@ export default function Dashboard() {
     }
   };
 
-  // Double-click calendar event → open the first project in that workspace
-  const calendarOpenProject = (workspaceId: string) => {
-    const wsIdx = parseInt(workspaceId.replace("w", "")) - 1;
-    const ws = workspaces[wsIdx];
-    if (!ws || ws.projects.length === 0) return;
-    const project = ws.projects[0];
-    setRailActive("workspaces");
+  // Double-click calendar event → open that exact project
+  const calendarOpenProject = (projectId: string) => {
+    const ws = workspaces.find(workspace => workspace.projects.some(project => project.id === projectId));
+    const project = ws?.projects.find(item => item.id === projectId);
+    if (!ws || !project) return;
     selectProject(project, ws.client);
   };
 
   const handleTabClick = (id: string) => {
+    restoreWorkspaceContext();
     setActiveWorkspaceId(null);
     setActiveProject(id);
     setTabs(prev => prev.map(t => ({ ...t, active: t.id === id })));
@@ -389,6 +396,7 @@ export default function Dashboard() {
   };
 
   const handleNewTab = () => {
+    restoreWorkspaceContext();
     // Find the active workspace (or default to first)
     const activeWs = workspaces.find(w => w.projects.some(p => p.id === activeProject)) || workspaces[0];
     const newId = uid();
@@ -418,6 +426,7 @@ export default function Dashboard() {
   };
 
   const handleNewTabInWorkspace = (wsId: string) => {
+    restoreWorkspaceContext();
     const ws = workspaces.find(w => w.id === wsId);
     if (!ws) return;
     const newId = uid();
@@ -434,7 +443,6 @@ export default function Dashboard() {
       id: newId, name: "Untitled", client: ws.client, active: true,
     }]);
     setActiveProject(newId);
-    setRailActive("workspaces");
   };
 
   const handleBlocksChange = useCallback((projectId: string, blocks: Block[]) => {
@@ -456,9 +464,10 @@ export default function Dashboard() {
         overdueCount={overdueCount}
         onItemClick={(item) => {
           if (item === "workspaces") {
-            setLaunchpadOpen(true);
+            restoreWorkspaceContext();
             return;
           }
+          setLaunchpadOpen(false);
           setRailActive(item);
           if (item === "home") {
             setActiveWorkspaceId(null);
@@ -597,6 +606,20 @@ export default function Dashboard() {
           onNewWorkspace={() => setOnboardingName("New Client")}
           onNewTabInWorkspace={handleNewTabInWorkspace}
           onSelectWorkspaceHome={selectWorkspaceHome}
+          onNavigateRail={(item) => {
+            if (item === "workspaces") {
+              restoreWorkspaceContext();
+              return;
+            }
+            setLaunchpadOpen(false);
+            setRailActive(item);
+            if (item === "home") {
+              setActiveWorkspaceId(null);
+              setTabs(prev => prev.map(t => ({ ...t, active: false })));
+              setActiveProject("");
+              setSidebarOpen(true);
+            }
+          }}
           onSaveAsTemplate={() => setShowSaveTemplate(true)}
           docTemplates={docTemplates}
           railActive={railActive}

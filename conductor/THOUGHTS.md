@@ -24,8 +24,8 @@
 
 | Agent | Task | Completed |
 |-------|------|-----------|
-| codex-main | Prepared and committed the current source changes while excluding local runtime artifacts | 2026-03-30 15:01 EDT |
-| codex-main | Created a living guardrail doc for feature and file tracking and wired AGENTS and CLAUDE to use it | 2026-03-30 |
-| codex-main | Ran the brain grounding protocol and loaded project context before any code changes | 2026-03-30 14:01 EDT |
-| claude-main | Massive session: UI scale-up, notification panel, 9 collab blocks, deliverable upgrade, AI action block, 6 visual blocks, 5 animation blocks, P0 polish fixes | 2026-03-30 |
-| claude-main | Built /drawing block with 8 visual component types (flowchart, userflow, devices, sitemap, stickies, chart, stamps, wireframe) | 2026-03-30 |
+| codex-main | Fixed slash-menu ranking so queries prefer relevant block names and removed the stale reset effect from the menu | 2026-03-30 16:46 EDT |
+| codex-main | Fixed the templates card highlight so hover and selected states both show the outline immediately | 2026-03-30 16:27 EDT |
+| codex-main | Hardened the share modal with visible API errors and a manual-copy fallback for blocked clipboard access | 2026-03-30 16:17 EDT |
+| codex-main | Audited the dashboard for micro-polish gaps in small interactions, feedback loops, and dead-end controls | 2026-03-30 16:09 EDT |
+| codex-main | Added simple hover tooltips to the rail icons using native button titles | 2026-03-30 16:00 EDT |

@@ -7,9 +7,10 @@ import styles from "./CommandPalette.module.css";
 
 interface CommandPaletteProps {
   onClose: () => void;
+  onSelectCommand?: (commandId: string) => boolean;
 }
 
-export default function CommandPalette({ onClose }: CommandPaletteProps) {
+export default function CommandPalette({ onClose, onSelectCommand }: CommandPaletteProps) {
   const [filter, setFilter] = useState("");
   const [index, setIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -21,10 +22,19 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
     inputRef.current?.focus();
   }, []);
 
+  const runCommand = (commandId: string) => {
+    const handled = onSelectCommand ? onSelectCommand(commandId) : true;
+    if (handled !== false) onClose();
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown") { e.preventDefault(); setIndex(i => Math.min(i + 1, filtered.length - 1)); }
     else if (e.key === "ArrowUp") { e.preventDefault(); setIndex(i => Math.max(i - 1, 0)); }
-    else if (e.key === "Enter") { onClose(); }
+    else if (e.key === "Enter") {
+      const command = filtered[index];
+      if (!command) return;
+      runCommand(command.id);
+    }
     else if (e.key === "Escape") { onClose(); }
   };
 
@@ -61,7 +71,7 @@ export default function CommandPalette({ onClose }: CommandPaletteProps) {
                     <div
                       key={c.id}
                       className={`${styles.item} ${gi === index ? styles.itemActive : ""}`}
-                      onClick={onClose}
+                      onClick={() => runCommand(c.id)}
                     >
                       <div className={`${styles.itemIcon} ${gi === index ? styles.itemIconActive : ""}`}>{c.icon}</div>
                       <span className={`${styles.itemLabel} ${gi === index ? styles.itemLabelActive : ""}`}>{c.label}</span>
