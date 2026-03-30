@@ -18,6 +18,7 @@ import PipelineBoard from "../pipeline/PipelineBoard";
 import TemplatesPage from "../templates/TemplatesPage";
 import FinancePage from "../finance/FinancePage";
 import WirePage from "../wire/WirePage";
+import { WIRE_SERVICES } from "@/lib/initial-services";
 import { TableBlock, AccordionBlock, MathBlock, GalleryBlock, SwatchesBlock, BeforeAfterBlock, BookmarkBlock } from "./blocks/ContentBlocks";
 import { CommentThreadBlock, MentionBlock, QuestionBlock, FeedbackBlock, DecisionBlock, PollBlock, HandoffBlock, SignoffBlock, AnnotationBlock, getDefaultCommentThread, getDefaultMention, getDefaultQuestion, getDefaultFeedback, getDefaultDecision, getDefaultPoll, getDefaultHandoff, getDefaultSignoff, getDefaultAnnotation } from "./blocks/CollabBlocks";
 import AiActionBlock, { getDefaultAiActionData } from "./ai-action/AiActionBlock";
@@ -1397,7 +1398,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
             <FinancePage />
           )}
           {railActive === "wire" && (
-            <WirePage />
+            <WirePage workspaces={workspaces} services={WIRE_SERVICES} />
           )}
           {railActive === "team" && (
             <TeamScreen />
