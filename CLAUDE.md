@@ -123,7 +123,16 @@ Chrome Extension (~50 lines)          Web App (app.tryfelmark.com)
 ### 1. No Scope Creep
 - **STOP -> PROPOSE -> WAIT** before expanding scope beyond the current task.
 
-### 2. Conductor Brain (Self-Sustaining -- CRITICAL)
+### 2. Structure Before Code
+Before building any feature that creates 3+ files, answer these four questions (out loud or in a plan):
+1. **Where does it live?** — Which folder? New folder or existing? Match the slash menu category.
+2. **Does shared/ already have what I need?** — Check for hooks (useClickOutside, useEditableField, etc.) and components (Avatar, IconButton, EmptyState) before re-implementing.
+3. **Which hotspot files does it touch?** — If it touches Editor.tsx, types.ts, or constants.ts, note the exact additions (import, CONTENT_DEFAULTS entry, contentBlockMap entry, margin labels).
+4. **One file or a folder?** — If the component + CSS exceeds ~250 lines, give it its own folder. If it's a block type, follow the category folder pattern (`blocks/content/`, `blocks/collab/`, etc.).
+
+This is not a document — it's a 30-second mental checklist. The goal is to build into the right structure the first time, not refactor after.
+
+### 3. Conductor Brain (Self-Sustaining -- CRITICAL)
 
 The Conductor is a self-sustaining knowledge system. These behaviors are **automatic** -- the AI executes them without being asked.
 
