@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import type { DeliverableData, DeliverableStatus, DeliverableFile, DeliverableComment } from "@/lib/types";
+import { useState, useEffect, useRef, useCallback } from "react";
+import type { DeliverableData, DeliverableStatus, DeliverableFile, DeliverableComment, DeliverableActivity, DeliverableSubtask } from "@/lib/types";
 import styles from "./DeliverableBlock.module.css";
 
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -16,17 +16,23 @@ const STATUS_CONFIG: Record<DeliverableStatus, { label: string; color: string; b
 
 const STATUSES: DeliverableStatus[] = ["todo", "in-progress", "review", "changes", "approved"];
 
-const FILE_ICONS: Record<string, { label: string; color: string }> = {
-  pdf: { label: "PDF", color: "#c24b38" },
-  fig: { label: "FIG", color: "#a259ff" },
-  png: { label: "PNG", color: "#5b7fa4" },
-  jpg: { label: "JPG", color: "#5b7fa4" },
-  doc: { label: "DOC", color: "#2b579a" },
+const FILE_TYPE_ICONS: Record<string, string> = {
+  pdf: "📄",
+  image: "🖼",
+  doc: "📝",
+  spreadsheet: "📊",
+  code: "💻",
+  generic: "📎",
 };
 
-function getFileIcon(name: string) {
+function inferFileType(name: string): "pdf" | "image" | "doc" | "spreadsheet" | "code" | "generic" {
   const ext = name.split(".").pop()?.toLowerCase() || "";
-  return FILE_ICONS[ext] || { label: "FILE", color: "#9b988f" };
+  if (ext === "pdf") return "pdf";
+  if (["png", "jpg", "jpeg", "gif", "svg", "webp"].includes(ext)) return "image";
+  if (["doc", "docx", "txt", "rtf", "odt"].includes(ext)) return "doc";
+  if (["xls", "xlsx", "csv"].includes(ext)) return "spreadsheet";
+  if (["js", "ts", "tsx", "jsx", "py", "go", "rs", "html", "css", "json"].includes(ext)) return "code";
+  return "generic";
 }
 
 interface DeliverableBlockProps {
@@ -44,10 +50,17 @@ export default function DeliverableBlock({ data, onChange, onCommentAdded }: Del
   const [editingDesc, setEditingDesc] = useState(false);
   const [titleDraft, setTitleDraft] = useState(data.title);
   const [descDraft, setDescDraft] = useState(data.description);
+  const [dropHighlight, setDropHighlight] = useState(false);
+  const [activityOpen, setActivityOpen] = useState(false);
+  const [subtasksOpen, setSubtasksOpen] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [draggedTask, setDraggedTask] = useState<string | null>(null);
   const titleRef = useRef<HTMLInputElement>(null);
   const descRef = useRef<HTMLTextAreaElement>(null);
 
   const cfg = STATUS_CONFIG[data.status];
+  const activities = data.activities || [];
+  const subtasks = data.subtasks || [];
 
   // Focus title input on edit
   useEffect(() => {
@@ -69,6 +82,11 @@ export default function DeliverableBlock({ data, onChange, onCommentAdded }: Del
     return () => document.removeEventListener("mousedown", handler);
   }, [showStatusMenu]);
 
+  const addActivity = useCallback((text: string, current: DeliverableActivity[]) => {
+    const entry: DeliverableActivity = { id: uid(), text, time: "Just now" };
+    return [...current, entry];
+  }, []);
+
   const commitTitle = () => {
     onChange({ ...data, title: titleDraft.trim() || "Untitled" });
     setEditingTitle(false);
@@ -80,7 +98,9 @@ export default function DeliverableBlock({ data, onChange, onCommentAdded }: Del
   };
 
   const updateStatus = (status: DeliverableStatus) => {
-    onChange({ ...data, status });
+    const label = STATUS_CONFIG[status].label;
+    const newActivities = addActivity(`Status changed to ${label}`, activities);
+    onChange({ ...data, status, activities: newActivities });
     setShowStatusMenu(false);
   };
 
@@ -95,18 +115,36 @@ export default function DeliverableBlock({ data, onChange, onCommentAdded }: Del
     setCommentText("");
   };
 
-  const simulateUpload = () => {
-    const names = ["deliverable-draft.pdf", "design-v2.fig", "mockup.png", "brand-assets.zip"];
-    const name = names[Math.floor(Math.random() * names.length)];
+  const addMockFile = () => {
     const newFile: DeliverableFile = {
-      id: uid(), name, size: `${(Math.random() * 5 + 0.5).toFixed(1)} MB`,
-      uploadedBy: "You", uploadedAt: "now",
+      id: uid(), name: "uploaded-file.pdf", size: "2.4 MB",
+      fileType: "pdf", uploadedBy: "You", uploadedAt: "Just now",
     };
     onChange({
       ...data,
       files: [...data.files, newFile],
       status: data.status === "todo" ? "in-progress" : data.status,
+      activities: addActivity("File uploaded: uploaded-file.pdf", activities),
     });
+  };
+
+  const removeFile = (fileId: string) => {
+    onChange({ ...data, files: data.files.filter(f => f.id !== fileId) });
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDropHighlight(true);
+  };
+
+  const handleDragLeave = () => {
+    setDropHighlight(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDropHighlight(false);
+    addMockFile();
   };
 
   const approve = () => {
@@ -115,13 +153,38 @@ export default function DeliverableBlock({ data, onChange, onCommentAdded }: Del
       ? data.approvals.map(a => a.user === "You" ? { ...a, status: "approved" as const, time: "now" } : a)
       : [...data.approvals, { user: "You", avatar: "A", color: "#b07d4f", status: "approved" as const, time: "now" }];
 
-    // Auto-transition to approved if all approvals are in (and there is at least one)
     const allApproved = updatedApprovals.length > 0 && updatedApprovals.every(a => a.status === "approved");
+    const newActivities = addActivity("Approved by You", activities);
     onChange({
       ...data,
       approvals: updatedApprovals,
       status: allApproved ? "approved" : data.status,
+      activities: newActivities,
     });
+  };
+
+  // Subtask helpers
+  const addSubtask = () => {
+    if (!newTaskTitle.trim()) return;
+    const task: DeliverableSubtask = { id: uid(), title: newTaskTitle.trim(), column: "todo" };
+    onChange({ ...data, subtasks: [...subtasks, task] });
+    setNewTaskTitle("");
+  };
+
+  const handleTaskDragStart = (taskId: string) => {
+    setDraggedTask(taskId);
+  };
+
+  const handleTaskDrop = (column: "todo" | "doing" | "done") => {
+    if (!draggedTask) return;
+    const updated = subtasks.map(t => t.id === draggedTask ? { ...t, column } : t);
+    onChange({ ...data, subtasks: updated });
+    setDraggedTask(null);
+  };
+
+  const getFileTypeIcon = (file: DeliverableFile) => {
+    const ft = file.fileType || inferFileType(file.name);
+    return FILE_TYPE_ICONS[ft] || "📎";
   };
 
   return (
@@ -230,25 +293,28 @@ export default function DeliverableBlock({ data, onChange, onCommentAdded }: Del
           </div>
 
           <div className={styles.panel}>
-            {/* Files */}
+            {/* Files — rich cards */}
             {activeTab === "files" && (
               <>
-                {data.files.map(f => {
-                  const fi = getFileIcon(f.name);
-                  return (
-                    <div key={f.id} className={styles.file}>
-                      <div className={styles.fileIcon} style={{ background: fi.color }}>{fi.label}</div>
-                      <div className={styles.fileInfo}>
-                        <div className={styles.fileName}>{f.name}</div>
-                        <div className={styles.fileMeta}>{f.size} · {f.uploadedBy} · {f.uploadedAt}</div>
-                      </div>
-                      <button className={styles.fileAct} title="Download">↓</button>
+                {data.files.map(f => (
+                  <div key={f.id} className={styles.fileCard}>
+                    <div className={styles.fileCardIcon}>{getFileTypeIcon(f)}</div>
+                    <div className={styles.fileCardInfo}>
+                      <div className={styles.fileCardName}>{f.name}</div>
+                      <div className={styles.fileCardMeta}>{f.size} · {f.uploadedBy} · {f.uploadedAt}</div>
                     </div>
-                  );
-                })}
-                <div className={styles.uploadZone} onClick={simulateUpload}>
-                  <span className={styles.uploadIcon}>↑</span>
-                  <span className={styles.uploadText}>Drop files or click to upload</span>
+                    <button className={styles.fileCardRemove} title="Remove" onClick={() => removeFile(f.id)}>×</button>
+                  </div>
+                ))}
+                {/* Drop zone */}
+                <div
+                  className={`${styles.dropZone} ${dropHighlight ? styles.dropZoneActive : ""}`}
+                  onClick={addMockFile}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                >
+                  Drop files here or click to add
                 </div>
               </>
             )}
@@ -301,6 +367,75 @@ export default function DeliverableBlock({ data, onChange, onCommentAdded }: Del
                   </button>
                 )}
               </>
+            )}
+          </div>
+
+          {/* Activity log — collapsible */}
+          <div className={styles.collapsibleSection}>
+            <div className={styles.collapsibleHeader} onClick={() => setActivityOpen(!activityOpen)}>
+              <span className={styles.collapsibleTitle}>Activity</span>
+              <span className={styles.collapsibleCount}>{activities.length}</span>
+              <span className={`${styles.collapsibleArrow} ${activityOpen ? styles.collapsibleArrowOpen : ""}`}>▶</span>
+            </div>
+            {activityOpen && (
+              <div className={styles.collapsibleBody}>
+                {activities.length === 0 && <div className={styles.empty}>No activity yet</div>}
+                {activities.map(a => (
+                  <div key={a.id} className={styles.activityEntry}>
+                    <span className={styles.activityBullet}>•</span>
+                    <span className={styles.activityText}>{a.text}</span>
+                    <span className={styles.activityTime}>{a.time}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Kanban mini-board — collapsible */}
+          <div className={styles.collapsibleSection}>
+            <div className={styles.collapsibleHeader} onClick={() => setSubtasksOpen(!subtasksOpen)}>
+              <span className={styles.collapsibleTitle}>Sub-tasks</span>
+              <span className={styles.collapsibleCount}>{subtasks.length}</span>
+              <span className={`${styles.collapsibleArrow} ${subtasksOpen ? styles.collapsibleArrowOpen : ""}`}>▶</span>
+            </div>
+            {subtasksOpen && (
+              <div className={styles.kanban}>
+                {(["todo", "doing", "done"] as const).map(col => (
+                  <div
+                    key={col}
+                    className={styles.kanbanCol}
+                    onDragOver={e => e.preventDefault()}
+                    onDrop={() => handleTaskDrop(col)}
+                  >
+                    <div className={styles.kanbanColHeader}>
+                      {col === "todo" ? "To Do" : col === "doing" ? "Doing" : "Done"}
+                    </div>
+                    {subtasks.filter(t => t.column === col).map(t => (
+                      <div
+                        key={t.id}
+                        className={styles.kanbanCard}
+                        draggable
+                        onDragStart={() => handleTaskDragStart(t.id)}
+                      >
+                        {t.title}
+                      </div>
+                    ))}
+                    {col === "todo" && (
+                      <div className={styles.kanbanAdd}>
+                        <input
+                          className={styles.kanbanAddInput}
+                          placeholder="New task..."
+                          value={newTaskTitle}
+                          onChange={e => setNewTaskTitle(e.target.value)}
+                          onKeyDown={e => { if (e.key === "Enter") addSubtask(); }}
+                          onClick={e => e.stopPropagation()}
+                        />
+                        <button className={styles.kanbanAddBtn} onClick={addSubtask} disabled={!newTaskTitle.trim()}>+</button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         </div>

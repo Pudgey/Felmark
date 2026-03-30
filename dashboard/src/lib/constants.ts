@@ -34,6 +34,8 @@ export const BLOCK_TYPES: BlockTypeInfo[] = [
   { type: "handoff", label: "Handoff", icon: "→", desc: "Mark ready for next person", section: "Collaboration", shortcut: "/handoff" },
   { type: "signoff", label: "Sign-off", icon: "✓", desc: "Lock section after approval", section: "Collaboration", shortcut: "/signoff" },
   { type: "annotation", label: "Annotation", icon: "📌", desc: "Pin comments on an image", section: "Collaboration", shortcut: "/annotate" },
+  { type: "canvas", label: "Canvas", icon: "◇", desc: "Sketchy whiteboard drawing", section: "Blocks", shortcut: "/canvas" },
+  { type: "ai-action", label: "AI Action", icon: "⚡", desc: "Summarize, suggest, translate, tone-check, or scope-risk", section: "Blocks", shortcut: "/action" },
 ];
 
 export interface Command {

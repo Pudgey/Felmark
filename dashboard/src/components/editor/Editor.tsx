@@ -11,6 +11,7 @@ import DeliverableBlockComponent from "./deliverable/DeliverableBlock";
 import DeadlineBlockComponent, { getDefaultDeadlineData } from "./deadline-block/DeadlineBlock";
 import AudioBlockComponent, { getDefaultAudioData } from "./audio/AudioBlock";
 import AiBlock from "./ai/AiBlock";
+import CanvasBlock, { getDefaultCanvasData } from "./canvas/CanvasBlock";
 import ShareModal from "./ShareModal";
 import ServicesPage from "../services/ServicesPage";
 import PipelineBoard from "../pipeline/PipelineBoard";
@@ -19,6 +20,7 @@ import FinancePage from "../finance/FinancePage";
 import WirePage from "../wire/WirePage";
 import { TableBlock, AccordionBlock, MathBlock, GalleryBlock, SwatchesBlock, BeforeAfterBlock, BookmarkBlock } from "./blocks/ContentBlocks";
 import { CommentThreadBlock, MentionBlock, QuestionBlock, FeedbackBlock, DecisionBlock, PollBlock, HandoffBlock, SignoffBlock, AnnotationBlock, getDefaultCommentThread, getDefaultMention, getDefaultQuestion, getDefaultFeedback, getDefaultDecision, getDefaultPoll, getDefaultHandoff, getDefaultSignoff, getDefaultAnnotation } from "./blocks/CollabBlocks";
+import AiActionBlock, { getDefaultAiActionData } from "./ai-action/AiActionBlock";
 import { STATUS } from "@/lib/constants";
 import { uid, cursorTo } from "@/lib/utils";
 import EditableBlock from "./EditableBlock";
@@ -321,6 +323,20 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       setSlashMenu(null);
       return;
     }
+    if (type === "canvas") {
+      setBlocks(prev => {
+        const idx = prev.findIndex(b => b.id === blockId);
+        const n = [...prev];
+        n[idx] = { ...n[idx], type: "canvas" as BlockType, content: "", canvasData: getDefaultCanvasData() };
+        const nid = uid();
+        contentCache.current[nid] = "";
+        n.splice(idx + 1, 0, { id: nid, type: "paragraph", content: "", checked: false });
+        setTimeout(() => { const ne = blockElMap.current[nid]; if (ne) cursorTo(ne, false); }, 20);
+        return n;
+      });
+      setSlashMenu(null);
+      return;
+    }
     if (type === "audio") {
       setBlocks(prev => {
         const idx = prev.findIndex(b => b.id === blockId);
@@ -345,6 +361,8 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
             title: "New Deliverable", description: "Describe what needs to be delivered...",
             status: "todo", assignee: "You", assigneeAvatar: "A", assigneeColor: "#b07d4f",
             dueDate: "—", files: [], comments: [], approvals: [],
+            activities: [{ id: "a1", text: "Deliverable created", time: "Just now" }],
+            subtasks: [],
           },
         };
         const nid = uid();
@@ -374,6 +392,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       handoff: { handoffData: getDefaultHandoff() },
       signoff: { signoffData: getDefaultSignoff() },
       annotation: { annotationData: getDefaultAnnotation() },
+      "ai-action": { aiActionData: getDefaultAiActionData() },
     };
     if (CONTENT_DEFAULTS[type]) {
       setBlocks(prev => {
@@ -734,6 +753,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       handoff: (b) => b.handoffData ? <HandoffBlock data={b.handoffData} onChange={(d) => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, handoffData: d } : bl))} /> : null,
       signoff: (b) => b.signoffData ? <SignoffBlock data={b.signoffData} onChange={(d) => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, signoffData: d } : bl))} /> : null,
       annotation: (b) => b.annotationData ? <AnnotationBlock data={b.annotationData} onChange={(d) => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, annotationData: d } : bl))} /> : null,
+      "ai-action": (b) => b.aiActionData ? <AiActionBlock data={b.aiActionData} onUpdate={(d) => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, aiActionData: d } : bl))} /> : null,
     };
 
     if (contentBlockMap[block.type]) {
@@ -862,6 +882,30 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
           <div className={styles.gutter} style={{ opacity: 0 }} />
           <div style={{ flex: 1 }}>
             <AiBlock blockId={block.id} onGenerate={handleAiGenerate} />
+          </div>
+        </div>
+      );
+    }
+
+    if (block.type === "canvas" && block.canvasData) {
+      return (
+        <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+          <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
+            <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
+              <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
+            </button>
+            <div className={`${styles.gutterBtn} ${styles.grip}`}>
+              <svg width="10" height="14" viewBox="0 0 10 14"><circle cx="3" cy="2.5" r="1" fill="currentColor"/><circle cx="7" cy="2.5" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="11.5" r="1" fill="currentColor"/><circle cx="7" cy="11.5" r="1" fill="currentColor"/></svg>
+            </div>
+            <button className={`${styles.gutterBtn} ${styles.gutterDelete}`} onClick={() => deleteBlock(block.id)} title="Delete block">
+              <svg width="10" height="10" viewBox="0 0 10 10"><path d="M3 3l4 4M7 3l-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>
+            </button>
+          </div>
+          <div style={{ flex: 1 }}>
+            <CanvasBlock
+              data={block.canvasData}
+              onUpdate={(updated) => setBlocks(prev => prev.map(b => b.id === block.id ? { ...b, canvasData: updated } : b))}
+            />
           </div>
         </div>
       );

@@ -1,0 +1,222 @@
+.wrapper {
+  border: 1px solid rgba(120, 100, 180, 0.2);
+  border-radius: var(--radius-lg, 12px);
+  overflow: hidden;
+  background: var(--warm-50, #faf9f7);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(120, 100, 180, 0.04);
+  border-bottom: 1px solid rgba(120, 100, 180, 0.1);
+}
+
+.headerIcon {
+  font-size: 14px;
+  color: #7864b4;
+}
+
+.headerLabel {
+  font-family: var(--mono, monospace);
+  font-size: 11px;
+  font-weight: 600;
+  color: #7864b4;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.headerMode {
+  margin-left: auto;
+  font-family: var(--mono, monospace);
+  font-size: 11px;
+  color: var(--ink-400, #8993a1);
+}
+
+/* Mode picker */
+.modePicker {
+  display: flex;
+  gap: 6px;
+  padding: 10px 14px;
+  flex-wrap: wrap;
+}
+
+.modeBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(120, 100, 180, 0.15);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: var(--mono, monospace);
+}
+
+.modeBtn:hover {
+  background: rgba(120, 100, 180, 0.06);
+  border-color: rgba(120, 100, 180, 0.3);
+}
+
+.modeBtnActive {
+  background: #7864b4;
+  border-color: #7864b4;
+  color: #fff;
+}
+
+.modeBtnActive:hover {
+  background: #6a58a4;
+  border-color: #6a58a4;
+}
+
+.modeBtnIcon {
+  font-size: 12px;
+  line-height: 1;
+}
+
+.modeBtnLabel {
+  font-size: 11px;
+  line-height: 1;
+}
+
+.modeBtnActive .modeBtnIcon,
+.modeBtnActive .modeBtnLabel {
+  color: #fff;
+}
+
+/* Context line */
+.context {
+  padding: 6px 14px 10px;
+  font-family: var(--mono, monospace);
+  font-size: 11px;
+  color: var(--ink-400, #8993a1);
+}
+
+.contextTarget {
+  color: #7864b4;
+  font-weight: 500;
+}
+
+/* Language picker */
+.langPicker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px 10px;
+}
+
+.langLabel {
+  font-family: var(--mono, monospace);
+  font-size: 11px;
+  color: var(--ink-400, #8993a1);
+}
+
+.langSelect {
+  font-family: var(--mono, monospace);
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: var(--radius-md, 8px);
+  border: 1px solid rgba(120, 100, 180, 0.2);
+  background: var(--warm-50, #faf9f7);
+  color: var(--ink-600, #2c2a25);
+  cursor: pointer;
+}
+
+.langSelect:focus {
+  outline: none;
+  border-color: #7864b4;
+}
+
+/* Run button */
+.runBtn {
+  display: block;
+  margin: 0 14px 12px;
+  padding: 8px 24px;
+  border: none;
+  border-radius: var(--radius-md, 8px);
+  background: var(--ember, #b07d4f);
+  color: #fff;
+  font-family: var(--mono, monospace);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.runBtn:hover:not(:disabled) {
+  background: #9a6c42;
+}
+
+.runBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Output area */
+.output {
+  margin: 0 14px 12px;
+  border-left: 3px solid #7864b4;
+  border-radius: 0 var(--radius-md, 8px) var(--radius-md, 8px) 0;
+  background: var(--warm-50, #faf9f7);
+  overflow: hidden;
+}
+
+.outputContent {
+  padding: 12px 14px;
+  font-family: var(--mono, monospace);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink-600, #2c2a25);
+  white-space: pre-wrap;
+}
+
+.outputLine {
+  min-height: 1em;
+}
+
+.outputActions {
+  display: flex;
+  gap: 8px;
+  padding: 8px 14px;
+  border-top: 1px solid rgba(120, 100, 180, 0.1);
+}
+
+.rerunBtn {
+  padding: 4px 14px;
+  border: 1px solid rgba(120, 100, 180, 0.2);
+  border-radius: var(--radius-md, 8px);
+  background: transparent;
+  font-family: var(--mono, monospace);
+  font-size: 11px;
+  color: #7864b4;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.rerunBtn:hover:not(:disabled) {
+  background: rgba(120, 100, 180, 0.06);
+}
+
+.rerunBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dismissBtn {
+  padding: 4px 14px;
+  border: 1px solid rgba(120, 100, 180, 0.1);
+  border-radius: var(--radius-md, 8px);
+  background: transparent;
+  font-family: var(--mono, monospace);
+  font-size: 11px;
+  color: var(--ink-400, #8993a1);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dismissBtn:hover {
+  background: rgba(0, 0, 0, 0.03);
+}

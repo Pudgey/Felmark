@@ -31,7 +31,9 @@ export type BlockType =
   | "poll"
   | "handoff"
   | "signoff"
-  | "annotation";
+  | "annotation"
+  | "canvas"
+  | "ai-action";
 
 export type GraphType = "bar" | "line" | "donut" | "hbar" | "sparkline" | "area" | "metrics";
 
@@ -48,8 +50,21 @@ export interface DeliverableFile {
   id: string;
   name: string;
   size: string;
+  fileType?: "pdf" | "image" | "doc" | "spreadsheet" | "code" | "generic";
   uploadedBy: string;
   uploadedAt: string;
+}
+
+export interface DeliverableActivity {
+  id: string;
+  text: string;
+  time: string;
+}
+
+export interface DeliverableSubtask {
+  id: string;
+  title: string;
+  column: "todo" | "doing" | "done";
 }
 
 export interface DeliverableComment {
@@ -80,6 +95,8 @@ export interface DeliverableData {
   files: DeliverableFile[];
   comments: DeliverableComment[];
   approvals: DeliverableApproval[];
+  activities?: DeliverableActivity[];
+  subtasks?: DeliverableSubtask[];
 }
 
 export type MoneyBlockType = "rate-calc" | "pay-schedule" | "expense" | "milestone" | "tax" | "payment";
@@ -225,6 +242,35 @@ export interface AnnotationData {
   pins: { id: string; x: number; y: number; comment: string; author: string; resolved: boolean; }[];
 }
 
+export interface CanvasElement {
+  id: number;
+  type: string;
+  x: number;
+  y: number;
+  w?: number;
+  h?: number;
+  strokeColor: string;
+  fillColor: string;
+  strokeWidth: number;
+  points?: number[][];
+  text?: string;
+  fontSize?: number;
+}
+
+export interface CanvasBlockData {
+  elements: CanvasElement[];
+}
+
+export type AiActionMode = "summarize" | "suggest" | "translate" | "tone" | "scope";
+
+export interface AiActionBlockData {
+  mode: AiActionMode;
+  output: string;
+  targetLabel: string;
+  ran: boolean;
+  language?: string;
+}
+
 export interface Block {
   id: string;
   type: BlockType;
@@ -251,6 +297,8 @@ export interface Block {
   handoffData?: HandoffData;
   signoffData?: SignoffData;
   annotationData?: AnnotationData;
+  canvasData?: CanvasBlockData;
+  aiActionData?: AiActionBlockData;
 }
 
 export interface BlockTypeInfo {
