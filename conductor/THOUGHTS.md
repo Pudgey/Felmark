@@ -18,7 +18,7 @@
 
 | Agent | Task | Started | Status |
 |-------|------|---------|--------|
-| claude-main | Fixed drag-and-drop for all block types via wrapBlock helper | 2026-03-30 | COMPLETE |
+| codex-main | Implementing the first editor polish pack for autosave feedback, block focus clarity, insert cues, and lightweight undo | 2026-03-30 16:54 EDT | ACTIVE |
 
 ## Recent
 

@@ -11,6 +11,7 @@ interface EditableBlockProps {
   onSlash: (blockId: string, filter?: string) => void;
   onSlashClose: () => void;
   onSelect: () => void;
+  onFocusBlock?: (id: string) => void;
   registerRef: (id: string, el: HTMLDivElement) => void;
   onCat?: () => void;
 }
@@ -61,7 +62,7 @@ const DATE_CHIP_STYLE = `
   }
 `;
 
-export default function EditableBlock({ block, onContentChange, onEnter, onBackspace, onSlash, onSlashClose, onSelect, registerRef, onCat }: EditableBlockProps) {
+export default function EditableBlock({ block, onContentChange, onEnter, onBackspace, onSlash, onSlashClose, onSelect, onFocusBlock, registerRef, onCat }: EditableBlockProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [datePicker, setDatePicker] = useState<{ top: number; left: number } | null>(null);
   const dateInputRef = useRef<HTMLInputElement>(null);
@@ -262,7 +263,7 @@ export default function EditableBlock({ block, onContentChange, onEnter, onBacks
         onInput={handleInput}
         onKeyDown={handleKeyDown}
         onMouseUp={onSelect}
-        onFocus={syncEmpty}
+        onFocus={() => { syncEmpty(); onFocusBlock?.(block.id); }}
         spellCheck
       />
       {/* Floating date picker for @date */}
