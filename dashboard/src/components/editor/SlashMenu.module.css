@@ -14,10 +14,10 @@
 .menu::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.06); border-radius: 99px; }
 
 .section {
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 500;
   color: var(--ink-400);
-  padding: 6px 8px 2px;
+  padding: 8px 10px 3px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-family: var(--mono);
@@ -29,10 +29,10 @@
 
 .shortcut {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
   color: var(--ink-300);
   background: var(--warm-100);
-  padding: 1px 5px;
+  padding: 2px 6px;
   border-radius: 3px;
   border: 1px solid var(--warm-200);
   margin-left: auto;
@@ -43,7 +43,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 5px 8px;
+  padding: 7px 10px;
   border-radius: 5px;
   cursor: pointer;
 }
@@ -54,14 +54,14 @@
 }
 
 .icon {
-  width: 38px;
-  height: 38px;
+  width: 42px;
+  height: 42px;
   border-radius: 5px;
   border: 1px solid var(--warm-200);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
   color: var(--ink-500);
   flex-shrink: 0;
@@ -69,11 +69,11 @@
 }
 
 .label {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--ink-800);
 }
 
 .desc {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--ink-400);
 }

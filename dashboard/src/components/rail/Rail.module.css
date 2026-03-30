@@ -1,18 +1,18 @@
 .rail {
-  width: 48px;
+  width: 56px;
   background: var(--rail-bg);
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 10px 0;
-  gap: 2px;
+  padding: 12px 0;
+  gap: 4px;
   flex-shrink: 0;
 }
 
 .logo {
-  width: 36px;
-  height: 36px;
-  margin-bottom: 8px;
+  width: 42px;
+  height: 42px;
+  margin-bottom: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -33,8 +33,8 @@
 }
 
 .btn {
-  width: 36px;
-  height: 36px;
+  width: 42px;
+  height: 42px;
   border-radius: var(--radius-md);
   border: none;
   background: none;
@@ -59,20 +59,20 @@
 
 .badge {
   position: absolute;
-  top: 5px;
-  right: 5px;
-  width: 7px;
-  height: 7px;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: #c24b38;
   border: 2px solid var(--rail-bg);
 }
 
 .sep {
-  width: 20px;
+  width: 24px;
   height: 1px;
   background: rgba(255, 255, 255, 0.06);
-  margin: 6px 0;
+  margin: 8px 0;
 }
 
 .spacer {

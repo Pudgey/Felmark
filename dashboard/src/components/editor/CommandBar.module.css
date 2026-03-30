@@ -1,5 +1,5 @@
 .bar {
-  height: 36px;
+  height: 42px;
   background: var(--warm-50);
   border-top: 1px solid var(--warm-200);
   display: flex;
@@ -11,7 +11,7 @@
 
 .prompt {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 13px;
   color: var(--ember);
   font-weight: 500;
   flex-shrink: 0;
@@ -23,7 +23,7 @@
   border: none;
   outline: none;
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 13px;
   color: var(--ink-700);
 }
 
@@ -38,7 +38,7 @@
 
 .hint {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
   color: var(--ink-300);
   display: flex;
   align-items: center;
@@ -47,7 +47,7 @@
 
 .kbd {
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 500;
   color: var(--ink-400);
   background: var(--warm-100);

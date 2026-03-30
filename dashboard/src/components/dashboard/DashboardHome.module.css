@@ -32,7 +32,7 @@
 
 .date {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
   color: var(--ink-300);
   margin-top: 2px;
 }
@@ -48,7 +48,7 @@
   gap: 5px;
   padding: 7px 14px;
   border-radius: var(--radius-md);
-  font-size: 12.5px;
+  font-size: 13.5px;
   border: 1px solid var(--warm-200);
   background: #fff;
   cursor: pointer;
@@ -112,7 +112,7 @@
   border: 1px solid var(--warm-200);
   border-radius: var(--radius-md);
   font-family: inherit;
-  font-size: 12.5px;
+  font-size: 14px;
   color: var(--ink-700);
   outline: none;
   background: var(--warm-50);
@@ -164,7 +164,7 @@
 }
 
 .wsPickerName {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--ink-700);
   flex: 1;
   overflow: hidden;
@@ -174,7 +174,7 @@
 
 .wsPickerCount {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
   color: var(--ink-300);
   background: var(--warm-100);
   padding: 0 5px;
@@ -196,7 +196,7 @@
 
 .qaKey {
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 11px;
   color: var(--ink-300);
   background: var(--warm-100);
   padding: 1px 4px;
@@ -249,7 +249,7 @@
 
 .statLabel {
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 11px;
   color: var(--ink-400);
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -322,7 +322,7 @@
 
 .sectionAction {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
   color: var(--ink-400);
   background: none;
   border: 1px solid var(--warm-200);
@@ -381,7 +381,7 @@
   border-radius: 50%;
   background: #c24b38;
   color: #fff;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -412,7 +412,7 @@
 
 .wsStatus {
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 500;
   padding: 1px 6px;
   border-radius: 3px;
@@ -435,12 +435,12 @@
 
 .wsDeadline {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .wsActivity {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
   color: var(--ink-300);
 }
 
@@ -469,13 +469,13 @@
 }
 
 .dlAvatar {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   color: #fff;
   flex-shrink: 0;
@@ -487,7 +487,7 @@
 }
 
 .dlTitle {
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--ink-700);
 }
@@ -532,7 +532,7 @@
 
 .dlPct {
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 11px;
   color: var(--ink-300);
 }
 
@@ -561,13 +561,13 @@
 }
 
 .actIcon {
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   flex-shrink: 0;
   margin-top: 1px;
@@ -592,7 +592,7 @@
 
 .actTime {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
   color: var(--ink-300);
   flex-shrink: 0;
   margin-top: 2px;
@@ -643,7 +643,7 @@
 
 .pipeStageVal {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
   color: var(--ink-400);
   display: block;
   margin-top: 1px;
@@ -651,7 +651,7 @@
 
 .pipeStageLabel {
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 11px;
   color: var(--ink-300);
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -709,13 +709,13 @@
 
 .earnBarLabel {
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 11px;
   color: var(--ink-300);
 }
 
 .earnBarVal {
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 11px;
   color: var(--ink-400);
   font-weight: 500;
 }
@@ -724,7 +724,7 @@
 .footer {
   padding: 8px 40px;
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
   color: var(--ink-300);
   display: flex;
   justify-content: space-between;

@@ -7,7 +7,7 @@
 
 /* Tab bar */
 .tabbar {
-  height: 38px;
+  height: 44px;
   background: var(--warm-50);
   border-bottom: 1px solid var(--warm-200);
   display: flex;
@@ -39,9 +39,9 @@
 .tab {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 0 14px;
-  font-size: 12.5px;
+  gap: 8px;
+  padding: 0 16px;
+  font-size: 13.5px;
   color: var(--ink-400);
   cursor: pointer;
   border-right: 1px solid var(--warm-200);
@@ -88,7 +88,7 @@
   outline: none;
   background: transparent;
   font-family: inherit;
-  font-size: 12.5px;
+  font-size: 13.5px;
   color: var(--ink-800);
   width: 120px;
   padding: 1px 2px;
@@ -99,7 +99,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
+  width: 40px;
   flex-shrink: 0;
   background: none;
   border: none;
@@ -120,7 +120,7 @@
   align-items: center;
   justify-content: center;
   padding: 0 10px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   font-family: var(--mono);
   color: var(--ink-400);
@@ -156,8 +156,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 10px;
-  font-size: 12.5px;
+  padding: 7px 12px;
+  font-size: 13.5px;
   color: var(--ink-600);
   cursor: pointer;
   border-radius: 4px;
@@ -182,7 +182,7 @@
 }
 
 .overflowClient {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--ink-300);
   margin-left: auto;
   flex-shrink: 0;
@@ -229,8 +229,8 @@
 }
 
 .tabBarAction {
-  width: 30px;
-  height: 30px;
+  width: 34px;
+  height: 34px;
   border-radius: var(--radius-md);
   border: none;
   background: none;
@@ -278,15 +278,15 @@
 }
 
 .profileAvatar {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: var(--radius-md);
   background: var(--ember);
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: opacity 0.1s;
@@ -315,12 +315,12 @@
 
 /* Breadcrumb */
 .bread {
-  height: 34px;
+  height: 38px;
   padding: 0 20px;
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--ink-400);
   border-bottom: 1px solid var(--warm-100);
   flex-shrink: 0;
@@ -341,7 +341,7 @@
 .breadNav:hover { color: var(--ink-500); background: rgba(0, 0, 0, 0.03); }
 
 .breadStatus {
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 500;
   padding: 2px 7px;
   border-radius: 2px;
@@ -461,8 +461,8 @@
 }
 
 .blockCommentBtn {
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
   border-radius: var(--radius-md);
   border: 1px solid var(--warm-200);
   background: #fff;
@@ -513,15 +513,15 @@
   flex-shrink: 0;
   transition: opacity 0.06s;
   margin-right: 4px;
-  margin-left: -70px;
-  width: 68px;
+  margin-left: -82px;
+  width: 80px;
   justify-content: flex-end;
   gap: 1px;
 }
 
 .gutterBtn {
-  width: 22px;
-  height: 22px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -567,8 +567,8 @@
 }
 
 .todoCheck input {
-  width: 15px;
-  height: 15px;
+  width: 17px;
+  height: 17px;
   accent-color: var(--ember);
   cursor: pointer;
   margin-top: 2px;
