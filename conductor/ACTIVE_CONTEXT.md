@@ -26,5 +26,4 @@ Felmark is actively building the browser-native dashboard experience in `dashboa
 
 ## Pending Manual Actions
 
-- Push local changes to GitHub
 - Decide when to wire Services, Templates, and The Wire to production components

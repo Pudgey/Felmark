@@ -73,7 +73,6 @@ None — all tasks completed.
 
 ## Remaining Tasks
 
-- [ ] Push latest changes to GitHub
 - [ ] Wire Services view (`railActive === "services"`) to actual component
 - [ ] Wire Templates view (`railActive === "templates"`) to actual component
 - [ ] Wire "The Wire" view

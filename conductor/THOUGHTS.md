@@ -18,14 +18,14 @@
 
 | Agent | Task | Started | Status |
 |-------|------|---------|--------|
-| codex-main | Committing and pushing the current publishable worktree while excluding local runtime artifacts | 2026-03-30 10:54 EDT | ACTIVE |
+| | | | |
 
 ## Recent
 
 | Agent | Task | Completed |
 |-------|------|-----------|
+| codex-main | Committed and prepared the current publishable Felmark worktree for GitHub while excluding local runtime artifacts | 2026-03-30 |
 | codex-main | Removed stale Flutter and INDEP references from the shared skill library and rewrote it for Felmark | 2026-03-30 |
 | codex-main | Reviewed Claude skill protocols and adopted the usable command set for this repo | 2026-03-30 |
 | claude-main | Massive feature sprint: graph blocks, money blocks, deadline blocks, @date chips, block deletion, date pickers, personal workspace, services/templates icons, outline drag-reorder, competitive intel | 2026-03-30 |
 | claude-main | Sprint: Wire Workspace Home — T-001 through T-005 | 2026-03-29 |
-| claude-main | MISSION_CONVERSATIONS_V2 — all 5 deliverables complete | 2026-03-29 |
