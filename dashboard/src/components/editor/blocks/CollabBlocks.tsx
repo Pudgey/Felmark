@@ -398,18 +398,31 @@ export function SignoffBlock({ data, onChange }: { data: SignoffData; onChange: 
 // ══════════════════════════════════════
 
 export function AnnotationBlock({ data, onChange }: { data: AnnotationData; onChange: (d: AnnotationData) => void }) {
-  const [newComment, setNewComment] = useState("");
+  const [pendingPin, setPendingPin] = useState<{ x: number; y: number } | null>(null);
+  const [pinComment, setPinComment] = useState("");
 
   const handleCanvasClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (pendingPin) return; // Don't place new pin while composing
     const rect = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
-    const comment = prompt("Add a comment for this pin:");
-    if (!comment) return;
+    setPendingPin({ x, y });
+    setPinComment("");
+  };
+
+  const confirmPin = () => {
+    if (!pendingPin || !pinComment.trim()) return;
     onChange({
       ...data,
-      pins: [...data.pins, { id: `pin${Date.now()}`, x, y, comment, author: "You", resolved: false }],
+      pins: [...data.pins, { id: `pin${Date.now()}`, x: pendingPin.x, y: pendingPin.y, comment: pinComment.trim(), author: "You", resolved: false }],
     });
+    setPendingPin(null);
+    setPinComment("");
+  };
+
+  const cancelPin = () => {
+    setPendingPin(null);
+    setPinComment("");
   };
 
   const resolvePin = (id: string) => {
@@ -443,7 +456,19 @@ export function AnnotationBlock({ data, onChange }: { data: AnnotationData; onCh
             {i + 1}
           </div>
         ))}
+        {pendingPin && (
+          <div className={styles.annotationPin} style={{ left: `${pendingPin.x}%`, top: `${pendingPin.y}%`, opacity: 0.6 }} onClick={e => e.stopPropagation()}>
+            ?
+          </div>
+        )}
       </div>
+      {pendingPin && (
+        <div className={styles.annotationCompose}>
+          <input className={styles.blockInput} placeholder="Add a comment for this pin..." value={pinComment} onChange={e => setPinComment(e.target.value)} onKeyDown={e => { if (e.key === "Enter") confirmPin(); if (e.key === "Escape") cancelPin(); }} autoFocus />
+          <button className={`${styles.blockBtn} ${styles.blockBtnPrimary} ${styles.blockBtnSmall}`} onClick={confirmPin}>Add</button>
+          <button className={`${styles.blockBtn} ${styles.blockBtnSmall}`} onClick={cancelPin}>Cancel</button>
+        </div>
+      )}
       <div style={{ padding: "8px 16px" }}>
         <input className={styles.blockInput} placeholder="Image URL..." value={data.imageUrl} onChange={e => onChange({ ...data, imageUrl: e.target.value })} style={{ fontSize: 12 }} />
       </div>

@@ -134,7 +134,7 @@
 
 .rfBarLabel {
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 11px;
   color: var(--ink-300);
 }
 
@@ -148,7 +148,7 @@
   padding: 4px 8px;
   border-radius: var(--radius-sm);
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
   white-space: nowrap;
   display: flex;
   flex-direction: column;
@@ -160,7 +160,7 @@
 }
 
 .rfTtEarned { color: #8fbc6b; }
-.rfTtPending { color: rgba(255, 255, 255, 0.4); font-size: 9px; }
+.rfTtPending { color: rgba(255, 255, 255, 0.4); font-size: 11px; }
 
 /* Breakdown */
 .rfBreakdown {
@@ -200,7 +200,7 @@
 
 .statsToggleLabel {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
   color: var(--ink-400);
 }
 
@@ -221,7 +221,7 @@
 }
 
 .statMiniVal { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--ink-700); }
-.statMiniLab { font-family: var(--mono); font-size: 9px; color: var(--ink-400); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 1px; }
+.statMiniLab { font-family: var(--mono); font-size: 11px; color: var(--ink-400); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 1px; }
 
 /* Search */
 .searchWrap { position: relative; flex-shrink: 0; padding: 0 12px; margin-bottom: 6px; }
@@ -394,14 +394,14 @@
   color: var(--ink-400);
   flex-shrink: 0;
   transition: transform 0.15s;
-  font-size: 9px;
+  font-size: 11px;
   width: 16px;
   text-align: center;
 }
 
 .wsMenuBtn {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 4px;
   border: none;
   background: none;
@@ -449,7 +449,7 @@
 
 .wsDropBadge {
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 600;
   color: #fff;
   background: var(--ember);
@@ -559,8 +559,8 @@
 }
 
 .pjActBtn {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: var(--radius-sm);
   border: none;
   background: none;
@@ -686,7 +686,7 @@
 }
 
 .archiveArrow {
-  font-size: 8px;
+  font-size: 11px;
   color: var(--ink-400);
   flex-shrink: 0;
   transition: transform 0.12s;
@@ -732,8 +732,8 @@
 }
 
 .archiveRestoreBtn {
-  width: 22px;
-  height: 22px;
+  width: 28px;
+  height: 28px;
   border-radius: 4px;
   border: none;
   background: none;
@@ -829,7 +829,7 @@
 
 .calDayHeader {
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 500;
   color: var(--ink-300);
   text-transform: uppercase;

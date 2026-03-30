@@ -182,6 +182,17 @@ export default function DeliverableBlock({ data, onChange, onCommentAdded }: Del
     setDraggedTask(null);
   };
 
+  const COLS: ("todo" | "doing" | "done")[] = ["todo", "doing", "done"];
+  const moveTask = (taskId: string, direction: -1 | 1) => {
+    const task = subtasks.find(t => t.id === taskId);
+    if (!task) return;
+    const idx = COLS.indexOf(task.column);
+    const nextIdx = idx + direction;
+    if (nextIdx < 0 || nextIdx >= COLS.length) return;
+    const updated = subtasks.map(t => t.id === taskId ? { ...t, column: COLS[nextIdx] } : t);
+    onChange({ ...data, subtasks: updated });
+  };
+
   const getFileTypeIcon = (file: DeliverableFile) => {
     const ft = file.fileType || inferFileType(file.name);
     return FILE_TYPE_ICONS[ft] || "📎";
@@ -415,7 +426,14 @@ export default function DeliverableBlock({ data, onChange, onCommentAdded }: Del
                         key={t.id}
                         className={styles.kanbanCard}
                         draggable
+                        tabIndex={0}
+                        role="button"
+                        aria-label={`${t.title} — ${col === "todo" ? "To Do" : col === "doing" ? "Doing" : "Done"}. Arrow keys to move.`}
                         onDragStart={() => handleTaskDragStart(t.id)}
+                        onKeyDown={e => {
+                          if (e.key === "ArrowRight") { e.preventDefault(); moveTask(t.id, 1); }
+                          if (e.key === "ArrowLeft") { e.preventDefault(); moveTask(t.id, -1); }
+                        }}
                       >
                         {t.title}
                       </div>

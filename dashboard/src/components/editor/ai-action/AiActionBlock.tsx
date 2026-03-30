@@ -58,6 +58,7 @@ export default function AiActionBlock({ data, onUpdate }: AiActionBlockProps) {
   };
 
   const handleRun = () => {
+    if (running) return;
     setRunning(true);
     setTimeout(() => {
       let output = MOCK_OUTPUTS[data.mode];
