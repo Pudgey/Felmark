@@ -12,6 +12,7 @@ import ErrorBoundary from "@/components/shared/ErrorBoundary";
 import { INITIAL_COMMENTS, type Comment } from "@/components/comments/CommentPanel";
 import { INITIAL_ACTIVITIES, type BlockActivity } from "@/components/activity/ActivityMargin";
 import CreationAnimation from "@/components/onboarding/CreationAnimation";
+import Launchpad from "@/components/launchpad/Launchpad";
 
 const INITIAL_TABS: Tab[] = [
   { id: "p1", name: "Brand Guidelines v2", client: "Meridian Studio", active: true },
@@ -58,9 +59,11 @@ export default function Dashboard() {
   const [isResizing, setIsResizing] = useState(false);
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<string | null>(null);
   const [calendarScrollTarget, setCalendarScrollTarget] = useState<string | null>(null);
+  const [launchpadOpen, setLaunchpadOpen] = useState(false);
   const resizeRef = useRef<{ startX: number; startW: number } | null>(null);
 
   const overdueCount = workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "overdue").length, 0);
+
 
   // Single click — pure expand/collapse toggle
   const toggleWorkspace = (wid: string) =>
@@ -170,8 +173,7 @@ export default function Dashboard() {
       id: projectId,
       name: projectName,
       status: "active",
-      due: "—",
-      daysLeft: null,
+      due: null,
       amount: "—",
       progress: 0,
       pinned: false,
@@ -213,7 +215,7 @@ export default function Dashboard() {
       lastActive: "now",
       projects: [{
         id: projectId, name: "Untitled", status: "active",
-        due: "—", daysLeft: null, amount: "—", progress: 0, pinned: false,
+        due: null, amount: "—", progress: 0, pinned: false,
       }],
     }]);
 
@@ -223,6 +225,13 @@ export default function Dashboard() {
     }]);
     setActiveProject(projectId);
     setOnboardingName(null);
+  };
+
+  const updateProjectDue = (projectId: string, due: string | null) => {
+    setWorkspaces(prev => prev.map(w => ({
+      ...w,
+      projects: w.projects.map(p => p.id === projectId ? { ...p, due } : p),
+    })));
   };
 
   const archiveProject = (projectId: string) => {
@@ -271,6 +280,8 @@ export default function Dashboard() {
   const archiveWorkspace = (wsId: string) => {
     const ws = workspaces.find(w => w.id === wsId);
     if (!ws) return;
+    // Prevent archiving the last personal workspace
+    if (ws.personal && workspaces.filter(w => w.personal).length <= 1) return;
 
     setArchived(prev => [...prev, ...ws.projects.map(project => ({
       project, workspaceId: ws.id, workspaceName: ws.client,
@@ -310,8 +321,7 @@ export default function Dashboard() {
       id: newId,
       name: "Untitled",
       status: "active",
-      due: "—",
-      daysLeft: null,
+      due: null,
       amount: "—",
       progress: 0,
       pinned: false,
@@ -332,6 +342,26 @@ export default function Dashboard() {
     setActiveProject(newId);
   };
 
+  const handleNewTabInWorkspace = (wsId: string) => {
+    const ws = workspaces.find(w => w.id === wsId);
+    if (!ws) return;
+    const newId = uid();
+    const newProject: Project = {
+      id: newId, name: "Untitled", status: "active",
+      due: null, amount: "—", progress: 0, pinned: false,
+    };
+    setWorkspaces(prev => prev.map(w =>
+      w.id === wsId ? { ...w, open: true, projects: [...w.projects, newProject] } : w
+    ));
+    setBlocksMap(prev => ({ ...prev, [newId]: makeEmptyBlocks() }));
+    setActiveWorkspaceId(null);
+    setTabs(prev => [...prev.map(t => ({ ...t, active: false })), {
+      id: newId, name: "Untitled", client: ws.client, active: true,
+    }]);
+    setActiveProject(newId);
+    setRailActive("workspaces");
+  };
+
   const handleBlocksChange = useCallback((projectId: string, blocks: Block[]) => {
     setBlocksMap(prev => ({ ...prev, [projectId]: blocks }));
   }, []);
@@ -349,7 +379,19 @@ export default function Dashboard() {
       <Rail
         activeItem={railActive}
         overdueCount={overdueCount}
-        onItemClick={(item) => { setRailActive(item); setSidebarOpen(true); }}
+        onItemClick={(item) => {
+          if (item === "workspaces") {
+            setLaunchpadOpen(true);
+            return;
+          }
+          setRailActive(item);
+          if (item === "home") {
+            setActiveWorkspaceId(null);
+            setTabs(prev => prev.map(t => ({ ...t, active: false })));
+            setActiveProject("");
+            setSidebarOpen(true);
+          }
+        }}
       />
       <Sidebar
         workspaces={workspaces}
@@ -369,6 +411,7 @@ export default function Dashboard() {
         onArchiveWorkspace={archiveWorkspace}
         onRestoreProject={restoreProject}
         onRenameProject={handleTabRename}
+        onUpdateProjectDue={updateProjectDue}
         onRenameWorkspace={(wsId, name) => {
           setWorkspaces(prev => prev.map(w => w.id === wsId ? { ...w, client: name, avatar: name[0].toUpperCase() } : w));
           setTabs(prev => prev.map(t => {
@@ -475,6 +518,8 @@ export default function Dashboard() {
           onWordCountChange={handleWordCountChange}
           onSelectProject={selectProject}
           onNewWorkspace={() => setOnboardingName("New Client")}
+          onNewTabInWorkspace={handleNewTabInWorkspace}
+          onSelectWorkspaceHome={selectWorkspaceHome}
           railActive={railActive}
           calendarScrollTarget={calendarScrollTarget}
           onCalendarScrollComplete={() => setCalendarScrollTarget(null)}
@@ -487,6 +532,7 @@ export default function Dashboard() {
               return t;
             }));
           }}
+          onUpdateProjectDue={updateProjectDue}
           comments={comments}
           onCommentsChange={setComments}
           activities={activitiesMap[activeProject] || []}
@@ -494,6 +540,29 @@ export default function Dashboard() {
         />
       )}
     </div>
+
+    <Launchpad
+      open={launchpadOpen}
+      onClose={() => setLaunchpadOpen(false)}
+      workspaces={workspaces}
+      onNavigate={(screenId) => {
+        setRailActive(screenId);
+        if (screenId === "home") {
+          setActiveWorkspaceId(null);
+          setTabs(prev => prev.map(t => ({ ...t, active: false })));
+          setActiveProject("");
+        }
+        setSidebarOpen(true);
+      }}
+      onSelectWorkspace={(wsId) => {
+        selectWorkspaceHome(wsId);
+        setRailActive("workspaces");
+      }}
+      onOpenCommandPalette={() => {
+        // Editor manages command palette state internally
+        // This is a placeholder — in the future, lift cmdPalette state to page.tsx
+      }}
+    />
     </ErrorBoundary>
   );
 }

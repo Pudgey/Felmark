@@ -8,7 +8,12 @@ import graphStyles from "./graphs/GraphBlock.module.css";
 import MoneyBlockComponent, { getDefaultMoneyData, MONEY_TYPE_OPTIONS } from "./money/MoneyBlock";
 import moneyStyles from "./money/MoneyBlock.module.css";
 import DeliverableBlockComponent from "./deliverable/DeliverableBlock";
+import DeadlineBlockComponent, { getDefaultDeadlineData } from "./deadline-block/DeadlineBlock";
 import ServicesPage from "../services/ServicesPage";
+import PipelineBoard from "../pipeline/PipelineBoard";
+import TemplatesPage from "../templates/TemplatesPage";
+import FinancePage from "../finance/FinancePage";
+import { TableBlock, AccordionBlock, MathBlock, GalleryBlock, SwatchesBlock, BeforeAfterBlock, BookmarkBlock } from "./blocks/ContentBlocks";
 import { STATUS } from "@/lib/constants";
 import { uid, cursorTo } from "@/lib/utils";
 import EditableBlock from "./EditableBlock";
@@ -25,6 +30,7 @@ import EditorMargin from "./margin/EditorMargin";
 import WorkspaceHome from "../workspace/WorkspaceHome";
 import CalendarFull from "../calendar/CalendarFull";
 import SearchPage from "../search/SearchPage";
+import DashboardHome from "../dashboard/DashboardHome";
 import type { Project } from "@/lib/types";
 import styles from "./Editor.module.css";
 
@@ -46,18 +52,21 @@ interface EditorProps {
   activeWorkspaceId?: string | null;
   onSelectProject?: (project: Project, client: string) => void;
   onNewWorkspace?: () => void;
+  onNewTabInWorkspace?: (wsId: string) => void;
+  onSelectWorkspaceHome?: (wsId: string) => void;
   railActive?: string;
   onCalendarOpenProject?: (workspaceId: string) => void;
   calendarScrollTarget?: string | null;
   onCalendarScrollComplete?: () => void;
   onRenameWorkspace?: (wsId: string, name: string) => void;
+  onUpdateProjectDue?: (projectId: string, due: string | null) => void;
   comments: CommentType[];
   onCommentsChange: (comments: CommentType[]) => void;
   activities: BlockActivity[];
   onActivitiesChange: (activities: BlockActivity[]) => void;
 }
 
-export default function Editor({ workspaces, tabs, activeProject, blocks: blocksProp, sidebarOpen, wordCount, charCount, onOpenSidebar, onTabClick, onTabClose, onNewTab, onTabRename, onBlocksChange, onWordCountChange, activeWorkspaceId, onSelectProject, onNewWorkspace, railActive, onCalendarOpenProject, calendarScrollTarget, onCalendarScrollComplete, onRenameWorkspace, comments, onCommentsChange, activities, onActivitiesChange }: EditorProps) {
+export default function Editor({ workspaces, tabs, activeProject, blocks: blocksProp, sidebarOpen, wordCount, charCount, onOpenSidebar, onTabClick, onTabClose, onNewTab, onTabRename, onBlocksChange, onWordCountChange, activeWorkspaceId, onSelectProject, onNewWorkspace, onNewTabInWorkspace, onSelectWorkspaceHome, railActive, onCalendarOpenProject, calendarScrollTarget, onCalendarScrollComplete, onRenameWorkspace, onUpdateProjectDue, comments, onCommentsChange, activities, onActivitiesChange }: EditorProps) {
   const [blocks, setBlocksLocal] = useState<Block[]>(blocksProp);
   const [editingTabId, setEditingTabId] = useState<string | null>(null);
   const [editingTabName, setEditingTabName] = useState("");
@@ -255,6 +264,20 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       setSlashMenu(null);
       return;
     }
+    if (type === "deadline") {
+      setBlocks(prev => {
+        const idx = prev.findIndex(b => b.id === blockId);
+        const n = [...prev];
+        n[idx] = { ...n[idx], type: "deadline" as BlockType, content: "", deadlineData: getDefaultDeadlineData() };
+        const nid = uid();
+        contentCache.current[nid] = "";
+        n.splice(idx + 1, 0, { id: nid, type: "paragraph", content: "", checked: false });
+        setTimeout(() => { const ne = blockElMap.current[nid]; if (ne) cursorTo(ne, false); }, 20);
+        return n;
+      });
+      setSlashMenu(null);
+      return;
+    }
     if (type === "deliverable") {
       setBlocks(prev => {
         const idx = prev.findIndex(b => b.id === blockId);
@@ -267,6 +290,30 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
             dueDate: "—", files: [], comments: [], approvals: [],
           },
         };
+        const nid = uid();
+        contentCache.current[nid] = "";
+        n.splice(idx + 1, 0, { id: nid, type: "paragraph", content: "", checked: false });
+        setTimeout(() => { const ne = blockElMap.current[nid]; if (ne) cursorTo(ne, false); }, 20);
+        return n;
+      });
+      setSlashMenu(null);
+      return;
+    }
+    // Content blocks — insert with default data
+    const CONTENT_DEFAULTS: Record<string, Partial<import("@/lib/types").Block>> = {
+      table: { tableData: { rows: [["Column 1", "Column 2", "Column 3"], ["—", "—", "—"], ["—", "—", "—"]] } },
+      accordion: { accordionData: { items: [{ title: "Section 1", content: "Content here..." }, { title: "Section 2", content: "Content here..." }] } },
+      math: { mathData: { formula: "Total = Quantity × Rate", variables: [{ name: "Quantity", value: "1" }, { name: "Rate", value: "$0" }], result: "$0" } },
+      gallery: { galleryData: { images: [{ icon: "◆", caption: "Image 1", meta: "Click to upload" }, { icon: "◇", caption: "Image 2", meta: "Click to upload" }, { icon: "◎", caption: "Image 3", meta: "Click to upload" }] } },
+      swatches: { swatchesData: { colors: [{ name: "Primary", hex: "#b07d4f" }, { name: "Dark", hex: "#2c2a25" }, { name: "Light", hex: "#faf9f7" }, { name: "Accent", hex: "#5a9a3c" }] } },
+      beforeafter: { beforeAfterData: { beforeLabel: "Before", afterLabel: "After" } },
+      bookmark: { bookmarkData: { url: "https://example.com", title: "Link Title", description: "A brief description of the linked resource.", source: "Website", favicon: "◇" } },
+    };
+    if (CONTENT_DEFAULTS[type]) {
+      setBlocks(prev => {
+        const idx = prev.findIndex(b => b.id === blockId);
+        const n = [...prev];
+        n[idx] = { ...n[idx], type: type as import("@/lib/types").BlockType, content: "", ...CONTENT_DEFAULTS[type] };
         const nid = uid();
         contentCache.current[nid] = "";
         n.splice(idx + 1, 0, { id: nid, type: "paragraph", content: "", checked: false });
@@ -556,6 +603,33 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       );
     }
 
+    // Content blocks (table, accordion, math, gallery, swatches, beforeafter, bookmark)
+    const contentBlockMap: Record<string, (b: typeof block) => React.ReactNode> = {
+      table: (b) => b.tableData ? <TableBlock data={b.tableData} onChange={(d) => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, tableData: d } : bl))} /> : null,
+      accordion: (b) => b.accordionData ? <AccordionBlock data={b.accordionData} onChange={(d) => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, accordionData: d } : bl))} /> : null,
+      math: (b) => b.mathData ? <MathBlock data={b.mathData} /> : null,
+      gallery: (b) => b.galleryData ? <GalleryBlock data={b.galleryData} /> : null,
+      swatches: (b) => b.swatchesData ? <SwatchesBlock data={b.swatchesData} /> : null,
+      beforeafter: (b) => b.beforeAfterData ? <BeforeAfterBlock data={b.beforeAfterData} /> : null,
+      bookmark: (b) => b.bookmarkData ? <BookmarkBlock data={b.bookmarkData} /> : null,
+    };
+
+    if (contentBlockMap[block.type]) {
+      return (
+        <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+          <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
+            <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
+              <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
+            </button>
+            <div className={`${styles.gutterBtn} ${styles.grip}`}>
+              <svg width="10" height="14" viewBox="0 0 10 14"><circle cx="3" cy="2.5" r="1" fill="currentColor"/><circle cx="7" cy="2.5" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="11.5" r="1" fill="currentColor"/><circle cx="7" cy="11.5" r="1" fill="currentColor"/></svg>
+            </div>
+          </div>
+          <div style={{ flex: 1 }}>{contentBlockMap[block.type](block)}</div>
+        </div>
+      );
+    }
+
     // Graph sub-picker — shown when user selected "Graph" from slash menu
     if (graphPicker && graphPicker.blockId === block.id && block.type !== "graph") {
       return (
@@ -626,6 +700,31 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
                 ))}
               </div>
             </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Deadline block
+    if (block.type === "deadline" && block.deadlineData) {
+      return (
+        <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+          <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
+            <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
+              <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
+            </button>
+            <div className={`${styles.gutterBtn} ${styles.grip}`}>
+              <svg width="10" height="14" viewBox="0 0 10 14"><circle cx="3" cy="2.5" r="1" fill="currentColor"/><circle cx="7" cy="2.5" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="11.5" r="1" fill="currentColor"/><circle cx="7" cy="11.5" r="1" fill="currentColor"/></svg>
+            </div>
+            <button className={`${styles.gutterBtn} ${styles.gutterDelete}`} onClick={() => deleteBlock(block.id)} title="Delete block">
+              <svg width="10" height="10" viewBox="0 0 10 10"><path d="M3 3l4 4M7 3l-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>
+            </button>
+          </div>
+          <div style={{ flex: 1 }}>
+            <DeadlineBlockComponent
+              data={block.deadlineData}
+              onUpdate={(updated) => setBlocks(prev => prev.map(b => b.id === block.id ? { ...b, deadlineData: updated } : b))}
+            />
           </div>
         </div>
       );
@@ -871,26 +970,30 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
           {railActive === "services" && (
             <ServicesPage />
           )}
-          {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && activeWorkspaceId && (() => {
+          {railActive === "pipeline" && (
+            <PipelineBoard />
+          )}
+          {railActive === "templates" && (
+            <TemplatesPage />
+          )}
+          {railActive === "finance" && (
+            <FinancePage />
+          )}
+          {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && activeWorkspaceId && (() => {
             const ws = workspaces.find(w => w.id === activeWorkspaceId);
             return ws && onSelectProject ? (
-              <WorkspaceHome workspace={ws} onSelectProject={onSelectProject} onNewTab={onNewTab} onRenameWorkspace={onRenameWorkspace} />
+              <WorkspaceHome workspace={ws} onSelectProject={onSelectProject} onNewTab={onNewTab} onRenameWorkspace={onRenameWorkspace} onUpdateProjectDue={onUpdateProjectDue} />
             ) : null;
           })()}
-          {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && !activeWorkspaceId && !tabs.some(t => t.active) && (
-            /* Terminal welcome — no active tab */
-            <TerminalWelcome
-              activeCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "active").length, 0)}
-              reviewCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "review").length, 0)}
-              overdueCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "overdue").length, 0)}
-              totalEarned={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "completed").reduce((a, p) => { const m = p.amount.match(/[\d,]+/); return a + (m ? parseInt(m[0].replace(",", "")) : 0); }, 0), 0)}
-              totalPending={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status !== "completed").reduce((a, p) => { const m = p.amount.match(/[\d,]+/); return a + (m ? parseInt(m[0].replace(",", "")) : 0); }, 0), 0)}
-              pipeline={workspaces.reduce((s, w) => s + w.projects.reduce((a, p) => { const m = p.amount.match(/[\d,]+/); return a + (m ? parseInt(m[0].replace(",", "")) : 0); }, 0), 0)}
-              onOpenCmdPalette={() => setCmdPalette(true)}
-              onNewWorkspace={onNewWorkspace}
+          {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && !activeWorkspaceId && !tabs.some(t => t.active) && (
+            <DashboardHome
+              workspaces={workspaces}
+              onSelectWorkspace={onSelectWorkspaceHome || (() => {})}
+              onSelectProject={onSelectProject || (() => {})}
+              onNewTabInWorkspace={onNewTabInWorkspace || (() => {})}
             />
           )}
-          {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && !activeWorkspaceId && tabs.some(t => t.active) && (
+          {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && !activeWorkspaceId && tabs.some(t => t.active) && (
             <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
               {/* Left margin — document spine + block gutter */}
               <EditorMargin
@@ -900,6 +1003,14 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
                 onScrollTo={(id) => {
                   const el = blockElMap.current[id];
                   if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                onReorderBlock={(fromIdx, toIdx) => {
+                  setBlocks(prev => {
+                    const n = [...prev];
+                    const [moved] = n.splice(fromIdx, 1);
+                    n.splice(toIdx, 0, moved);
+                    return n;
+                  });
                 }}
               />
               {/* Editor area */}

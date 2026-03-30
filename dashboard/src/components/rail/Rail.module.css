@@ -10,12 +10,26 @@
 }
 
 .logo {
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   margin-bottom: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: var(--radius-md);
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: all 0.1s;
+  padding: 0;
+}
+
+.logo:hover {
+  background: var(--rail-hover);
+}
+
+.logoActive {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .btn {

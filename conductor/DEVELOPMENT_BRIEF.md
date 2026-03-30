@@ -109,6 +109,9 @@ Three tiers:
 | [COMPETITIVE_ANALYSIS.md](Reports/COMPETITIVE_ANALYSIS.md) | Industry competitor analysis | Reference |
 | [PIPELINE_CONCEPT.md](missions/PIPELINE_CONCEPT.md) | Kanban deal pipeline — Lead → Proposed → Active → Payment → Done | M2 |
 | [SEARCH_CONCEPT.md](missions/SEARCH_CONCEPT.md) | Universal search — projects, docs, invoices, clients, messages, commands | M1 |
+| [DASHBOARD_HOME_CONCEPT.md](missions/DASHBOARD_HOME_CONCEPT.md) | Dashboard home — freelancer command center with earnings, pipeline, activity | M1 |
+| [LAUNCHPAD_CONCEPT.md](missions/LAUNCHPAD_CONCEPT.md) | Launchpad — Spotlight-style overlay to jump to any screen, doc, or workspace | M1 |
+| [COMPETITIVE_MOAT.md](../business/COMPETITIVE_MOAT.md) | Strategy: why Felmark isn't a cheaper HoneyBook — context engine, doc-first workflow, The Wire | Reference |
 | — | Async messaging per workspace | M3+ |
 | — | Team workspaces + real-time collab | M4 |
 | — | Template marketplace | M4+ |

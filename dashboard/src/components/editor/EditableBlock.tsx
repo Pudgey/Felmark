@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import type { Block } from "@/lib/types";
 
 interface EditableBlockProps {
@@ -20,11 +20,11 @@ const PLACEHOLDERS: Record<string, string> = {
   h3: "Heading 3",
   code: "// code",
   quote: "Quote",
-  paragraph: "Type '/' for commands, ⌘K for palette",
+  paragraph: "Type '/' for commands, @date for dates",
   bullet: "List",
   numbered: "List",
   todo: "To-do",
-  callout: "Type here…",
+  callout: "Type here\u2026",
 };
 
 const STYLES: Record<string, React.CSSProperties> = {
@@ -40,8 +40,40 @@ const STYLES: Record<string, React.CSSProperties> = {
   code: { fontFamily: "var(--font-mono), 'JetBrains Mono', monospace", fontSize: "0.84em", background: "var(--warm-100)", border: "1px solid var(--warm-200)", borderRadius: 5, padding: "14px 16px", lineHeight: 1.65, whiteSpace: "pre-wrap", tabSize: 2, color: "var(--ink-700)" },
 };
 
+// Date chip CSS injected once
+const DATE_CHIP_STYLE = `
+  .felmark-date-chip {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-family: var(--font-mono), 'JetBrains Mono', monospace;
+    font-size: 0.85em; font-weight: 500;
+    color: var(--ember); background: var(--ember-bg);
+    padding: 1px 7px; border-radius: 4px;
+    border: 1px solid rgba(176,125,79,0.12);
+    cursor: pointer; white-space: nowrap;
+    transition: background 0.08s;
+  }
+  .felmark-date-chip:hover {
+    background: rgba(176,125,79,0.12);
+  }
+  .felmark-date-chip::before {
+    content: "\\25C7"; font-size: 0.8em;
+  }
+`;
+
 export default function EditableBlock({ block, onContentChange, onEnter, onBackspace, onSlash, onSlashClose, onSelect, registerRef }: EditableBlockProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const [datePicker, setDatePicker] = useState<{ top: number; left: number } | null>(null);
+  const dateInputRef = useRef<HTMLInputElement>(null);
+  const pendingChipRef = useRef<HTMLSpanElement | null>(null);
+
+  // Inject date chip styles once
+  useEffect(() => {
+    if (document.getElementById("felmark-date-chip-style")) return;
+    const style = document.createElement("style");
+    style.id = "felmark-date-chip-style";
+    style.textContent = DATE_CHIP_STYLE;
+    document.head.appendChild(style);
+  }, []);
 
   useEffect(() => {
     if (ref.current) registerRef(block.id, ref.current);
@@ -53,24 +85,99 @@ export default function EditableBlock({ block, onContentChange, onEnter, onBacks
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // When block type changes (e.g. backspace converts h1 → paragraph), sync the DOM
   useEffect(() => {
     if (ref.current) {
       ref.current.setAttribute("data-placeholder", PLACEHOLDERS[block.type] || "Type '/' for commands");
     }
   }, [block.type]);
 
+  // Handle clicks on existing date chips to edit them
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const handler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.classList.contains("felmark-date-chip")) {
+        e.preventDefault();
+        e.stopPropagation();
+        pendingChipRef.current = target as HTMLSpanElement;
+        const rect = target.getBoundingClientRect();
+        setDatePicker({ top: rect.bottom + 4, left: rect.left });
+        setTimeout(() => dateInputRef.current?.showPicker?.(), 50);
+      }
+    };
+    el.addEventListener("click", handler);
+    return () => el.removeEventListener("click", handler);
+  }, []);
+
+  const insertDateChip = useCallback((isoDate: string) => {
+    if (!ref.current) return;
+    const d = new Date(isoDate + "T00:00:00");
+    const display = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+    if (pendingChipRef.current) {
+      // Editing an existing chip
+      pendingChipRef.current.setAttribute("data-felmark-date", isoDate);
+      pendingChipRef.current.textContent = display;
+      pendingChipRef.current = null;
+    } else {
+      // Inserting a new chip — replace @date text
+      const chip = `<span class="felmark-date-chip" data-felmark-date="${isoDate}" contenteditable="false">${display}</span>&nbsp;`;
+      document.execCommand("insertHTML", false, chip);
+    }
+
+    const html = ref.current.innerHTML;
+    const text = ref.current.textContent || "";
+    onContentChange(block.id, html, text);
+    setDatePicker(null);
+  }, [block.id, onContentChange]);
+
   const handleInput = () => {
     if (!ref.current) return;
     const text = ref.current.textContent || "";
     const html = ref.current.innerHTML;
     onContentChange(block.id, html, text);
+
+    // Detect @date trigger
+    if (text.includes("@date")) {
+      // Find and select the @date text to replace it
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return;
+
+      // Walk text nodes to find @date
+      const walker = document.createTreeWalker(ref.current, NodeFilter.SHOW_TEXT);
+      let node: Text | null;
+      while ((node = walker.nextNode() as Text | null)) {
+        const idx = node.textContent?.indexOf("@date") ?? -1;
+        if (idx >= 0) {
+          // Select @date text
+          const range = document.createRange();
+          range.setStart(node, idx);
+          range.setEnd(node, idx + 5);
+          sel.removeAllRanges();
+          sel.addRange(range);
+
+          // Show date picker at cursor position
+          const rect = range.getBoundingClientRect();
+          pendingChipRef.current = null; // new chip, not editing
+          setDatePicker({ top: rect.bottom + 4, left: rect.left });
+          setTimeout(() => dateInputRef.current?.showPicker?.(), 50);
+          return;
+        }
+      }
+    }
+
     if (text === "/") onSlash(block.id);
     else if (text.startsWith("/") && text.length <= 20) onSlash(block.id, text.slice(1));
     else onSlashClose();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape" && datePicker) {
+      setDatePicker(null);
+      return;
+    }
+
     if (e.key === "Enter" && !e.shiftKey && block.type !== "code") {
       e.preventDefault();
       if (!ref.current) return;
@@ -107,7 +214,6 @@ export default function EditableBlock({ block, onContentChange, onEnter, onBacks
           e.preventDefault();
           onBackspace(block.id);
         }
-        // If deleting back to just "/" or empty after "/", let handleInput close the menu naturally
       }
     }
 
@@ -118,21 +224,51 @@ export default function EditableBlock({ block, onContentChange, onEnter, onBacks
   };
 
   return (
-    <div
-      ref={ref}
-      contentEditable
-      suppressContentEditableWarning
-      data-placeholder={PLACEHOLDERS[block.type] || "Type '/' for commands"}
-      style={{
-        outline: "none",
-        width: "100%",
-        ...STYLES[block.type],
-        ...(block.type === "todo" && block.checked ? { textDecoration: "line-through", opacity: 0.35 } : {}),
-      }}
-      onInput={handleInput}
-      onKeyDown={handleKeyDown}
-      onMouseUp={onSelect}
-      spellCheck
-    />
+    <>
+      <div
+        ref={ref}
+        contentEditable
+        suppressContentEditableWarning
+        data-placeholder={PLACEHOLDERS[block.type] || "Type '/' for commands"}
+        style={{
+          outline: "none",
+          width: "100%",
+          ...STYLES[block.type],
+          ...(block.type === "todo" && block.checked ? { textDecoration: "line-through", opacity: 0.35 } : {}),
+        }}
+        onInput={handleInput}
+        onKeyDown={handleKeyDown}
+        onMouseUp={onSelect}
+        spellCheck
+      />
+      {/* Floating date picker for @date */}
+      {datePicker && (
+        <div style={{ position: "fixed", top: datePicker.top, left: datePicker.left, zIndex: 100 }}>
+          <input
+            ref={dateInputRef}
+            type="date"
+            autoFocus
+            onChange={e => {
+              if (e.target.value) insertDateChip(e.target.value);
+            }}
+            onBlur={() => {
+              // Delay to allow onChange to fire first
+              setTimeout(() => setDatePicker(null), 150);
+            }}
+            style={{
+              padding: "6px 10px",
+              border: "1px solid var(--ember)",
+              borderRadius: 6,
+              fontFamily: "var(--font-mono), monospace",
+              fontSize: 13,
+              color: "var(--ink-800)",
+              background: "#fff",
+              boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
+              outline: "none",
+            }}
+          />
+        </div>
+      )}
+    </>
   );
 }

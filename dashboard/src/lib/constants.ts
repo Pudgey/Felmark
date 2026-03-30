@@ -15,6 +15,14 @@ export const BLOCK_TYPES: BlockTypeInfo[] = [
   { type: "graph", label: "Graph", icon: "▥", desc: "Insert a live chart", section: "Blocks", shortcut: "/graph" },
   { type: "deliverable", label: "Deliverable", icon: "☰", desc: "Task with files & approvals", section: "Blocks", shortcut: "/deliv" },
   { type: "money", label: "Money", icon: "$", desc: "Financial block", section: "Blocks", shortcut: "/money" },
+  { type: "table", label: "Table", icon: "⊞", desc: "Editable data table", section: "Blocks", shortcut: "/table" },
+  { type: "accordion", label: "Accordion", icon: "▸", desc: "Collapsible sections", section: "Blocks", shortcut: "/acc" },
+  { type: "math", label: "Formula", icon: "∑", desc: "Math with variables", section: "Blocks", shortcut: "/math" },
+  { type: "gallery", label: "Gallery", icon: "▦", desc: "Image grid + lightbox", section: "Blocks", shortcut: "/gallery" },
+  { type: "swatches", label: "Swatches", icon: "●", desc: "Colors + contrast check", section: "Blocks", shortcut: "/color" },
+  { type: "beforeafter", label: "Before/After", icon: "◐", desc: "Comparison slider", section: "Blocks", shortcut: "/ba" },
+  { type: "bookmark", label: "Bookmark", icon: "\u2197", desc: "Link preview card", section: "Blocks", shortcut: "/link" },
+  { type: "deadline", label: "Deadline", icon: "\u2691", desc: "Due date milestone", section: "Blocks", shortcut: "/deadline" },
 ];
 
 export interface Command {
@@ -49,30 +57,30 @@ export const INITIAL_WORKSPACES: Workspace[] = [
   {
     id: "w1", client: "Meridian Studio", avatar: "M", avatarBg: "#7c8594", open: true, lastActive: "2m ago",
     projects: [
-      { id: "p1", name: "Brand Guidelines v2", status: "active", due: "Apr 3", daysLeft: 5, amount: "$2,400", progress: 65, pinned: true },
-      { id: "p2", name: "Website Copy", status: "review", due: "Apr 8", daysLeft: 10, amount: "$1,800", progress: 40, pinned: false },
-      { id: "p3", name: "Social Media Kit", status: "completed", due: "Mar 20", daysLeft: -9, amount: "$950", progress: 100, pinned: false },
+      { id: "p1", name: "Brand Guidelines v2", status: "active", due: "2026-04-03", amount: "$2,400", progress: 65, pinned: true },
+      { id: "p2", name: "Website Copy", status: "review", due: "2026-04-08", amount: "$1,800", progress: 40, pinned: false },
+      { id: "p3", name: "Social Media Kit", status: "completed", due: "2026-03-20", amount: "$950", progress: 100, pinned: false },
     ],
   },
   {
-    id: "w2", client: "Nora Kim — Coach", avatar: "N", avatarBg: "#a08472", open: false, lastActive: "1h ago",
+    id: "w2", client: "Nora Kim \u2014 Coach", avatar: "N", avatarBg: "#a08472", open: false, lastActive: "1h ago",
     projects: [
-      { id: "p4", name: "Course Landing Page", status: "active", due: "Apr 12", daysLeft: 14, amount: "$3,200", progress: 25, pinned: false },
-      { id: "p5", name: "Email Sequence (6x)", status: "paused", due: "Apr 20", daysLeft: 22, amount: "$1,600", progress: 10, pinned: false },
+      { id: "p4", name: "Course Landing Page", status: "active", due: "2026-04-12", amount: "$3,200", progress: 25, pinned: false },
+      { id: "p5", name: "Email Sequence (6x)", status: "paused", due: "2026-04-20", amount: "$1,600", progress: 10, pinned: false },
     ],
   },
   {
     id: "w3", client: "Bolt Fitness", avatar: "B", avatarBg: "#8a7e63", open: false, lastActive: "3h ago",
     projects: [
-      { id: "p6", name: "App Onboarding UX", status: "overdue", due: "Mar 25", daysLeft: -4, amount: "$4,000", progress: 70, pinned: false },
-      { id: "p7", name: "Monthly Blog Posts", status: "active", due: "Apr 1", daysLeft: 3, amount: "$800", progress: 15, pinned: false },
+      { id: "p6", name: "App Onboarding UX", status: "overdue", due: "2026-03-25", amount: "$4,000", progress: 70, pinned: false },
+      { id: "p7", name: "Monthly Blog Posts", status: "active", due: "2026-04-01", amount: "$800", progress: 15, pinned: false },
     ],
   },
   {
     id: "w4", client: "Personal", avatar: "\u2726", avatarBg: "#5c5c53", open: false, lastActive: "5h ago", personal: true,
     projects: [
-      { id: "p8", name: "Portfolio Updates", status: "active", due: "—", daysLeft: null, amount: "—", progress: 50, pinned: false },
-      { id: "p9", name: "Invoice Template", status: "completed", due: "—", daysLeft: null, amount: "—", progress: 100, pinned: false },
+      { id: "p8", name: "Portfolio Updates", status: "active", due: null, amount: "\u2014", progress: 50, pinned: false },
+      { id: "p9", name: "Invoice Template", status: "completed", due: null, amount: "\u2014", progress: 100, pinned: false },
     ],
   },
 ];

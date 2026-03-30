@@ -3,12 +3,14 @@
 import { useState, useEffect, useRef } from "react";
 import type { Workspace, Project } from "@/lib/types";
 import { STATUS } from "@/lib/constants";
+import { daysLeft, formatDue, getDueLabelFromDate, getDueColorFromDate } from "@/lib/utils";
 import styles from "./WorkspaceHome.module.css";
 
 interface WorkspaceHomeProps {
   workspace: Workspace;
   onSelectProject: (project: Project, client: string) => void;
   onNewTab: () => void;
+  onUpdateProjectDue?: (projectId: string, due: string | null) => void;
   onRenameWorkspace?: (wsId: string, name: string) => void;
 }
 
@@ -34,7 +36,7 @@ const STATUS_CFG: Record<string, { color: string; bg: string; label: string }> =
   paused: { color: "#9b988f", bg: "rgba(155,152,143,0.06)", label: "Paused" },
 };
 
-export default function WorkspaceHome({ workspace, onSelectProject, onNewTab, onRenameWorkspace }: WorkspaceHomeProps) {
+export default function WorkspaceHome({ workspace, onSelectProject, onNewTab, onRenameWorkspace, onUpdateProjectDue }: WorkspaceHomeProps) {
   const [editingName, setEditingName] = useState(false);
   const [nameValue, setNameValue] = useState(workspace.client);
 
@@ -65,8 +67,8 @@ export default function WorkspaceHome({ workspace, onSelectProject, onNewTab, on
     : 0;
 
   const nextDeadline = activeProjects
-    .filter(p => p.daysLeft != null && p.daysLeft > 0)
-    .sort((a, b) => (a.daysLeft ?? 999) - (b.daysLeft ?? 999))[0];
+    .filter(p => { const dl = daysLeft(p.due); return dl !== null && dl > 0; })
+    .sort((a, b) => (daysLeft(a.due) ?? 999) - (daysLeft(b.due) ?? 999))[0];
 
   // Animate revenue counter
   useEffect(() => {
@@ -84,10 +86,10 @@ export default function WorkspaceHome({ workspace, onSelectProject, onNewTab, on
   }, [totalEarned]);
 
   const upcoming = activeProjects
-    .filter(p => p.daysLeft != null)
-    .sort((a, b) => (a.daysLeft ?? 999) - (b.daysLeft ?? 999))
+    .filter(p => daysLeft(p.due) !== null)
+    .sort((a, b) => (daysLeft(a.due) ?? 999) - (daysLeft(b.due) ?? 999))
     .slice(0, 4)
-    .map(p => ({ label: `${p.name} due`, date: p.due, daysLeft: p.daysLeft!, color: STATUS[p.status]?.color || "#b07d4f" }));
+    .map(p => ({ label: `${p.name} due`, date: formatDue(p.due), daysNum: daysLeft(p.due)!, color: STATUS[p.status]?.color || "#b07d4f" }));
 
   return (
     <div className={styles.root}>
@@ -162,8 +164,8 @@ export default function WorkspaceHome({ workspace, onSelectProject, onNewTab, on
           <div className={styles.statSub}>across active work</div>
         </div>
         <div className={styles.stat}>
-          <div className={styles.statVal} style={{ color: nextDeadline && nextDeadline.daysLeft! <= 5 ? "#c89360" : "var(--ink-800)" }}>
-            {nextDeadline ? `${nextDeadline.daysLeft}d` : "—"}
+          <div className={styles.statVal} style={{ color: nextDeadline && (daysLeft(nextDeadline.due) ?? 999) <= 5 ? "#c89360" : "var(--ink-800)" }}>
+            {nextDeadline ? `${daysLeft(nextDeadline.due)}d` : "\u2014"}
           </div>
           <div className={styles.statLabel}>next deadline</div>
           <div className={styles.statSub}>{nextDeadline?.name || "—"}</div>
@@ -182,11 +184,8 @@ export default function WorkspaceHome({ workspace, onSelectProject, onNewTab, on
           <div className={styles.projects}>
             {activeProjects.map(pj => {
               const st = STATUS_CFG[pj.status] || STATUS_CFG.active;
-              const dueColor = pj.daysLeft != null && pj.daysLeft <= 3 ? "#c24b38" : pj.daysLeft != null && pj.daysLeft <= 7 ? "#c89360" : "var(--ink-400)";
-              const dueText = pj.daysLeft == null ? pj.due
-                : pj.daysLeft <= 0 ? `${Math.abs(pj.daysLeft)}d overdue`
-                : pj.daysLeft === 1 ? "Tomorrow"
-                : `${pj.daysLeft}d left`;
+              const dueColor = getDueColorFromDate(pj.due);
+              const dueText = getDueLabelFromDate(pj.due);
 
               return (
                 <div
@@ -204,7 +203,10 @@ export default function WorkspaceHome({ workspace, onSelectProject, onNewTab, on
                     <div className={styles.pjName}>{pj.name}</div>
                     <div className={styles.pjRow}>
                       <span className={styles.pjStatus} style={{ background: st.bg, color: st.color }}>{st.label}</span>
-                      <span className={styles.pjDue} style={{ color: dueColor }}>{dueText}</span>
+                      <label className={styles.pjDue} style={{ color: dueColor, cursor: "pointer" }} onClick={e => e.stopPropagation()}>
+                        {dueText}
+                        <input type="date" value={pj.due || ""} onChange={e => onUpdateProjectDue?.(pj.id, e.target.value || null)} style={{ position: "absolute", opacity: 0, width: 0, height: 0, overflow: "hidden" }} />
+                      </label>
                     </div>
                   </div>
                   <div className={styles.pjRight}>
@@ -230,7 +232,7 @@ export default function WorkspaceHome({ workspace, onSelectProject, onNewTab, on
                     <span className={styles.compCheck}>✓</span>
                     <span className={styles.compName}>{pj.name}</span>
                     <span className={styles.compVal}>{pj.amount}</span>
-                    <span className={styles.compDate}>{pj.due}</span>
+                    <span className={styles.compDate}>{formatDue(pj.due)}</span>
                   </div>
                 ))}
               </div>
@@ -275,7 +277,7 @@ export default function WorkspaceHome({ workspace, onSelectProject, onNewTab, on
                       <div className={styles.upLabel}>{up.label}</div>
                       <div className={styles.upDate}>{up.date}</div>
                     </div>
-                    <span className={styles.upDays} style={{ color: up.daysLeft <= 7 ? up.color : "var(--ink-400)" }}>{up.daysLeft}d</span>
+                    <span className={styles.upDays} style={{ color: up.daysNum <= 7 ? up.color : "var(--ink-400)" }}>{up.daysNum}d</span>
                   </div>
                 ))}
               </div>

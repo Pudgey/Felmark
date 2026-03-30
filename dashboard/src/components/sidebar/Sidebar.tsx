@@ -25,6 +25,7 @@ interface SidebarProps {
   onReorderWorkspaces: (fromIndex: number, toIndex: number) => void;
   onRenameWorkspace: (wsId: string, name: string) => void;
   onRenameProject: (projectId: string, name: string) => void;
+  onUpdateProjectDue: (projectId: string, due: string | null) => void;
   onAddWorkspace: (name: string) => void;
   onTogglePin: (projectId: string) => void;
   onCycleStatus: (projectId: string) => void;
@@ -195,24 +196,10 @@ const REVENUE_WEEKS = [
   { week: "now", earned: 2200, pending: 3800 },
 ];
 
-function getDueColor(daysLeft: number | null) {
-  if (daysLeft === null) return "var(--ink-300)";
-  if (daysLeft < 0) return "#c24b38";
-  if (daysLeft <= 3) return "#c89360";
-  if (daysLeft <= 7) return "#b07d4f";
-  return "var(--ink-400)";
-}
+// Due date helpers imported from utils
+import { getDueLabelFromDate, getDueColorFromDate } from "@/lib/utils";
 
-function getDueLabel(daysLeft: number | null, due: string) {
-  if (daysLeft === null) return due;
-  if (daysLeft < 0) return `${Math.abs(daysLeft)}d overdue`;
-  if (daysLeft === 0) return "Today";
-  if (daysLeft === 1) return "Tomorrow";
-  if (daysLeft <= 7) return `${daysLeft}d left`;
-  return due;
-}
-
-export default function Sidebar({ workspaces, archived, activeProject, open, width, isResizing, wordCount, railActive, onClose, onToggleWorkspace, onSelectWorkspaceHome, onSelectProject, onArchiveProject, onArchiveCompleted, onArchiveWorkspace, onRestoreProject, onReorderWorkspaces, onRenameWorkspace, onRenameProject, onAddWorkspace, onTogglePin, onCycleStatus, onScrollToCalendarEvent }: SidebarProps) {
+export default function Sidebar({ workspaces, archived, activeProject, open, width, isResizing, wordCount, railActive, onClose, onToggleWorkspace, onSelectWorkspaceHome, onSelectProject, onArchiveProject, onArchiveCompleted, onArchiveWorkspace, onRestoreProject, onReorderWorkspaces, onRenameWorkspace, onRenameProject, onUpdateProjectDue, onAddWorkspace, onTogglePin, onCycleStatus, onScrollToCalendarEvent }: SidebarProps) {
   const [wsMenu, setWsMenu] = useState<string | null>(null);
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [showAddWs, setShowAddWs] = useState(false);
@@ -273,6 +260,9 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
         open: true,
       })).filter(w => w.client.toLowerCase().includes(search.toLowerCase()) || w.projects.length > 0)
     : workspaces;
+
+  const clientWorkspaces = filtered.filter(w => !w.personal);
+  const personalWorkspaces = filtered.filter(w => w.personal);
 
   return (
     <div className={`${styles.sidebar} ${open ? "" : styles.closed} ${isResizing ? styles.resizing : ""}`} style={{ "--sidebar-w": `${width}px` } as React.CSSProperties}>
@@ -403,7 +393,7 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
         <div className={styles.scroll}>
           {!search && <div className={styles.sectionLabel}>clients</div>}
 
-          {filtered.map((ws, wsIdx) => (
+          {clientWorkspaces.map((ws, wsIdx) => (
             <div
               key={ws.id}
               className={`${styles.wsBlock} ${dropWsId === ws.id ? styles.wsDropTarget : ""} ${dragWsId === ws.id ? styles.wsDragging : ""}`}
@@ -489,7 +479,10 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
                         <span className={styles.projectName} onDoubleClick={e => { e.stopPropagation(); setEditingPjId(pj.id); setEditingPjName(pj.name); }}>{pj.name}</span>
                       )}
                       <div className={styles.projectBottom}>
-                        <span className={styles.projectDue} style={{ color: getDueColor(pj.daysLeft) }}>{getDueLabel(pj.daysLeft, pj.due)}</span>
+                        <label className={styles.projectDue} style={{ color: getDueColorFromDate(pj.due), cursor: "pointer" }} onClick={e => e.stopPropagation()}>
+                          {getDueLabelFromDate(pj.due)}
+                          <input type="date" value={pj.due || ""} onChange={e => onUpdateProjectDue(pj.id, e.target.value || null)} style={{ position: "absolute", opacity: 0, width: 0, height: 0, overflow: "hidden" }} />
+                        </label>
                         {pj.amount !== "—" && <span className={styles.projectAmount}>{pj.amount}</span>}
                         <div className={styles.projectProgressBar}>
                           <div className={styles.projectProgressFill} style={{ width: `${pj.progress}%`, background: st.color }} />
@@ -511,6 +504,98 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
               })}
             </div>
           ))}
+
+          {/* Personal */}
+          {personalWorkspaces.length > 0 && (
+            <>
+              {!search && <div className={styles.sectionLabel} style={{ marginTop: 12 }}>personal</div>}
+              {personalWorkspaces.map((ws, wsIdx) => (
+                <div
+                  key={ws.id}
+                  className={`${styles.wsBlock} ${dropWsId === ws.id ? styles.wsDropTarget : ""} ${dragWsId === ws.id ? styles.wsDragging : ""}`}
+                >
+                  <div className={styles.wsHead}>
+                    <div className={styles.wsHeadClick} onClick={() => { if (editingWsId !== ws.id) onToggleWorkspace(ws.id); }}>
+                      <div className={styles.wsAvatar} style={{ background: ws.avatarBg }} onDoubleClick={e => { e.stopPropagation(); onSelectWorkspaceHome(ws.id); }}>{ws.avatar}</div>
+                      <div className={styles.wsInfo}>
+                        {editingWsId === ws.id ? (
+                          <input className={styles.wsRenameInput} value={editingWsName} autoFocus
+                            onChange={e => setEditingWsName(e.target.value)}
+                            onBlur={() => { onRenameWorkspace(ws.id, editingWsName.trim() || ws.client); setEditingWsId(null); }}
+                            onKeyDown={e => { if (e.key === "Enter") { onRenameWorkspace(ws.id, editingWsName.trim() || ws.client); setEditingWsId(null); } if (e.key === "Escape") setEditingWsId(null); }}
+                            onClick={e => e.stopPropagation()} />
+                        ) : (
+                          <span className={styles.wsName} onDoubleClick={e => { e.stopPropagation(); setEditingWsId(ws.id); setEditingWsName(ws.client); }}>{ws.client}</span>
+                        )}
+                        <div className={styles.wsMeta}>
+                          <span className={styles.wsLastActive}>{ws.lastActive}</span>
+                        </div>
+                      </div>
+                      <span className={styles.wsCount}>{ws.projects.length}</span>
+                      <span className={styles.wsArrow} style={{ transform: ws.open ? "rotate(90deg)" : "rotate(0deg)" }}>{"\u25b6"}</span>
+                    </div>
+                    <button className={styles.wsMenuBtn} onClick={e => { e.stopPropagation(); setWsMenu(wsMenu === ws.id ? null : ws.id); }}>
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="3" cy="7" r="1" fill="currentColor" /><circle cx="7" cy="7" r="1" fill="currentColor" /><circle cx="11" cy="7" r="1" fill="currentColor" /></svg>
+                    </button>
+                  </div>
+
+                  {wsMenu === ws.id && (
+                    <div className={styles.wsDropdown}>
+                      <button className={styles.wsDropItem} onClick={() => { setEditingWsId(ws.id); setEditingWsName(ws.client); setWsMenu(null); }}>
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2-7 7H1.5v-2l7-7z" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                        <span>Rename</span>
+                      </button>
+                      {personalWorkspaces.length > 1 && <button className={styles.wsDropItem} onClick={() => { onArchiveWorkspace(ws.id); setWsMenu(null); }}>
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 3.5h9M2.5 3.5v6a1 1 0 001 1h5a1 1 0 001-1v-6" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /><path d="M4 6l1.5 1.5L8 5" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                        <span>Archive workspace</span>
+                      </button>}
+                    </div>
+                  )}
+
+                  {ws.open && ws.projects.map(pj => {
+                    const st = STATUS[pj.status];
+                    return (
+                      <div key={pj.id} className={`${styles.project} ${activeProject === pj.id ? styles.projectActive : ""}`}
+                        onClick={() => { if (editingPjId !== pj.id) onSelectProject(pj, ws.client); }}>
+                        <div className={styles.projectStatusDot} style={{ background: st.color }}
+                          onClick={e => { e.stopPropagation(); onCycleStatus(pj.id); }} title={`${st.label} — click to change`} />
+                        <div className={styles.projectContent}>
+                          {editingPjId === pj.id ? (
+                            <input className={styles.pjRenameInput} value={editingPjName} autoFocus
+                              onChange={e => setEditingPjName(e.target.value)}
+                              onBlur={() => { onRenameProject(pj.id, editingPjName.trim() || pj.name); setEditingPjId(null); }}
+                              onKeyDown={e => { if (e.key === "Enter") { onRenameProject(pj.id, editingPjName.trim() || pj.name); setEditingPjId(null); } if (e.key === "Escape") setEditingPjId(null); }}
+                              onClick={e => e.stopPropagation()} />
+                          ) : (
+                            <span className={styles.projectName} onDoubleClick={e => { e.stopPropagation(); setEditingPjId(pj.id); setEditingPjName(pj.name); }}>{pj.name}</span>
+                          )}
+                          <div className={styles.projectBottom}>
+                            <label className={styles.projectDue} style={{ color: getDueColorFromDate(pj.due), cursor: "pointer" }} onClick={e => e.stopPropagation()}>
+                          {getDueLabelFromDate(pj.due)}
+                          <input type="date" value={pj.due || ""} onChange={e => onUpdateProjectDue(pj.id, e.target.value || null)} style={{ position: "absolute", opacity: 0, width: 0, height: 0, overflow: "hidden" }} />
+                        </label>
+                            <div className={styles.projectProgressBar}>
+                              <div className={styles.projectProgressFill} style={{ width: `${pj.progress}%`, background: st.color }} />
+                            </div>
+                            <span className={styles.projectProgressPct}>{pj.progress}%</span>
+                          </div>
+                        </div>
+                        <div className={styles.projectActions}>
+                          <button className={`${styles.pjActBtn} ${pj.pinned ? styles.pjPinActive : ""}`} title={pj.pinned ? "Unpin" : "Pin"}
+                            onClick={e => { e.stopPropagation(); onTogglePin(pj.id); }}>
+                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M4 8L2 10M7 1.5l2 2-1.5 2-.5-.5L4 8l-1.5-1.5L5.5 3.5 5 3z" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round" fill={pj.pinned ? "currentColor" : "none"} /></svg>
+                          </button>
+                          <button className={styles.pjActBtn} title="Archive" onClick={e => { e.stopPropagation(); onArchiveProject(pj.id); }}>
+                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 3h8M1.8 3v5a.8.8 0 00.8.8h4.8a.8.8 0 00.8-.8V3" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round" /><path d="M4 5h2" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round" /></svg>
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </>
+          )}
 
           {/* Add workspace */}
           {!search && !showAddWs && (
@@ -561,7 +646,7 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
 
         {/* Footer */}
         <div className={styles.footer}>
-          <span>{railActive === "calendar" ? `${workspaces.flatMap(w => w.projects).filter(p => p.daysLeft != null).length} deadlines` : `${totalProjects} projects · ${workspaces.length} clients`}</span>
+          <span>{railActive === "calendar" ? `${workspaces.flatMap(w => w.projects).filter(p => p.due != null).length} deadlines` : `${totalProjects} projects · ${workspaces.length} clients`}</span>
           <span className={styles.savedIndicator}>
             <span className={styles.savedDot} />saved
           </span>

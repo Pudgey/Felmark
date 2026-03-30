@@ -49,25 +49,10 @@ function formatHour(h: number): string {
   return h < 12 ? `${h}am` : `${h - 12}pm`;
 }
 
-const MONTH_MAP: Record<string, number> = {
-  Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
-  Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11,
-};
-
-function parseDueDate(due: string): Date | null {
-  if (!due || due === "—") return null;
-  const match = due.match(/^([A-Za-z]+)\s+(\d+)$/);
-  if (!match) return null;
-  const monthIdx = MONTH_MAP[match[1]];
-  if (monthIdx === undefined) return null;
-  const day = parseInt(match[2]);
-  const now = new Date();
-  // Assume current year, but if month is far behind, could be next year
-  let year = now.getFullYear();
-  const candidate = new Date(year, monthIdx, day);
-  // If the date is more than 6 months in the past, assume next year
-  if (candidate.getTime() < now.getTime() - 180 * 86400000) year++;
-  return new Date(year, monthIdx, day);
+function parseDueDate(due: string | null): Date | null {
+  if (!due) return null;
+  const d = new Date(due + "T00:00:00");
+  return isNaN(d.getTime()) ? null : d;
 }
 
 function generateDeadlineEvents(workspaces: Workspace[], weekStart: Date): CalendarEvent[] {
@@ -84,7 +69,7 @@ function generateDeadlineEvents(workspaces: Workspace[], weekStart: Date): Calen
       // Check if due date falls in this week
       if (dueDate >= weekStart && dueDate < weekEnd) {
         const dayIdx = (dueDate.getDay() + 6) % 7; // Monday = 0
-        const isOverdue = p.daysLeft != null && p.daysLeft < 0;
+        const isOverdue = dueDate.getTime() < new Date().setHours(0, 0, 0, 0);
         events.push({
           id: `deadline-${p.id}`,
           title: p.name,

@@ -1,19 +1,19 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useRef } from "react";
 import type { Block } from "@/lib/types";
 import styles from "./EditorMargin.module.css";
 
 const BLOCK_LABELS: Record<string, string> = {
   h1: "H1", h2: "H2", h3: "H3", paragraph: "¶", todo: "☐", callout: "◆",
-  divider: "—", code: "<>", bullet: "•", numbered: "1.", quote: "❝", graph: "▥", deliverable: "☰", money: "$",
+  divider: "—", code: "<>", bullet: "•", numbered: "1.", quote: "❝", graph: "▥", deliverable: "☰", money: "$", table: "⊞", accordion: "▸", math: "∑", gallery: "▦", swatches: "●", beforeafter: "◐", bookmark: "↗", deadline: "⚑",
 };
 
 const BLOCK_LABEL_COLORS: Record<string, string> = {
   h1: "var(--ember)", h2: "var(--ink-500)", h3: "var(--ink-400)",
   paragraph: "var(--ink-300)", todo: "#5a9a3c", callout: "var(--ember)",
   divider: "var(--warm-300)", code: "#5b7fa4", bullet: "var(--ink-400)",
-  numbered: "var(--ink-400)", quote: "var(--ink-400)", graph: "#5b7fa4", deliverable: "#5b7fa4", money: "#5a9a3c",
+  numbered: "var(--ink-400)", quote: "var(--ink-400)", graph: "#5b7fa4", deliverable: "#5b7fa4", money: "#5a9a3c", table: "var(--ink-500)", accordion: "var(--ink-500)", math: "var(--ember)", gallery: "#5b7fa4", swatches: "var(--ember)", beforeafter: "var(--ink-500)", bookmark: "#5b7fa4", deadline: "#c24b38",
 };
 
 interface EditorMarginProps {
@@ -21,9 +21,14 @@ interface EditorMarginProps {
   hoveredBlock: string | null;
   onHoverBlock: (id: string | null) => void;
   onScrollTo: (id: string) => void;
+  onReorderBlock?: (fromIndex: number, toIndex: number) => void;
 }
 
-export default function EditorMargin({ blocks, hoveredBlock, onHoverBlock, onScrollTo }: EditorMarginProps) {
+export default function EditorMargin({ blocks, hoveredBlock, onHoverBlock, onScrollTo, onReorderBlock }: EditorMarginProps) {
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [dropIdx, setDropIdx] = useState<number | null>(null);
+  const dragRef = useRef<number | null>(null);
+
   // Extract sections (h1 and h2 blocks)
   const sections = useMemo(() =>
     blocks.filter(b => b.type === "h1" || b.type === "h2").map(b => {
@@ -109,24 +114,38 @@ export default function EditorMargin({ blocks, hoveredBlock, onHoverBlock, onScr
             const graphTitle = block.type === "graph" && block.graphData ? block.graphData.title : "";
             const delivTitle = block.type === "deliverable" && block.deliverableData ? block.deliverableData.title : "";
             const moneyLabel = block.type === "money" && block.moneyData ? block.moneyData.moneyType.replace("-", " ") : "";
-            const displayContent = block.type === "graph" ? graphTitle : block.type === "deliverable" ? delivTitle : block.type === "money" ? moneyLabel : block.content;
+            const deadlineTitle = block.type === "deadline" && block.deadlineData ? block.deadlineData.title : "";
+            const displayContent = block.type === "graph" ? graphTitle : block.type === "deliverable" ? delivTitle : block.type === "money" ? moneyLabel : block.type === "deadline" ? deadlineTitle : block.content;
             const preview = displayContent
               ? (displayContent.length > 24 ? displayContent.slice(0, 22) + "…" : displayContent)
               : "";
-            const isEmpty = !displayContent && block.type !== "divider" && block.type !== "graph" && block.type !== "deliverable" && block.type !== "money";
+            const isEmpty = !displayContent && block.type !== "divider" && block.type !== "graph" && block.type !== "deliverable" && block.type !== "money" && block.type !== "deadline";
 
             return (
               <div
                 key={block.id}
-                className={`${styles.gutterItem} ${isHovered ? styles.gutterItemOn : ""} ${isSection ? styles.gutterItemSection : ""}`}
+                className={`${styles.gutterItem} ${isHovered ? styles.gutterItemOn : ""} ${isSection ? styles.gutterItemSection : ""} ${dropIdx === i ? styles.gutterItemDrop : ""} ${dragIdx === i ? styles.gutterItemDrag : ""}`}
+                draggable={!!onReorderBlock}
+                onDragStart={e => { setDragIdx(i); dragRef.current = i; e.dataTransfer.effectAllowed = "move"; }}
+                onDragEnd={() => { setDragIdx(null); setDropIdx(null); dragRef.current = null; }}
+                onDragOver={e => { e.preventDefault(); if (dragRef.current !== null && dragRef.current !== i) setDropIdx(i); }}
+                onDragLeave={() => { if (dropIdx === i) setDropIdx(null); }}
+                onDrop={e => {
+                  e.preventDefault();
+                  if (dragRef.current !== null && dragRef.current !== i && onReorderBlock) {
+                    onReorderBlock(dragRef.current, i);
+                  }
+                  setDragIdx(null); setDropIdx(null); dragRef.current = null;
+                }}
                 onMouseEnter={() => onHoverBlock(block.id)}
                 onMouseLeave={() => onHoverBlock(null)}
                 onClick={() => onScrollTo(block.id)}
               >
                 <span className={styles.gutterLine}>{i + 1}</span>
                 <span className={styles.gutterType} style={{ color }}>{label}</span>
-                <span className={`${styles.gutterPreview} ${isEmpty ? styles.gutterPreviewEmpty : ""} ${block.type === "divider" ? styles.gutterPreviewDivider : ""}`}>
-                  {block.type === "divider" ? "divider" : block.type === "graph" ? (graphTitle || "chart") : block.type === "deliverable" ? (delivTitle || "deliverable") : block.type === "money" ? (moneyLabel || "money") : isEmpty ? "empty" : preview}
+                <span className={`${styles.gutterPreview} ${isEmpty ? styles.gutterPreviewEmpty : ""} ${block.type === "divider" ? styles.gutterPreviewDivider : ""}`}
+                  style={!isEmpty && block.type !== "paragraph" && block.type !== "bullet" && block.type !== "numbered" ? { color, opacity: 0.7 } : undefined}>
+                  {block.type === "divider" ? "divider" : block.type === "graph" ? (graphTitle || "chart") : block.type === "deliverable" ? (delivTitle || "deliverable") : block.type === "money" ? (moneyLabel || "money") : block.type === "deadline" ? (deadlineTitle || "deadline") : isEmpty ? "empty" : preview}
                 </span>
               </div>
             );

@@ -12,7 +12,15 @@ export type BlockType =
   | "divider"
   | "graph"
   | "deliverable"
-  | "money";
+  | "money"
+  | "table"
+  | "accordion"
+  | "math"
+  | "gallery"
+  | "swatches"
+  | "beforeafter"
+  | "bookmark"
+  | "deadline";
 
 export type GraphType = "bar" | "line" | "donut" | "hbar" | "sparkline" | "area" | "metrics";
 
@@ -70,6 +78,69 @@ export interface MoneyBlockData {
   data: unknown;
 }
 
+export interface TableBlockData {
+  rows: string[][];
+}
+
+export interface AccordionItem {
+  title: string;
+  content: string;
+}
+
+export interface AccordionBlockData {
+  items: AccordionItem[];
+}
+
+export interface MathVariable {
+  name: string;
+  value: string;
+}
+
+export interface MathBlockData {
+  formula: string;
+  variables: MathVariable[];
+  result: string;
+}
+
+export interface GalleryImage {
+  icon: string;
+  caption: string;
+  meta: string;
+}
+
+export interface GalleryBlockData {
+  images: GalleryImage[];
+}
+
+export interface SwatchColor {
+  name: string;
+  hex: string;
+}
+
+export interface SwatchesBlockData {
+  colors: SwatchColor[];
+}
+
+export interface BeforeAfterBlockData {
+  beforeLabel: string;
+  afterLabel: string;
+}
+
+export interface BookmarkBlockData {
+  url: string;
+  title: string;
+  description: string;
+  source: string;
+  favicon: string;
+}
+
+export interface DeadlineBlockData {
+  title: string;
+  due: string | null;
+  assignee: string;
+  completed: boolean;
+}
+
 export interface Block {
   id: string;
   type: BlockType;
@@ -78,6 +149,14 @@ export interface Block {
   graphData?: GraphBlockData;
   deliverableData?: DeliverableData;
   moneyData?: MoneyBlockData;
+  tableData?: TableBlockData;
+  accordionData?: AccordionBlockData;
+  mathData?: MathBlockData;
+  galleryData?: GalleryBlockData;
+  swatchesData?: SwatchesBlockData;
+  beforeAfterData?: BeforeAfterBlockData;
+  bookmarkData?: BookmarkBlockData;
+  deadlineData?: DeadlineBlockData;
 }
 
 export interface BlockTypeInfo {
@@ -95,8 +174,7 @@ export interface Project {
   id: string;
   name: string;
   status: ProjectStatus;
-  due: string;
-  daysLeft: number | null;
+  due: string | null;        // ISO date string (e.g. "2026-04-03") or null
   amount: string;
   progress: number;
   pinned: boolean;
