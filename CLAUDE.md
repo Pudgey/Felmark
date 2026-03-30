@@ -127,11 +127,12 @@ Chrome Extension (~50 lines)          Web App (app.tryfelmark.com)
 
 The Conductor is a self-sustaining knowledge system. These behaviors are **automatic** -- the AI executes them without being asked.
 
-#### On Session Start (Silent Health Check + Handoff + Thoughts)
+#### On Session Start (Silent Health Check + Handoff + Thoughts + Guardrail)
 - Run `conductor/CONDUCTOR_HEALTH.md` checks silently. Only speak up if issues found.
 - Check: standards past review dates, stale missions, skills out of sync, journal gaps, active context freshness, handoff existence.
 - Read `conductor/HANDOFF.md` if it exists -- it has context from the previous session. Mention briefly if relevant to the current task.
 - Check `conductor/THOUGHTS.md` for stale `ACTIVE` entries (older than 4 hours). Resolve or clear them.
+- **Read `conductor/GUARDRAIL.md`** — check the Codebase Pulse thresholds. Run `find dashboard/src -name "*.tsx" -o -name "*.ts" -o -name "*.css" | wc -l` and compare. If any metric crossed into caution or split, flag it immediately. If the Feature Registry or Block Registry is stale (features exist on disk but aren't listed), fix it before starting work.
 - If all healthy and no handoff, say nothing.
 
 #### During Work (Thoughts -- Real-Time Status)
@@ -139,7 +140,7 @@ The Conductor is a self-sustaining knowledge system. These behaviors are **autom
 - **On task complete**: Update status to `COMPLETE`, then move the entry to the Recent table (cap at 5, drop oldest).
 - Team agents use their name (architect, data-hawk). Solo sessions use `claude-main`.
 - One sentence max per entry. Detail goes in the journal.
-- When adding, deleting, renaming, or retiring a feature or its primary files, update `conductor/GUARDRAIL.md` in the same pass.
+- **MANDATORY**: When adding, deleting, renaming, or retiring a feature, block type, or primary file, update `conductor/GUARDRAIL.md` in the same commit. Update the Feature Registry, Block Registry, and Codebase Pulse metrics. This is not a follow-up task — it happens in the same pass as the code change.
 
 #### On Session Close (Learning Capture + Context Update + Handoff)
 - After any non-trivial session (debug, feature build, audit, refactor):
@@ -149,6 +150,7 @@ The Conductor is a self-sustaining knowledge system. These behaviors are **autom
   4. Regenerate `conductor/ACTIVE_CONTEXT.md` with current mission status, recent journal entries, and pattern alerts.
   5. Write `conductor/HANDOFF.md` if there's in-progress work or gotchas (per `conductor/sops/SESSION_HANDOFF.md`).
   6. Scan INDEX.md for pattern matches (3+ same tag -> propose standard promotion).
+  7. Verify `conductor/GUARDRAIL.md` is current — Feature Registry, Block Registry, and Codebase Pulse all match reality. Update the "Last synced" date. If any threshold was crossed during the session, note it in HANDOFF.md.
 - Skip if session was purely conversational or informational.
 
 #### After Creating Any New Standard, Skill, or Mission (Integrity Check)
@@ -174,7 +176,7 @@ All engineering standards, active missions, audit reports, and project tracking 
 | `THOUGHTS.md` | Real-time agent scratchpad (active task status) |
 | `HANDOFF.md` | Session continuity context |
 | `ACTIVE_CONTEXT.md` | Current project snapshot |
-| `GUARDRAIL.md` | Living feature/file inventory and change guardrail |
+| `GUARDRAIL.md` | Feature inventory, block registry, codebase metrics, and scale thresholds — read on session start, updated on every feature change |
 | `DEVELOPMENT_BRIEF.md` | Master plan: milestones, missions, strategy, ideas |
 | `agent-team/AGENT_TEAM.md` | Multi-agent coordination -- roles, collision prevention |
 | `agent-team/agent-sprint/SPRINT_SOP.md` | Sprint execution protocol -- claiming, status, archival |
