@@ -1,43 +1,30 @@
-# Active Context — 2026-03-29
+# Active Context — 2026-03-30
 
-## Production Readiness: 0%
+## Product Snapshot
 
-Felmark is in pre-development. Brand name locked (tryfelmark.com), business strategy documented, one JSX prototype exists (FreelancerPad.jsx). No Chrome extension code yet. Conductor and tooling just set up.
+Felmark is actively building the browser-native dashboard experience in `dashboard/`. The product is well past initial setup: workspace and editor surfaces are under active development, while the Chrome extension remains the thin shell planned for a later pass.
+
+## Current Focus
+
+- Block editor expansion and slash-command system
+- Workspace home, sidebar, and calendar integration
+- Services, Templates, and The Wire surfaces still need real wiring
+- Notification panel, deadline/calendar linkage, and outline/date aggregation remain open follow-ups
 
 ## Architecture Status
 
-| Milestone | Status |
-|-----------|--------|
-| M1: Chrome Extension MVP | Not started |
-| M2: Pro Tier + Time Tracking | Not started |
-| M3: Invoicing + Client Portal | Not started |
-| M4: Web App + Analytics | Not started |
+| Area | Status |
+|------|--------|
+| Dashboard app | In active local development |
+| Chrome extension shell | Not started |
+| Shared conductor skill library | Updated for Felmark's current stack |
 
-## Bug Tracker Summary
+## Recent Completed Work
 
-| Severity | Open | Fixed | Total |
-|----------|------|-------|-------|
-| CRITICAL | 0 | 0 | 0 |
-| HIGH | 0 | 0 | 0 |
-| MEDIUM | 0 | 0 | 0 |
-| LOW | 0 | 0 | 0 |
-
-## Active Missions
-
-| Mission | Status | Priority |
-|---------|--------|----------|
-| (none yet) | — | — |
-
-## Completed Missions
-
-(none)
-
-## Upcoming Work
-
-1. Scaffold Chrome extension (MV3 manifest, service worker, side panel)
-2. Build workspace + notes MVP in the side panel
-3. Auto time tracking via domain detection
+- Large dashboard feature sprint completed on 2026-03-30
+- Conductor skill library cleaned of stale Flutter/INDEP references on 2026-03-30
 
 ## Pending Manual Actions
 
-- Git repo initialized but no initial commit yet
+- Push local changes to GitHub
+- Decide when to wire Services, Templates, and The Wire to production components

@@ -4,6 +4,14 @@
 
 Massive feature sprint across two days. Built and shipped:
 
+### Conductor Maintenance
+- Cleaned the shared skill library so `conductor/skills` and `.claude/commands` no longer carry stale Flutter/INDEP references
+- Rewrote 13 skill docs for Felmark's React/Next.js + extension workflow
+- Local checkpoint commits created during cleanup:
+  - `1c32233` — skill cleanup batch 1
+  - `5732e22` — skill cleanup batch 2
+  - `b3464c6` — skill cleanup batch 3
+
 ### Block Editor Expansions
 - **Graph blocks** (7 chart types: bar, line, donut, hbar, sparkline, stacked area, metrics) with full inline data editing, type switching, NaN guards
 - **Money blocks** (6 types: rate calc, payment schedule, expenses, milestones, tax estimate, payment button) with sub-picker
