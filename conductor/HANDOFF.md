@@ -1,91 +1,42 @@
-# Session Handoff — 2026-03-30
+# Session Handoff — 2026-03-30 (Evening)
 
 ## What just happened
 
-Massive feature sprint across two days. Built and shipped:
+Massive UI sprint. Shipped ~4,000 lines across 30+ files in one session.
 
-### Conductor Maintenance
-- Cleaned the shared skill library so `conductor/skills` and `.claude/commands` no longer carry stale Flutter/INDEP references
-- Rewrote 13 skill docs for Felmark's React/Next.js + extension workflow
-- Converted repo-local `.codex/skills/*.md` wrappers into real Codex skill folders with `SKILL.md` and `agents/openai.yaml`
-- Local checkpoint commits created during cleanup:
-  - `1c32233` — skill cleanup batch 1
-  - `5732e22` — skill cleanup batch 2
-  - `b3464c6` — skill cleanup batch 3
+### Built this session:
+- **UI Scale-up** — 11px floor, 28px click targets, 11 CSS files
+- **Notification Panel** — 10 types, avatars, action buttons, 6 filters, PRO badge
+- **9 Collaboration Blocks** — thread, mention, question, feedback, decision, poll, handoff, signoff, annotation
+- **Deliverable Upgrade** — drop zone, file cards, activity log, kanban mini-board
+- **AI Action Block** — 5 modes (summarize, suggest, translate, tone, scope)
+- **6 Visual Blocks** — timeline, flow, brand board, mood board, wireframe, pull quote
+- **5 Animation Blocks** — hero spotlight, kinetic type, number cascade, stat reveal, value counter
+- **Outline Multi-select** — range select, copy, delete, keyboard shortcuts
+- **P0 Polish** — prompt() removed, race condition fixed, font violations, click targets, kanban a11y
 
-### Block Editor Expansions
-- **Graph blocks** (7 chart types: bar, line, donut, hbar, sparkline, stacked area, metrics) with full inline data editing, type switching, NaN guards
-- **Money blocks** (6 types: rate calc, payment schedule, expenses, milestones, tax estimate, payment button) with sub-picker
-- **Deadline blocks** (`/deadline`) — standalone milestone with title, date picker, assignee, completion toggle, auto-status styling
-- **Inline date chips** (`@date`) — type @date mid-sentence, pick a date, inserts ember-styled chip inline
-- **Deliverable blocks** — added by user, integrated into outline
-- **7 more block types** added by user: table, accordion, math, gallery, swatches, before/after, bookmark
-- **Block deletion** — gutter × button on every block + Cmd+Shift+Backspace keyboard shortcut
-- **Slash Command Checklist** standard created (`conductor/standards/SLASH_COMMAND_CHECKLIST.md`)
-
-### Real Dates (Not Hardcoded)
-- `Project.due` converted from display string ("Apr 3") to ISO date (`"2026-04-03"`)
-- `Project.daysLeft` removed — computed dynamically via `daysLeft()` utility
-- Date pickers on sidebar project rows and workspace home project cards
-- Calendar view simplified (`parseDueDate` now just parses ISO strings)
-
-### Sidebar & Navigation
-- **Personal workspace segment** — separate from clients, always has at least one (can't archive the last one)
-- **Workspace rename** — hamburger menu option + double-click on name
-- **Notification bell** — new icon in tab bar right, red badge with count
-- **Services icon** in rail (star/tag shape)
-- **Templates icon** in rail (document with lines)
-- **"The Wire" icon** added by user in rail
-
-### Calendar
-- Fixed calendar always showing when `railActive === "calendar"` (no more blank screen trap)
-- Double-click calendar event opens the project tab
-- Fixed scroll-to-current-hour overshooting (capped to working hours)
-
-### Terminal Welcome
-- Fixed hydration mismatch (date/time rendering deferred to client)
-- Fixed animation blinking (converted from unmounting `<Line>` components to CSS transitions on stable divs)
-- Fixed top cutoff (`height: 100vh` → `height: 100%; flex: 1`, removed `justify-content: center`)
-- Removed auto-focus on command input
-
-### Outline Margin
-- Widened from 200px to 230px
-- Color-coded preview text matching block type colors (terminal-style)
-- Drag-to-reorder blocks from the outline
-- All new block types integrated (labels, colors, previews)
-
-### Competitive Intelligence
-- HoneyBook full feature list + user complaints report (`conductor/HONEYBOOK_COMPETITIVE_INTEL.md`)
-- Assembly competitive intel (`conductor/Assembly_Competitive_Intelligence.md`)
-- Free-forever pricing positioned as #1 structural advantage
-
-### Mission Docs Created
-- `SERVICES_CATALOG.md` — service menu + invoice builder
-- `GRAPH_BLOCKS.md` — living charts inside documents
-- `MONEY_BLOCKS.md` — financial blocks inside documents
-- `DEADLINE_BLOCKS.md` — dates that live where work happens
-
-### Prototypes Saved
-- `Prototype/Services.jsx`, `GraphBlocks.jsx`, `MoneyBlocks.jsx`, `Templates.jsx`
+### User also added between builder runs:
+- PricingConfigBlock, ScopeBoundaryBlock, AssetChecklistBlock
+- DecisionPickerBlock, AvailabilityPickerBlock, ProgressStreamBlock
+- DrawingBlock with 8 visual types
+- DocumentTemplate, TemplateBlock types
+- BLOCK_CATEGORIES for slash menu
 
 ## In-progress work
 
-None — all tasks completed.
+None — all tasks completed and pushed.
 
 ## Remaining Tasks
 
-- [ ] Wire Services view (`railActive === "services"`) to actual component
-- [ ] Wire Templates view (`railActive === "templates"`) to actual component
-- [ ] Wire "The Wire" view
-- [ ] Build notification panel (bell icon is placed, no panel yet)
-- [ ] Connect deadline blocks to calendar view
-- [ ] Connect inline @date chips to outline aggregation
+- [ ] 3 animation blocks deferred: Ambient Gradient, Celebration Burst, Particle Logo Reveal
+- [ ] P1 polish: Consolidate 40+ inline styles in CollabBlocks to CSS modules
+- [ ] P1 polish: Add aria-labels to all CollabBlock buttons
+- [ ] P1 polish: Add focus-visible states globally
+- [ ] P2: Create --ai-accent CSS variable for AiActionBlock purple
 
 ## Gotchas
 
-- If repo-local Codex skills do not appear immediately in the UI, reload the workspace or start a fresh Codex session so it re-reads `.codex/skills/`
-- `EditableBlock.tsx` was fully rewritten to support @date chip detection and inline date picker — if touching this file, be aware of the `handleInput` flow that detects both `/` (slash menu) and `@date` triggers
-- Graph blocks have NaN guards on every chart component — don't remove the `|| 0` and `|| 1` guards on value accessors
-- The `deleteBlock` function in Editor has a safety check: last block resets to empty paragraph instead of deleting
-- `DashboardHome.tsx` prop was renamed from `onNewTab` to `onNewTabInWorkspace` — already fixed in Editor
-- Personal workspace uses `personal: true` flag on Workspace interface — the last personal workspace can't be archived (guard in both UI and logic)
+- **Worktree merge pattern**: User's codebase evolves during builder runs. NEVER copy types.ts or Editor.tsx wholesale from worktree. Only copy NEW files, then manually splice changes into user's version.
+- **Missing type exports**: After any types.ts modification, check for cascade failures (DocumentTemplate, ColumnsBlockData, DataChipsBlockData, VisualBlockData all got dropped at various points and had to be re-added).
+- **Block count**: The editor now has 40+ block types. The slash menu uses BLOCK_CATEGORIES for tabbed navigation.
+- **SignoffBlock was rewritten by user** to support multi-party e-signatures with `parties` array. The `SignoffParty` type was added to support this.

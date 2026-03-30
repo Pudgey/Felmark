@@ -24,8 +24,8 @@
 
 | Agent | Task | Completed |
 |-------|------|-----------|
+| claude-main | Massive session: UI scale-up, notification panel, 9 collab blocks, deliverable upgrade, AI action block, 6 visual blocks, 5 animation blocks, P0 polish fixes | 2026-03-30 |
+| claude-main | Built /drawing block with 8 visual component types (flowchart, userflow, devices, sitemap, stickies, chart, stamps, wireframe) | 2026-03-30 |
+| codex-main | Created a new `phase` skill for proposing the next development phase for approval | 2026-03-30 |
 | codex-main | Converted repo-local Codex skill wrappers into real discoverable skills with UI metadata | 2026-03-30 |
 | codex-main | Updated Codex repo instructions so conductor skills can be invoked with `$skill` syntax | 2026-03-30 |
-| codex-main | Committed and prepared the current publishable Felmark worktree for GitHub while excluding local runtime artifacts | 2026-03-30 |
-| codex-main | Removed stale Flutter and INDEP references from the shared skill library and rewrote it for Felmark | 2026-03-30 |
-| codex-main | Reviewed Claude skill protocols and adopted the usable command set for this repo | 2026-03-30 |
