@@ -164,7 +164,9 @@ Skills are reusable protocols stored in `conductor/skills/<name>/SKILL.md`. They
 
 ### Invoking a Skill
 
-When the user says something like "run brain" or "do a review on src/", read the corresponding SKILL.md and execute its protocol. Pass the user's target as the scope argument.
+When the user says something like `$brain`, `$review dashboard/src/`, "run brain", or "do a review on src/", treat that as an explicit skill invocation. Read the corresponding SKILL.md and execute its protocol. Pass the user's target as the scope argument.
+
+`$<skill-name>` is the preferred shorthand command form for Codex in this repo.
 
 ## Key Documents
 
