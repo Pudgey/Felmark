@@ -1398,7 +1398,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
             <FinancePage />
           )}
           {railActive === "wire" && (
-            <WirePage workspaces={workspaces} services={WIRE_SERVICES} />
+            <WirePage />
           )}
           {railActive === "team" && (
             <TeamScreen />
