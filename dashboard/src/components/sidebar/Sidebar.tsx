@@ -196,8 +196,7 @@ const REVENUE_WEEKS = [
   { week: "now", earned: 2200, pending: 3800 },
 ];
 
-// Due date helpers imported from utils
-import { getDueLabelFromDate, getDueColorFromDate } from "@/lib/utils";
+import { getDueLabel as getDueLabelFromDate, getDueColor as getDueColorFromDate } from "@/lib/due-dates";
 
 export default function Sidebar({ workspaces, archived, activeProject, open, width, isResizing, wordCount, railActive, onClose, onToggleWorkspace, onSelectWorkspaceHome, onSelectProject, onArchiveProject, onArchiveCompleted, onArchiveWorkspace, onRestoreProject, onReorderWorkspaces, onRenameWorkspace, onRenameProject, onUpdateProjectDue, onAddWorkspace, onTogglePin, onCycleStatus, onScrollToCalendarEvent }: SidebarProps) {
   const [wsMenu, setWsMenu] = useState<string | null>(null);

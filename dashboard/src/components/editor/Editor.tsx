@@ -26,7 +26,14 @@ import { HeroSpotlightBlock, KineticTypeBlock, NumberCascadeBlock, StatRevealBlo
 import PricingConfigBlock, { getDefaultPricingConfigData } from "./unique/PricingConfigBlock";
 import ScopeBoundaryBlock, { getDefaultScopeBoundaryData } from "./unique/ScopeBoundaryBlock";
 import AssetChecklistBlock, { getDefaultAssetChecklistData } from "./unique/AssetChecklistBlock";
+import DecisionPickerBlock, { getDefaultDecisionPickerData } from "./unique/DecisionPickerBlock";
+import AvailabilityPickerBlock, { getDefaultAvailabilityPickerData } from "./unique/AvailabilityPickerBlock";
+import ProgressStreamBlock, { getDefaultProgressStreamData } from "./unique/ProgressStreamBlock";
+import DependencyMapBlock, { getDefaultDependencyMapData } from "./unique/DependencyMapBlock";
+import RevisionHeatmapBlock, { getDefaultRevisionHeatmapData } from "./unique/RevisionHeatmapBlock";
 import { STATUS } from "@/lib/constants";
+import { getDueLabel, getDueColor, getDaysLeft } from "@/lib/due-dates";
+import DueDatePicker from "@/components/shared/DueDatePicker";
 import { uid, cursorTo } from "@/lib/utils";
 import EditableBlock from "./EditableBlock";
 import SlashMenu from "./SlashMenu";
@@ -72,8 +79,9 @@ interface EditorProps {
   onSelectWorkspaceHome?: (wsId: string) => void;
   onSaveAsTemplate?: () => void;
   docTemplates?: DocumentTemplate[];
+  onNavigateRail?: (item: string) => void;
   railActive?: string;
-  onCalendarOpenProject?: (workspaceId: string) => void;
+  onCalendarOpenProject?: (projectId: string) => void;
   calendarScrollTarget?: string | null;
   onCalendarScrollComplete?: () => void;
   onRenameWorkspace?: (wsId: string, name: string) => void;
@@ -93,7 +101,7 @@ interface EditorProps {
   onSplitMakePrimary?: () => void;
 }
 
-export default function Editor({ workspaces, tabs, activeProject, blocks: blocksProp, sidebarOpen, wordCount, charCount, onOpenSidebar, onTabClick, onTabClose, onNewTab, onTabRename, onBlocksChange, onWordCountChange, activeWorkspaceId, onSelectProject, onNewWorkspace, onNewTabInWorkspace, onSelectWorkspaceHome, onSaveAsTemplate, docTemplates, railActive, onCalendarOpenProject, calendarScrollTarget, onCalendarScrollComplete, onRenameWorkspace, onUpdateProjectDue, comments, onCommentsChange, activities, onActivitiesChange, zenMode, onToggleZen, splitProject, splitBlocks, splitProjectName, splitClientName, onSplitOpen, onSplitClose, onSplitMakePrimary }: EditorProps) {
+export default function Editor({ workspaces, tabs, activeProject, blocks: blocksProp, sidebarOpen, wordCount, charCount, onOpenSidebar, onTabClick, onTabClose, onNewTab, onTabRename, onBlocksChange, onWordCountChange, activeWorkspaceId, onSelectProject, onNewWorkspace, onNewTabInWorkspace, onSelectWorkspaceHome, onSaveAsTemplate, docTemplates, onNavigateRail, railActive, onCalendarOpenProject, calendarScrollTarget, onCalendarScrollComplete, onRenameWorkspace, onUpdateProjectDue, comments, onCommentsChange, activities, onActivitiesChange, zenMode, onToggleZen, splitProject, splitBlocks, splitProjectName, splitClientName, onSplitOpen, onSplitClose, onSplitMakePrimary }: EditorProps) {
   const [blocks, setBlocksLocal] = useState<Block[]>(blocksProp);
   const [editingTabId, setEditingTabId] = useState<string | null>(null);
   const [editingTabName, setEditingTabName] = useState("");
@@ -130,6 +138,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     { id: "n10", type: "milestone", title: "Logo usage rules — approved by all", desc: "Brand Guidelines v2 · Sarah ✓ · Jamie ✓ · Ready for next milestone", time: "2 days ago", read: true, action: "View deliverable", workspace: "Meridian Studio" },
   ]);
   const splitPickerRef = useRef<HTMLDivElement>(null);
+  const cmdPaletteSourceBlockId = useRef<string | null>(null);
 
   const blockElMap = useRef<Record<string, HTMLDivElement>>({});
   const editorRef = useRef<HTMLDivElement>(null);
@@ -137,6 +146,15 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
   const manuallyRenamed = useRef<Set<string>>(new Set());
 
   const registerRef = useCallback((id: string, el: HTMLDivElement) => { blockElMap.current[id] = el; }, []);
+
+  const getSelectedBlockId = useCallback(() => {
+    const sel = window.getSelection();
+    if (!sel?.anchorNode) return null;
+    for (const [id, el] of Object.entries(blockElMap.current)) {
+      if (el && el.contains(sel.anchorNode)) return id;
+    }
+    return null;
+  }, []);
 
   // Retry-based focus helper — waits for EditableBlock to register its ref in blockElMap
   const focusNew = useCallback((id: string, retries = 5) => {
@@ -181,6 +199,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
+        cmdPaletteSourceBlockId.current = getSelectedBlockId();
         setCmdPalette(p => !p);
       }
       if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === "Backspace") {
@@ -200,7 +219,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, []);
+  }, [getSelectedBlockId]);
 
   useEffect(() => {
     let t = "";
@@ -290,6 +309,22 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       return n;
     });
   }, []);
+
+  const duplicateBlockById = useCallback((sourceId: string) => {
+    const source = blocks.find(block => block.id === sourceId);
+    if (!source) return false;
+    const cloned = structuredClone(source) as Block;
+    cloned.id = uid();
+    setBlocks(prev => {
+      const idx = prev.findIndex(block => block.id === sourceId);
+      if (idx === -1) return prev;
+      const next = [...prev];
+      next.splice(idx + 1, 0, cloned);
+      return next;
+    });
+    focusNew(cloned.id);
+    return true;
+  }, [blocks, focusNew, setBlocks]);
 
   const onSlash = useCallback((blockId: string, filter?: string) => {
     const el = blockElMap.current[blockId];
@@ -429,6 +464,11 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       "pricing-config": { pricingConfigData: getDefaultPricingConfigData() },
       "scope-boundary": { scopeBoundaryData: getDefaultScopeBoundaryData() },
       "asset-checklist": { assetChecklistData: getDefaultAssetChecklistData() },
+      "decision-picker": { decisionPickerData: getDefaultDecisionPickerData() },
+      "availability-picker": { availabilityPickerData: getDefaultAvailabilityPickerData() },
+      "progress-stream": { progressStreamData: getDefaultProgressStreamData() },
+      "dependency-map": { dependencyMapData: getDefaultDependencyMapData() },
+      "revision-heatmap": { revisionHeatmapData: getDefaultRevisionHeatmapData() },
     };
     if (CONTENT_DEFAULTS[type]) {
       setBlocks(prev => {
@@ -712,6 +752,54 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
 
   const activeTab = tabs.find(t => t.active);
   const activeWs = workspaces.find(w => w.projects.some(p => p.id === activeProject));
+  const canGoToWorkspaceHome = Boolean(activeWs?.id && onSelectWorkspaceHome);
+
+  const handleBreadcrumbParentClick = useCallback(() => {
+    if (!activeWs?.id || !onSelectWorkspaceHome) return;
+    onSelectWorkspaceHome(activeWs.id);
+  }, [activeWs?.id, onSelectWorkspaceHome]);
+
+  const handleCommandSelect = useCallback((commandId: string) => {
+    switch (commandId) {
+      case "new-project":
+        onNewTab();
+        return true;
+      case "new-proposal":
+        onNavigateRail?.("templates");
+        return true;
+      case "new-invoice":
+        onNavigateRail?.("finance");
+        return true;
+      case "search":
+        onNavigateRail?.("search");
+        return true;
+      case "switch-ws":
+        if (activeWs?.id && onSelectWorkspaceHome) {
+          onSelectWorkspaceHome(activeWs.id);
+          return true;
+        }
+        onNavigateRail?.("workspaces");
+        return true;
+      case "recent":
+        setHistoryOpen(true);
+        return true;
+      case "export-pdf":
+        if (typeof window === "undefined") return false;
+        window.print();
+        return true;
+      case "share":
+        if (!activeProject) return false;
+        setShareOpen(true);
+        return true;
+      case "duplicate": {
+        const sourceId = cmdPaletteSourceBlockId.current || hoverBlock;
+        if (!sourceId) return false;
+        return duplicateBlockById(sourceId);
+      }
+      default:
+        return false;
+    }
+  }, [activeProject, activeWs?.id, duplicateBlockById, hoverBlock, onNavigateRail, onNewTab, onSelectWorkspaceHome]);
 
   const renderBlock = (block: Block) => {
     // Graph block — click to select, double-click to edit data
@@ -822,6 +910,11 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       "pricing-config": (b) => b.pricingConfigData ? <PricingConfigBlock data={b.pricingConfigData} onUpdate={d => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, pricingConfigData: d } : bl))} /> : null,
       "scope-boundary": (b) => b.scopeBoundaryData ? <ScopeBoundaryBlock data={b.scopeBoundaryData} onUpdate={d => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, scopeBoundaryData: d } : bl))} /> : null,
       "asset-checklist": (b) => b.assetChecklistData ? <AssetChecklistBlock data={b.assetChecklistData} onUpdate={d => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, assetChecklistData: d } : bl))} /> : null,
+      "decision-picker": (b) => b.decisionPickerData ? <DecisionPickerBlock data={b.decisionPickerData} onUpdate={d => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, decisionPickerData: d } : bl))} /> : null,
+      "availability-picker": (b) => b.availabilityPickerData ? <AvailabilityPickerBlock data={b.availabilityPickerData} onUpdate={d => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, availabilityPickerData: d } : bl))} /> : null,
+      "progress-stream": (b) => b.progressStreamData ? <ProgressStreamBlock data={b.progressStreamData} onUpdate={d => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, progressStreamData: d } : bl))} /> : null,
+      "dependency-map": (b) => b.dependencyMapData ? <DependencyMapBlock data={b.dependencyMapData} onUpdate={d => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, dependencyMapData: d } : bl))} /> : null,
+      "revision-heatmap": (b) => b.revisionHeatmapData ? <RevisionHeatmapBlock data={b.revisionHeatmapData} onUpdate={d => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, revisionHeatmapData: d } : bl))} /> : null,
     };
 
     if (contentBlockMap[block.type]) {
@@ -1249,9 +1342,25 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       {/* Breadcrumb — only show when a tab is active */}
       {!zenMode && tabs.some(t => t.active) && (
         <div className={styles.bread}>
-          <button className={styles.breadNav}><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M8 3L4 7l4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg></button>
-          <button className={styles.breadNav}><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M6 3l4 4-4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg></button>
-          <span style={{ color: "var(--ink-400)", margin: "0 4px" }}>{activeWs?.client || "Workspace"}</span>
+          <button
+            className={styles.breadNav}
+            type="button"
+            aria-label="Back to workspace"
+            title="Back to workspace"
+            onClick={handleBreadcrumbParentClick}
+            disabled={!canGoToWorkspaceHome}
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M8 3L4 7l4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          </button>
+          <span className={styles.breadChevron} aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M6 3l4 4-4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
+          <button
+            className={styles.breadLink}
+            type="button"
+            onClick={handleBreadcrumbParentClick}
+            disabled={!canGoToWorkspaceHome}
+          >
+            {activeWs?.client || "Workspace"}
+          </button>
           <span style={{ color: "var(--warm-300)" }}>/</span>
           <span style={{ color: "var(--ink-700)", margin: "0 4px", fontWeight: 500 }}>{activeTab?.name || "Untitled"}</span>
           {(() => {
@@ -1339,7 +1448,34 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
               />}
               {/* Editor area */}
               <div className={styles.editor} ref={editorRef} onMouseDown={() => { setConvoPanelOpen(false); setCommentPanelOpen(false); }} style={{ flex: 1 }}>
-                <div className={styles.page} onClick={handlePageClick}>{blocks.map(renderBlock)}</div>
+                <div className={styles.page} onClick={handlePageClick}>
+                  {/* Project meta bar with due date picker */}
+                  {activeWs && (() => {
+                    const project = activeWs.projects.find(p => p.id === activeProject);
+                    if (!project) return null;
+                    const st = STATUS[project.status];
+                    return (
+                      <div className={styles.metaBar}>
+                        <div className={styles.metaClient}>
+                          <span className={styles.metaAvatar} style={{ background: activeWs.avatarBg }}>{activeWs.avatar}</span>
+                          {activeWs.client}
+                        </div>
+                        <span className={styles.metaSep}>·</span>
+                        <span className={styles.metaStatus} style={{ color: st.color, background: st.color + "08", borderColor: st.color + "15" }}>● {st.label}</span>
+                        <span className={styles.metaSep}>·</span>
+                        <DueDatePicker
+                          date={project.due}
+                          onChange={(due) => onUpdateProjectDue?.(activeProject, due)}
+                        />
+                        {project.amount !== "—" && <>
+                          <span className={styles.metaSep}>·</span>
+                          <span className={styles.metaBudget}>{project.amount}</span>
+                        </>}
+                      </div>
+                    );
+                  })()}
+                  {blocks.map(renderBlock)}
+                </div>
                 {slashMenu && (
                   <SlashMenu
                     top={slashMenu.top}
@@ -1409,7 +1545,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       )}
 
       {/* Command palette */}
-      {cmdPalette && <CommandPalette onClose={() => setCmdPalette(false)} />}
+      {cmdPalette && <CommandPalette onClose={() => setCmdPalette(false)} onSelectCommand={handleCommandSelect} />}
 
       {/* History modal */}
       <HistoryModal open={historyOpen} onClose={() => setHistoryOpen(false)} />

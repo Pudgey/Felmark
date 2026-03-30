@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import type { Workspace, Project } from "@/lib/types";
 import { STATUS } from "@/lib/constants";
-import { daysLeft, getDueLabelFromDate, getDueColorFromDate } from "@/lib/utils";
+import { getDaysLeft as daysLeft, getDueLabel as getDueLabelFromDate, getDueColor as getDueColorFromDate } from "@/lib/due-dates";
 import styles from "./DashboardHome.module.css";
 
 // ── Seed data (activity, pipeline, earnings — not yet connected to real data) ──

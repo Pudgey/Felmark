@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { DeadlineBlockData } from "@/lib/types";
-import { daysLeft, formatDue, getDueLabelFromDate, getDueColorFromDate } from "@/lib/utils";
+import { getDaysLeft as daysLeft, formatDueShort as formatDue, getDueLabel as getDueLabelFromDate, getDueColor as getDueColorFromDate } from "@/lib/due-dates";
 import styles from "./DeadlineBlock.module.css";
 
 interface DeadlineBlockProps {

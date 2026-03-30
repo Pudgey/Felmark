@@ -2,43 +2,7 @@ import type { Block, WorkspaceTemplate } from "./types";
 
 export const uid = () => Math.random().toString(36).slice(2, 10);
 
-/** Compute days remaining from an ISO date string. Positive = future, negative = overdue, null = no date. */
-export function daysLeft(due: string | null): number | null {
-  if (!due) return null;
-  const d = new Date(due + "T00:00:00");
-  if (isNaN(d.getTime())) return null;
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-  return Math.ceil((d.getTime() - now.getTime()) / 86400000);
-}
-
-/** Format an ISO date string to a short display label like "Apr 3" */
-export function formatDue(due: string | null): string {
-  if (!due) return "\u2014";
-  const d = new Date(due + "T00:00:00");
-  if (isNaN(d.getTime())) return "\u2014";
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
-
-/** Get the due label with relative context: "5 days left", "3 days overdue", "Due Apr 3" */
-export function getDueLabelFromDate(due: string | null): string {
-  const dl = daysLeft(due);
-  if (dl === null) return "\u2014";
-  if (dl < 0) return `${Math.abs(dl)}d overdue`;
-  if (dl === 0) return "Due today";
-  if (dl <= 14) return `${dl}d left`;
-  return formatDue(due);
-}
-
-/** Get due color based on days remaining */
-export function getDueColorFromDate(due: string | null): string {
-  const dl = daysLeft(due);
-  if (dl === null) return "var(--ink-300)";
-  if (dl < 0) return "#c24b38";
-  if (dl <= 3) return "#c24b38";
-  if (dl <= 7) return "var(--ember)";
-  return "var(--ink-400)";
-}
+// Date utilities moved to @/lib/due-dates.ts — use getDaysLeft, formatDueShort, getDueLabel, getDueColor
 
 export function makeBlocks(template: WorkspaceTemplate, clientName: string): { blocks: Block[]; projectName: string } {
   switch (template) {

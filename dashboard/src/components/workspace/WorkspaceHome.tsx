@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import type { Workspace, Project } from "@/lib/types";
 import { STATUS } from "@/lib/constants";
-import { daysLeft, formatDue, getDueLabelFromDate, getDueColorFromDate } from "@/lib/utils";
+import { getDaysLeft as daysLeft, formatDueShort as formatDue, getDueLabel as getDueLabelFromDate, getDueColor as getDueColorFromDate } from "@/lib/due-dates";
 import styles from "./WorkspaceHome.module.css";
 
 interface WorkspaceHomeProps {
