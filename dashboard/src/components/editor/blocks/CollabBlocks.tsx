@@ -354,41 +354,70 @@ export function HandoffBlock({ data, onChange }: { data: HandoffData; onChange: 
 // ══════════════════════════════════════
 
 export function SignoffBlock({ data, onChange }: { data: SignoffData; onChange: (d: SignoffData) => void }) {
-  const handleSign = () => {
-    if (data.signed) {
-      onChange({ ...data, signed: false, signedAt: null, locked: false });
-    } else {
-      onChange({ ...data, signed: true, signedAt: new Date().toISOString(), locked: true });
-    }
+  // Initialize parties if not present (backward compat)
+  const parties = data.parties || [
+    { name: data.signer || "Freelancer", role: "Freelancer", signed: data.signed, signedAt: data.signedAt },
+    { name: "", role: "Client", signed: false, signedAt: null },
+  ];
+
+  const handleSign = (idx: number) => {
+    const updated = parties.map((p, i) => {
+      if (i !== idx) return p;
+      if (p.signed) return { ...p, signed: false, signedAt: null };
+      return { ...p, signed: true, signedAt: new Date().toISOString() };
+    });
+    const allSigned = updated.every(p => p.signed);
+    onChange({ ...data, parties: updated, signed: allSigned, signedAt: allSigned ? new Date().toISOString() : null, locked: allSigned });
   };
 
+  const updatePartyName = (idx: number, name: string) => {
+    const updated = parties.map((p, i) => i === idx ? { ...p, name } : p);
+    onChange({ ...data, parties: updated });
+  };
+
+  const allSigned = parties.every(p => p.signed);
+
   return (
-    <div className={`${styles.signoff} ${data.locked ? styles.signoffLocked : ""}`}>
-      <div className={`${styles.signoffHeader} ${data.locked ? styles.signoffLockedHeader : ""}`}>
-        <div className={`${styles.signoffIcon} ${data.locked ? styles.signoffIconLocked : ""}`}>
-          {data.locked ? "🔒" : "✓"}
-        </div>
-        <span className={styles.blockLabel} style={{ color: data.locked ? "#5a9a3c" : "var(--ink-500)" }}>Sign-off</span>
-        {data.locked && <span className={styles.signoffLockBadge}>Locked</span>}
+    <div className={`${styles.signoff} ${allSigned ? styles.signoffLocked : ""}`}>
+      <div className={`${styles.signoffHeader} ${allSigned ? styles.signoffLockedHeader : ""}`}>
+        <div className={styles.signoffHeaderIcon}>✍</div>
+        <span className={styles.blockLabel}>E-Signatures</span>
+        {allSigned && <span className={styles.signoffLockBadge}>Fully signed</span>}
       </div>
-      <div className={styles.blockBody}>
-        <input className={styles.blockInput} placeholder="Section name (e.g. Final Copy)" value={data.section} onChange={e => onChange({ ...data, section: e.target.value })} style={{ fontSize: 15, fontWeight: 500, marginBottom: 10 }} disabled={data.locked} />
-        <div className={`${styles.signoffSignature} ${data.signed ? styles.signoffSignatureSigned : ""}`}>
-          <div className={`${styles.signoffCheck} ${data.signed ? styles.signoffCheckSigned : ""}`} onClick={handleSign}>
-            {data.signed && <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6l2.5 2.5L9.5 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
-          </div>
-          <div>
-            <div className={styles.signoffSigner}>
-              {data.signed ? (
-                <><span className={styles.signoffSignerName}>{data.signer || "Signer"}</span> approved</>
+
+      <div className={styles.signoffParties}>
+        {parties.map((party, i) => (
+          <div key={i} className={`${styles.signoffParty} ${party.signed ? styles.signoffPartySigned : ""}`}>
+            <div className={styles.signoffLine} />
+            <div className={styles.signoffPartyName}>
+              {party.signed ? (
+                <span style={{ fontStyle: "italic", color: "var(--ink-600)" }}>{party.name || party.role}</span>
               ) : (
-                <input className={styles.blockInput} placeholder="Signer name" value={data.signer} onChange={e => onChange({ ...data, signer: e.target.value })} style={{ fontSize: 13, padding: "4px 8px" }} />
+                <input
+                  className={styles.blockInput}
+                  placeholder={`${party.role} name`}
+                  value={party.name}
+                  onChange={e => updatePartyName(i, e.target.value)}
+                  style={{ fontSize: 13, padding: "4px 8px", textAlign: "center" }}
+                />
               )}
             </div>
+            <div className={styles.signoffRole}>{party.role}</div>
+            {party.signed ? (
+              <div className={styles.signoffBadgeSigned} onClick={() => handleSign(i)}>
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2 2L8 3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                Signed · {party.signedAt ? new Date(party.signedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : ""}
+              </div>
+            ) : (
+              <button className={styles.signoffSignBtn} onClick={() => handleSign(i)}>
+                Sign
+              </button>
+            )}
           </div>
-          {data.signedAt && <span className={styles.signoffDate}>{new Date(data.signedAt).toLocaleDateString()}</span>}
-        </div>
+        ))}
       </div>
+
+      <div className={styles.signoffNote}>Legally binding digital signatures · Timestamped</div>
     </div>
   );
 }

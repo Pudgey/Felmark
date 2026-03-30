@@ -90,6 +90,13 @@ Chrome Extension (~50 lines)          Web App (app.tryfelmark.com)
 
 ## Ground Rules
 
+### 0. Worktree Required (NON-NEGOTIABLE)
+- **ALL code-writing agent work MUST run in a git worktree** (isolated copy of the repo).
+- File watchers (linters, formatters, IDE extensions) in the main worktree modify files between edits, causing edit conflicts and slowdowns.
+- Worktrees give the agent an isolated repo copy. No interference. Edit freely, commit when done, merge back clean.
+- **Applies to**: sprints, missions, bug fixes, feature builds, refactors — any task modifying `dashboard/src/` files.
+- **Exceptions**: Conductor-only edits (THOUGHTS.md, HANDOFF.md, mission docs) can run in the main worktree.
+
 ### 1. No Scope Creep
 - **STOP -> PROPOSE -> WAIT** before expanding scope beyond the current task.
 
@@ -119,6 +126,7 @@ The Conductor is the project's self-sustaining knowledge system in `conductor/`.
 #### During Work
 - **On task start**: Add a row to `conductor/THOUGHTS.md` Current table with `ACTIVE` status, agent name `codex-main`, one-sentence task description, and timestamp.
 - **On task complete**: Update status to `COMPLETE`, then move the entry to the Recent table (cap at 5, drop oldest).
+- When adding, deleting, renaming, or retiring a feature or its primary files, update `conductor/GUARDRAIL.md` in the same pass.
 
 #### On Session Close
 After any non-trivial session:
@@ -139,6 +147,7 @@ Skills are reusable protocols stored in `conductor/skills/<name>/SKILL.md`. They
 |-------|---------|------|
 | brain | Project grounding protocol — load full context before changes | `conductor/skills/brain/SKILL.md` |
 | mission | Create a new feature mission plan | `conductor/skills/mission/SKILL.md` |
+| phase | Propose the next development phase for human approval | `conductor/skills/phase/SKILL.md` |
 | review | Systematic code review checklist | `conductor/skills/review/SKILL.md` |
 | debug | Parallel hypothesis debugging | `conductor/skills/debug/SKILL.md` |
 | find | Read-only codebase sweep for bugs and issues | `conductor/skills/find/SKILL.md` |
@@ -176,6 +185,7 @@ When the user says something like `$brain`, `$review dashboard/src/`, "run brain
 | `conductor/ACTIVE_CONTEXT.md` | Current project snapshot |
 | `conductor/THOUGHTS.md` | Real-time agent scratchpad |
 | `conductor/HANDOFF.md` | Session continuity context |
+| `conductor/GUARDRAIL.md` | Living feature/file inventory and change guardrail |
 | `conductor/CONDUCTOR_HEALTH.md` | Self-audit protocol |
 | `conductor/agent-team/AGENT_TEAM.md` | Multi-agent coordination |
 | `conductor/sops/AAS_SOP.md` | Three-layer quality review protocol |

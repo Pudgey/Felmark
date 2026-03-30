@@ -39,9 +39,19 @@ export default function EditorMargin({ blocks, hoveredBlock, onHoverBlock, onScr
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [dropIdx, setDropIdx] = useState<number | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number; blockId: string } | null>(null);
   const lastClickIdx = useRef<number | null>(null);
   const gutterRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<number | null>(null);
+
+  // Close context menu on outside click
+  useEffect(() => {
+    if (!ctxMenu) return;
+    const close = () => setCtxMenu(null);
+    window.addEventListener("click", close);
+    window.addEventListener("contextmenu", close);
+    return () => { window.removeEventListener("click", close); window.removeEventListener("contextmenu", close); };
+  }, [ctxMenu]);
 
   // Clear selection when blocks change (e.g. after delete)
   useEffect(() => {
@@ -248,6 +258,7 @@ export default function EditorMargin({ blocks, hoveredBlock, onHoverBlock, onScr
                 onMouseEnter={() => onHoverBlock(block.id)}
                 onMouseLeave={() => onHoverBlock(null)}
                 onClick={(e) => handleItemClick(e, block, i)}
+                onContextMenu={(e) => { e.preventDefault(); setCtxMenu({ x: e.clientX, y: e.clientY, blockId: block.id }); }}
               >
                 <span className={styles.gutterLine}>{i + 1}</span>
                 <span className={styles.gutterType} style={{ color }}>{label}</span>
@@ -276,6 +287,21 @@ export default function EditorMargin({ blocks, hoveredBlock, onHoverBlock, onScr
           <button className={styles.selectionBtn} title="Clear selection (Esc)" onClick={() => setSelected(new Set())}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 4l6 6M10 4l-6 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
           </button>
+        </div>
+      )}
+
+      {/* Context menu */}
+      {ctxMenu && (
+        <div className={styles.ctxMenu} style={{ top: ctxMenu.y, left: ctxMenu.x }}
+          onClick={e => e.stopPropagation()}>
+          <button className={styles.ctxItem} onClick={() => { onScrollTo(ctxMenu.blockId); setCtxMenu(null); }}>
+            Go to block
+          </button>
+          {onDeleteBlocks && (
+            <button className={styles.ctxItemDanger} onClick={() => { onDeleteBlocks([ctxMenu.blockId]); setCtxMenu(null); }}>
+              Delete block
+            </button>
+          )}
         </div>
       )}
     </div>

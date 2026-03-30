@@ -13,6 +13,10 @@ import { INITIAL_COMMENTS, type Comment } from "@/components/comments/CommentPan
 import { INITIAL_ACTIVITIES, type BlockActivity } from "@/components/activity/ActivityMargin";
 import CreationAnimation from "@/components/onboarding/CreationAnimation";
 import Launchpad from "@/components/launchpad/Launchpad";
+import type { DocumentTemplate } from "@/lib/types";
+import { STARTER_TEMPLATES } from "@/lib/starter-templates";
+import SaveTemplateModal from "@/components/templates/SaveTemplateModal";
+import TemplatePicker from "@/components/templates/TemplatePicker";
 
 const INITIAL_TABS: Tab[] = [
   { id: "p1", name: "Brand Guidelines v2", client: "Meridian Studio", active: true },
@@ -41,30 +45,88 @@ function makeEmptyBlocks(): Block[] {
   ];
 }
 
+// ── localStorage persistence ──
+const STORAGE_KEY = "felmark_workspace";
+
+function loadFromStorage<T>(key: string, fallback: T): T {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const raw = localStorage.getItem(`${STORAGE_KEY}_${key}`);
+    if (raw) return JSON.parse(raw);
+  } catch { /* corrupted data — use fallback */ }
+  return fallback;
+}
+
+function saveToStorage(key: string, data: unknown) {
+  try {
+    localStorage.setItem(`${STORAGE_KEY}_${key}`, JSON.stringify(data));
+  } catch { /* storage full — silent fail */ }
+}
+
 export default function Dashboard() {
   const [workspaces, setWorkspaces] = useState<Workspace[]>(INITIAL_WORKSPACES);
   const [tabs, setTabs] = useState<Tab[]>(INITIAL_TABS.map(t => ({ ...t, active: false })));
   const [activeProject, setActiveProject] = useState("");
+  const [blocksMap, setBlocksMap] = useState<Record<string, Block[]>>(INITIAL_BLOCKS);
+  const [archived, setArchived] = useState<ArchivedProject[]>([]);
+  const [comments, setComments] = useState<Comment[]>(INITIAL_COMMENTS);
+  const [activitiesMap, setActivitiesMap] = useState<Record<string, BlockActivity[]>>({ p1: INITIAL_ACTIVITIES });
+
+  // ── Hydrate from localStorage after mount (avoids SSR mismatch) ──
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => {
+    const ws = loadFromStorage("workspaces", null);
+    if (ws) setWorkspaces(ws);
+    const t = loadFromStorage("tabs", null);
+    if (t) setTabs(t);
+    const ap = loadFromStorage("activeProject", null);
+    if (ap !== null) setActiveProject(ap);
+    const bm = loadFromStorage("blocksMap", null);
+    if (bm) setBlocksMap(bm);
+    const ar = loadFromStorage("archived", null);
+    if (ar) setArchived(ar);
+    const cm = loadFromStorage("comments", null);
+    if (cm) setComments(cm);
+    const am = loadFromStorage("activitiesMap", null);
+    if (am) setActivitiesMap(am);
+    setHydrated(true);
+  }, []);
+
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [railActive, setRailActive] = useState("workspaces");
   const [wordCount, setWordCount] = useState(0);
   const [charCount, setCharCount] = useState(0);
-  const [blocksMap, setBlocksMap] = useState<Record<string, Block[]>>(INITIAL_BLOCKS);
-  const [archived, setArchived] = useState<ArchivedProject[]>([]);
   const [onboardingName, setOnboardingName] = useState<string | null>(null);
   const [creationAnim, setCreationAnim] = useState<{ name: string; template: string; color: string; pendingData: { name: string; contact: string; rate: string; budget: string; color: string; template: WorkspaceTemplate } } | null>(null);
-  const [comments, setComments] = useState<Comment[]>(INITIAL_COMMENTS);
-  const [activitiesMap, setActivitiesMap] = useState<Record<string, BlockActivity[]>>({ p1: INITIAL_ACTIVITIES });
   const [sidebarWidth, setSidebarWidth] = useState(260);
   const [isResizing, setIsResizing] = useState(false);
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<string | null>(null);
   const [calendarScrollTarget, setCalendarScrollTarget] = useState<string | null>(null);
   const [launchpadOpen, setLaunchpadOpen] = useState(false);
+  const [docTemplates, setDocTemplates] = useState<DocumentTemplate[]>(STARTER_TEMPLATES);
+  const [showSaveTemplate, setShowSaveTemplate] = useState(false);
+  const [showTemplatePicker, setShowTemplatePicker] = useState(false);
   const [zenMode, setZenMode] = useState(false);
   const [splitProject, setSplitProject] = useState<string | null>(null);
   const resizeRef = useRef<{ startX: number; startW: number } | null>(null);
 
   const overdueCount = workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "overdue").length, 0);
+
+  // ── Auto-save to localStorage (debounced 500ms) ──
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      saveToStorage("workspaces", workspaces);
+      saveToStorage("blocksMap", blocksMap);
+      saveToStorage("tabs", tabs);
+      saveToStorage("archived", archived);
+      saveToStorage("comments", comments);
+      saveToStorage("activitiesMap", activitiesMap);
+      saveToStorage("activeProject", activeProject);
+    }, 500);
+    return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
+  }, [workspaces, blocksMap, tabs, archived, comments, activitiesMap, activeProject]);
 
   // Zen mode: Escape to exit
   useEffect(() => {
@@ -535,6 +597,8 @@ export default function Dashboard() {
           onNewWorkspace={() => setOnboardingName("New Client")}
           onNewTabInWorkspace={handleNewTabInWorkspace}
           onSelectWorkspaceHome={selectWorkspaceHome}
+          onSaveAsTemplate={() => setShowSaveTemplate(true)}
+          docTemplates={docTemplates}
           railActive={railActive}
           calendarScrollTarget={calendarScrollTarget}
           onCalendarScrollComplete={() => setCalendarScrollTarget(null)}
@@ -593,6 +657,27 @@ export default function Dashboard() {
       onOpenCommandPalette={() => {
         // Editor manages command palette state internally
         // This is a placeholder — in the future, lift cmdPalette state to page.tsx
+      }}
+    />
+
+    <SaveTemplateModal
+      open={showSaveTemplate}
+      onClose={() => setShowSaveTemplate(false)}
+      blocks={blocksMap[activeProject] || []}
+      onSave={(template) => setDocTemplates(prev => [...prev, template])}
+    />
+
+    <TemplatePicker
+      open={showTemplatePicker}
+      onClose={() => setShowTemplatePicker(false)}
+      templates={docTemplates}
+      onSelectBlank={() => {
+        // Just close — the new tab is already created with blank blocks
+      }}
+      onSelectTemplate={(blocks) => {
+        if (activeProject) {
+          setBlocksMap(prev => ({ ...prev, [activeProject]: blocks }));
+        }
       }}
     />
     </ErrorBoundary>

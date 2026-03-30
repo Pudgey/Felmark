@@ -18,14 +18,14 @@
 
 | Agent | Task | Started | Status |
 |-------|------|---------|--------|
-| | | | |
+| claude-main | Fixed drag-and-drop for all block types via wrapBlock helper | 2026-03-30 | COMPLETE |
 
 ## Recent
 
 | Agent | Task | Completed |
 |-------|------|-----------|
+| codex-main | Prepared and committed the current source changes while excluding local runtime artifacts | 2026-03-30 15:01 EDT |
+| codex-main | Created a living guardrail doc for feature and file tracking and wired AGENTS and CLAUDE to use it | 2026-03-30 |
+| codex-main | Ran the brain grounding protocol and loaded project context before any code changes | 2026-03-30 14:01 EDT |
 | claude-main | Massive session: UI scale-up, notification panel, 9 collab blocks, deliverable upgrade, AI action block, 6 visual blocks, 5 animation blocks, P0 polish fixes | 2026-03-30 |
 | claude-main | Built /drawing block with 8 visual component types (flowchart, userflow, devices, sitemap, stickies, chart, stamps, wireframe) | 2026-03-30 |
-| codex-main | Created a new `phase` skill for proposing the next development phase for approval | 2026-03-30 |
-| codex-main | Converted repo-local Codex skill wrappers into real discoverable skills with UI metadata | 2026-03-30 |
-| codex-main | Updated Codex repo instructions so conductor skills can be invoked with `$skill` syntax | 2026-03-30 |

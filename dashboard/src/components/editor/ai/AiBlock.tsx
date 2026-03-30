@@ -445,6 +445,9 @@ export default function AiBlock({ blockId, onGenerate }: AiBlockProps) {
           <div className={styles.inputHead}>
             <span className={styles.inputIcon}>◈</span>
             <span className={styles.inputLabel}>AI Generate</span>
+            <button className={styles.closeBtn} onClick={() => onGenerate(blockId, [])} title="Remove block">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 4l6 6M10 4l-6 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
+            </button>
           </div>
           <div className={styles.inputRow}>
             <span className={styles.prompt}>❯</span>

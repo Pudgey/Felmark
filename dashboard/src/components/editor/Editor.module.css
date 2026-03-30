@@ -426,6 +426,7 @@
   margin: 0 auto;
   padding: 36px clamp(16px, 4vw, 48px) 40vh;
   width: 100%;
+  min-height: 100%;
   transition: max-width 0.5s cubic-bezier(0.4, 0, 0.2, 1), padding 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 

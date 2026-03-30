@@ -120,22 +120,28 @@
 .handoffStatusAccepted { composes: blockTag; background: rgba(176, 125, 79, 0.08); color: var(--ember); }
 .handoffStatusCompleted { composes: blockTag; background: rgba(90, 154, 60, 0.08); color: #5a9a3c; }
 
-/* ── Sign-off ── */
-.signoff { composes: block; }
-.signoffLocked { border-color: #5a9a3c; background: rgba(90, 154, 60, 0.02); }
-.signoffHeader { composes: blockHeader; }
-.signoffLockedHeader { background: rgba(90, 154, 60, 0.04); }
-.signoffIcon { composes: blockIcon; background: var(--warm-100); color: var(--ink-500); }
-.signoffIconLocked { background: rgba(90, 154, 60, 0.1); color: #5a9a3c; }
-.signoffSection { font-size: 15px; font-weight: 500; color: var(--ink-800); }
-.signoffSignature { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: rgba(90, 154, 60, 0.04); border: 1px dashed rgba(90, 154, 60, 0.2); border-radius: var(--radius-md); margin-top: 8px; }
-.signoffSignatureSigned { border-style: solid; border-color: rgba(90, 154, 60, 0.3); }
-.signoffCheck { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--warm-300); display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; transition: all 0.12s; }
-.signoffCheckSigned { border-color: #5a9a3c; background: #5a9a3c; color: #fff; }
-.signoffSigner { font-size: 14px; color: var(--ink-600); }
-.signoffSignerName { font-weight: 500; color: var(--ink-800); }
-.signoffDate { font-family: var(--mono); font-size: 11px; color: var(--ink-300); margin-left: auto; }
-.signoffLockBadge { composes: blockTag; background: rgba(90, 154, 60, 0.08); color: #5a9a3c; font-weight: 500; }
+/* ── Sign-off / E-Signature ── */
+.signoff { border: 1px dashed var(--warm-300); border-radius: 10px; padding: 20px; text-align: center; }
+.signoffLocked { border-style: solid; border-color: rgba(90, 154, 60, 0.2); background: rgba(90, 154, 60, 0.01); }
+.signoffHeader { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 16px; }
+.signoffLockedHeader {}
+.signoffHeaderIcon { font-size: 16px; color: var(--ink-400); }
+.signoffLockBadge { font-family: var(--mono); font-size: 9px; color: #5a9a3c; background: rgba(90,154,60,0.06); padding: 2px 8px; border-radius: 3px; font-weight: 500; }
+
+.signoffParties { display: flex; gap: 20px; justify-content: center; margin-bottom: 14px; }
+.signoffParty { flex: 1; max-width: 240px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.signoffPartySigned {}
+.signoffLine { width: 100%; height: 1px; background: var(--warm-300); }
+.signoffPartyName { font-size: 13px; color: var(--ink-500); }
+.signoffRole { font-family: var(--mono); font-size: 9px; color: var(--ink-300); text-transform: uppercase; letter-spacing: 0.06em; }
+
+.signoffBadgeSigned { display: flex; align-items: center; gap: 4px; font-family: var(--mono); font-size: 10px; color: #5a9a3c; background: rgba(90,154,60,0.06); padding: 3px 10px; border-radius: 4px; cursor: pointer; transition: all 0.08s; }
+.signoffBadgeSigned:hover { background: rgba(90,154,60,0.1); }
+
+.signoffSignBtn { padding: 6px 20px; border-radius: 6px; border: 1px solid var(--warm-200); background: #fff; font-size: 12px; font-family: inherit; color: var(--ink-500); cursor: pointer; transition: all 0.08s; }
+.signoffSignBtn:hover { border-color: var(--ember); color: var(--ember); background: rgba(176,125,79,0.04); }
+
+.signoffNote { font-family: var(--mono); font-size: 10px; color: var(--ink-300); }
 
 /* ── Annotation ── */
 .annotation { composes: block; }

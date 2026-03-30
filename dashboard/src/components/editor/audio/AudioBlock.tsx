@@ -43,10 +43,18 @@ export default function AudioBlock({ data, onUpdate }: AudioBlockProps) {
   const startTime = useRef(0);
   const pausedDuration = useRef(0);
 
-  // Sync state back to parent
+  // Sync to parent only when recording finishes or transcript changes
+  const prevStateRef = useRef(state);
+  const prevTranscriptRef = useRef(transcript);
   useEffect(() => {
-    onUpdate({ state, duration, audioUrl, waveform, transcript });
-  }, [state, duration, audioUrl, waveform, transcript]);
+    const stateChanged = prevStateRef.current !== state && state === "done";
+    const transcriptChanged = prevTranscriptRef.current !== transcript && state === "done";
+    prevStateRef.current = state;
+    prevTranscriptRef.current = transcript;
+    if (stateChanged || transcriptChanged) {
+      onUpdate({ state, duration, audioUrl, waveform, transcript });
+    }
+  }, [state, transcript]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const sampleWaveform = useCallback(() => {
     if (!analyser.current) return;

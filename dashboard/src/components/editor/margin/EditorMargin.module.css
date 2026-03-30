@@ -257,3 +257,47 @@
   background: rgba(194, 75, 56, 0.08);
   color: #c24b38;
 }
+
+/* Context menu */
+.ctxMenu {
+  position: fixed;
+  z-index: 200;
+  min-width: 140px;
+  background: #fff;
+  border: 1px solid var(--warm-200);
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  padding: 4px;
+  font-family: 'Outfit', sans-serif;
+}
+
+.ctxItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  background: none;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-600);
+  cursor: pointer;
+  min-height: 28px;
+}
+
+.ctxItem:hover {
+  background: var(--warm-100);
+  color: var(--ink-800);
+}
+
+.ctxItemDanger {
+  composes: ctxItem;
+  color: #c24b38;
+}
+
+.ctxItemDanger:hover {
+  background: rgba(194, 75, 56, 0.06);
+  color: #c24b38;
+}

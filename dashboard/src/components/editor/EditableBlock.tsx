@@ -12,6 +12,7 @@ interface EditableBlockProps {
   onSlashClose: () => void;
   onSelect: () => void;
   registerRef: (id: string, el: HTMLDivElement) => void;
+  onCat?: () => void;
 }
 
 const PLACEHOLDERS: Record<string, string> = {
@@ -60,7 +61,7 @@ const DATE_CHIP_STYLE = `
   }
 `;
 
-export default function EditableBlock({ block, onContentChange, onEnter, onBackspace, onSlash, onSlashClose, onSelect, registerRef }: EditableBlockProps) {
+export default function EditableBlock({ block, onContentChange, onEnter, onBackspace, onSlash, onSlashClose, onSelect, registerRef, onCat }: EditableBlockProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [datePicker, setDatePicker] = useState<{ top: number; left: number } | null>(null);
   const dateInputRef = useRef<HTMLInputElement>(null);
@@ -79,17 +80,25 @@ export default function EditableBlock({ block, onContentChange, onEnter, onBacks
     if (ref.current) registerRef(block.id, ref.current);
   }, [block.id, registerRef]);
 
+  const syncEmpty = useCallback(() => {
+    if (!ref.current) return;
+    const text = (ref.current.textContent || "").replace(/[\u200B\uFEFF\xA0]/g, "").trim();
+    ref.current.classList.toggle("is-empty", text.length === 0);
+  }, []);
+
   useEffect(() => {
     if (ref.current && block.content && ref.current.innerHTML !== block.content) {
       ref.current.innerHTML = block.content;
     }
+    syncEmpty();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (ref.current) {
       ref.current.setAttribute("data-placeholder", PLACEHOLDERS[block.type] || "Type '/' for commands");
     }
-  }, [block.type]);
+    syncEmpty();
+  }, [block.type, syncEmpty]);
 
   // Handle clicks on existing date chips to edit them
   useEffect(() => {
@@ -134,9 +143,11 @@ export default function EditableBlock({ block, onContentChange, onEnter, onBacks
 
   const handleInput = () => {
     if (!ref.current) return;
-    const text = ref.current.textContent || "";
+    const rawText = ref.current.textContent || "";
+    const text = rawText.replace(/[\u200B\uFEFF\xA0]/g, "").trim();
     const html = ref.current.innerHTML;
-    onContentChange(block.id, html, text);
+    onContentChange(block.id, html, rawText);
+    syncEmpty();
 
     // Detect @date trigger
     if (text.includes("@date")) {
@@ -165,6 +176,14 @@ export default function EditableBlock({ block, onContentChange, onEnter, onBacks
           return;
         }
       }
+    }
+
+    // Easter egg: $cat
+    if (text.toLowerCase() === "$cat" && onCat) {
+      if (ref.current) ref.current.textContent = "";
+      onContentChange(block.id, "", "");
+      onCat();
+      return;
     }
 
     if (text === "/") onSlash(block.id);
@@ -227,6 +246,7 @@ export default function EditableBlock({ block, onContentChange, onEnter, onBacks
     <>
       <div
         ref={ref}
+        className="is-empty"
         contentEditable
         suppressContentEditableWarning
         data-placeholder={PLACEHOLDERS[block.type] || "Type '/' for commands"}
@@ -239,6 +259,7 @@ export default function EditableBlock({ block, onContentChange, onEnter, onBacks
         onInput={handleInput}
         onKeyDown={handleKeyDown}
         onMouseUp={onSelect}
+        onFocus={syncEmpty}
         spellCheck
       />
       {/* Floating date picker for @date */}

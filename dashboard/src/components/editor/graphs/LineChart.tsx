@@ -33,7 +33,7 @@ export default function LineChart({ title, data, height = 160 }: { title: string
         <span className={styles.gbTitle}>{title}</span>
         <span className={styles.gbBadge}>line chart</span>
       </div>
-      <svg className={styles.lineSvg} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none">
+      <svg className={styles.lineSvg} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="xMidYMid meet">
         {[0, 0.25, 0.5, 0.75, 1].map((frac, i) => {
           const y = pad.top + chartH * (1 - frac);
           return <line key={i} x1={pad.left} y1={y} x2={w - pad.right} y2={y} stroke="rgba(0,0,0,0.03)" strokeWidth="1" />;

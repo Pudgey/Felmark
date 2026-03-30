@@ -47,7 +47,13 @@ export type BlockType =
   | "value-counter"
   | "pricing-config"
   | "scope-boundary"
-  | "asset-checklist";
+  | "asset-checklist"
+  | "decision-picker"
+  | "availability-picker"
+  | "progress-stream"
+  | "drawing"
+  | "dependency-map"
+  | "revision-heatmap";
 
 export type GraphType = "bar" | "line" | "donut" | "hbar" | "sparkline" | "area" | "metrics";
 
@@ -323,6 +329,14 @@ export interface CanvasBlockData {
   elements: CanvasElement[];
 }
 
+export type DrawingType = "flowchart" | "userflow" | "devices" | "sitemap" | "stickies" | "sketch-chart" | "stamps" | "wireframe-kit";
+
+export interface DrawingBlockData {
+  drawingType: DrawingType;
+  title: string;
+  data: unknown;
+}
+
 export type AiActionMode = "summarize" | "suggest" | "translate" | "tone" | "scope";
 
 export interface AiActionBlockData {
@@ -497,6 +511,53 @@ export interface AssetChecklistData {
   items: AssetItem[];
 }
 
+export interface DecisionOption {
+  id: string;
+  label: string;
+  subtitle: string;
+  desc: string;
+  colors: string[];
+  font: string;
+  timeline: string;
+  price: number;
+  pros: string[];
+}
+
+export interface DecisionPickerData {
+  options: DecisionOption[];
+  choice: string | null;
+}
+
+export interface TimeSlot {
+  time: string;
+  duration: string;
+  available: boolean;
+}
+
+export interface AvailabilityDay {
+  date: string;
+  slots: TimeSlot[];
+}
+
+export interface AvailabilityPickerData {
+  days: AvailabilityDay[];
+  selected: string | null;
+}
+
+export interface ProgressSnapshot {
+  id: string;
+  date: string;
+  label: string;
+  desc: string;
+  items: number;
+  type: "sketch" | "decision" | "design" | "current";
+  color: string;
+}
+
+export interface ProgressStreamData {
+  snapshots: ProgressSnapshot[];
+}
+
 export interface Block {
   id: string;
   type: BlockType;
@@ -524,6 +585,7 @@ export interface Block {
   signoffData?: SignoffData;
   annotationData?: AnnotationData;
   canvasData?: CanvasBlockData;
+  drawingData?: DrawingBlockData;
   columnsData?: ColumnsBlockData;
   dataChipsData?: DataChipsBlockData;
   visualData?: VisualBlockData;
@@ -542,6 +604,38 @@ export interface Block {
   pricingConfigData?: PricingConfigData;
   scopeBoundaryData?: ScopeBoundaryData;
   assetChecklistData?: AssetChecklistData;
+  decisionPickerData?: DecisionPickerData;
+  availabilityPickerData?: AvailabilityPickerData;
+  progressStreamData?: ProgressStreamData;
+  dependencyMapData?: DependencyMapData;
+  revisionHeatmapData?: RevisionHeatmapData;
+}
+
+export interface DepNode {
+  id: string;
+  label: string;
+  status: "done" | "active" | "blocked" | "upcoming";
+  x: number;
+  y: number;
+  deps: string[];
+  blocker?: string;
+}
+
+export interface DependencyMapData {
+  nodes: DepNode[];
+}
+
+export interface HeatmapSection {
+  name: string;
+  edits: number;
+  lastEdit: string;
+  authors: string[];
+  heat: number;
+  lines: number;
+}
+
+export interface RevisionHeatmapData {
+  sections: HeatmapSection[];
 }
 
 export interface BlockTypeInfo {

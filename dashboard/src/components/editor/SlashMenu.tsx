@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
-import { BLOCK_TYPES } from "@/lib/constants";
-import type { BlockType, BlockTypeInfo } from "@/lib/types";
+import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
+import { BLOCK_TYPES, BLOCK_CATEGORIES } from "@/lib/constants";
+import type { BlockType } from "@/lib/types";
 import styles from "./SlashMenu.module.css";
 
 interface SlashMenuProps {
@@ -13,11 +14,26 @@ interface SlashMenuProps {
   onSelect: (type: BlockType) => void;
   onClose: () => void;
   onIndexChange: (index: number) => void;
+  onCat?: () => void;
 }
 
-export default function SlashMenu({ top, left, filter, selectedIndex, onSelect, onClose, onIndexChange }: SlashMenuProps) {
-  const filtered = BLOCK_TYPES.filter(t => t.label.toLowerCase().includes(filter.toLowerCase()));
+export default function SlashMenu({ top, left, filter, selectedIndex, onSelect, onClose, onIndexChange, onCat }: SlashMenuProps) {
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
+  // Reset category when filter changes
+  useEffect(() => {
+    if (filter) setActiveCategory(null);
+  }, [filter]);
+
+  // Build filtered list
+  const filtered = filter
+    ? BLOCK_TYPES.filter(t => t.label.toLowerCase().includes(filter.toLowerCase()) || t.desc.toLowerCase().includes(filter.toLowerCase()) || t.section.toLowerCase().includes(filter.toLowerCase()))
+    : activeCategory
+      ? BLOCK_TYPES.filter(t => t.section === activeCategory)
+      : BLOCK_TYPES;
+
+  // Keyboard navigation
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "ArrowDown") {
@@ -37,6 +53,7 @@ export default function SlashMenu({ top, left, filter, selectedIndex, onSelect, 
     return () => window.removeEventListener("keydown", handler, true);
   }, [selectedIndex, filtered, onSelect, onClose, onIndexChange]);
 
+  // Outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (!(e.target as HTMLElement).closest(`.${styles.menu}`)) onClose();
@@ -45,38 +62,115 @@ export default function SlashMenu({ top, left, filter, selectedIndex, onSelect, 
     return () => document.removeEventListener("mousedown", handler);
   }, [onClose]);
 
+  // Scroll selected into view
+  useEffect(() => {
+    const el = listRef.current?.querySelector(`.${styles.itemActive}`);
+    if (el) el.scrollIntoView({ block: "nearest" });
+  }, [selectedIndex]);
+
   if (filtered.length === 0) return null;
 
-  const sections = ["Basic", "Blocks", "Collaboration"] as const;
+  // Group by section for "All" view (no filter, no active category)
+  const showGrouped = !filter && !activeCategory;
+  const sections = BLOCK_CATEGORIES.map(c => c.id);
 
-  return (
+  return createPortal(
     <div className={styles.menu} style={{ top, left }}>
-      {sections.map(section => {
-        const items = filtered.filter(t => t.section === section);
-        if (!items.length) return null;
-        return (
-          <div key={section}>
-            <div className={styles.section}>{section}</div>
-            {items.map(t => {
-              const gi = filtered.indexOf(t);
-              return (
-                <div
-                  key={t.type}
-                  className={`${styles.item} ${gi === selectedIndex ? styles.itemActive : ""}`}
-                  onClick={() => onSelect(t.type)}
-                >
-                  <div className={styles.icon}>{t.icon}</div>
-                  <div>
-                    <div className={styles.label}>{t.label}</div>
-                    <div className={styles.desc}>{t.desc}</div>
-                  </div>
-                  <span className={styles.shortcut}>{t.shortcut}</span>
-                </div>
-              );
-            })}
-          </div>
-        );
-      })}
-    </div>
+      {/* Header with search info */}
+      <div className={styles.header}>
+        <div className={styles.searchRow}>
+          <span className={styles.prompt}>/</span>
+          <span className={styles.searchText}>{filter || "blocks"}</span>
+          <span className={styles.count}>{filtered.length}</span>
+        </div>
+      </div>
+
+      {/* Category tabs */}
+      <div className={styles.categories}>
+        <button
+          className={`${styles.cat} ${!activeCategory && !filter ? styles.catOn : ""}`}
+          onClick={() => { setActiveCategory(null); onIndexChange(0); }}
+        >All</button>
+        {BLOCK_CATEGORIES.map(c => (
+          <button
+            key={c.id}
+            className={`${styles.cat} ${activeCategory === c.id ? styles.catOn : ""}`}
+            onClick={() => { setActiveCategory(activeCategory === c.id ? null : c.id); onIndexChange(0); }}
+          >
+            <span className={styles.catIcon}>{c.icon}</span>
+            {c.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Block list */}
+      <div className={styles.list} ref={listRef}>
+        {showGrouped ? (
+          // Grouped view — show 3 per category
+          sections.map(section => {
+            const items = BLOCK_TYPES.filter(t => t.section === section);
+            if (!items.length) return null;
+            const cat = BLOCK_CATEGORIES.find(c => c.id === section);
+            return (
+              <div key={section}>
+                <div className={styles.group}>{cat?.icon} {cat?.label}</div>
+                {items.slice(0, 3).map(t => {
+                  const gi = filtered.indexOf(t);
+                  return (
+                    <div
+                      key={t.type}
+                      className={`${styles.item} ${gi === selectedIndex ? styles.itemActive : ""}`}
+                      onClick={() => onSelect(t.type)}
+                      onMouseEnter={() => onIndexChange(gi)}
+                    >
+                      <div className={styles.icon}>{t.icon}</div>
+                      <div className={styles.info}>
+                        <div className={styles.label}>{t.label}</div>
+                        <div className={styles.desc}>{t.desc}</div>
+                      </div>
+                      {t.shortcut && <span className={styles.shortcut}>{t.shortcut}</span>}
+                    </div>
+                  );
+                })}
+                {items.length > 3 && (
+                  <button className={styles.moreBtn} onClick={() => { setActiveCategory(section); onIndexChange(0); }}>
+                    +{items.length - 3} more in {cat?.label}
+                  </button>
+                )}
+              </div>
+            );
+          })
+        ) : (
+          // Flat filtered or category view
+          filtered.map((t, i) => (
+            <div
+              key={t.type}
+              className={`${styles.item} ${i === selectedIndex ? styles.itemActive : ""}`}
+              onClick={() => onSelect(t.type)}
+              onMouseEnter={() => onIndexChange(i)}
+            >
+              <div className={styles.icon}>{t.icon}</div>
+              <div className={styles.info}>
+                <div className={styles.label}>{t.label}</div>
+                <div className={styles.desc}>{t.desc}</div>
+              </div>
+              {t.shortcut && <span className={styles.shortcut}>{t.shortcut}</span>}
+              {filter && <span className={styles.itemCat}>{t.section}</span>}
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className={styles.footer}>
+        <span>{BLOCK_TYPES.length} blocks · {BLOCK_CATEGORIES.length} categories</span>
+        <div className={styles.hints}>
+          <span><span className={styles.kbd}>↑↓</span> navigate</span>
+          <span><span className={styles.kbd}>⏎</span> insert</span>
+          <span><span className={styles.kbd}>⎋</span> close</span>
+        </div>
+      </div>
+    </div>,
+    document.body
   );
 }

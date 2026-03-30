@@ -57,6 +57,12 @@ export const BLOCK_TYPES: BlockTypeInfo[] = [
   { type: "pricing-config", label: "Pricing Builder", icon: "$", desc: "Client toggles options, total updates live", section: "Blocks", shortcut: "/pricing" },
   { type: "scope-boundary", label: "Scope Boundary", icon: "⇄", desc: "In-scope vs out-of-scope with boundary", section: "Blocks", shortcut: "/scope" },
   { type: "asset-checklist", label: "Asset Checklist", icon: "☑", desc: "Track what you need from the client", section: "Blocks", shortcut: "/assets" },
+  { type: "decision-picker", label: "Decision Picker", icon: "⇄", desc: "Client picks between directions", section: "Blocks", shortcut: "/decide" },
+  { type: "availability-picker", label: "Availability", icon: "◇", desc: "Inline meeting scheduler", section: "Blocks", shortcut: "/avail" },
+  { type: "progress-stream", label: "Progress Stream", icon: "→", desc: "Visual work timeline", section: "Blocks", shortcut: "/stream" },
+  { type: "drawing", label: "Drawing", icon: "✎", desc: "Pre-built visual diagrams", section: "Visual", shortcut: "/drawing" },
+  { type: "dependency-map", label: "Dependency Map", icon: "◎", desc: "SVG deliverable dependency graph", section: "Blocks", shortcut: "/deps" },
+  { type: "revision-heatmap", label: "Revision Heatmap", icon: "█", desc: "Edit intensity per section", section: "Blocks", shortcut: "/heat" },
 ];
 
 export interface Command {

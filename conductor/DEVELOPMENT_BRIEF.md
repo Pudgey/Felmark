@@ -93,6 +93,7 @@ Three tiers:
 |---------|-----------|-----|
 | nox AI — Rapid Project Creation | M1 | [MISSION_NOX_AI.md](missions/MISSION_NOX_AI.md) |
 | AI Block System Prompt — Felmark-aware structured output | M1 | [MISSION_AI_BLOCK_SYSTEM_PROMPT.md](missions/MISSION_AI_BLOCK_SYSTEM_PROMPT.md) |
+| Save Editor as Template — Reusable document layouts | M1 | [MISSION_SAVE_AS_TEMPLATE.md](missions/MISSION_SAVE_AS_TEMPLATE.md) |
 
 ### Completed
 | Mission | Completed | Doc |

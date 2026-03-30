@@ -113,6 +113,13 @@ Chrome Extension (~50 lines)          Web App (app.tryfelmark.com)
 
 ## Ground Rules
 
+### 0. Worktree Required (NON-NEGOTIABLE)
+- **ALL code-writing agent work MUST run in a git worktree** (`isolation: "worktree"`).
+- File watchers (linters, formatters, IDE extensions) in the main worktree modify files between edits, causing `old_string` mismatches, stale reads, and 3x slowdown.
+- Worktrees give the agent an isolated repo copy. No interference. Edit freely, commit when done, merge back clean.
+- **This applies to**: sprints, missions, bug fixes, feature builds, refactors — any task that modifies `dashboard/src/` files.
+- **Exceptions**: Conductor-only edits (THOUGHTS.md, HANDOFF.md, mission docs) can run in the main worktree since they're not watched by linters.
+
 ### 1. No Scope Creep
 - **STOP -> PROPOSE -> WAIT** before expanding scope beyond the current task.
 
@@ -132,6 +139,7 @@ The Conductor is a self-sustaining knowledge system. These behaviors are **autom
 - **On task complete**: Update status to `COMPLETE`, then move the entry to the Recent table (cap at 5, drop oldest).
 - Team agents use their name (architect, data-hawk). Solo sessions use `claude-main`.
 - One sentence max per entry. Detail goes in the journal.
+- When adding, deleting, renaming, or retiring a feature or its primary files, update `conductor/GUARDRAIL.md` in the same pass.
 
 #### On Session Close (Learning Capture + Context Update + Handoff)
 - After any non-trivial session (debug, feature build, audit, refactor):
@@ -166,6 +174,7 @@ All engineering standards, active missions, audit reports, and project tracking 
 | `THOUGHTS.md` | Real-time agent scratchpad (active task status) |
 | `HANDOFF.md` | Session continuity context |
 | `ACTIVE_CONTEXT.md` | Current project snapshot |
+| `GUARDRAIL.md` | Living feature/file inventory and change guardrail |
 | `DEVELOPMENT_BRIEF.md` | Master plan: milestones, missions, strategy, ideas |
 | `agent-team/AGENT_TEAM.md` | Multi-agent coordination -- roles, collision prevention |
 | `agent-team/agent-sprint/SPRINT_SOP.md` | Sprint execution protocol -- claiming, status, archival |
