@@ -1,0 +1,160 @@
+/* ══════════════════════════════════════
+   VISUAL BLOCKS
+   ══════════════════════════════════════ */
+
+/* ── Shared ── */
+.block { border: 1px solid var(--warm-200); border-radius: var(--radius-lg); overflow: hidden; margin: 8px 0; }
+.blockHeader { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--warm-50); border-bottom: 1px solid var(--warm-100); }
+.blockIcon { font-size: 14px; flex-shrink: 0; width: 32px; height: 32px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; }
+.blockLabel { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+.blockBody { padding: 14px 16px; }
+.blockMeta { font-family: var(--mono); font-size: 11px; color: var(--ink-400); margin-left: auto; flex-shrink: 0; }
+
+/* ══════════════════════════════════════
+   1. TIMELINE
+   ══════════════════════════════════════ */
+.timeline { composes: block; }
+.timelineHeader { composes: blockHeader; }
+.timelineIcon { composes: blockIcon; background: rgba(91, 127, 164, 0.1); color: #5b7fa4; }
+.timelineLabel { composes: blockLabel; color: #5b7fa4; }
+.timelineBody { composes: blockBody; padding: 20px 16px 16px; }
+
+.timelinePhases { position: relative; padding-left: 28px; }
+.timelinePhase { position: relative; padding-bottom: 24px; }
+.timelinePhase:last-child { padding-bottom: 0; }
+
+.timelineDot { position: absolute; left: -28px; top: 2px; width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--warm-300); background: var(--parchment); z-index: 1; display: flex; align-items: center; justify-content: center; font-size: 8px; }
+.timelineDotDone { border-color: #5a9a3c; background: #5a9a3c; color: #fff; }
+.timelineDotCurrent { border-color: var(--ember); background: var(--ember); }
+.timelineDotUpcoming { border-color: var(--warm-300); background: var(--warm-100); opacity: 0.6; }
+
+.timelineLine { position: absolute; left: -22px; top: 16px; bottom: 0; width: 2px; background: var(--warm-200); }
+.timelinePhase:last-child .timelineLine { display: none; }
+
+.timelinePhaseLabel { font-family: var(--font-heading); font-size: 15px; font-weight: 600; color: var(--ink-800); }
+.timelinePhaseDate { font-family: var(--mono); font-size: 11px; color: var(--ink-400); margin-left: 8px; }
+.timelineItems { margin-top: 6px; list-style: none; padding: 0; }
+.timelineItem { font-size: 13px; color: var(--ink-600); padding: 3px 0; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.timelineItem:hover { color: var(--ink-800); }
+.timelineItemCheck { width: 14px; height: 14px; border-radius: 3px; border: 1.5px solid var(--warm-300); display: flex; align-items: center; justify-content: center; font-size: 9px; flex-shrink: 0; }
+.timelineItemCheckDone { border-color: #5a9a3c; background: #5a9a3c; color: #fff; }
+.timelineItemText { line-height: 1.4; }
+.timelineItemTextDone { text-decoration: line-through; color: var(--ink-400); }
+.timelinePhaseUpcoming .timelinePhaseLabel,
+.timelinePhaseUpcoming .timelineItems { opacity: 0.5; }
+
+/* ══════════════════════════════════════
+   2. FLOW
+   ══════════════════════════════════════ */
+.flow { composes: block; }
+.flowHeader { composes: blockHeader; }
+.flowIcon { composes: blockIcon; background: rgba(124, 107, 158, 0.1); color: #7c6b9e; }
+.flowLabel { composes: blockLabel; color: #7c6b9e; }
+.flowBody { composes: blockBody; padding: 20px 16px; overflow-x: auto; }
+
+.flowTrack { display: flex; align-items: flex-start; position: relative; gap: 0; min-width: max-content; }
+.flowConnector { position: absolute; top: 28px; left: 28px; right: 28px; height: 2px; background: var(--warm-200); z-index: 0; }
+.flowNode { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; width: 120px; flex-shrink: 0; cursor: pointer; padding: 0 4px; }
+.flowNodeIcon { width: 56px; height: 56px; border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; font-size: 22px; transition: transform 0.15s; border: 2px solid transparent; }
+.flowNode:hover .flowNodeIcon { transform: scale(1.08); }
+.flowNodeActive .flowNodeIcon { border-color: var(--ink-800); }
+.flowNodeLabel { font-family: var(--font-heading); font-size: 13px; font-weight: 600; color: var(--ink-800); margin-top: 8px; text-align: center; }
+.flowNodeSub { font-family: var(--mono); font-size: 11px; color: var(--ink-400); text-align: center; margin-top: 2px; }
+
+.flowDetail { margin-top: 16px; padding: 12px 16px; background: var(--warm-50); border: 1px solid var(--warm-100); border-radius: var(--radius-md); font-size: 13.5px; color: var(--ink-600); line-height: 1.5; }
+.flowDetailLabel { font-family: var(--mono); font-size: 11px; color: var(--ink-400); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+
+/* ══════════════════════════════════════
+   3. BRAND BOARD
+   ══════════════════════════════════════ */
+.brand { composes: block; }
+.brandHeader { composes: blockHeader; }
+.brandIcon { composes: blockIcon; background: rgba(176, 125, 79, 0.1); color: var(--ember); }
+.brandLabel { composes: blockLabel; color: var(--ember); }
+.brandBody { composes: blockBody; padding: 0; }
+
+.brandLogo { display: flex; align-items: center; gap: 20px; padding: 24px 20px; border-bottom: 1px solid var(--warm-100); }
+.brandLogoMark { width: 72px; height: 72px; border-radius: var(--radius-lg); background: var(--ink-800); color: #fff; display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 36px; font-weight: 700; flex-shrink: 0; }
+.brandLogoText { display: flex; flex-direction: column; }
+.brandLogoName { font-family: var(--font-heading); font-size: 24px; font-weight: 700; color: var(--ink-800); letter-spacing: -0.02em; }
+.brandLogoSub { font-family: var(--mono); font-size: 11px; color: var(--ink-400); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px; }
+.brandLogoVariants { display: flex; gap: 8px; margin-top: 10px; }
+.brandLogoVariant { width: 32px; height: 32px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; }
+
+.brandColors { padding: 16px 20px; border-bottom: 1px solid var(--warm-100); }
+.brandColorsLabel { font-family: var(--mono); font-size: 11px; color: var(--ink-400); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+.brandColorRow { display: flex; gap: 10px; flex-wrap: wrap; }
+.brandSwatch { width: 80px; }
+.brandSwatchColor { width: 80px; height: 48px; border-radius: var(--radius-md); border: 1px solid rgba(0,0,0,0.06); }
+.brandSwatchName { font-size: 12px; font-weight: 500; color: var(--ink-700); margin-top: 6px; }
+.brandSwatchHex { font-family: var(--mono); font-size: 11px; color: var(--ink-400); }
+.brandSwatchType { font-family: var(--mono); font-size: 11px; color: var(--ink-300); }
+
+.brandTypo { padding: 16px 20px; border-bottom: 1px solid var(--warm-100); }
+.brandTypoLabel { font-family: var(--mono); font-size: 11px; color: var(--ink-400); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+.brandTypoRow { display: flex; flex-direction: column; gap: 12px; }
+.brandTypoSample { display: flex; align-items: baseline; gap: 12px; }
+.brandTypoText { font-size: 18px; color: var(--ink-800); }
+.brandTypoRole { font-family: var(--mono); font-size: 11px; color: var(--ink-400); flex-shrink: 0; min-width: 60px; }
+.brandTypoWeight { font-family: var(--mono); font-size: 11px; color: var(--ink-300); }
+
+.brandKeywords { display: flex; gap: 6px; flex-wrap: wrap; padding: 14px 20px; background: var(--warm-50); }
+.brandKeyword { font-family: var(--mono); font-size: 11px; padding: 4px 10px; border-radius: var(--radius-sm); background: var(--warm-100); color: var(--ink-500); }
+
+/* ══════════════════════════════════════
+   4. MOOD BOARD
+   ══════════════════════════════════════ */
+.mood { composes: block; }
+.moodHeader { composes: blockHeader; }
+.moodIcon { composes: blockIcon; background: rgba(138, 126, 99, 0.1); color: #8a7e63; }
+.moodLabel { composes: blockLabel; color: #8a7e63; }
+.moodBody { composes: blockBody; padding: 12px; }
+
+.moodGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.moodCell { border-radius: var(--radius-md); padding: 24px 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: transform 0.15s; min-height: 100px; }
+.moodCell:hover { transform: scale(1.03); }
+.moodCellLarge { grid-row: span 2; }
+.moodCellWide { grid-column: span 2; }
+.moodCellIcon { font-size: 28px; }
+.moodCellLabel { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.85; }
+
+.moodKeywords { display: flex; gap: 6px; flex-wrap: wrap; padding: 12px 16px; border-top: 1px solid var(--warm-100); margin-top: 4px; }
+.moodKeyword { font-family: var(--mono); font-size: 11px; padding: 4px 10px; border-radius: var(--radius-sm); background: var(--warm-100); color: var(--ink-500); }
+
+/* ══════════════════════════════════════
+   5. WIREFRAME
+   ══════════════════════════════════════ */
+.wire { composes: block; }
+.wireHeader { composes: blockHeader; }
+.wireIcon { composes: blockIcon; background: rgba(124, 133, 148, 0.1); color: #7c8594; }
+.wireLabel { composes: blockLabel; color: #7c8594; }
+.wireBody { composes: blockBody; padding: 16px; background: var(--warm-50); }
+
+.wireCanvas { display: flex; flex-direction: column; gap: 12px; }
+.wireSection { border: 2px dashed var(--warm-300); border-radius: var(--radius-md); padding: 20px 16px 16px; position: relative; background: var(--parchment); min-height: 56px; }
+.wireSectionLabel { position: absolute; top: -10px; left: 12px; font-family: var(--mono); font-size: 11px; color: #7c8594; background: var(--warm-50); padding: 0 6px; text-transform: uppercase; letter-spacing: 0.06em; }
+.wireSectionContent { font-size: 13px; color: var(--ink-500); line-height: 1.5; font-style: italic; }
+
+.wireFooter { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--warm-100); }
+.wireHint { font-family: var(--mono); font-size: 11px; color: var(--ink-300); }
+.wireViewport { font-family: var(--mono); font-size: 11px; color: var(--ink-400); padding: 2px 8px; background: var(--warm-100); border-radius: var(--radius-sm); }
+
+/* ══════════════════════════════════════
+   6. PULL QUOTE
+   ══════════════════════════════════════ */
+.pq { composes: block; border-color: rgba(176, 125, 79, 0.15); }
+.pqHeader { composes: blockHeader; }
+.pqIcon { composes: blockIcon; background: rgba(176, 125, 79, 0.1); color: var(--ember); }
+.pqLabel { composes: blockLabel; color: var(--ember); }
+.pqBody { composes: blockBody; padding: 24px 20px; }
+
+.pqQuoteMark { font-family: var(--font-heading); font-size: 48px; line-height: 1; color: var(--ember); opacity: 0.25; margin-bottom: -8px; }
+.pqText { font-family: var(--font-heading); font-size: 20px; font-style: italic; color: var(--ink-700); line-height: 1.5; margin-bottom: 16px; }
+
+.pqAttribution { display: flex; align-items: center; gap: 12px; }
+.pqAvatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: #fff; flex-shrink: 0; }
+.pqAuthor { font-size: 14px; font-weight: 600; color: var(--ink-800); }
+.pqRole { font-family: var(--mono); font-size: 11px; color: var(--ink-400); }
+.pqStars { display: flex; gap: 2px; margin-left: auto; }
+.pqStar { font-size: 14px; color: var(--warm-300); }
+.pqStarFilled { color: #d4a43a; }

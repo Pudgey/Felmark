@@ -33,7 +33,13 @@ export type BlockType =
   | "signoff"
   | "annotation"
   | "canvas"
-  | "ai-action";
+  | "ai-action"
+  | "timeline"
+  | "flow"
+  | "brandboard"
+  | "moodboard"
+  | "wireframe"
+  | "pullquote";
 
 export type GraphType = "bar" | "line" | "donut" | "hbar" | "sparkline" | "area" | "metrics";
 
@@ -229,12 +235,60 @@ export interface HandoffData {
   items: string[];
 }
 
+export interface SignoffParty {
+  name: string;
+  role: string;
+  signed: boolean;
+  signedAt: string | null;
+}
+
 export interface SignoffData {
   section: string;
   signer: string;
   signed: boolean;
   signedAt: string | null;
   locked: boolean;
+  parties?: SignoffParty[];
+}
+
+export type ColumnLayout = "2-col" | "3-col" | "sidebar";
+
+export interface ColumnData {
+  label: string;
+  content: string;
+}
+
+export interface ColumnsBlockData {
+  layout: ColumnLayout;
+  columns: ColumnData[];
+}
+
+export type DataChipType = "revenue" | "deadline" | "status" | "progress" | "timer" | "effective-rate" | "hours" | "budget-burn";
+
+export interface DataChip {
+  type: DataChipType;
+  label: string;
+}
+
+export interface DataChipsBlockData {
+  chips: DataChip[];
+}
+
+export type VisualVariant = "process-flow" | "timeline" | "brand-board" | "mood-board" | "wireframe";
+
+export interface VisualStep { id: string; label: string; desc: string; status: "done" | "current" | "upcoming"; }
+export interface VisualPhase { id: string; label: string; start: string; end: string; color: string; }
+export interface VisualMoodItem { id: string; label: string; placeholder: string; }
+
+export interface VisualBlockData {
+  variant: VisualVariant;
+  title: string;
+  steps?: VisualStep[];
+  phases?: VisualPhase[];
+  moodItems?: VisualMoodItem[];
+  brandColors?: string[];
+  brandFonts?: string[];
+  wireframeSections?: { id: string; label: string; height: number }[];
 }
 
 export interface AnnotationData {
@@ -271,6 +325,75 @@ export interface AiActionBlockData {
   language?: string;
 }
 
+// ── Visual block data ──
+
+export interface TimelinePhase {
+  label: string;
+  date: string;
+  status: "done" | "current" | "upcoming";
+  items: string[];
+  color: string;
+}
+export interface TimelineBlockData {
+  title: string;
+  phases: TimelinePhase[];
+}
+
+export interface FlowNode {
+  id: string;
+  label: string;
+  sub: string;
+  desc: string;
+  icon: string;
+  color: string;
+}
+export interface FlowBlockData {
+  title: string;
+  nodes: FlowNode[];
+}
+
+export interface BrandBoardData {
+  title: string;
+  logoLetter: string;
+  logoName: string;
+  logoSub: string;
+  colors: { hex: string; name: string; type: string }[];
+  fonts: { family: string; role: string; weight: string }[];
+  keywords: string[];
+}
+
+export interface MoodBoardCell {
+  color: string;
+  icon: string;
+  label: string;
+  span?: "large" | "wide";
+  lightText?: boolean;
+}
+export interface MoodBoardData {
+  title: string;
+  cells: MoodBoardCell[];
+  keywords: string[];
+}
+
+export interface WireframeSection {
+  label: string;
+  content: string;
+}
+export interface WireframeBlockData {
+  title: string;
+  viewport: string;
+  sections: WireframeSection[];
+}
+
+export interface PullQuoteData {
+  text: string;
+  author: string;
+  role: string;
+  avatarLetter: string;
+  avatarColor: string;
+  rating: number;
+}
+
 export interface Block {
   id: string;
   type: BlockType;
@@ -298,7 +421,16 @@ export interface Block {
   signoffData?: SignoffData;
   annotationData?: AnnotationData;
   canvasData?: CanvasBlockData;
+  columnsData?: ColumnsBlockData;
+  dataChipsData?: DataChipsBlockData;
+  visualData?: VisualBlockData;
   aiActionData?: AiActionBlockData;
+  timelineData?: TimelineBlockData;
+  flowData?: FlowBlockData;
+  brandBoardData?: BrandBoardData;
+  moodBoardData?: MoodBoardData;
+  wireframeData?: WireframeBlockData;
+  pullQuoteData?: PullQuoteData;
 }
 
 export interface BlockTypeInfo {
@@ -306,7 +438,7 @@ export interface BlockTypeInfo {
   label: string;
   icon: string;
   desc: string;
-  section: "Basic" | "Blocks" | "Collaboration";
+  section: "Basic" | "Blocks" | "Collaboration" | "Visual";
   shortcut: string;
 }
 

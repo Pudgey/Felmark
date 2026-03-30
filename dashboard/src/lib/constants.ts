@@ -1,5 +1,12 @@
 import type { BlockTypeInfo, Workspace, StatusInfo, ProjectStatus } from "./types";
 
+export const BLOCK_CATEGORIES = [
+  { id: "Basic", label: "Basic", icon: "Aa" },
+  { id: "Blocks", label: "Blocks", icon: "☰" },
+  { id: "Visual", label: "Visual", icon: "◆" },
+  { id: "Collaboration", label: "Collaboration", icon: "◎" },
+] as const;
+
 export const BLOCK_TYPES: BlockTypeInfo[] = [
   { type: "paragraph", label: "Text", icon: "T", desc: "Plain text", section: "Basic", shortcut: "⏎" },
   { type: "h1", label: "Heading 1", icon: "H1", desc: "Large heading", section: "Basic", shortcut: "#" },
@@ -36,6 +43,12 @@ export const BLOCK_TYPES: BlockTypeInfo[] = [
   { type: "annotation", label: "Annotation", icon: "📌", desc: "Pin comments on an image", section: "Collaboration", shortcut: "/annotate" },
   { type: "canvas", label: "Canvas", icon: "◇", desc: "Sketchy whiteboard drawing", section: "Blocks", shortcut: "/canvas" },
   { type: "ai-action", label: "AI Action", icon: "⚡", desc: "Summarize, suggest, translate, tone-check, or scope-risk", section: "Blocks", shortcut: "/action" },
+  { type: "timeline", label: "Timeline", icon: "⏱", desc: "Project roadmap with phases", section: "Visual", shortcut: "/timeline" },
+  { type: "flow", label: "Process Flow", icon: "◎", desc: "Step-by-step visual process", section: "Visual", shortcut: "/flow" },
+  { type: "brandboard", label: "Brand Board", icon: "✦", desc: "Visual identity snapshot", section: "Visual", shortcut: "/brand" },
+  { type: "moodboard", label: "Mood Board", icon: "◇", desc: "Visual direction grid", section: "Visual", shortcut: "/mood" },
+  { type: "wireframe", label: "Wireframe", icon: "☐", desc: "Annotated page layout", section: "Visual", shortcut: "/wireframe" },
+  { type: "pullquote", label: "Pull Quote", icon: "❝", desc: "Testimonial with attribution", section: "Visual", shortcut: "/testimonial" },
 ];
 
 export interface Command {

@@ -21,6 +21,7 @@ import WirePage from "../wire/WirePage";
 import { TableBlock, AccordionBlock, MathBlock, GalleryBlock, SwatchesBlock, BeforeAfterBlock, BookmarkBlock } from "./blocks/ContentBlocks";
 import { CommentThreadBlock, MentionBlock, QuestionBlock, FeedbackBlock, DecisionBlock, PollBlock, HandoffBlock, SignoffBlock, AnnotationBlock, getDefaultCommentThread, getDefaultMention, getDefaultQuestion, getDefaultFeedback, getDefaultDecision, getDefaultPoll, getDefaultHandoff, getDefaultSignoff, getDefaultAnnotation } from "./blocks/CollabBlocks";
 import AiActionBlock, { getDefaultAiActionData } from "./ai-action/AiActionBlock";
+import { TimelineBlock, FlowBlock, BrandBoardBlock, MoodBoardBlock, WireframeBlock, PullQuoteBlock, getDefaultTimeline, getDefaultFlow, getDefaultBrandBoard, getDefaultMoodBoard, getDefaultWireframe, getDefaultPullQuote } from "./blocks/VisualBlocks";
 import { STATUS } from "@/lib/constants";
 import { uid, cursorTo } from "@/lib/utils";
 import EditableBlock from "./EditableBlock";
@@ -393,6 +394,12 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       signoff: { signoffData: getDefaultSignoff() },
       annotation: { annotationData: getDefaultAnnotation() },
       "ai-action": { aiActionData: getDefaultAiActionData() },
+      timeline: { timelineData: getDefaultTimeline() },
+      flow: { flowData: getDefaultFlow() },
+      brandboard: { brandBoardData: getDefaultBrandBoard() },
+      moodboard: { moodBoardData: getDefaultMoodBoard() },
+      wireframe: { wireframeData: getDefaultWireframe() },
+      pullquote: { pullQuoteData: getDefaultPullQuote() },
     };
     if (CONTENT_DEFAULTS[type]) {
       setBlocks(prev => {
@@ -754,6 +761,12 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       signoff: (b) => b.signoffData ? <SignoffBlock data={b.signoffData} onChange={(d) => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, signoffData: d } : bl))} /> : null,
       annotation: (b) => b.annotationData ? <AnnotationBlock data={b.annotationData} onChange={(d) => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, annotationData: d } : bl))} /> : null,
       "ai-action": (b) => b.aiActionData ? <AiActionBlock data={b.aiActionData} onUpdate={(d) => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, aiActionData: d } : bl))} /> : null,
+      timeline: (b) => b.timelineData ? <TimelineBlock data={b.timelineData} onChange={d => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, timelineData: d } : bl))} /> : null,
+      flow: (b) => b.flowData ? <FlowBlock data={b.flowData} onChange={d => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, flowData: d } : bl))} /> : null,
+      brandboard: (b) => b.brandBoardData ? <BrandBoardBlock data={b.brandBoardData} onChange={d => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, brandBoardData: d } : bl))} /> : null,
+      moodboard: (b) => b.moodBoardData ? <MoodBoardBlock data={b.moodBoardData} onChange={d => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, moodBoardData: d } : bl))} /> : null,
+      wireframe: (b) => b.wireframeData ? <WireframeBlock data={b.wireframeData} onChange={d => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, wireframeData: d } : bl))} /> : null,
+      pullquote: (b) => b.pullQuoteData ? <PullQuoteBlock data={b.pullQuoteData} onChange={d => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, pullQuoteData: d } : bl))} /> : null,
     };
 
     if (contentBlockMap[block.type]) {
