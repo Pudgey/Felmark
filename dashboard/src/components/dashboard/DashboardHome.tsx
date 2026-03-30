@@ -37,26 +37,40 @@ const QUICK_ACTIONS = [
   { id: "note", label: "Quick note", icon: "✎", shortcut: "⌘N" },
 ];
 
-// ── Animated number ──
+// ── Animated number (only animates on value change, not parent re-render) ──
 
 function AnimNum({ value, prefix = "", suffix = "" }: { value: number; prefix?: string; suffix?: string }) {
-  const [display, setDisplay] = useState(0);
-  const ref = useRef<number | null>(null);
+  const [display, setDisplay] = useState(value);
+  const prevValue = useRef(value);
+  const animRef = useRef<number | null>(null);
 
   useEffect(() => {
+    if (prevValue.current === value) return;
+    const from = prevValue.current;
+    prevValue.current = value;
     const start = Date.now();
-    const frame = () => {
+    const animate = () => {
       const p = Math.min((Date.now() - start) / 1200, 1);
       const eased = 1 - Math.pow(1 - p, 3);
-      setDisplay(Math.round(eased * value));
-      if (p < 1) ref.current = requestAnimationFrame(frame);
+      setDisplay(Math.round(from + (value - from) * eased));
+      if (p < 1) animRef.current = requestAnimationFrame(animate);
     };
-    ref.current = requestAnimationFrame(frame);
-    return () => { if (ref.current) cancelAnimationFrame(ref.current); };
+    animRef.current = requestAnimationFrame(animate);
+    return () => { if (animRef.current) cancelAnimationFrame(animRef.current); };
   }, [value]);
 
   return <>{prefix}{display.toLocaleString()}{suffix}</>;
 }
+
+// ── Status config (static, outside component) ──
+
+const STATUS_CFG: Record<string, { color: string; label: string }> = {
+  active: { color: "#5a9a3c", label: "Active" },
+  review: { color: "#b07d4f", label: "Review" },
+  overdue: { color: "#c24b38", label: "Overdue" },
+  paused: { color: "#9b988f", label: "Paused" },
+  completed: { color: "#7c8594", label: "Done" },
+};
 
 // ── Component ──
 
@@ -132,15 +146,6 @@ export default function DashboardHome({ workspaces, onSelectWorkspace, onSelectP
     setShowWsPicker(false);
     setWsSearch("");
     onNewTabInWorkspace(wsId);
-  };
-
-  // Status config
-  const statusCfg: Record<string, { color: string; label: string }> = {
-    active: { color: "#5a9a3c", label: "Active" },
-    review: { color: "#b07d4f", label: "Review" },
-    overdue: { color: "#c24b38", label: "Overdue" },
-    paused: { color: "#9b988f", label: "Paused" },
-    completed: { color: "#7c8594", label: "Done" },
   };
 
   return (
@@ -246,18 +251,21 @@ export default function DashboardHome({ workspaces, onSelectWorkspace, onSelectP
               <button className={styles.sectionAction}>View all</button>
             </div>
             <div className={styles.wsList}>
+              {workspaces.length === 0 && (
+                <div style={{ padding: "24px 14px", textAlign: "center", color: "var(--ink-300)", fontSize: 13 }}>No workspaces yet. Create one to get started.</div>
+              )}
               {workspaces.map(ws => {
                 const wsActive = ws.projects.filter(p => p.status !== "completed");
                 const wsValue = wsActive.reduce((s, p) => s + parseAmount(p.amount), 0);
                 const wsTotal = ws.projects.reduce((s, p) => s + parseAmount(p.amount), 0);
                 const wsOverdue = ws.projects.some(p => { const dl = daysLeft(p.due); return p.status === "overdue" || (dl != null && dl < 0); });
                 const nextDl = wsActive.filter(p => daysLeft(p.due) != null).sort((a, b) => (daysLeft(a.due) ?? 999) - (daysLeft(b.due) ?? 999))[0];
-                const st = wsOverdue ? statusCfg.overdue : statusCfg.active;
+                const st = wsOverdue ? STATUS_CFG.overdue : STATUS_CFG.active;
                 const dlColor = !nextDl ? "var(--ink-300)" : getDueColorFromDate(nextDl.due);
                 const dlText = !nextDl ? "No deadline" : getDueLabelFromDate(nextDl.due);
 
                 return (
-                  <div key={ws.id} className={styles.ws} onClick={() => onSelectWorkspace(ws.id)}>
+                  <div key={ws.id} className={styles.ws} role="button" tabIndex={0} aria-label={`${ws.client} workspace`} onClick={() => onSelectWorkspace(ws.id)} onKeyDown={e => { if (e.key === "Enter") onSelectWorkspace(ws.id); }}>
                     <div className={styles.wsAvatar} style={{ background: ws.avatarBg }}>{ws.avatar}</div>
                     <div className={styles.wsInfo}>
                       <div className={styles.wsName}>{ws.client}</div>
@@ -286,6 +294,9 @@ export default function DashboardHome({ workspaces, onSelectWorkspace, onSelectP
               <button className={styles.sectionAction}>Calendar</button>
             </div>
             <div className={styles.dlList}>
+              {deadlines.length === 0 && (
+                <div style={{ padding: "20px 14px", textAlign: "center", color: "var(--ink-300)", fontSize: 13 }}>No upcoming deadlines</div>
+              )}
               {deadlines.slice(0, 6).map(p => {
                 const ws = workspaces.find(w => w.projects.some(pr => pr.id === p.id));
                 const dl = daysLeft(p.due);
@@ -295,7 +306,7 @@ export default function DashboardHome({ workspaces, onSelectWorkspace, onSelectP
                 const progressColor = isOverdue ? "#c24b38" : (p.progress ?? 0) >= 60 ? "#5a9a3c" : "#b07d4f";
 
                 return (
-                  <div key={p.id} className={`${styles.dl} ${isOverdue ? styles.dlOverdue : ""}`} onClick={() => ws && onSelectProject(p, ws.client)}>
+                  <div key={p.id} className={`${styles.dl} ${isOverdue ? styles.dlOverdue : ""}`} role="button" tabIndex={0} aria-label={`${p.name}, ${dlText}`} onClick={() => ws && onSelectProject(p, ws.client)} onKeyDown={e => { if (e.key === "Enter" && ws) onSelectProject(p, ws.client); }}>
                     <div className={styles.dlAvatar} style={{ background: ws?.avatarBg || "#999" }}>{ws?.avatar || "?"}</div>
                     <div className={styles.dlInfo}>
                       <div className={styles.dlTitle}>{p.name}</div>

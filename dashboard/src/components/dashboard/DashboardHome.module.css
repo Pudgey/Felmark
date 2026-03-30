@@ -218,10 +218,12 @@
   overflow: hidden;
   background: #fff;
   flex-shrink: 0;
+  flex-wrap: wrap;
 }
 
 .stat {
   flex: 1;
+  min-width: 140px;
   padding: 18px 22px;
   border-right: 1px solid var(--warm-100);
   transition: background 0.06s;

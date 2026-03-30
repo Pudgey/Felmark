@@ -14,9 +14,11 @@ interface MoneyBlockProps {
 }
 
 export default function MoneyBlock({ moneyData, onUpdate }: MoneyBlockProps) {
-  const { moneyType, data } = moneyData;
-
-  if (!data) return <div style={{ padding: 16, color: "var(--ink-400)", fontStyle: "italic" }}>Click to configure money block</div>;
+  const { moneyType } = moneyData;
+  // Use default data if AI sent empty object or null
+  const data = (moneyData.data && Object.keys(moneyData.data as object).length > 0)
+    ? moneyData.data
+    : getDefaultMoneyData(moneyType).data;
 
   const handleDataUpdate = (newData: unknown) => {
     onUpdate?.({ ...moneyData, data: newData });

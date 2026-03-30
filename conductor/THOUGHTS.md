@@ -18,7 +18,7 @@
 
 | Agent | Task | Started | Status |
 |-------|------|---------|--------|
-| | | | |
+| codex-main | Committing and pushing the current publishable worktree while excluding local runtime artifacts | 2026-03-30 10:54 EDT | ACTIVE |
 
 ## Recent
 

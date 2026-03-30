@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { INITIAL_WORKSPACES } from "@/lib/constants";
 import type { Block, Workspace, Project, Tab, ArchivedProject, WorkspaceTemplate } from "@/lib/types";
 import { uid, makeBlocks } from "@/lib/utils";
@@ -60,9 +60,21 @@ export default function Dashboard() {
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<string | null>(null);
   const [calendarScrollTarget, setCalendarScrollTarget] = useState<string | null>(null);
   const [launchpadOpen, setLaunchpadOpen] = useState(false);
+  const [zenMode, setZenMode] = useState(false);
+  const [splitProject, setSplitProject] = useState<string | null>(null);
   const resizeRef = useRef<{ startX: number; startW: number } | null>(null);
 
   const overdueCount = workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "overdue").length, 0);
+
+  // Zen mode: Escape to exit
+  useEffect(() => {
+    if (!zenMode) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setZenMode(false);
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [zenMode]);
 
 
   // Single click — pure expand/collapse toggle
@@ -376,8 +388,8 @@ export default function Dashboard() {
 
   return (
     <ErrorBoundary>
-    <div style={{ display: "flex", height: "100dvh" }}>
-      <Rail
+    <div style={{ display: "flex", height: "100dvh", background: "var(--parchment)" }}>
+      {!zenMode && <Rail
         activeItem={railActive}
         overdueCount={overdueCount}
         onItemClick={(item) => {
@@ -393,8 +405,10 @@ export default function Dashboard() {
             setSidebarOpen(true);
           }
         }}
-      />
-      <Sidebar
+        zenMode={zenMode}
+        onToggleZen={() => setZenMode(true)}
+      />}
+      {!zenMode && <Sidebar
         workspaces={workspaces}
         archived={archived}
         activeProject={activeProject}
@@ -433,9 +447,9 @@ export default function Dashboard() {
         onTogglePin={togglePin}
         onCycleStatus={cycleStatus}
         onScrollToCalendarEvent={(projectId) => setCalendarScrollTarget(projectId)}
-      />
+      />}
       {/* Resize handle */}
-      {sidebarOpen && (
+      {sidebarOpen && !zenMode && (
         <div
           style={{
             width: 5,
@@ -538,6 +552,23 @@ export default function Dashboard() {
           onCommentsChange={setComments}
           activities={activitiesMap[activeProject] || []}
           onActivitiesChange={(newActivities) => setActivitiesMap(prev => ({ ...prev, [activeProject]: newActivities }))}
+          zenMode={zenMode}
+          onToggleZen={() => setZenMode(prev => !prev)}
+          splitProject={splitProject}
+          splitBlocks={splitProject ? blocksMap[splitProject] || [] : undefined}
+          splitProjectName={splitProject ? (() => { for (const w of workspaces) { const p = w.projects.find(p => p.id === splitProject); if (p) return p.name; } return "Untitled"; })() : undefined}
+          splitClientName={splitProject ? (() => { for (const w of workspaces) { if (w.projects.some(p => p.id === splitProject)) return w.client; } return ""; })() : undefined}
+          onSplitOpen={(id) => setSplitProject(id)}
+          onSplitClose={() => setSplitProject(null)}
+          onSplitMakePrimary={() => {
+            if (!splitProject) return;
+            const ws = workspaces.find(w => w.projects.some(p => p.id === splitProject));
+            const proj = ws?.projects.find(p => p.id === splitProject);
+            if (ws && proj) {
+              selectProject(proj, ws.client);
+              setSplitProject(null);
+            }
+          }}
         />
       )}
     </div>

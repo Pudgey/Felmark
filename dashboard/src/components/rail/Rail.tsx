@@ -6,9 +6,11 @@ interface RailProps {
   activeItem: string;
   overdueCount: number;
   onItemClick: (item: string) => void;
+  zenMode?: boolean;
+  onToggleZen?: () => void;
 }
 
-export default function Rail({ activeItem, overdueCount, onItemClick }: RailProps) {
+export default function Rail({ activeItem, overdueCount, onItemClick, zenMode, onToggleZen }: RailProps) {
   return (
     <div className={styles.rail} role="navigation" aria-label="Main navigation">
       <button className={`${styles.logo} ${activeItem === "home" ? styles.logoActive : ""}`} onClick={() => onItemClick("home")} aria-label="Dashboard Home">
@@ -52,6 +54,10 @@ export default function Rail({ activeItem, overdueCount, onItemClick }: RailProp
         <svg width="20" height="20" viewBox="0 0 18 18" fill="none"><path d="M2 9h3l2-5 2 10 2-7 2 4h3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
       </button>
 
+      <button className={`${styles.btn} ${activeItem === "team" ? styles.active : ""}`} onClick={() => onItemClick("team")} aria-label="Team">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="7" cy="6" r="2.5" stroke="currentColor" strokeWidth="1.2"/><path d="M3 14c0-2.2 1.8-4 4-4s4 1.8 4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/><circle cx="13" cy="7" r="2" stroke="currentColor" strokeWidth="1" opacity="0.5"/><path d="M12 14c0-1.7 1-3 2.5-3" stroke="currentColor" strokeWidth="1" strokeLinecap="round" opacity="0.5"/></svg>
+      </button>
+
       <div className={styles.sep} />
 
       <button className={styles.btn} aria-label="Contacts">
@@ -59,6 +65,10 @@ export default function Rail({ activeItem, overdueCount, onItemClick }: RailProp
       </button>
 
       <div className={styles.spacer} />
+
+      <button className={`${styles.btn} ${zenMode ? styles.active : ""}`} aria-label="Zen Mode" onClick={onToggleZen}>
+        <svg width="20" height="20" viewBox="0 0 18 18" fill="none"><path d="M9 3C5 3 2 9 2 9s3 6 7 6 7-6 7-6-3-6-7-6z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/><circle cx="9" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.2"/></svg>
+      </button>
 
       <button className={styles.btn} aria-label="Settings">
         <svg width="20" height="20" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="3" stroke="currentColor" strokeWidth="1.2"/><path d="M9 2v2M9 14v2M2 9h2M14 9h2M4.2 4.2l1.4 1.4M12.4 12.4l1.4 1.4M4.2 13.8l1.4-1.4M12.4 5.6l1.4-1.4" stroke="currentColor" strokeWidth="1" strokeLinecap="round"/></svg>

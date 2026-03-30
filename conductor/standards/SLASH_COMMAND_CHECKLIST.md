@@ -27,15 +27,27 @@ When adding a new slash command block type (any block a user can insert via `/` 
 | 9 | `margin/EditorMargin.tsx` → gutter preview | Handle preview text (e.g., graph shows its title, divider shows "divider"). |
 | 10 | `Editor.module.css` | Add styles if the block has custom container rendering (callout border, quote border-left, etc.). |
 
+## AI Prompt Sync (MANDATORY)
+
+| # | File / System | What to update |
+|---|---|---|
+| 11 | `app/api/generate/route.ts` → `SYSTEM_PROMPT` | Add the new block type to the BLOCK TYPES section with its JSON schema. Add intent mapping keywords. |
+| 12 | `components/editor/ai/AiBlock.tsx` → `getFallbackBlocks` | Add a pattern match for the new block type so offline/fallback generation works. |
+| 13 | `components/editor/ai/AiBlock.tsx` → `streamBlocks` | Add type mapping in the block mapper if the new block carries special data (graphData, moneyData, etc.). |
+
+**Why this is mandatory:** If the AI doesn't know a block type exists, it will describe it in text instead of generating it. Every new block must be added to the system prompt so `/ai create a [new block]` actually produces the block.
+
+---
+
 ## Optional (if applicable)
 
 | # | System | When needed |
 |---|---|---|
-| 11 | `lib/utils.ts` → `makeBlocks` | If the new block type should appear in workspace templates (proposal, brief, etc.). |
-| 12 | `onBackspace` handler | If the block needs special backspace behavior (e.g., convert to paragraph before deleting). |
-| 13 | Keyboard shortcuts | If the block has a markdown-style trigger (e.g., `---` for divider, `>` for quote). |
-| 14 | Export (Markdown/JSON/plain text) | If the block needs custom serialization for export. |
-| 15 | Dark mode | If the block has custom colors, ensure dark mode variants exist. |
+| 14 | `lib/utils.ts` → `makeBlocks` | If the new block type should appear in workspace templates (proposal, brief, etc.). |
+| 15 | `onBackspace` handler | If the block needs special backspace behavior (e.g., convert to paragraph before deleting). |
+| 16 | Keyboard shortcuts | If the block has a markdown-style trigger (e.g., `---` for divider, `>` for quote). |
+| 17 | Export (Markdown/JSON/plain text) | If the block needs custom serialization for export. |
+| 18 | Dark mode | If the block has custom colors, ensure dark mode variants exist. |
 
 ---
 

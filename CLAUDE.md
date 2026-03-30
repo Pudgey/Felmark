@@ -172,4 +172,5 @@ All engineering standards, active missions, audit reports, and project tracking 
 | `sops/AAS_SOP.md` | Three-layer quality review (Advocate -> Adjudicate -> Suitability) |
 | `sops/MULTI_AGENT_WORKFLOW.md` | Collision prevention & coordination |
 | `sops/SESSION_HANDOFF.md` | Handoff protocol details |
-| `standards/SLASH_COMMAND_CHECKLIST.md` | Required touchpoints when adding a new `/` block type |
+| `standards/SLASH_COMMAND_CHECKLIST.md` | Required touchpoints when adding a new `/` block type (includes AI prompt sync) |
+| `standards/UI_UX_GUIDELINES.md` | Source of truth for all design tokens, components, and interaction patterns |

@@ -92,6 +92,7 @@ Three tiers:
 | Mission | Milestone | Doc |
 |---------|-----------|-----|
 | nox AI — Rapid Project Creation | M1 | [MISSION_NOX_AI.md](missions/MISSION_NOX_AI.md) |
+| AI Block System Prompt — Felmark-aware structured output | M1 | [MISSION_AI_BLOCK_SYSTEM_PROMPT.md](missions/MISSION_AI_BLOCK_SYSTEM_PROMPT.md) |
 
 ### Completed
 | Mission | Completed | Doc |

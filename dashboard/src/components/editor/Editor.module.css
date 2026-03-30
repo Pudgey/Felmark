@@ -13,7 +13,6 @@
   display: flex;
   align-items: stretch;
   flex-shrink: 0;
-  overflow: hidden;
 }
 
 /* Tab zone — shrinkable container between left controls and sacred right column */
@@ -427,6 +426,127 @@
   margin: 0 auto;
   padding: 36px clamp(16px, 4vw, 48px) 40vh;
   width: 100%;
+  transition: max-width 0.5s cubic-bezier(0.4, 0, 0.2, 1), padding 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Zen mode */
+.zenMode { background: var(--parchment); }
+.zenMode .page { max-width: 650px; padding-top: 80px; }
+
+.zenHint {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-300);
+  background: var(--warm-50);
+  border: 1px solid var(--warm-200);
+  border-radius: var(--radius-full);
+  padding: 6px 14px;
+  animation: zenFadeIn 0.8s ease forwards;
+  opacity: 0;
+  z-index: 50;
+}
+
+.zenExit {
+  background: none;
+  border: 1px solid var(--warm-200);
+  border-radius: var(--radius-sm);
+  padding: 2px 8px;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-400);
+  cursor: pointer;
+  transition: all 0.1s;
+}
+
+.zenExit:hover { background: var(--warm-100); color: var(--ink-600); }
+
+.zenKey {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-300);
+  background: var(--warm-100);
+  border: 1px solid var(--warm-200);
+  border-radius: 3px;
+  padding: 1px 5px;
+}
+
+@keyframes zenFadeIn {
+  0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* Split picker */
+.splitPicker {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 240px;
+  background: #fff;
+  border: 1px solid var(--warm-200);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  z-index: 100;
+  padding: 4px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.splitPickerLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-300);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 6px 10px 4px;
+}
+
+.splitPickerEmpty {
+  padding: 12px 10px;
+  font-size: 12px;
+  color: var(--ink-300);
+  text-align: center;
+}
+
+.splitPickerItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  transition: background 0.06s;
+}
+
+.splitPickerItem:hover { background: var(--warm-100); }
+
+.splitPickerName {
+  font-size: 13px;
+  color: var(--ink-700);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.splitPickerClient {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-300);
+  flex-shrink: 0;
 }
 
 /* Block rows */
