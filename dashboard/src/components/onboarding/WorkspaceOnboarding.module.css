@@ -301,23 +301,178 @@
   cursor: default;
 }
 
-.aiResult {
+.aiSpinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: aiSpin 0.6s linear infinite;
+}
+
+@keyframes aiSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Structured AI result card */
+.aiCard {
+  margin-top: 12px;
+  padding: 14px 16px;
+  background: #fff;
+  border: 1px solid rgba(90, 154, 60, 0.15);
+  border-radius: var(--radius-lg, 10px);
+  animation: aiCardIn 0.25s ease;
+}
+
+@keyframes aiCardIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.aiCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.aiCardTitle {
+  font-size: 14px;
+  font-weight: 500;
+  color: #5a9a3c;
+  flex: 1;
+}
+
+.aiToneBadge {
+  font-family: var(--mono, monospace);
+  font-size: 11px;
+  color: #7864b4;
+  background: rgba(120, 100, 180, 0.06);
+  padding: 2px 8px;
+  border-radius: 3px;
+  border: 1px solid rgba(120, 100, 180, 0.1);
+}
+
+.aiCardRows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.aiCardRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.aiCardLabel {
+  font-family: var(--mono, monospace);
+  font-size: 11px;
+  color: var(--ink-400, #9b988f);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  width: 70px;
+  flex-shrink: 0;
+}
+
+.aiCardValue {
+  font-size: 13px;
+  color: var(--ink-700, #4f4c44);
+  font-weight: 500;
+}
+
+.aiCardSections {
+  margin-bottom: 12px;
+}
+
+.aiSectionPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.aiSectionPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: var(--warm-50, #f7f6f3);
+  border: 1px solid var(--warm-200, #e5e2db);
+  border-radius: 5px;
+  font-size: 12px;
+  color: var(--ink-600, #65625a);
+  transition: all 0.08s;
+}
+
+.aiSectionPill:hover {
+  background: var(--warm-100, #f0eee9);
+}
+
+.aiSectionRemove {
+  width: 14px;
+  height: 14px;
+  border: none;
+  background: none;
+  color: var(--ink-300, #b5b2a9);
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.08s;
+  padding: 0;
+  line-height: 1;
+}
+
+.aiSectionRemove:hover {
+  color: #c24b38;
+  background: rgba(194, 75, 56, 0.06);
+}
+
+.aiAcceptBtn {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-top: 10px;
-  padding: 8px 12px;
-  background: rgba(90, 154, 60, 0.04);
-  border: 1px solid rgba(90, 154, 60, 0.12);
+  padding: 8px 16px;
   border-radius: var(--radius-md, 6px);
+  border: none;
+  background: #5a9a3c;
+  color: #fff;
+  font-family: inherit;
   font-size: 13px;
-  color: #5a9a3c;
-  animation: aiResultIn 0.2s ease;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.08s;
+  width: 100%;
+  justify-content: center;
 }
 
-@keyframes aiResultIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+.aiAcceptBtn:hover {
+  background: #4e8a34;
+}
+
+/* Template dimming when AI has set one */
+.templateDimmed {
+  opacity: 0.4;
+  transition: opacity 0.2s;
+}
+
+.templateDimmed:hover {
+  opacity: 0.7;
+}
+
+.templateRecommended {
+  font-family: var(--mono, monospace);
+  font-size: 11px;
+  color: #5a9a3c;
+  background: rgba(90, 154, 60, 0.06);
+  padding: 1px 6px;
+  border-radius: 3px;
+  margin-left: 6px;
+  font-weight: 500;
 }
 
 /* Divider */

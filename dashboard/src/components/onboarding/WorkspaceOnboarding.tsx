@@ -50,8 +50,31 @@ export default function WorkspaceOnboarding({ initialName, workspaces, onComplet
   const [showRecent, setShowRecent] = useState(false);
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiProcessing, setAiProcessing] = useState(false);
-  const [aiResult, setAiResult] = useState<{ template: WorkspaceTemplate; suggestion: string } | null>(null);
+  const [aiResult, setAiResult] = useState<{
+    template: WorkspaceTemplate;
+    templateLabel: string;
+    projectName: string;
+    sections: string[];
+    tone: string;
+    detectedBudget: string | null;
+  } | null>(null);
+  const [placeholderIdx, setPlaceholderIdx] = useState(0);
   const nameRef = useRef<HTMLInputElement>(null);
+
+  const AI_PLACEHOLDERS = [
+    "What are you working on?",
+    "Brand identity for a yoga studio",
+    "Monthly retainer, $2k/mo",
+    "Proposal for website redesign",
+    "Quick invoice for logo project",
+  ];
+
+  // Rotate placeholder every 3s
+  useEffect(() => {
+    if (aiPrompt) return; // stop rotating once user types
+    const i = setInterval(() => setPlaceholderIdx(prev => (prev + 1) % AI_PLACEHOLDERS.length), 3000);
+    return () => clearInterval(i);
+  }, [aiPrompt]);
 
   const initials = name.trim()
     ? name.trim().split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)
@@ -80,57 +103,78 @@ export default function WorkspaceOnboarding({ initialName, workspaces, onComplet
     onComplete({ name: name.trim(), contact, rate, budget, color, template: selectedTemplate });
   };
 
+  const SECTION_PRESETS: Record<string, { template: WorkspaceTemplate; label: string; sections: string[]; keywords: string[] }> = {
+    brand: { template: "proposal", label: "Brand Identity Proposal", sections: ["Brand Audit", "Logo Exploration", "Color Palette", "Typography", "Brand Voice", "Applications", "Timeline", "Pricing"], keywords: ["brand", "identity", "logo", "branding"] },
+    website: { template: "proposal", label: "Web Project Proposal", sections: ["Sitemap", "Wireframes", "Design Concepts", "Development", "Content Strategy", "Launch Plan", "Timeline", "Pricing"], keywords: ["website", "landing", "web", "app", "site"] },
+    proposal: { template: "proposal", label: "Project Proposal", sections: ["Introduction", "Scope of Work", "Deliverables", "Timeline", "Pricing", "Terms"], keywords: ["proposal", "pitch", "bid", "project"] },
+    invoice: { template: "invoice", label: "Invoice", sections: ["Line Items", "Payment Terms", "Notes"], keywords: ["invoice", "bill", "payment"] },
+    meeting: { template: "meeting", label: "Meeting Notes", sections: ["Agenda", "Discussion", "Decisions", "Action Items", "Follow-ups"], keywords: ["meeting", "call", "standup", "sync", "check-in"] },
+    brief: { template: "brief", label: "Project Brief", sections: ["Overview", "Objectives", "Target Audience", "Deliverables", "Constraints", "Timeline"], keywords: ["brief", "kick", "onboard", "scope", "requirements"] },
+    retainer: { template: "retainer", label: "Retainer Agreement", sections: ["Monthly Scope", "Hours & Availability", "Deliverables", "Communication", "Billing", "Terms"], keywords: ["retainer", "monthly", "ongoing", "subscription"] },
+    social: { template: "brief", label: "Social Media Project", sections: ["Strategy", "Content Calendar", "Platform Guidelines", "Asset Specs", "Analytics", "Timeline"], keywords: ["social", "instagram", "tiktok", "content", "campaign"] },
+    packaging: { template: "proposal", label: "Packaging Design Proposal", sections: ["Brand Review", "Structural Design", "Visual Design", "Print Specs", "Mockups", "Timeline", "Pricing"], keywords: ["packaging", "package", "label", "print"] },
+  };
+
   const handleAiSetup = () => {
     if (!aiPrompt.trim() || aiProcessing) return;
     setAiProcessing(true);
 
-    // Simulate AI analysis (mock — will connect to real API later)
     setTimeout(() => {
       const prompt = aiPrompt.toLowerCase();
-      let template: WorkspaceTemplate = "blank";
-      let suggestion = "";
 
-      if (prompt.includes("proposal") || prompt.includes("pitch") || prompt.includes("bid")) {
-        template = "proposal";
-        suggestion = "Proposal template with scope, timeline, and pricing sections";
-      } else if (prompt.includes("invoice") || prompt.includes("bill") || prompt.includes("payment")) {
-        template = "invoice";
-        suggestion = "Invoice template with line items and payment terms";
-      } else if (prompt.includes("meeting") || prompt.includes("call") || prompt.includes("standup") || prompt.includes("sync")) {
-        template = "meeting";
-        suggestion = "Meeting notes with agenda, discussion, and action items";
-      } else if (prompt.includes("brief") || prompt.includes("kick") || prompt.includes("onboard") || prompt.includes("scope")) {
-        template = "brief";
-        suggestion = "Project brief with goals, audience, and deliverables";
-      } else if (prompt.includes("retainer") || prompt.includes("monthly") || prompt.includes("ongoing")) {
-        template = "retainer";
-        suggestion = "Retainer agreement with monthly scope and billing";
-      } else if (prompt.includes("brand") || prompt.includes("identity") || prompt.includes("logo") || prompt.includes("design")) {
-        template = "proposal";
-        suggestion = "Brand identity proposal — we'll pre-fill scope and deliverables";
-      } else if (prompt.includes("website") || prompt.includes("landing") || prompt.includes("web") || prompt.includes("app")) {
-        template = "proposal";
-        suggestion = "Web project proposal — scope, timeline, and milestones";
-      } else {
-        template = "brief";
-        suggestion = "Project brief — we'll structure it based on your description";
+      // Find best matching preset
+      let bestMatch = SECTION_PRESETS.brief; // fallback
+      let bestScore = 0;
+      for (const [, preset] of Object.entries(SECTION_PRESETS)) {
+        const score = preset.keywords.filter(kw => prompt.includes(kw)).length;
+        if (score > bestScore) { bestScore = score; bestMatch = preset; }
       }
 
-      setSelectedTemplate(template);
-      setAiResult({ template, suggestion });
+      // Detect tone
+      const casualWords = ["quick", "friend", "buddy", "simple", "small", "easy", "just"];
+      const formalWords = ["enterprise", "corporation", "board", "executive", "compliance", "strategic"];
+      const isCasual = casualWords.some(w => prompt.includes(w));
+      const isFormal = formalWords.some(w => prompt.includes(w));
+      const tone = isCasual ? "Casual" : isFormal ? "Formal" : "Professional";
 
-      // Auto-fill name from prompt if still default
-      if (name === initialName || !name.trim()) {
-        const words = aiPrompt.trim().split(" ").slice(0, 4).join(" ");
-        if (words.length > 3) setName(words.charAt(0).toUpperCase() + words.slice(1));
-      }
-
-      // Try to detect budget from prompt
-      const budgetMatch = aiPrompt.match(/\$[\d,]+/);
+      // Detect budget
+      const budgetMatch = aiPrompt.match(/\$[\d,]+(?:\s*[–-]\s*\$?[\d,]+)?/);
       if (budgetMatch && !budget) setBudget(budgetMatch[0]);
+
+      // Generate project name
+      let projectName = "";
+      if (!name.trim() || name === initialName) {
+        // Try to extract a meaningful name from the prompt
+        const cleaned = aiPrompt.trim().replace(/[,.].*$/, "").slice(0, 40);
+        projectName = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+      } else {
+        projectName = name + " — " + bestMatch.label;
+      }
+
+      setSelectedTemplate(bestMatch.template);
+      setAiResult({
+        template: bestMatch.template,
+        templateLabel: bestMatch.label,
+        projectName,
+        sections: [...bestMatch.sections],
+        tone,
+        detectedBudget: budgetMatch ? budgetMatch[0] : null,
+      });
 
       setAiProcessing(false);
     }, 800);
+  };
+
+  const removeAiSection = (section: string) => {
+    if (!aiResult) return;
+    setAiResult({ ...aiResult, sections: aiResult.sections.filter(s => s !== section) });
+  };
+
+  const acceptAiResult = () => {
+    if (!aiResult) return;
+    if (aiResult.projectName && (!name.trim() || name === initialName)) {
+      setName(aiResult.projectName);
+    }
   };
 
   const selectRecent = (client: { name: string; color: string; contact: string }) => {
@@ -236,19 +280,62 @@ export default function WorkspaceOnboarding({ initialName, workspaces, onComplet
             <textarea
               className={styles.aiInput}
               value={aiPrompt}
-              onChange={e => setAiPrompt(e.target.value)}
+              onChange={e => { setAiPrompt(e.target.value); if (aiResult) setAiResult(null); }}
               onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleAiSetup(); } }}
-              placeholder="e.g. Brand identity project for a yoga studio, $3,000 budget, need proposal with timeline..."
+              placeholder={AI_PLACEHOLDERS[placeholderIdx]}
               rows={2}
             />
             <button className={styles.aiBtn} onClick={handleAiSetup} disabled={!aiPrompt.trim() || aiProcessing}>
-              {aiProcessing ? "..." : "⚡"}
+              {aiProcessing ? (
+                <span className={styles.aiSpinner} />
+              ) : "⚡"}
             </button>
           </div>
+
+          {/* Structured AI result card */}
           {aiResult && (
-            <div className={styles.aiResult}>
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              <span>{aiResult.suggestion}</span>
+            <div className={styles.aiCard}>
+              <div className={styles.aiCardHeader}>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#5a9a3c" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                <span className={styles.aiCardTitle}>Here&apos;s what I set up</span>
+                <span className={styles.aiToneBadge}>{aiResult.tone}</span>
+              </div>
+
+              <div className={styles.aiCardRows}>
+                <div className={styles.aiCardRow}>
+                  <span className={styles.aiCardLabel}>Template</span>
+                  <span className={styles.aiCardValue}>{aiResult.templateLabel}</span>
+                </div>
+                {aiResult.projectName && (
+                  <div className={styles.aiCardRow}>
+                    <span className={styles.aiCardLabel}>Project</span>
+                    <span className={styles.aiCardValue}>{aiResult.projectName}</span>
+                  </div>
+                )}
+                {aiResult.detectedBudget && (
+                  <div className={styles.aiCardRow}>
+                    <span className={styles.aiCardLabel}>Budget</span>
+                    <span className={styles.aiCardValue}>{aiResult.detectedBudget}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className={styles.aiCardSections}>
+                <span className={styles.aiCardLabel}>Sections</span>
+                <div className={styles.aiSectionPills}>
+                  {aiResult.sections.map(s => (
+                    <span key={s} className={styles.aiSectionPill}>
+                      {s}
+                      <button className={styles.aiSectionRemove} onClick={() => removeAiSection(s)} title="Remove section">×</button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <button className={styles.aiAcceptBtn} onClick={acceptAiResult}>
+                Looks good
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </button>
             </div>
           )}
         </div>
@@ -259,16 +346,19 @@ export default function WorkspaceOnboarding({ initialName, workspaces, onComplet
         </div>
 
         {/* Templates */}
-        <div className={styles.templates}>
+        <div className={`${styles.templates} ${aiResult ? styles.templatesDimmed : ""}`}>
           {TEMPLATES.map(t => (
             <button
               key={t.id}
-              className={`${styles.template} ${selectedTemplate === t.id ? styles.templateActive : ""}`}
-              onClick={() => setSelectedTemplate(t.id)}
+              className={`${styles.template} ${selectedTemplate === t.id ? styles.templateActive : ""} ${aiResult && selectedTemplate !== t.id ? styles.templateDimmed : ""}`}
+              onClick={() => { setSelectedTemplate(t.id); if (aiResult) setAiResult(null); }}
             >
               <span className={styles.templateIcon} style={{ color: t.color }}>{t.icon}</span>
               <div className={styles.templateInfo}>
-                <span className={styles.templateLabel}>{t.label}</span>
+                <span className={styles.templateLabel}>
+                  {t.label}
+                  {aiResult && selectedTemplate === t.id && <span className={styles.templateRecommended}>Recommended</span>}
+                </span>
                 <span className={styles.templateDesc}>{t.desc}</span>
                 <div className={styles.templateSections}>
                   {t.sections.map((s, i) => (
