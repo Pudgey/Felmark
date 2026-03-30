@@ -10,24 +10,31 @@
 | Total source files | 141 | <200 OK, 200–400 caution, 400+ split | ✅ OK |
 | Total lines of code | ~37,500 | <50K OK, 50–100K caution, 100K+ enterprise | ✅ OK |
 | Component directories | 21 | <30 OK, 30–50 caution, 50+ split | ✅ OK |
-| Block types registered | 55 | <40 OK, 40–60 caution, 60+ audit | ⚠️ Caution |
-| Types in Block interface | 30+ fields | <20 OK, 20–30 caution, 30+ refactor | ⚠️ Caution |
+| Block types registered | 55 | No limit — each lives in its own folder | ✅ OK |
+| Types in Block interface | 30+ fields | Verbose but flat — no tangled deps | ✅ OK |
 | Shared hotspot files | 7 | Keep minimal | ✅ OK |
+| Editor.tsx imports | 25+ | Only real bottleneck — monitor size | ⚠️ Watch |
+
+### Architecture note
+
+Block count is NOT a scaling concern. Every block type is self-contained:
+- Own folder (`editor/blocks/`, `editor/money/`, `editor/ai-action/`, etc.)
+- Own CSS module
+- Own data interface in types.ts
+- Own default factory function
+
+The only shared coupling is mechanical boilerplate in 3 places:
+1. `Editor.tsx` — import, CONTENT_DEFAULTS entry, contentBlockMap entry
+2. `EditorMargin.tsx` — BLOCK_LABELS, BLOCK_LABEL_COLORS
+3. `constants.ts` — BLOCK_TYPES registration
+
+This is boilerplate, not complexity. No refactor needed unless Editor.tsx itself becomes hard to navigate (past ~2,500 lines, consider extracting the contentBlockMap into a separate `blockRegistry.ts` file).
 
 ### When thresholds are hit:
 
-- **Caution**: Flag in session, note in HANDOFF.md, consider grouping or lazy loading
-- **Split**: Propose architecture change — code splitting, feature modules, or domain separation
-- **Enterprise**: Mandatory refactor plan before adding more features. Create a mission doc.
-
-### Block type growth warning
-
-At 55 block types, the editor is approaching the point where:
-- `types.ts` Block interface becomes unwieldy (30+ optional fields)
-- `Editor.tsx` contentBlockMap becomes hard to navigate
-- Slash menu needs category-based navigation (already implemented via BLOCK_CATEGORIES)
-
-**When we hit 60**: Propose refactoring Block into a discriminated union or moving block data to a registry pattern instead of optional fields on a single interface.
+- **Caution**: Note in session, consider if the metric is actually causing friction
+- **Split**: Only if files are genuinely hard to work with — not just because a number is high
+- **Enterprise**: When onboarding a new developer would take more than a day to understand the codebase
 
 ---
 
@@ -152,10 +159,9 @@ Before closing any feature task, confirm:
 
 ## Architecture Signals
 
-**Things to watch as we scale:**
+**The only real scaling concern is Editor.tsx** — it's the central dispatch for all block types. Everything else is modular by design.
 
-1. **Editor.tsx size** — currently the largest file. When it passes 2,000 lines, extract renderBlock into a separate module.
-2. **types.ts Block interface** — 30+ optional fields. At 40, switch to discriminated union or registry.
-3. **Slash menu performance** — 55 items with category tabs. If search feels slow at 80+, add virtualization.
-4. **CSS module count** — 141 files. When individual modules pass 500 lines, split by sub-feature.
-5. **Import chain depth** — Editor.tsx imports 25+ components. Consider lazy loading for rarely-used blocks.
+1. **Editor.tsx size** — when it passes ~2,500 lines, extract `contentBlockMap` and `CONTENT_DEFAULTS` into a separate `blockRegistry.ts`. This is the one refactor that will actually help.
+2. **Slash menu** — already has BLOCK_CATEGORIES with tabbed navigation. No action needed unless search feels sluggish.
+3. **Bundle size** — if initial load gets slow, lazy-load block components that aren't visible on first render (animation blocks, visual blocks, collab blocks are good candidates).
+4. **No refactor needed for**: block count, Block interface fields, types.ts size, CSS module count, or component directory count. These are all modular and self-contained.
