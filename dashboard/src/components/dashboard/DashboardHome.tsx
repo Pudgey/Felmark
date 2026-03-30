@@ -68,13 +68,14 @@ interface DashboardHomeProps {
 }
 
 export default function DashboardHome({ workspaces, onSelectWorkspace, onSelectProject, onNewTabInWorkspace }: DashboardHomeProps) {
-  const [now, setNow] = useState(new Date());
+  const [now, setNow] = useState<Date | null>(null);
   const [showWsPicker, setShowWsPicker] = useState(false);
   const [wsSearch, setWsSearch] = useState("");
   const pickerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    setNow(new Date());
     const i = setInterval(() => setNow(new Date()), 60000);
     return () => clearInterval(i);
   }, []);
@@ -95,7 +96,7 @@ export default function DashboardHome({ workspaces, onSelectWorkspace, onSelectP
     .filter(p => daysLeft(p.due) != null)
     .sort((a, b) => (daysLeft(a.due) ?? 999) - (daysLeft(b.due) ?? 999));
 
-  const hour = now.getHours();
+  const hour = now?.getHours() ?? 12;
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 
   // Workspace picker: Personal first, then alphabetical, filtered by search
@@ -148,7 +149,7 @@ export default function DashboardHome({ workspaces, onSelectWorkspace, onSelectP
       <div className={styles.header}>
         <div>
           <div className={styles.greeting}>{greeting}. <span className={styles.greetingAccent}>Let&apos;s build.</span></div>
-          <div className={styles.date}>{now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}</div>
+          <div className={styles.date}>{now ? now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" }) : "\u00A0"}</div>
         </div>
         <div className={styles.actions}>
           {QUICK_ACTIONS.map((a, i) => (
@@ -392,7 +393,7 @@ export default function DashboardHome({ workspaces, onSelectWorkspace, onSelectP
       {/* Footer */}
       <div className={styles.footer}>
         <span>Felmark · {workspaces.length} workspaces · {allProjects.length} projects</span>
-        <span>{now.toLocaleTimeString()}</span>
+        <span>{now ? now.toLocaleTimeString() : "\u00A0"}</span>
       </div>
     </div>
   );

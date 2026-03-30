@@ -117,6 +117,7 @@ export default function Dashboard() {
       }
       if (n.length === 0) {
         setActiveProject("");
+        setActiveWorkspaceId(null);
       }
       return n;
     });
