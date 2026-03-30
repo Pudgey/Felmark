@@ -9,6 +9,8 @@ import MoneyBlockComponent, { getDefaultMoneyData, MONEY_TYPE_OPTIONS } from "./
 import moneyStyles from "./money/MoneyBlock.module.css";
 import DeliverableBlockComponent from "./deliverable/DeliverableBlock";
 import DeadlineBlockComponent, { getDefaultDeadlineData } from "./deadline-block/DeadlineBlock";
+import AudioBlockComponent, { getDefaultAudioData } from "./audio/AudioBlock";
+import AiBlock from "./ai/AiBlock";
 import ServicesPage from "../services/ServicesPage";
 import PipelineBoard from "../pipeline/PipelineBoard";
 import TemplatesPage from "../templates/TemplatesPage";
@@ -32,6 +34,8 @@ import DashboardHome from "../dashboard/DashboardHome";
 import CalendarFull from "../calendar/CalendarFull";
 import SearchPage from "../search/SearchPage";
 import type { Project } from "@/lib/types";
+import SplitPane from "./SplitPane";
+import NotificationPanel, { type Notification } from "../notifications/NotificationPanel";
 import styles from "./Editor.module.css";
 
 interface EditorProps {
@@ -64,9 +68,18 @@ interface EditorProps {
   onCommentsChange: (comments: CommentType[]) => void;
   activities: BlockActivity[];
   onActivitiesChange: (activities: BlockActivity[]) => void;
+  zenMode?: boolean;
+  onToggleZen?: () => void;
+  splitProject?: string | null;
+  splitBlocks?: Block[];
+  splitProjectName?: string;
+  splitClientName?: string;
+  onSplitOpen?: (projectId: string) => void;
+  onSplitClose?: () => void;
+  onSplitMakePrimary?: () => void;
 }
 
-export default function Editor({ workspaces, tabs, activeProject, blocks: blocksProp, sidebarOpen, wordCount, charCount, onOpenSidebar, onTabClick, onTabClose, onNewTab, onTabRename, onBlocksChange, onWordCountChange, activeWorkspaceId, onSelectProject, onNewWorkspace, onNewTabInWorkspace, onSelectWorkspaceHome, railActive, onCalendarOpenProject, calendarScrollTarget, onCalendarScrollComplete, onRenameWorkspace, onUpdateProjectDue, comments, onCommentsChange, activities, onActivitiesChange }: EditorProps) {
+export default function Editor({ workspaces, tabs, activeProject, blocks: blocksProp, sidebarOpen, wordCount, charCount, onOpenSidebar, onTabClick, onTabClose, onNewTab, onTabRename, onBlocksChange, onWordCountChange, activeWorkspaceId, onSelectProject, onNewWorkspace, onNewTabInWorkspace, onSelectWorkspaceHome, railActive, onCalendarOpenProject, calendarScrollTarget, onCalendarScrollComplete, onRenameWorkspace, onUpdateProjectDue, comments, onCommentsChange, activities, onActivitiesChange, zenMode, onToggleZen, splitProject, splitBlocks, splitProjectName, splitClientName, onSplitOpen, onSplitClose, onSplitMakePrimary }: EditorProps) {
   const [blocks, setBlocksLocal] = useState<Block[]>(blocksProp);
   const [editingTabId, setEditingTabId] = useState<string | null>(null);
   const [editingTabName, setEditingTabName] = useState("");
@@ -86,6 +99,17 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
   const [graphPicker, setGraphPicker] = useState<{ blockId: string } | null>(null);
   const [editingGraphId, setEditingGraphId] = useState<string | null>(null);
   const [moneyPicker, setMoneyPicker] = useState<{ blockId: string } | null>(null);
+  const [splitPickerOpen, setSplitPickerOpen] = useState(false);
+  const [notifPanelOpen, setNotifPanelOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([
+    { id: "n1", type: "deadline", title: "Brand Guidelines due tomorrow", desc: "Bolt Industries project deadline is approaching", time: "2h ago", read: false, project: "Brand Guidelines", projectColor: "#e87040", workspace: "Bolt Industries" },
+    { id: "n2", type: "payment", title: "Payment received from Nora Chen", desc: "$2,400 for Website Redesign milestone 2", time: "3h ago", read: false, project: "Website Redesign", projectColor: "#5a9a3c", workspace: "Nora Chen" },
+    { id: "n3", type: "mention", title: "You were mentioned in a comment", desc: "@you check the updated copy on the hero section", time: "5h ago", read: false, project: "Landing Page", projectColor: "#b07d4f", workspace: "Bolt Industries" },
+    { id: "n4", type: "status", title: "Project moved to Review", desc: "Bolt Industries moved Brand Guidelines to review", time: "Yesterday 4:30 PM", read: true, project: "Brand Guidelines", projectColor: "#e87040", workspace: "Bolt Industries" },
+    { id: "n5", type: "comment", title: "New comment on proposal", desc: "Nora left feedback on the pricing section", time: "Yesterday 2:15 PM", read: true, project: "Proposal v2", projectColor: "#5a9a3c", workspace: "Nora Chen" },
+    { id: "n6", type: "deadline", title: "Invoice overdue by 3 days", desc: "Remind Greenleaf Studio about the outstanding balance", time: "Mar 27", read: true, project: "Monthly Retainer", projectColor: "#7c8594", workspace: "Greenleaf Studio" },
+  ]);
+  const splitPickerRef = useRef<HTMLDivElement>(null);
 
   const blockElMap = useRef<Record<string, HTMLDivElement>>({});
   const editorRef = useRef<HTMLDivElement>(null);
@@ -278,6 +302,30 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       setSlashMenu(null);
       return;
     }
+    if (type === "ai") {
+      setBlocks(prev => {
+        const idx = prev.findIndex(b => b.id === blockId);
+        const n = [...prev];
+        n[idx] = { ...n[idx], type: "ai" as BlockType, content: "" };
+        return n;
+      });
+      setSlashMenu(null);
+      return;
+    }
+    if (type === "audio") {
+      setBlocks(prev => {
+        const idx = prev.findIndex(b => b.id === blockId);
+        const n = [...prev];
+        n[idx] = { ...n[idx], type: "audio" as BlockType, content: "", audioData: getDefaultAudioData() };
+        const nid = uid();
+        contentCache.current[nid] = "";
+        n.splice(idx + 1, 0, { id: nid, type: "paragraph", content: "", checked: false });
+        setTimeout(() => { const ne = blockElMap.current[nid]; if (ne) cursorTo(ne, false); }, 20);
+        return n;
+      });
+      setSlashMenu(null);
+      return;
+    }
     if (type === "deliverable") {
       setBlocks(prev => {
         const idx = prev.findIndex(b => b.id === blockId);
@@ -398,6 +446,27 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     setTimeout(() => { const el = blockElMap.current[nid]; if (el) cursorTo(el, false); }, 20);
   };
 
+  const handleAiGenerate = useCallback((blockId: string, generatedBlocks: Block[]) => {
+    setBlocks(prev => {
+      const idx = prev.findIndex(b => b.id === blockId);
+      if (idx === -1) return prev;
+      const n = [...prev];
+      if (generatedBlocks.length === 0) {
+        // Cancelled — revert to paragraph
+        n[idx] = { ...n[idx], type: "paragraph" as BlockType, content: "" };
+        setTimeout(() => { const el = blockElMap.current[blockId]; if (el) cursorTo(el, false); }, 20);
+        return n;
+      }
+      // Replace the AI block with generated blocks + trailing paragraph
+      n.splice(idx, 1, ...generatedBlocks);
+      const trailingId = uid();
+      contentCache.current[trailingId] = "";
+      n.splice(idx + generatedBlocks.length, 0, { id: trailingId, type: "paragraph", content: "", checked: false });
+      setTimeout(() => { const el = blockElMap.current[trailingId]; if (el) cursorTo(el, false); }, 50);
+      return n;
+    });
+  }, []);
+
   const deleteBlock = (blockId: string) => {
     setBlocks(prev => {
       // Last block — reset to empty paragraph instead of removing
@@ -503,6 +572,18 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [overflowOpen]);
+
+  // Close split picker on outside click
+  useEffect(() => {
+    if (!splitPickerOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (splitPickerRef.current && !splitPickerRef.current.contains(e.target as Node)) {
+        setSplitPickerOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [splitPickerOpen]);
 
   // Compute visible vs. overflowed tabs
   // Active tab is always visible — reorder so it's in the visible set
@@ -730,6 +811,41 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       );
     }
 
+    if (block.type === "ai") {
+      return (
+        <div key={block.id} className={styles.blockRow}>
+          <div className={styles.gutter} style={{ opacity: 0 }} />
+          <div style={{ flex: 1 }}>
+            <AiBlock blockId={block.id} onGenerate={handleAiGenerate} />
+          </div>
+        </div>
+      );
+    }
+
+    if (block.type === "audio" && block.audioData) {
+      return (
+        <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+          <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
+            <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
+              <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
+            </button>
+            <div className={`${styles.gutterBtn} ${styles.grip}`}>
+              <svg width="10" height="14" viewBox="0 0 10 14"><circle cx="3" cy="2.5" r="1" fill="currentColor"/><circle cx="7" cy="2.5" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="11.5" r="1" fill="currentColor"/><circle cx="7" cy="11.5" r="1" fill="currentColor"/></svg>
+            </div>
+            <button className={`${styles.gutterBtn} ${styles.gutterDelete}`} onClick={() => deleteBlock(block.id)} title="Delete block">
+              <svg width="10" height="10" viewBox="0 0 10 10"><path d="M3 3l4 4M7 3l-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>
+            </button>
+          </div>
+          <div style={{ flex: 1 }}>
+            <AudioBlockComponent
+              data={block.audioData}
+              onUpdate={(updated) => setBlocks(prev => prev.map(b => b.id === block.id ? { ...b, audioData: updated } : b))}
+            />
+          </div>
+        </div>
+      );
+    }
+
     if (block.type === "divider") {
       return (
         <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
@@ -839,9 +955,9 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
   const unreadTotal = 0;
 
   return (
-    <div className={styles.main}>
+    <div className={`${styles.main} ${zenMode ? styles.zenMode : ""}`}>
       {/* Tab bar */}
-      <div className={styles.tabbar}>
+      {!zenMode && <div className={styles.tabbar}>
         {!sidebarOpen && (
           <button className={styles.sidebarToggle} onClick={onOpenSidebar} aria-label="Open sidebar">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
@@ -914,12 +1030,40 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
 
         {/* Sacred right column — never pushed by tabs */}
         <div className={styles.tabBarRight}>
-          <button className={styles.tabBarAction} title="Notifications" aria-label="Notifications">
+          <div style={{ position: "relative" }} ref={splitPickerRef}>
+            <button className={`${styles.tabBarAction} ${splitProject ? styles.tabBarActionActive : ""}`} title="Split view" aria-label="Split view" onClick={() => {
+              if (splitProject) { onSplitClose?.(); } else { setSplitPickerOpen(p => !p); }
+            }}>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <rect x="1.5" y="2.5" width="13" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.2"/>
+                <path d="M8 2.5v11" stroke="currentColor" strokeWidth="1.2"/>
+              </svg>
+            </button>
+            {splitPickerOpen && (() => {
+              const allProjects = workspaces.flatMap(w => w.projects.map(p => ({ ...p, client: w.client })));
+              const available = allProjects.filter(p => p.id !== activeProject);
+              return (
+                <div className={styles.splitPicker}>
+                  <div className={styles.splitPickerLabel}>Open in split</div>
+                  {available.length === 0 && <div className={styles.splitPickerEmpty}>No other docs</div>}
+                  {available.map(p => (
+                    <button key={p.id} className={styles.splitPickerItem} onClick={() => { onSplitOpen?.(p.id); setSplitPickerOpen(false); }}>
+                      <span className={styles.splitPickerName}>{p.name}</span>
+                      <span className={styles.splitPickerClient}>{p.client}</span>
+                    </button>
+                  ))}
+                </div>
+              );
+            })()}
+          </div>
+          <button className={`${styles.tabBarAction} ${notifPanelOpen ? styles.tabBarActionActive : ""}`} title="Notifications" aria-label="Notifications" onClick={() => setNotifPanelOpen(p => !p)}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M4 6.5a4 4 0 018 0v2.5l1.5 2H2.5L4 9V6.5z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
               <path d="M6.5 13a1.5 1.5 0 003 0" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
             </svg>
-            <span className={styles.tabBarBadge}>3</span>
+            {notifications.filter(n => !n.read).length > 0 && (
+              <span className={styles.tabBarBadge}>{notifications.filter(n => !n.read).length}</span>
+            )}
           </button>
           <button className={`${styles.tabBarAction} ${commentPanelOpen ? styles.tabBarActionActive : ""}`} title="Comments" aria-label="Comments" onClick={() => setCommentPanelOpen(p => !p)}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -936,10 +1080,10 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
           </button>
           <div className={styles.profileAvatar} title="Profile">A</div>
         </div>
-      </div>
+      </div>}
 
       {/* Breadcrumb — only show when a tab is active */}
-      {tabs.some(t => t.active) && (
+      {!zenMode && tabs.some(t => t.active) && (
         <div className={styles.bread}>
           <button className={styles.breadNav}><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M8 3L4 7l4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg></button>
           <button className={styles.breadNav}><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M6 3l4 4-4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg></button>
@@ -1005,7 +1149,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
           {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && !activeWorkspaceId && tabs.some(t => t.active) && (
             <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
               {/* Left margin — document spine + block gutter */}
-              <EditorMargin
+              {!zenMode && <EditorMargin
                 blocks={blocks}
                 hoveredBlock={hoverBlock}
                 onHoverBlock={setHoverBlock}
@@ -1021,7 +1165,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
                     return n;
                   });
                 }}
-              />
+              />}
               {/* Editor area */}
               <div className={styles.editor} ref={editorRef} onMouseDown={() => { setConvoPanelOpen(false); setCommentPanelOpen(false); }} style={{ flex: 1 }}>
                 <div className={styles.page}>{blocks.map(renderBlock)}</div>
@@ -1038,15 +1182,25 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
                 )}
                 {formatBar && <FormatBar top={formatBar.top} left={formatBar.left} />}
               </div>
+              {/* Split pane */}
+              {splitProject && splitBlocks && (
+                <SplitPane
+                  blocks={splitBlocks}
+                  projectName={splitProjectName || "Untitled"}
+                  clientName={splitClientName || ""}
+                  onClose={() => onSplitClose?.()}
+                  onMakePrimary={() => onSplitMakePrimary?.()}
+                />
+              )}
             </div>
           )}
 
-          {/* Command bar — only show when not in workspace home */}
-          {!activeWorkspaceId && <CommandBar charCount={charCount} />}
+          {/* Command bar — only show when not in workspace home or zen mode */}
+          {!activeWorkspaceId && !zenMode && <CommandBar charCount={charCount} />}
         </div>
 
-        {/* Activity margin (right) */}
-        <ActivityMargin
+        {/* Activity margin (right) — hidden in zen mode */}
+        {!zenMode && <ActivityMargin
           open={commentPanelOpen}
           onClose={() => { setCommentPanelOpen(false); setCommentHighlight(null); }}
           blocks={blocks}
@@ -1060,8 +1214,28 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
             const el = blockElMap.current[blockId];
             if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
           }}
-        />
+        />}
+
+        {/* Notification panel (right) */}
+        {!zenMode && (
+          <NotificationPanel
+            open={notifPanelOpen}
+            onClose={() => setNotifPanelOpen(false)}
+            notifications={notifications}
+            onMarkAllRead={() => setNotifications(prev => prev.map(n => ({ ...n, read: true })))}
+            onMarkRead={(id) => setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))}
+          />
+        )}
       </div>
+
+      {/* Zen mode exit hint */}
+      {zenMode && (
+        <div className={styles.zenHint}>
+          <span>Zen Mode</span>
+          <button className={styles.zenExit} onClick={onToggleZen}>Exit</button>
+          <span className={styles.zenKey}>Esc</span>
+        </div>
+      )}
 
       {/* Command palette */}
       {cmdPalette && <CommandPalette onClose={() => setCmdPalette(false)} />}
