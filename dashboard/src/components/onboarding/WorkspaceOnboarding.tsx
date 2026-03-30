@@ -119,8 +119,8 @@ export default function WorkspaceOnboarding({ initialName, workspaces, onComplet
       setSelectedTemplate(template);
       setAiResult({ template, suggestion });
 
-      // Auto-fill name from prompt if still default
-      if (name === initialName || !name.trim()) {
+      // Preserve the client name already provided in the add-workspace step.
+      if (!name.trim()) {
         const words = aiPrompt.trim().split(" ").slice(0, 4).join(" ");
         if (words.length > 3) setName(words.charAt(0).toUpperCase() + words.slice(1));
       }
