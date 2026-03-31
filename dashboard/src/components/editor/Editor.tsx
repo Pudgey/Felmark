@@ -13,6 +13,7 @@ import AudioBlockComponent, { getDefaultAudioData } from "./audio/AudioBlock";
 import AiBlock from "./ai/AiBlock";
 import CanvasBlock, { getDefaultCanvasData } from "./canvas/CanvasBlock";
 import ShareModal from "./ShareModal";
+import ForgePaper from "../forge-paper/ForgePaper";
 import ServicesPage from "../services/ServicesPage";
 import PipelineBoard from "../pipeline/PipelineBoard";
 import TemplatesPage from "../templates/TemplatesPage";
@@ -134,6 +135,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
   const [splitPickerOpen, setSplitPickerOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [breathe, setBreathe] = useState(false);
+  const [forgePaper, setForgePaper] = useState(false);
   const [catOpen, setCatOpen] = useState(false);
   const [notifPanelOpen, setNotifPanelOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([
@@ -289,10 +291,10 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       const merged = mergeCachedContent(prev);
       if (merged !== prev) {
         commitBlocks(merged);
-        emitWordCounts(merged);
+        queueMicrotask(() => emitWordCounts(merged));
         return merged;
       }
-      emitWordCounts(prev);
+      queueMicrotask(() => emitWordCounts(prev));
       return prev;
     });
     typingSaveTimer.current = null;
@@ -1522,6 +1524,13 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
               <path d="M10 10l2 2 4-4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
+          <button className={`${styles.tabBarAction} ${forgePaper ? styles.tabBarActionActive : ""}`} title="Forge Paper" aria-label="Forge Paper" onClick={() => setForgePaper(p => !p)}>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M4 2h5.5L13 5.5V13a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
+              <path d="M9 2v4h4" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
+              <path d="M6 9h4M6 11.5h2.5" stroke="currentColor" strokeWidth="1" strokeLinecap="round"/>
+            </svg>
+          </button>
           <div className={styles.profileAvatar} title="Profile">A</div>
         </div>
       </div>}
@@ -1619,7 +1628,16 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
               onNewWorkspace={onNewWorkspace}
             />
           )}
-          {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && !activeWorkspaceId && tabs.some(t => t.active) && (
+          {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && !activeWorkspaceId && tabs.some(t => t.active) && forgePaper && (
+            <ForgePaper
+              blocks={blocks}
+              workspace={activeWs}
+              projectName={activeTab?.name || "Untitled"}
+              onClose={() => setForgePaper(false)}
+              onBlocksChange={(newBlocks) => setBlocks(newBlocks)}
+            />
+          )}
+          {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && !activeWorkspaceId && tabs.some(t => t.active) && !forgePaper && (
             <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
               {/* Left margin — document spine + block gutter */}
               {!zenMode && <EditorMargin

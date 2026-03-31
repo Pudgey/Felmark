@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useTerminalContext } from "./TerminalProvider";
 import { COMMAND_REGISTRY } from "@/lib/terminal/commands";
 import type { TerminalBlock, NLResponseData } from "@/lib/terminal/types";
+import { ThinkingDots, ScanLine } from "./AIThink";
 import styles from "./Terminal.module.css";
 
 const AI_SUGGESTIONS: Record<string, string> = {
@@ -369,12 +370,12 @@ export default function Terminal({ onClose }: TerminalProps) {
       );
     }
 
-    // D6: Loading block
+    // D6: Loading block — AI think animation
     if (block.type === "loading") {
       return (
         <div key={block.id} className={styles.loadingBlock}>
-          <div className={styles.loadingSpinner} />
-          <span>Thinking...</span>
+          <ThinkingDots label="Thinking" />
+          <ScanLine duration={2} />
         </div>
       );
     }

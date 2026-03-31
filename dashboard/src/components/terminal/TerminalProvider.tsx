@@ -156,16 +156,29 @@ export default function TerminalProvider({
       activeProject: activeProject || null,
     };
 
-    const result = entry.handler(parsed, context);
-
-    const outputBlock: TerminalBlock = {
-      id: nextBlockId(),
-      type: "command",
+    // Show loading animation before result
+    const loadingId = nextBlockId();
+    const loadingBlock: TerminalBlock = {
+      id: loadingId,
+      type: "loading",
       command: trimmed,
-      content: result,
+      content: null,
       timestamp: Date.now(),
     };
-    setBlocks(prev => [...prev, outputBlock]);
+    setBlocks(prev => [...prev, loadingBlock]);
+
+    // Brief think delay, then replace with result
+    setTimeout(() => {
+      const result = entry.handler(parsed, context);
+      const outputBlock: TerminalBlock = {
+        id: nextBlockId(),
+        type: "command",
+        command: trimmed,
+        content: result,
+        timestamp: Date.now(),
+      };
+      setBlocks(prev => prev.filter(b => b.id !== loadingId).concat(outputBlock));
+    }, 600);
   }, [activeProject, clearBlocks]);
 
   // Alias for context consumption (matches existing API)

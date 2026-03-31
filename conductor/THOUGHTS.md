@@ -23,8 +23,8 @@
 
 | Agent | Task | Completed |
 |-------|------|-----------|
+| codex-main | Fixed empty slash-trigger text blocks so deleting `/` no longer persists filler `<br>` HTML | 2026-03-31 08:12 EDT |
+| codex-main | Hardened the workspace earned-this-month revenue widget so large totals stay compact without destabilizing the chart layout | 2026-03-31 06:21 EDT |
 | codex-main | Normalized the remaining special editor block gutters so e-signature, AI, and other structured blocks now expose the same delete X as standard rows | 2026-03-31 06:15 EDT |
 | codex-main | Realigned the split-terminal editor gutter so project chrome and block cards keep the same left edge under responsive compression | 2026-03-31 06:08 EDT |
 | codex-main | Wired the outline jump target to real editor rows so every block type now scrolls correctly from the left margin | 2026-03-31 06:00 EDT |
-| codex-main | Updated the editor outline to recognize newer block types and show real previews instead of empty placeholders | 2026-03-31 05:49 EDT |
-| codex-main | Restored the editor gutter controls in split-terminal mode and added the missing delete X to regular document blocks | 2026-03-31 01:54 EDT |

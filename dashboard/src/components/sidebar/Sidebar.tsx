@@ -36,6 +36,12 @@ const STATUSES = ["active", "review", "paused", "completed"] as const;
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const COMPACT_CURRENCY = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
 
 function CalendarView({ workspaces, onSelectProject, onScrollToEvent }: { workspaces: Workspace[]; onSelectProject: (project: Project, client: string) => void; onScrollToEvent?: (projectId: string) => void }) {
   const today = new Date();
@@ -260,6 +266,9 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
   const parseAmount = (amt: string) => { const m = amt.match(/[\d,]+/); return m ? parseInt(m[0].replace(",", "")) : 0; };
   const totalEarned = workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "completed").reduce((a, p) => a + parseAmount(p.amount), 0), 0);
   const totalPending = workspaces.reduce((s, w) => s + w.projects.filter(p => p.status !== "completed").reduce((a, p) => a + parseAmount(p.amount), 0), 0);
+  const totalEarnedDisplay = COMPACT_CURRENCY.format(totalEarned);
+  const totalPendingDisplay = COMPACT_CURRENCY.format(totalPending);
+  const totalPipelineDisplay = COMPACT_CURRENCY.format(totalEarned + totalPending);
 
   // Pinned projects
   const pinnedProjects = workspaces.flatMap(w =>
@@ -301,11 +310,11 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
 
         {/* Revenue Flow */}
         {railActive !== "calendar" && <>
-        <div className={styles.revenueArea}>
+          <div className={styles.revenueArea}>
           {/* Header */}
           <div className={styles.rfHead}>
             <div className={styles.rfTitleRow}>
-              <span className={styles.rfAmount}>${(totalEarned / 1000).toFixed(1)}k</span>
+              <span className={styles.rfAmount}>{totalEarnedDisplay}</span>
               <span className={styles.rfTrend}>+23%</span>
             </div>
             <span className={styles.rfLabel}>earned this month</span>
@@ -342,17 +351,17 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
             <div className={styles.rfBkItem}>
               <div className={`${styles.rfBkDot} ${styles.rfBkDotEarned}`} />
               <span className={styles.rfBkLabel}>Earned</span>
-              <span className={styles.rfBkVal}>${(totalEarned / 1000).toFixed(1)}k</span>
+              <span className={styles.rfBkVal}>{totalEarnedDisplay}</span>
             </div>
             <div className={styles.rfBkItem}>
               <div className={`${styles.rfBkDot} ${styles.rfBkDotPending}`} />
               <span className={styles.rfBkLabel}>Pending</span>
-              <span className={styles.rfBkVal}>${(totalPending / 1000).toFixed(1)}k</span>
+              <span className={styles.rfBkVal}>{totalPendingDisplay}</span>
             </div>
             <div className={styles.rfBkItem}>
               <div className={`${styles.rfBkDot} ${styles.rfBkDotTotal}`} />
               <span className={styles.rfBkLabel}>Pipeline</span>
-              <span className={`${styles.rfBkVal} ${styles.rfBkValStrong}`}>${((totalEarned + totalPending) / 1000).toFixed(1)}k</span>
+              <span className={`${styles.rfBkVal} ${styles.rfBkValStrong}`}>{totalPipelineDisplay}</span>
             </div>
           </div>
 
