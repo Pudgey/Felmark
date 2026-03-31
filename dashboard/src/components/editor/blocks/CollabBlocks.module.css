@@ -199,6 +199,33 @@
 
 .signoffNote { font-family: var(--mono); font-size: 11px; color: var(--ink-300); padding: 10px 18px; border-top: 1px solid var(--warm-100); }
 
+/* E-Sign: Saved signature */
+.esSavedSig { margin-top: 10px; }
+.esSavedSigPreview { border: 1px solid var(--warm-200); border-radius: 8px; padding: 10px 16px; background: #fff; text-align: center; margin-bottom: 8px; min-height: 50px; display: flex; align-items: center; justify-content: center; }
+.esSavedSigImg { height: 36px; display: block; }
+.esSavedSigText { font-family: var(--font-heading), 'Cormorant Garamond', serif; font-size: 24px; font-style: italic; color: var(--ink-700); }
+.esSavedSigActions { display: flex; gap: 8px; align-items: center; }
+.esSaveNote { font-family: var(--mono); font-size: 11px; color: var(--ink-300); margin-top: 8px; text-align: center; }
+
+/* E-Sign: Party email */
+.esPartyEmail { color: var(--ink-300); font-weight: 400; }
+
+/* E-Sign: Request sent badge */
+.esPartyBadgeRequest { font-family: var(--mono); font-size: 11px; color: var(--ember); background: var(--ember-bg); padding: 3px 10px; border-radius: 4px; border: 1px solid rgba(176, 125, 79, 0.08); flex-shrink: 0; }
+
+/* E-Sign: Request sent inline */
+.esRequestSent { display: flex; align-items: center; gap: 8px; }
+.esRequestSentText { font-family: var(--mono); font-size: 11px; color: var(--ink-400); }
+
+/* E-Sign: Request modal */
+.esRequestModal { margin-top: 14px; padding: 16px; border: 1px solid var(--warm-200); border-radius: 10px; background: var(--warm-50); }
+.esRequestTitle { font-size: 14px; font-weight: 500; color: var(--ink-800); margin-bottom: 4px; }
+.esRequestDesc { font-size: 12px; color: var(--ink-400); margin-bottom: 12px; line-height: 1.5; }
+.esRequestField { margin-bottom: 12px; }
+.esRequestActions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.esLinkBtn { padding: 8px 16px; border-radius: 6px; border: 1px solid var(--warm-200); background: #fff; font-size: 12px; font-family: inherit; color: var(--ink-500); cursor: pointer; transition: all 0.08s; }
+.esLinkBtn:hover { border-color: var(--ember); color: var(--ember); }
+
 /* ── Annotation ── */
 .annotation { composes: block; }
 .annotationHeader { composes: blockHeader; }

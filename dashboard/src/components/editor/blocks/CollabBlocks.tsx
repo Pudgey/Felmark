@@ -28,7 +28,13 @@ export function getDefaultHandoff(): HandoffData {
   return { from: "You", to: "", notes: "", status: "pending", items: [] };
 }
 export function getDefaultSignoff(): SignoffData {
-  return { section: "", signer: "", signed: false, signedAt: null, locked: false };
+  return {
+    section: "", signer: "", signed: false, signedAt: null, locked: false,
+    parties: [
+      { name: "", role: "freelancer", signed: false, signedAt: null },
+      { name: "", role: "client", signed: false, signedAt: null },
+    ],
+  };
 }
 export function getDefaultAnnotation(): AnnotationData {
   return { imageUrl: "", pins: [] };
@@ -474,21 +480,36 @@ export function SignoffBlock({ data, onChange }: { data: SignoffData; onChange: 
   const [signingIdx, setSigningIdx] = useState<number | null>(null);
   const [sigMode, setSigMode] = useState<"draw" | "type">("draw");
   const [celebration, setCelebration] = useState(false);
+  const [requestEmail, setRequestEmail] = useState("");
+  const [showRequestModal, setShowRequestModal] = useState<number | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const parties = data.parties || [
-    { name: data.signer || "Freelancer", role: "Freelancer", signed: data.signed, signedAt: data.signedAt },
-    { name: "", role: "Client", signed: false, signedAt: null },
+    { name: data.signer || "You", role: "freelancer" as const, signed: data.signed, signedAt: data.signedAt },
+    { name: "", role: "client" as const, signed: false, signedAt: null },
   ];
 
+  const savedSig = data.savedFreelancerSig;
+
   const handleSign = (idx: number, sigData: string) => {
+    const party = parties[idx];
     const updated = parties.map((p, i) =>
       i === idx ? { ...p, signed: true, signedAt: new Date().toISOString(), sigData, sigMode } : p
     );
     const allSigned = updated.every(p => p.signed);
-    onChange({ ...data, parties: updated, signed: allSigned, signedAt: allSigned ? new Date().toISOString() : null, locked: allSigned });
+
+    // Save freelancer signature for reuse
+    const newSaved = party.role === "freelancer" ? { sigData, sigMode, name: party.name } : data.savedFreelancerSig;
+
+    onChange({ ...data, parties: updated, signed: allSigned, signedAt: allSigned ? new Date().toISOString() : null, locked: allSigned, savedFreelancerSig: newSaved });
     setSigningIdx(null);
     setCelebration(true);
     setTimeout(() => setCelebration(false), 2500);
+  };
+
+  const applyFreelancerSaved = (idx: number) => {
+    if (!savedSig) return;
+    handleSign(idx, savedSig.sigData);
   };
 
   const handleUnsign = (idx: number) => {
@@ -498,8 +519,25 @@ export function SignoffBlock({ data, onChange }: { data: SignoffData; onChange: 
     onChange({ ...data, parties: updated, signed: false, signedAt: null, locked: false });
   };
 
-  const updatePartyName = (idx: number, name: string) => {
-    onChange({ ...data, parties: parties.map((p, i) => i === idx ? { ...p, name } : p) });
+  const updatePartyField = (idx: number, field: "name" | "email", value: string) => {
+    onChange({ ...data, parties: parties.map((p, i) => i === idx ? { ...p, [field]: value } : p) });
+  };
+
+  const handleRequestSignature = (idx: number) => {
+    if (!requestEmail.trim()) return;
+    const updated = parties.map((p, i) =>
+      i === idx ? { ...p, email: requestEmail.trim(), requestSent: true, requestSentAt: new Date().toISOString() } : p
+    );
+    onChange({ ...data, parties: updated });
+    setShowRequestModal(null);
+    setRequestEmail("");
+  };
+
+  const copySignLink = () => {
+    const link = `${window.location.origin}/sign/${data.section || "document"}`;
+    navigator.clipboard.writeText(link);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const allSigned = parties.every(p => p.signed);
@@ -522,16 +560,15 @@ export function SignoffBlock({ data, onChange }: { data: SignoffData; onChange: 
         {allSigned && <span className={styles.signoffLockBadge}>Fully signed</span>}
       </div>
 
-      {data.agreement && (
+      {data.agreement ? (
         <div className={styles.esAgreement}>
           <div className={styles.esAgreementText}>{data.agreement}</div>
         </div>
-      )}
-      {!data.agreement && !allSigned && (
+      ) : !allSigned ? (
         <div className={styles.esAgreement}>
           <textarea className={styles.blockTextarea} placeholder="Agreement summary (optional)..." value={data.agreement || ""} onChange={e => onChange({ ...data, agreement: e.target.value })} style={{ minHeight: 40 }} />
         </div>
-      )}
+      ) : null}
 
       <div className={styles.esPartiesSection}>
         {parties.map((party, i) => (
@@ -544,14 +581,19 @@ export function SignoffBlock({ data, onChange }: { data: SignoffData; onChange: 
                 {party.signed ? (
                   <div className={styles.esPartyName}>{party.name || party.role}</div>
                 ) : (
-                  <input className={styles.blockInput} placeholder={`${party.role} name`} value={party.name} onChange={e => updatePartyName(i, e.target.value)} style={{ fontSize: 14, padding: "4px 8px", fontWeight: 500 }} />
+                  <input className={styles.blockInput} placeholder={party.role === "freelancer" ? "Your name" : "Client name"} value={party.name} onChange={e => updatePartyField(i, "name", e.target.value)} style={{ fontSize: 14, padding: "4px 8px", fontWeight: 500 }} />
                 )}
-                <div className={styles.esPartyRole}>{party.role}</div>
+                <div className={styles.esPartyRole}>
+                  {party.role === "freelancer" ? "Freelancer (you)" : "Client"}
+                  {party.email && !party.signed && <span className={styles.esPartyEmail}> · {party.email}</span>}
+                </div>
               </div>
               {party.signed && <span className={styles.esPartyBadge}>Signed</span>}
+              {party.requestSent && !party.signed && <span className={styles.esPartyBadgeRequest}>Request sent</span>}
               {signingIdx === i && <span className={styles.esPartyBadgeViewing}>Signing...</span>}
             </div>
 
+            {/* Signed — show signature */}
             {party.signed && party.sigData && (
               <div className={styles.esSigArea}>
                 {party.sigData.startsWith("data:") ? (
@@ -566,14 +608,69 @@ export function SignoffBlock({ data, onChange }: { data: SignoffData; onChange: 
               </div>
             )}
 
-            {!party.signed && signingIdx !== i && (
+            {/* Freelancer — unsigned, not signing */}
+            {!party.signed && party.role === "freelancer" && signingIdx !== i && (
               <div className={styles.esPartyPending}>
-                <div className={styles.esPendingLine} />
-                <button className={styles.signoffSignBtn} onClick={() => setSigningIdx(i)}>Sign</button>
+                {savedSig ? (
+                  <div className={styles.esSavedSig}>
+                    <div className={styles.esSavedSigPreview}>
+                      {savedSig.sigData.startsWith("data:") ? (
+                        <img src={savedSig.sigData} alt="Saved signature" className={styles.esSavedSigImg} />
+                      ) : (
+                        <span className={styles.esSavedSigText}>{savedSig.sigData}</span>
+                      )}
+                    </div>
+                    <div className={styles.esSavedSigActions}>
+                      <button className={styles.esBtnAccept} onClick={() => applyFreelancerSaved(i)}>Apply saved signature</button>
+                      <button className={styles.esUnsignBtn} onClick={() => setSigningIdx(i)}>Draw new</button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className={styles.esPendingLine} />
+                    <button className={styles.signoffSignBtn} onClick={() => setSigningIdx(i)}>Sign</button>
+                  </>
+                )}
               </div>
             )}
 
-            {signingIdx === i && (
+            {/* Client — unsigned, not signing — show request flow */}
+            {!party.signed && party.role === "client" && signingIdx !== i && showRequestModal !== i && (
+              <div className={styles.esPartyPending}>
+                <div className={styles.esPendingLine} />
+                {party.requestSent ? (
+                  <div className={styles.esRequestSent}>
+                    <span className={styles.esRequestSentText}>Sent {party.requestSentAt ? new Date(party.requestSentAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : ""}</span>
+                    <button className={styles.esUnsignBtn} onClick={() => setShowRequestModal(i)}>Resend</button>
+                  </div>
+                ) : (
+                  <button className={styles.signoffSignBtn} onClick={() => setShowRequestModal(i)}>Request signature</button>
+                )}
+              </div>
+            )}
+
+            {/* Client — request modal */}
+            {showRequestModal === i && (
+              <div className={styles.esRequestModal}>
+                <div className={styles.esRequestTitle}>Request signature from {party.name || "client"}</div>
+                <div className={styles.esRequestDesc}>Send a signing link via email or copy the link to share directly.</div>
+                <div className={styles.esRequestField}>
+                  <input className={styles.blockInput} type="email" placeholder="client@email.com" value={requestEmail || party.email || ""} onChange={e => setRequestEmail(e.target.value)} style={{ fontSize: 14, padding: "8px 12px" }} />
+                </div>
+                <div className={styles.esRequestActions}>
+                  <button className={styles.esBtnAccept} onClick={() => handleRequestSignature(i)} disabled={!requestEmail.trim()}>
+                    Send signing request
+                  </button>
+                  <button className={styles.esLinkBtn} onClick={copySignLink}>
+                    {copied ? "Copied!" : "Copy link"}
+                  </button>
+                  <button className={styles.esUnsignBtn} onClick={() => setShowRequestModal(null)}>Cancel</button>
+                </div>
+              </div>
+            )}
+
+            {/* Active signing (freelancer only — clients sign via link) */}
+            {signingIdx === i && party.role === "freelancer" && (
               <div className={styles.esSigningArea}>
                 <div className={styles.esModes}>
                   <button className={`${styles.esMode} ${sigMode === "draw" ? styles.esModeOn : ""}`} onClick={() => setSigMode("draw")}>Draw</button>
@@ -581,6 +678,7 @@ export function SignoffBlock({ data, onChange }: { data: SignoffData; onChange: 
                 </div>
                 {sigMode === "draw" && <SignCanvas onSign={(d) => handleSign(i, d)} />}
                 {sigMode === "type" && <SignType name={party.name} onSign={(t) => handleSign(i, t)} />}
+                {savedSig && <div className={styles.esSaveNote}>Your signature will be saved for future documents</div>}
               </div>
             )}
 

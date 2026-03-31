@@ -251,11 +251,20 @@ export interface HandoffData {
 
 export interface SignoffParty {
   name: string;
-  role: string;
+  role: "freelancer" | "client";
+  email?: string;
   signed: boolean;
   signedAt: string | null;
   sigData?: string;
   sigMode?: "draw" | "type";
+  requestSent?: boolean;
+  requestSentAt?: string | null;
+}
+
+export interface SavedSignature {
+  sigData: string;
+  sigMode: "draw" | "type";
+  name: string;
 }
 
 export interface SignoffData {
@@ -266,6 +275,7 @@ export interface SignoffData {
   locked: boolean;
   parties?: SignoffParty[];
   agreement?: string;
+  savedFreelancerSig?: SavedSignature;
 }
 
 export type ColumnLayout = "2-col" | "3-col" | "sidebar";
