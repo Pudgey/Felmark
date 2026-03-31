@@ -62,6 +62,19 @@ const DATE_CHIP_STYLE = `
   }
 `;
 
+function normalizeEditableHtml(html: string) {
+  if (!html) return "";
+  const collapsed = html
+    .replace(/&nbsp;/gi, "")
+    .replace(/[\u200B\uFEFF\xA0]/g, "")
+    .replace(/\s+/g, "")
+    .toLowerCase();
+
+  return /^(?:(?:<br\b[^>]*\/?>)|(?:<div><br\b[^>]*\/?><\/div>)|(?:<p><br\b[^>]*\/?><\/p>))*$/.test(collapsed)
+    ? ""
+    : html;
+}
+
 export default function EditableBlock({ block, onContentChange, onEnter, onBackspace, onSlash, onSlashClose, onSelect, onFocusBlock, registerRef, onCat }: EditableBlockProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [datePicker, setDatePicker] = useState<{ top: number; left: number } | null>(null);
@@ -88,8 +101,9 @@ export default function EditableBlock({ block, onContentChange, onEnter, onBacks
   }, []);
 
   useEffect(() => {
-    if (ref.current && block.content && ref.current.innerHTML !== block.content) {
-      ref.current.innerHTML = block.content;
+    if (ref.current) {
+      const normalizedContent = block.content || "";
+      if (ref.current.innerHTML !== normalizedContent) ref.current.innerHTML = normalizedContent;
     }
     syncEmpty();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -146,7 +160,7 @@ export default function EditableBlock({ block, onContentChange, onEnter, onBacks
     if (!ref.current) return;
     const rawText = ref.current.textContent || "";
     const text = rawText.replace(/[\u200B\uFEFF\xA0]/g, "").trim();
-    const html = ref.current.innerHTML;
+    const html = normalizeEditableHtml(ref.current.innerHTML);
     onContentChange(block.id, html, rawText);
     syncEmpty();
 
@@ -220,8 +234,10 @@ export default function EditableBlock({ block, onContentChange, onEnter, onBacks
       const aD = document.createElement("div");
       aD.appendChild(aR.cloneContents());
 
-      ref.current.innerHTML = bD.innerHTML;
-      onEnter(block.id, bD.innerHTML, aD.innerHTML);
+      const beforeHtml = normalizeEditableHtml(bD.innerHTML);
+      const afterHtml = normalizeEditableHtml(aD.innerHTML);
+      ref.current.innerHTML = beforeHtml;
+      onEnter(block.id, beforeHtml, afterHtml);
     }
 
     if (e.key === "Backspace" && ref.current) {
