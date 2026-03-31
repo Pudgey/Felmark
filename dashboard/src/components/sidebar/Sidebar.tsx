@@ -29,6 +29,8 @@ interface SidebarProps {
   onAddWorkspace: (name: string) => void;
   onTogglePin: (projectId: string) => void;
   onCycleStatus: (projectId: string) => void;
+  saveIndicatorState: "saved" | "saving";
+  onSaveNow: () => void;
   onScrollToCalendarEvent?: (projectId: string) => void;
 }
 
@@ -204,7 +206,7 @@ const REVENUE_WEEKS = [
 
 import { getDueLabel as getDueLabelFromDate, getDueColor as getDueColorFromDate } from "@/lib/due-dates";
 
-export default function Sidebar({ workspaces, archived, activeProject, open, width, isResizing, wordCount, railActive, onClose, onToggleWorkspace, onSelectWorkspaceHome, onSelectProject, onArchiveProject, onArchiveCompleted, onArchiveWorkspace, onRestoreProject, onReorderWorkspaces, onRenameWorkspace, onRenameProject, onUpdateProjectDue, onAddWorkspace, onTogglePin, onCycleStatus, onScrollToCalendarEvent }: SidebarProps) {
+export default function Sidebar({ workspaces, archived, activeProject, open, width, isResizing, wordCount, railActive, onClose, onToggleWorkspace, onSelectWorkspaceHome, onSelectProject, onArchiveProject, onArchiveCompleted, onArchiveWorkspace, onRestoreProject, onReorderWorkspaces, onRenameWorkspace, onRenameProject, onUpdateProjectDue, onAddWorkspace, onTogglePin, onCycleStatus, saveIndicatorState, onSaveNow, onScrollToCalendarEvent }: SidebarProps) {
   const [wsMenu, setWsMenu] = useState<string | null>(null);
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [showAddWs, setShowAddWs] = useState(false);
@@ -700,9 +702,16 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
         {/* Footer */}
         <div className={styles.footer}>
           <span>{railActive === "calendar" ? `${workspaces.flatMap(w => w.projects).filter(p => p.due != null).length} deadlines` : `${totalProjects} projects · ${workspaces.length} clients`}</span>
-          <span className={styles.savedIndicator}>
-            <span className={styles.savedDot} />saved
-          </span>
+          <button
+            type="button"
+            className={`${styles.savedIndicator} ${saveIndicatorState === "saving" ? styles.savedIndicatorSaving : ""}`}
+            onClick={onSaveNow}
+            title="Save now"
+            aria-label="Save now"
+          >
+            <span className={`${styles.savedDot} ${saveIndicatorState === "saving" ? styles.savedDotSaving : ""}`} />
+            {saveIndicatorState === "saving" ? "saving..." : "saved"}
+          </button>
         </div>
       </div>
     </div>

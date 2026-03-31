@@ -2,8 +2,8 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import type { Block, BlockType, Workspace } from "@/lib/types";
-import { uid } from "@/lib/utils";
-import { BLOCK_TYPES, BLOCK_CATEGORIES } from "@/lib/constants";
+import { convertBlock, insertAfter, removeBlock, needsPicker } from "@/forge";
+import SlashMenu from "@/components/editor/slash-menu/SlashMenu";
 import styles from "./ForgePaper.module.css";
 
 interface ForgePaperProps {
@@ -21,38 +21,7 @@ function numberSections(blocks: Block[]): Map<string, number> {
   return map;
 }
 
-// ── Slash menu for paper ──
-function PaperSlashMenu({ filter, onSelect, onClose }: { filter: string; onSelect: (type: BlockType) => void; onClose: () => void }) {
-  const filtered = BLOCK_TYPES.filter(t =>
-    t.label.toLowerCase().includes(filter.toLowerCase()) || t.type.includes(filter.toLowerCase())
-  ).slice(0, 8);
-  const [idx, setIdx] = useState(0);
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "ArrowDown") { e.preventDefault(); setIdx(i => Math.min(i + 1, filtered.length - 1)); }
-      else if (e.key === "ArrowUp") { e.preventDefault(); setIdx(i => Math.max(i - 1, 0)); }
-      else if (e.key === "Enter") { e.preventDefault(); if (filtered[idx]) onSelect(filtered[idx].type); }
-      else if (e.key === "Escape") { onClose(); }
-    };
-    window.addEventListener("keydown", handler, true);
-    return () => window.removeEventListener("keydown", handler, true);
-  }, [filtered, idx, onSelect, onClose]);
-
-  if (filtered.length === 0) return null;
-
-  return (
-    <div className={styles.slashMenu}>
-      <div className={styles.slashHeader}><span className={styles.slashPrompt}>/</span><span className={styles.slashFilter}>{filter || "blocks"}</span></div>
-      {filtered.map((t, i) => (
-        <div key={t.type} className={`${styles.slashItem} ${i === idx ? styles.slashItemOn : ""}`} onClick={() => onSelect(t.type)} onMouseEnter={() => setIdx(i)}>
-          <div className={styles.slashIcon}>{t.icon}</div>
-          <div className={styles.slashInfo}><div className={styles.slashLabel}>{t.label}</div><div className={styles.slashDesc}>{t.desc}</div></div>
-        </div>
-      ))}
-    </div>
-  );
-}
+// Uses the shared SlashMenu component from the editor
 
 // ── Paper block renderer ──
 function PaperBlock({ block, sectionNum, isFocused, onFocus, onInput }: {
@@ -64,7 +33,12 @@ function PaperBlock({ block, sectionNum, isFocused, onFocus, onInput }: {
     onInput(el.innerHTML, el.textContent || "");
   };
 
-  const editProps = { contentEditable: true, suppressContentEditableWarning: true, onFocus, onInput: handleInput };
+  const handleBlur = (e: React.FocusEvent<HTMLElement>) => {
+    // Save content on blur — this is how typing persists
+    onInput(e.currentTarget.innerHTML, e.currentTarget.textContent || "");
+  };
+
+  const editProps = { contentEditable: true, suppressContentEditableWarning: true, onFocus, onInput: handleInput, onBlur: handleBlur };
 
   switch (block.type) {
     case "h1": return <h1 className={styles.h1} {...editProps} dangerouslySetInnerHTML={{ __html: block.content }} />;
@@ -101,7 +75,9 @@ export default function ForgePaper({ blocks, workspace, projectName, onClose, on
   const [draftLineY, setDraftLineY] = useState(-1);
   const [draftLineOn, setDraftLineOn] = useState(true);
   const [hoveredBlock, setHoveredBlock] = useState<string | null>(null);
-  const [slashMenu, setSlashMenu] = useState<{ blockId: string; filter: string } | null>(null);
+  const [slashMenu, setSlashMenu] = useState<{ blockId: string; top: number; left: number } | null>(null);
+  const [slashFilter, setSlashFilter] = useState("");
+  const [slashIndex, setSlashIndex] = useState(0);
   const paperRef = useRef<HTMLDivElement>(null);
 
   const sectionNums = numberSections(blocks);
@@ -127,41 +103,38 @@ export default function ForgePaper({ blocks, workspace, projectName, onClose, on
     return () => observer.disconnect();
   }, [draftLineOn, updateDraftLine]);
 
-  // ── Block operations ──
-  const updateBlocks = (newBlocks: Block[]) => {
-    onBlocksChange?.(newBlocks);
-  };
-
+  // ── Block operations (shared via forge) ──
   const addBlockAfter = (afterId: string, type: BlockType = "paragraph") => {
-    const newId = uid();
-    const newBlock: Block = { id: newId, type, content: "", checked: false };
-    const idx = blocks.findIndex(b => b.id === afterId);
-    const next = [...blocks];
-    next.splice(idx + 1, 0, newBlock);
-    updateBlocks(next);
+    const result = insertAfter(blocks, afterId, type);
+    onBlocksChange?.(result.blocks);
     setTimeout(() => {
-      setFocusedBlock(newId);
-      const el = paperRef.current?.querySelector(`[data-block-id="${newId}"] [contenteditable]`) as HTMLElement;
-      if (el) { el.focus(); }
+      setFocusedBlock(result.newBlockId);
+      const el = paperRef.current?.querySelector(`[data-block-id="${result.newBlockId}"] [contenteditable]`) as HTMLElement;
+      if (el) el.focus();
     }, 50);
   };
 
-  const deleteBlock = (blockId: string) => {
-    if (blocks.length <= 1) return;
-    const idx = blocks.findIndex(b => b.id === blockId);
-    const next = blocks.filter(b => b.id !== blockId);
-    updateBlocks(next);
-    const focusIdx = Math.max(0, idx - 1);
-    if (next[focusIdx]) setFocusedBlock(next[focusIdx].id);
+  const handleDeleteBlock = (blockId: string) => {
+    const result = removeBlock(blocks, blockId);
+    onBlocksChange?.(result.blocks);
+    if (result.focusId) setFocusedBlock(result.focusId);
   };
 
   const handleBlockInput = (blockId: string, html: string, text: string) => {
+    // Save content to blocks
+    const updated = blocks.map(b => b.id === blockId ? { ...b, content: html } : b);
+    onBlocksChange?.(updated);
+
     // Detect slash command
     const rawText = text.replace(/[\u200B\uFEFF\xA0]/g, "").trim();
-    if (rawText === "/") {
-      setSlashMenu({ blockId, filter: "" });
-    } else if (rawText.startsWith("/") && rawText.length <= 20) {
-      setSlashMenu({ blockId, filter: rawText.slice(1) });
+    if (rawText === "/" || (rawText.startsWith("/") && rawText.length <= 20)) {
+      const el = paperRef.current?.querySelector(`[data-block-id="${blockId}"]`);
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        setSlashMenu({ blockId, top: rect.bottom + 4, left: rect.left });
+        setSlashFilter(rawText === "/" ? "" : rawText.slice(1));
+        setSlashIndex(0);
+      }
     } else {
       if (slashMenu) setSlashMenu(null);
     }
@@ -170,17 +143,23 @@ export default function ForgePaper({ blocks, workspace, projectName, onClose, on
   const handleSlashSelect = (type: BlockType) => {
     if (!slashMenu) return;
     const { blockId } = slashMenu;
+
+    // Skip picker types — those need the full Editor UI
+    if (needsPicker(type)) { setSlashMenu(null); return; }
+
     // Clear the slash text
     const el = paperRef.current?.querySelector(`[data-block-id="${blockId}"] [contenteditable]`) as HTMLElement;
     if (el) el.textContent = "";
 
-    if (type === "divider") {
-      // Convert current block to divider
-      updateBlocks(blocks.map(b => b.id === blockId ? { ...b, type: "divider" as BlockType, content: "" } : b));
-      addBlockAfter(blockId);
-    } else {
-      // Convert current block to selected type
-      updateBlocks(blocks.map(b => b.id === blockId ? { ...b, type, content: "" } : b));
+    // Convert block using shared forge logic
+    const result = convertBlock(blocks, blockId, type);
+    onBlocksChange?.(result.blocks);
+    if (result.newBlockId) {
+      setTimeout(() => {
+        setFocusedBlock(result.newBlockId!);
+        const newEl = paperRef.current?.querySelector(`[data-block-id="${result.newBlockId}"] [contenteditable]`) as HTMLElement;
+        if (newEl) newEl.focus();
+      }, 50);
     }
     setSlashMenu(null);
   };
@@ -207,7 +186,7 @@ export default function ForgePaper({ blocks, workspace, projectName, onClose, on
         const text = (target.textContent || "").replace(/[\u200B\uFEFF\xA0]/g, "").trim();
         if (text === "" && blocks.length > 1) {
           e.preventDefault();
-          deleteBlock(focusedBlock);
+          handleDeleteBlock(focusedBlock);
         }
       }
     };
@@ -279,7 +258,7 @@ export default function ForgePaper({ blocks, workspace, projectName, onClose, on
                     onMouseLeave={() => setHoveredBlock(null)}>
                     <div className={`${styles.blockChrome} ${isHovered || isFocused ? styles.blockChromeVisible : ""}`}>
                       <button className={styles.blockChromeBtn} title="Add block below" onClick={(e) => { e.stopPropagation(); addBlockAfter(block.id); }}>+</button>
-                      <button className={styles.blockChromeBtn} title="Delete block" onClick={(e) => { e.stopPropagation(); deleteBlock(block.id); }}>×</button>
+                      <button className={styles.blockChromeBtn} title="Delete block" onClick={(e) => { e.stopPropagation(); handleDeleteBlock(block.id); }}>×</button>
                     </div>
                     <PaperBlock block={block} sectionNum={sectionNums.get(block.id)} isFocused={isFocused} onFocus={() => setFocusedBlock(block.id)} onInput={(html, text) => handleBlockInput(block.id, html, text)} />
                   </div>
@@ -298,7 +277,17 @@ export default function ForgePaper({ blocks, workspace, projectName, onClose, on
       </div>
 
       {/* Slash menu */}
-      {slashMenu && <PaperSlashMenu filter={slashMenu.filter} onSelect={handleSlashSelect} onClose={() => setSlashMenu(null)} />}
+      {slashMenu && (
+        <SlashMenu
+          top={slashMenu.top}
+          left={slashMenu.left}
+          filter={slashFilter}
+          selectedIndex={slashIndex}
+          onSelect={handleSlashSelect}
+          onClose={() => setSlashMenu(null)}
+          onIndexChange={setSlashIndex}
+        />
+      )}
 
       <div className={styles.bottomBar}>
         <div className={styles.bottomLeft}><span className={styles.bottomDot} /><span>Forge Paper · {blocks.length} blocks</span></div>

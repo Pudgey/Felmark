@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { COMMANDS } from "@/lib/constants";
-import { useFocusTrap } from "../shared/useFocusTrap";
+import { useFocusTrap } from "../../shared/useFocusTrap";
 import styles from "./CommandPalette.module.css";
 
 interface CommandPaletteProps {
