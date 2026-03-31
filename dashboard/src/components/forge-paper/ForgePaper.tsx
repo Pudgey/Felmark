@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import type { Block, BlockType, Workspace } from "@/lib/types";
 import { convertBlock, insertAfter, removeBlock, needsPicker } from "@/forge";
 import SlashMenu from "@/components/editor/slash-menu/SlashMenu";
-import DocumentOutline from "@/components/shared/DocumentOutline";
+import ForgePaperOutline from "./ForgePaperOutline";
 import styles from "./ForgePaper.module.css";
 
 interface ForgePaperProps {
@@ -260,19 +260,19 @@ export default function ForgePaper({ blocks, workspace, projectName, onClose, on
       </div>
 
       <div className={styles.layout}>
-        {/* Outline — shared component */}
-        <div className={styles.outline}>
-          <DocumentOutline
-            blocks={blocks}
-            focusedBlock={focusedBlock}
-            hoveredBlock={hoveredBlock}
-            onScrollTo={(id) => {
-              setFocusedBlock(id);
-              paperRef.current?.querySelector(`[data-block-id="${id}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" });
-            }}
-            onHoverBlock={setHoveredBlock}
-          />
-        </div>
+        {/* Forge Paper dedicated outline */}
+        <ForgePaperOutline
+          blocks={blocks}
+          focusedBlock={focusedBlock}
+          hoveredBlock={hoveredBlock}
+          onScrollTo={(id) => {
+            setFocusedBlock(id);
+            paperRef.current?.querySelector(`[data-block-id="${id}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+          }}
+          onHoverSection={(id) => setHoveredBlock(id)}
+          projectName={projectName}
+          clientName={workspace?.client || "Client"}
+        />
 
         {/* Paper */}
         <div className={styles.scroll}>

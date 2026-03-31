@@ -23,8 +23,8 @@
 
 | Agent | Task | Completed |
 |-------|------|-----------|
+| codex-main | Promoted the editor terminal into its own dedicated top-right action so it no longer feels buried inside split view | 2026-03-31 10:04 EDT |
 | codex-main | Fixed Forge Paper so slash-created text blocks and the shared outline behave correctly on the live paper surface | 2026-03-31 09:58 EDT |
 | codex-main | Audited Forge Paper so the text block pipeline and shared outline behavior explain why blocks fail to render or register | 2026-03-31 09:47 EDT |
 | codex-main | Polished The Wire so its signal list, favorite state, and panel layout feel intentional instead of overlapping or visually breaking under interaction | 2026-03-31 09:27 EDT |
 | codex-main | Tightened the workspace footer so the save timestamp stays compact instead of shoving the project and client summary around | 2026-03-31 09:16 EDT |
-| codex-main | Hardened the dashboard shell so screen swaps and sidebar disclosure states feel smoother instead of snapping | 2026-03-31 09:11 EDT |

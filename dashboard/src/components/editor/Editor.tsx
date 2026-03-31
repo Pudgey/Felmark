@@ -1502,10 +1502,34 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
 
         {/* Sacred right column — never pushed by tabs */}
         <div className={styles.tabBarRight}>
+          <button
+            className={`${styles.tabBarAction} ${splitProject === TERMINAL_SPLIT_ID ? styles.tabBarActionActive : ""}`}
+            title="Terminal"
+            aria-label="Terminal"
+            onClick={() => {
+              setSplitPickerOpen(false);
+              if (splitProject === TERMINAL_SPLIT_ID) {
+                onSplitClose?.();
+              } else {
+                onSplitOpen?.(TERMINAL_SPLIT_ID);
+              }
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="1.75" y="2.5" width="12.5" height="11" rx="1.75" stroke="currentColor" strokeWidth="1.2" />
+              <path d="M4.75 6.25L6.75 8L4.75 9.75" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M8.5 10.25H11.25" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+            </svg>
+          </button>
           <div style={{ position: "relative" }} ref={splitPickerRef}>
-            <button className={`${styles.tabBarAction} ${splitProject ? styles.tabBarActionActive : ""}`} title="Split view" aria-label="Split view" onClick={() => {
-              if (splitProject) { onSplitClose?.(); } else { setSplitPickerOpen(p => !p); }
-            }}>
+            <button
+              className={`${styles.tabBarAction} ${splitPickerOpen || (splitProject !== null && splitProject !== TERMINAL_SPLIT_ID) ? styles.tabBarActionActive : ""}`}
+              title="Split view"
+              aria-label="Split view"
+              onClick={() => {
+                setSplitPickerOpen(p => !p);
+              }}
+            >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <rect x="1.5" y="2.5" width="13" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.2"/>
                 <path d="M8 2.5v11" stroke="currentColor" strokeWidth="1.2"/>
@@ -1524,11 +1548,6 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
                       <span className={styles.splitPickerClient}>{p.client}</span>
                     </button>
                   ))}
-                  <div className={styles.splitPickerLabel} style={{ marginTop: 4, borderTop: `1px solid var(--warm-200, #e5e2db)`, paddingTop: 8 }}>Tools</div>
-                  <button className={styles.splitPickerItem} onClick={() => { onSplitOpen?.(TERMINAL_SPLIT_ID); setSplitPickerOpen(false); }}>
-                    <span className={styles.splitPickerName}>Terminal</span>
-                    <span className={styles.splitPickerClient}>❯_</span>
-                  </button>
                 </div>
               );
             })()}

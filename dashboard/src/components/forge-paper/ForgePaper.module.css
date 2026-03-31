@@ -64,9 +64,9 @@
 .body { padding: 24px 64px; counter-reset: paperNum; }
 
 /* Block wrap */
-.blockWrap { position: relative; margin-bottom: 2px; border-radius: 3px; }
-.blockWrapFocused {}
-.blockWrapHovered { background: rgba(176,125,79,0.008); }
+.blockWrap { position: relative; margin-bottom: 2px; border-radius: 4px; transition: background 0.1s; }
+.blockWrapFocused { background: rgba(176,125,79,0.02); }
+.blockWrapHovered { background: rgba(176,125,79,0.015); }
 
 /* Block chrome — floats outside the paper to the left */
 .blockChrome { position: absolute; left: -52px; top: 2px; display: flex; gap: 2px; opacity: 0; transition: opacity 0.1s; }
