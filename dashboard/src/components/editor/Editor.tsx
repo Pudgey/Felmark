@@ -75,6 +75,7 @@ interface EditorProps {
   onTabClose: (id: string) => void;
   onNewTab: () => void;
   onTabRename: (id: string, name: string) => void;
+  onTabReorder?: (sourceId: string, targetId: string, position: "before" | "after") => void;
   onBlocksChange: (projectId: string, blocks: Block[]) => void;
   onWordCountChange: (words: number, chars: number) => void;
   activeWorkspaceId?: string | null;
@@ -1268,6 +1269,9 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
           >
             <svg width="10" height="14" viewBox="0 0 10 14"><circle cx="3" cy="2.5" r="1" fill="currentColor"/><circle cx="7" cy="2.5" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="11.5" r="1" fill="currentColor"/><circle cx="7" cy="11.5" r="1" fill="currentColor"/></svg>
           </div>
+          <button className={`${styles.gutterBtn} ${styles.gutterDelete}`} onClick={() => deleteBlock(block.id)} title="Delete block">
+            <svg width="10" height="10" viewBox="0 0 10 10"><path d="M3 3l4 4M7 3l-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>
+          </button>
         </div>
 
         {/* Block accent line */}
@@ -1597,7 +1601,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
               />}
               {/* Editor area */}
               <div className={styles.editor} ref={editorRef} onMouseDown={() => { setConvoPanelOpen(false); setCommentPanelOpen(false); }} style={{ flex: 1 }}>
-                <div className={`${styles.page} ${breathe ? styles.pageBreathe : ""}`} onClick={handlePageClick}>
+                <div className={`${styles.page} ${breathe ? styles.pageBreathe : ""} ${splitProject ? styles.pageSplit : ""}`} onClick={handlePageClick}>
                   {/* Project meta bar with due date picker */}
                   {activeWs && (() => {
                     const project = activeWs.projects.find(p => p.id === activeProject);

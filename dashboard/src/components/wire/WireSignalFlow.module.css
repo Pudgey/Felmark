@@ -11,6 +11,38 @@
   background: var(--parchment);
 }
 
+.closeBtn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 1px solid var(--warm-200);
+  background: rgba(252, 248, 242, 0.94);
+  color: var(--ink-400);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s, transform 0.12s;
+  z-index: 1;
+}
+
+.closeBtn:hover {
+  background: #fff;
+  border-color: var(--warm-300);
+  color: var(--ink-700);
+  transform: translateY(-1px);
+}
+
+.closeBtn:focus-visible {
+  outline: 2px solid rgba(176, 125, 79, 0.3);
+  outline-offset: 2px;
+}
+
 /* ── Progress Stepper ── */
 .stepper {
   display: flex;
@@ -49,10 +81,11 @@
 
 /* ── Card container ── */
 .card {
+  position: relative;
   background: #fff;
   border: 1px solid var(--warm-200);
   border-radius: 14px;
-  padding: 36px 40px;
+  padding: 48px 40px 36px;
   max-width: 560px;
   width: 100%;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
@@ -111,6 +144,7 @@
   font-size: 14px;
   font-weight: 600;
   margin-bottom: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
 }
 .typeName {
   font-size: 14px;
@@ -613,6 +647,7 @@
   font-size: 11px;
   font-weight: 600;
   flex-shrink: 0;
+  border: 1px solid rgba(0, 0, 0, 0.06);
 }
 .resultCardBody {
   flex: 1;

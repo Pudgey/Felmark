@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useTerminalContext } from "./TerminalProvider";
 import { COMMAND_REGISTRY } from "@/lib/terminal/commands";
+import type { TerminalBlock, NLResponseData } from "@/lib/terminal/types";
 import styles from "./Terminal.module.css";
 
 const AI_SUGGESTIONS: Record<string, string> = {
@@ -11,7 +12,7 @@ const AI_SUGGESTIONS: Record<string, string> = {
   "/client": "Run /pipeline to see your project funnel",
   "/pipeline": "Check /wire for the latest market signals",
   "/wire": "Use /status for a full project overview",
-  "": "Type / to see available commands",
+  "": "Type / for commands, or ask a question in plain English",
 };
 
 function getAiSuggestion(lastCommand: string): string {
@@ -33,8 +34,79 @@ interface TerminalProps {
   onClose?: () => void;
 }
 
+// ─── D4: Rich data sub-components for NL responses ──────────
+
+function NLTable({ data }: { data: { headers: string[]; rows: string[][] } }) {
+  return (
+    <table className={styles.nlTable}>
+      <thead>
+        <tr>{data.headers.map((h, i) => <th key={i}>{h}</th>)}</tr>
+      </thead>
+      <tbody>
+        {data.rows.map((row, ri) => (
+          <tr key={ri}>{row.map((cell, ci) => <td key={ci}>{cell}</td>)}</tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+function NLList({ items }: { items: string[] }) {
+  return (
+    <ul className={styles.nlList}>
+      {items.map((item, i) => <li key={i}>{item}</li>)}
+    </ul>
+  );
+}
+
+function NLMetric({ data }: { data: { label: string; value: string; change?: string } }) {
+  return (
+    <div className={styles.nlMetric}>
+      <span className={styles.nlMetricValue}>{data.value}</span>
+      <span className={styles.nlMetricLabel}>{data.label}</span>
+      {data.change && <span className={styles.nlMetricChange}>{data.change}</span>}
+    </div>
+  );
+}
+
+function NLCard({ data }: { data: { title: string; body: string; tags?: string[] } }) {
+  return (
+    <div className={styles.nlCard}>
+      <div className={styles.nlCardTitle}>{data.title}</div>
+      <div className={styles.nlCardBody}>{data.body}</div>
+      {data.tags && data.tags.length > 0 && (
+        <div className={styles.nlCardTags}>
+          {data.tags.map((tag, i) => <span key={i} className={styles.nlCardTag}>{tag}</span>)}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RichDataRenderer({ data }: { data: NLResponseData }) {
+  if (!data || !data.content) return null;
+  switch (data.type) {
+    case "table":
+      return <NLTable data={data.content as { headers: string[]; rows: string[][] }} />;
+    case "list":
+      return <NLList items={data.content as string[]} />;
+    case "metric":
+      return <NLMetric data={data.content as { label: string; value: string; change?: string }} />;
+    case "card":
+      return <NLCard data={data.content as { title: string; body: string; tags?: string[] }} />;
+    default:
+      return null;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+
 export default function Terminal({ onClose }: TerminalProps) {
-  const { blocks, executeCommand, inputHistory, clearBlocks } = useTerminalContext();
+  const {
+    blocks, executeCommand, inputHistory, clearBlocks,
+    dismissInsight, executeAction, sendNLQuery,
+  } = useTerminalContext();
+
   const [input, setInput] = useState("");
   const [historyIdx, setHistoryIdx] = useState(-1);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -72,6 +144,15 @@ export default function Terminal({ onClose }: TerminalProps) {
   const lastCommand = blocks.length > 0 ? (blocks[blocks.length - 1].command || "") : "";
   const aiSuggestion = getAiSuggestion(lastCommand);
 
+  // D6: Determine if input is a natural language query (not a command)
+  const isNLQuery = useCallback((text: string): boolean => {
+    const trimmed = text.trim();
+    if (!trimmed) return false;
+    if (trimmed.startsWith("/")) return false;
+    if (trimmed.toLowerCase() === "clear") return false;
+    return true;
+  }, []);
+
   const handleSubmit = useCallback(() => {
     const trimmed = input.trim();
     if (!trimmed) return;
@@ -83,11 +164,20 @@ export default function Terminal({ onClose }: TerminalProps) {
       return;
     }
 
+    // D6: Route natural language queries to the NL handler
+    if (isNLQuery(trimmed)) {
+      sendNLQuery(trimmed);
+      setInput("");
+      setHistoryIdx(-1);
+      setPaletteOpen(false);
+      return;
+    }
+
     executeCommand(trimmed);
     setInput("");
     setHistoryIdx(-1);
     setPaletteOpen(false);
-  }, [input, executeCommand, clearBlocks]);
+  }, [input, executeCommand, clearBlocks, isNLQuery, sendNLQuery]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     // Palette navigation
@@ -188,6 +278,169 @@ export default function Terminal({ onClose }: TerminalProps) {
 
   const commandCount = inputHistory.length;
 
+  // ─── D4: Block renderer ────────────────────────────
+
+  function renderBlock(block: TerminalBlock) {
+    // D4: Whisper rendering
+    if (block.type === "whisper" && block.insight) {
+      return (
+        <div key={block.id} className={styles.whisper}>
+          <span className={styles.whisperIcon}>~</span>
+          {block.insight.text}
+        </div>
+      );
+    }
+
+    // D4: Nudge rendering
+    if (block.type === "nudge" && block.insight) {
+      return (
+        <div key={block.id} className={styles.nudge}>
+          <div className={styles.nudgeHeader}>
+            <span className={styles.nudgeIcon}>*</span>
+            <div className={styles.nudgeBody}>
+              <div className={styles.nudgeText}>{block.insight.text}</div>
+              {block.insight.reason && (
+                <div className={styles.nudgeReason}>{block.insight.reason}</div>
+              )}
+              <div className={styles.nudgeActions}>
+                {block.insight.action && (
+                  <button
+                    className={styles.nudgeAction}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      executeAction(block.insight!.action!.command);
+                    }}
+                  >
+                    {block.insight.action.label}
+                  </button>
+                )}
+                <button
+                  className={styles.nudgeDismiss}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (block.insightKey) dismissInsight(block.insightKey);
+                  }}
+                >
+                  dismiss
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // D4: Alert rendering
+    if (block.type === "alert" && block.insight) {
+      return (
+        <div key={block.id} className={styles.alert}>
+          <div className={styles.alertHeader}>
+            <span className={styles.alertIcon}>!</span>
+            <div className={styles.alertBody}>
+              <div className={styles.alertText}>{block.insight.text}</div>
+              {block.insight.reason && (
+                <div className={styles.alertReason}>{block.insight.reason}</div>
+              )}
+              <div className={styles.alertActions}>
+                {block.insight.action && (
+                  <button
+                    className={styles.alertActionPrimary}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      executeAction(block.insight!.action!.command);
+                    }}
+                  >
+                    {block.insight.action.label}
+                  </button>
+                )}
+                <button
+                  className={styles.alertDismiss}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (block.insightKey) dismissInsight(block.insightKey);
+                  }}
+                >
+                  dismiss
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // D6: Loading block
+    if (block.type === "loading") {
+      return (
+        <div key={block.id} className={styles.loadingBlock}>
+          <div className={styles.loadingSpinner} />
+          <span>Thinking...</span>
+        </div>
+      );
+    }
+
+    // D6: NL Response block
+    if (block.type === "nl-response") {
+      const nlBlock = block as TerminalBlock & { nlData?: { text: string; data?: NLResponseData | null; model?: string } };
+      const nlData = nlBlock.nlData;
+      return (
+        <div key={block.id} className={styles.nlResponse}>
+          <div className={styles.nlResponseHeader}>
+            <span className={styles.nlResponseBadge}>AI</span>
+            <span className={styles.nlResponseQuery}>{block.command}</span>
+            {nlData?.model && (
+              <span className={styles.nlResponseModel}>
+                {nlData.model.includes("sonnet") ? "sonnet" : "haiku"}
+              </span>
+            )}
+          </div>
+          <div className={styles.nlResponseBody}>
+            {nlData?.text || "No response"}
+            {nlData?.data && <RichDataRenderer data={nlData.data} />}
+          </div>
+        </div>
+      );
+    }
+
+    // Existing: Error block
+    if (block.type === "error") {
+      return (
+        <div key={block.id} className={styles.errorBlock}>
+          <div className={styles.errorHeader}>
+            <span className={styles.errorPrompt}>&#10095;</span>
+            <span className={styles.commandText}>{block.command}</span>
+          </div>
+          <div className={styles.errorBody}>{block.content}</div>
+        </div>
+      );
+    }
+
+    // Existing: Command block (default)
+    return (
+      <div key={block.id} className={styles.commandBlock}>
+        <div className={styles.commandHeader}>
+          <span className={styles.commandPrompt}>&#10095;</span>
+          <span className={styles.commandText}>{block.command}</span>
+          <button
+            className={`${styles.commandCopy} ${copiedId === block.id ? styles.commandCopied : ""}`}
+            title={copiedId === block.id ? "Copied!" : "Copy command"}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleCopy(block.command || "", block.id);
+            }}
+          >
+            {copiedId === block.id ? (
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            ) : (
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="4" y="1.5" width="6.5" height="8" rx="1" stroke="currentColor" strokeWidth="1"/><path d="M1.5 3.5v6a1 1 0 001 1h5" stroke="currentColor" strokeWidth="1"/></svg>
+            )}
+          </button>
+        </div>
+        <div className={styles.commandBody}>{block.content}</div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.terminal} onClick={() => inputRef.current?.focus()}>
       {/* Header */}
@@ -213,9 +466,9 @@ export default function Terminal({ onClose }: TerminalProps) {
           </button>
         </div>
         <div className={styles.headerButtons}>
-          <button className={styles.headerBtn} title="Minimize" onClick={(e) => e.stopPropagation()}>⊞</button>
-          <button className={styles.headerBtn} title="Maximize" onClick={(e) => e.stopPropagation()}>□</button>
-          <button className={styles.headerBtn} title="Close" onClick={(e) => { e.stopPropagation(); onClose?.(); }}>✕</button>
+          <button className={styles.headerBtn} title="Minimize" onClick={(e) => e.stopPropagation()}>&#8862;</button>
+          <button className={styles.headerBtn} title="Maximize" onClick={(e) => e.stopPropagation()}>&#9633;</button>
+          <button className={styles.headerBtn} title="Close" onClick={(e) => { e.stopPropagation(); onClose?.(); }}>&#10005;</button>
         </div>
       </div>
 
@@ -225,7 +478,7 @@ export default function Terminal({ onClose }: TerminalProps) {
         {blocks.length === 0 && (
           <div className={styles.welcomeBlock}>
             <div className={styles.welcomeLogo}>
-              <span className={styles.welcomeLogoMark}>◆</span>
+              <span className={styles.welcomeLogoMark}>&#9670;</span>
               <span className={styles.welcomeTitle}>
                 Felmark Terminal
                 <span className={styles.welcomeVersion}>v1.0</span>
@@ -242,44 +495,8 @@ export default function Terminal({ onClose }: TerminalProps) {
           </div>
         )}
 
-        {/* Command blocks */}
-        {blocks.map(block => {
-          if (block.type === "error") {
-            return (
-              <div key={block.id} className={styles.errorBlock}>
-                <div className={styles.errorHeader}>
-                  <span className={styles.errorPrompt}>❯</span>
-                  <span className={styles.commandText}>{block.command}</span>
-                </div>
-                <div className={styles.errorBody}>{block.content}</div>
-              </div>
-            );
-          }
-
-          return (
-            <div key={block.id} className={styles.commandBlock}>
-              <div className={styles.commandHeader}>
-                <span className={styles.commandPrompt}>❯</span>
-                <span className={styles.commandText}>{block.command}</span>
-                <button
-                  className={`${styles.commandCopy} ${copiedId === block.id ? styles.commandCopied : ""}`}
-                  title={copiedId === block.id ? "Copied!" : "Copy command"}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleCopy(block.command || "", block.id);
-                  }}
-                >
-                  {copiedId === block.id ? (
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  ) : (
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="4" y="1.5" width="6.5" height="8" rx="1" stroke="currentColor" strokeWidth="1"/><path d="M1.5 3.5v6a1 1 0 001 1h5" stroke="currentColor" strokeWidth="1"/></svg>
-                  )}
-                </button>
-              </div>
-              <div className={styles.commandBody}>{block.content}</div>
-            </div>
-          );
-        })}
+        {/* All blocks — commands, insights, NL responses */}
+        {blocks.map(block => renderBlock(block))}
       </div>
 
       {/* Slash command palette */}
@@ -305,7 +522,7 @@ export default function Terminal({ onClose }: TerminalProps) {
             ))}
           </div>
           <div className={styles.paletteFooter}>
-            <span><span className={styles.paletteKey}>↑↓</span> navigate</span>
+            <span><span className={styles.paletteKey}>&#8593;&#8595;</span> navigate</span>
             <span><span className={styles.paletteKey}>Tab</span> autocomplete</span>
             <span><span className={styles.paletteKey}>Enter</span> select</span>
             <span><span className={styles.paletteKey}>Esc</span> close</span>
@@ -326,7 +543,7 @@ export default function Terminal({ onClose }: TerminalProps) {
 
       {/* Input bar */}
       <div className={styles.inputBar} onClick={(e) => { e.stopPropagation(); inputRef.current?.focus(); }}>
-        <span className={styles.inputPrompt}>❯</span>
+        <span className={styles.inputPrompt}>&#10095;</span>
         <input
           ref={inputRef}
           className={styles.inputField}
@@ -334,7 +551,7 @@ export default function Terminal({ onClose }: TerminalProps) {
           value={input}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          placeholder="Type a command..."
+          placeholder="Type a command or ask a question..."
           spellCheck={false}
           autoComplete="off"
         />
@@ -345,7 +562,7 @@ export default function Terminal({ onClose }: TerminalProps) {
         <div className={styles.footerLeft}>
           <span className={styles.footerDot} />
           <span>ready</span>
-          <span style={{ margin: "0 2px" }}>·</span>
+          <span style={{ margin: "0 2px" }}>&middot;</span>
           <span>{activeTab}</span>
         </div>
         <div className={styles.footerRight}>

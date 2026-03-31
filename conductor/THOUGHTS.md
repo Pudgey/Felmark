@@ -18,14 +18,13 @@
 
 | Agent | Task | Started | Status |
 |-------|------|---------|--------|
-| | | | |
 
 ## Recent
 
 | Agent | Task | Completed |
 |-------|------|-----------|
-| codex-main | Tightened the editor margin rail spacing and made the focus marker ignore pointer events so the gutter hover stays usable | 2026-03-30 18:21 EDT |
-| codex-main | Moved the editor active-block highlight out of the text plane and into a cleaner margin rail cue | 2026-03-30 18:18 EDT |
-| codex-main | Implemented the first editor polish pack with save feedback, active/new block cues, undo, and slash-menu match highlighting | 2026-03-30 18:11 EDT |
-| claude-main | Added stencil library (40+ stencils, 8 categories) and production-ready canvas interactions (multi-select, drag-move, rubber band, keyboard shortcuts, z-order) | 2026-03-30 |
-| codex-main | Fixed slash-menu ranking so queries prefer relevant block names and removed the stale reset effect from the menu | 2026-03-30 16:46 EDT |
+| codex-main | Restored the editor gutter controls in split-terminal mode and added the missing delete X to regular document blocks | 2026-03-31 01:54 EDT |
+| codex-main | Added drag-and-drop tab reordering in the editor tab strip with visible drop cues and persisted tab order | 2026-03-31 01:39 EDT |
+| codex-main | Replaced the Wire route’s retired Anthropic model defaults with current supported ids so runs no longer fail with model not found | 2026-03-31 01:31 EDT |
+| codex-main | Refined the Wire flow close control into a simple X anchored on the card instead of a detached shell button | 2026-03-31 01:14 EDT |
+| codex-main | Added a close path to the reopened Wire signal flow with a visible close control and Escape support back to the feed | 2026-03-31 01:07 EDT |

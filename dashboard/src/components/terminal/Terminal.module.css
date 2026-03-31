@@ -499,3 +499,367 @@
 .synWarning { color: #d97706; }
 .synSuccess { color: #16a34a; }
 .synEmber { color: var(--ember, #b07d4f); }
+
+/* ═══════════════════════════════════════════════════════
+   D4 — Whisper / Nudge / Alert Intelligence Blocks
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Whisper — ambient, like a sticky note ── */
+.whisper {
+  font-size: 11px;
+  color: var(--ink-300, #b5b2a9);
+  padding: 4px 12px;
+  margin-bottom: 6px;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.whisperIcon {
+  display: inline;
+  margin-right: 4px;
+  opacity: 0.5;
+  font-style: normal;
+}
+
+/* ── Nudge — colleague tapping your shoulder ── */
+.nudge {
+  border: 1px solid #e5e2db;
+  border-radius: 8px;
+  padding: 10px 14px;
+  background: #ffffff;
+  margin-bottom: 10px;
+}
+
+.nudgeHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.nudgeIcon {
+  flex-shrink: 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.nudgeBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.nudgeText {
+  font-size: 12px;
+  color: var(--ink-700, #4f4c44);
+  line-height: 1.5;
+}
+
+.nudgeReason {
+  font-size: 11px;
+  color: var(--ink-400, #9b988f);
+  margin-top: 3px;
+  line-height: 1.4;
+}
+
+.nudgeActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.nudgeAction {
+  font-family: var(--mono, 'JetBrains Mono'), monospace;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ember, #b07d4f);
+  background: rgba(176, 125, 79, 0.08);
+  border: 1px solid rgba(176, 125, 79, 0.2);
+  border-radius: 4px;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: background 0.1s, border-color 0.1s;
+}
+
+.nudgeAction:hover {
+  background: rgba(176, 125, 79, 0.15);
+  border-color: rgba(176, 125, 79, 0.35);
+}
+
+.nudgeDismiss {
+  font-family: var(--mono, 'JetBrains Mono'), monospace;
+  font-size: 10px;
+  color: var(--ink-300, #b5b2a9);
+  background: none;
+  border: none;
+  padding: 3px 6px;
+  cursor: pointer;
+  transition: color 0.1s;
+}
+
+.nudgeDismiss:hover {
+  color: var(--ink-500, #7d7a72);
+}
+
+/* ── Alert — phone ringing ── */
+.alert {
+  border: 1px solid rgba(194, 75, 56, 0.15);
+  background: rgba(194, 75, 56, 0.02);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+}
+
+.alertHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.alertIcon {
+  flex-shrink: 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #c24b38;
+}
+
+.alertBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.alertText {
+  font-size: 12px;
+  color: var(--ink-800, #3d3a33);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.alertReason {
+  font-size: 11px;
+  color: var(--ink-400, #9b988f);
+  margin-top: 3px;
+  line-height: 1.4;
+}
+
+.alertActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.alertActionPrimary {
+  font-family: var(--mono, 'JetBrains Mono'), monospace;
+  font-size: 10px;
+  font-weight: 600;
+  color: #ffffff;
+  background: #c24b38;
+  border: 1px solid #c24b38;
+  border-radius: 4px;
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.alertActionPrimary:hover {
+  background: #a83e2e;
+}
+
+.alertDismiss {
+  font-family: var(--mono, 'JetBrains Mono'), monospace;
+  font-size: 10px;
+  color: var(--ink-300, #b5b2a9);
+  background: none;
+  border: none;
+  padding: 3px 6px;
+  cursor: pointer;
+  transition: color 0.1s;
+}
+
+.alertDismiss:hover {
+  color: var(--ink-500, #7d7a72);
+}
+
+/* ═══════════════════════════════════════════════════════
+   D6 — Natural Language Query Response Blocks
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Loading block ── */
+.loadingBlock {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  color: var(--ink-400, #9b988f);
+  font-size: 12px;
+}
+
+.loadingSpinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--warm-200, #e5e2db);
+  border-top-color: var(--ember, #b07d4f);
+  border-radius: 50%;
+  animation: terminalSpin 0.6s linear infinite;
+}
+
+@keyframes terminalSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── NL Response block ── */
+.nlResponse {
+  background: #ffffff;
+  border: 1px solid var(--warm-200, #e5e2db);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.nlResponseHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: var(--parchment, #faf9f7);
+  border-bottom: 1px solid var(--warm-200, #e5e2db);
+  min-height: 30px;
+}
+
+.nlResponseBadge {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #7c3aed;
+  background: rgba(124, 58, 237, 0.08);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+.nlResponseQuery {
+  font-size: 12px;
+  color: var(--ink-600, #65625a);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nlResponseModel {
+  font-size: 9px;
+  color: var(--ink-300, #b5b2a9);
+}
+
+.nlResponseBody {
+  padding: 10px 12px;
+  font-size: 12px;
+  color: var(--ink-700, #4f4c44);
+  line-height: 1.6;
+}
+
+/* ── Rich data: table ── */
+.nlTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+  font-size: 11px;
+}
+
+.nlTable th {
+  text-align: left;
+  padding: 4px 8px;
+  font-weight: 600;
+  color: var(--ink-500, #7d7a72);
+  border-bottom: 1px solid var(--warm-200, #e5e2db);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.nlTable td {
+  padding: 4px 8px;
+  color: var(--ink-700, #4f4c44);
+  border-bottom: 1px solid var(--warm-100, #f0eee9);
+}
+
+/* ── Rich data: list ── */
+.nlList {
+  margin-top: 6px;
+  padding-left: 14px;
+  list-style-type: disc;
+}
+
+.nlList li {
+  font-size: 11px;
+  color: var(--ink-600, #65625a);
+  padding: 2px 0;
+}
+
+/* ── Rich data: metric ── */
+.nlMetric {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: var(--parchment, #faf9f7);
+  border-radius: 6px;
+}
+
+.nlMetricValue {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink-800, #3d3a33);
+}
+
+.nlMetricLabel {
+  font-size: 11px;
+  color: var(--ink-400, #9b988f);
+}
+
+.nlMetricChange {
+  font-size: 11px;
+  font-weight: 600;
+  color: #16a34a;
+}
+
+/* ── Rich data: card ── */
+.nlCard {
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: var(--parchment, #faf9f7);
+  border-radius: 6px;
+  border: 1px solid var(--warm-100, #f0eee9);
+}
+
+.nlCardTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-800, #3d3a33);
+  margin-bottom: 4px;
+}
+
+.nlCardBody {
+  font-size: 11px;
+  color: var(--ink-600, #65625a);
+  line-height: 1.5;
+}
+
+.nlCardTags {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.nlCardTag {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-400, #9b988f);
+  background: var(--warm-100, #f0eee9);
+  padding: 1px 5px;
+  border-radius: 3px;
+}

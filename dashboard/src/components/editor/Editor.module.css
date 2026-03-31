@@ -55,6 +55,20 @@
 
 .tab:hover { background: var(--warm-100); }
 
+.tabDragging {
+  opacity: 0.48;
+}
+
+.tabDropBefore {
+  box-shadow: inset 2px 0 0 var(--ember);
+  background: var(--warm-100);
+}
+
+.tabDropAfter {
+  box-shadow: inset -2px 0 0 var(--ember);
+  background: var(--warm-100);
+}
+
 .tabActive { background: var(--parchment); color: var(--ink-800); min-width: 140px; max-width: 240px; flex-shrink: 0.5; }
 .tabActive::after {
   content: '';
@@ -509,6 +523,22 @@
   max-width: 100%;
   padding-left: clamp(24px, 5vw, 64px);
   padding-right: clamp(24px, 5vw, 64px);
+}
+
+.pageSplit {
+  max-width: 620px;
+  padding-left: clamp(32px, 5vw, 56px);
+  padding-right: clamp(20px, 3vw, 36px);
+}
+
+.pageSplit .gutter {
+  width: 88px;
+  margin-left: -76px;
+}
+
+.pageSplit .blockRowActive::after,
+.pageSplit .blockRowFresh::after {
+  left: -4px;
 }
 
 /* Breathe toggle button */

@@ -212,6 +212,23 @@ export default function Dashboard() {
     })));
   };
 
+  const handleTabReorder = (sourceId: string, targetId: string, position: "before" | "after") => {
+    if (sourceId === targetId) return;
+    setTabs(prev => {
+      const sourceIndex = prev.findIndex(tab => tab.id === sourceId);
+      if (sourceIndex === -1) return prev;
+
+      const next = [...prev];
+      const [moved] = next.splice(sourceIndex, 1);
+      const targetIndex = next.findIndex(tab => tab.id === targetId);
+      if (!moved || targetIndex === -1) return prev;
+
+      const insertIndex = position === "after" ? targetIndex + 1 : targetIndex;
+      next.splice(insertIndex, 0, moved);
+      return next;
+    });
+  };
+
   const togglePin = (projectId: string) => {
     setWorkspaces(prev => prev.map(w => ({
       ...w, projects: w.projects.map(p => p.id === projectId ? { ...p, pinned: !p.pinned } : p),
@@ -600,6 +617,7 @@ export default function Dashboard() {
           onTabClose={handleTabClose}
           onNewTab={handleNewTab}
           onTabRename={handleTabRename}
+          onTabReorder={handleTabReorder}
           onBlocksChange={handleBlocksChange}
           onWordCountChange={handleWordCountChange}
           onSelectProject={selectProject}

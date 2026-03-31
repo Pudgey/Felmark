@@ -10,6 +10,8 @@
 @keyframes lp { 0%,100% { opacity: .4; } 50% { opacity: 1; } }
 .pro { font-family: var(--mono); font-size: 9px; color: var(--ember); background: var(--ember-bg); border: 1px solid rgba(176,125,79,0.08); padding: 3px 10px; border-radius: 4px; letter-spacing: .04em; font-weight: 500; }
 .headRight { display: flex; align-items: center; gap: 8px; }
+.newSignalBtn { display: flex; align-items: center; gap: 5px; padding: 6px 14px; border-radius: var(--radius-md); border: none; background: var(--ember); color: #fff; font-size: 12px; font-weight: 500; font-family: inherit; cursor: pointer; transition: all 0.08s; flex-shrink: 0; }
+.newSignalBtn:hover { background: var(--ember-light, #c89360); }
 .refreshBtn { width: 30px; height: 30px; border-radius: var(--radius-md); border: 1px solid var(--warm-200); background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--ink-400); transition: all 0.08s; flex-shrink: 0; }
 .refreshBtn:hover { background: var(--warm-50); border-color: var(--warm-300); color: var(--ink-600); }
 .refreshBtn:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -75,6 +77,8 @@
 .itemRelFill { height: 100%; border-radius: 1px; transition: width .3s; }
 .itemActions { position: absolute; right: 12px; top: 10px; display: flex; gap: 3px; opacity: 0; transition: opacity .08s; }
 .item:hover .itemActions { opacity: 1; }
+.itemActions:has(.itemActOn) { opacity: 1; }
+.itemActionsVisible { opacity: 1; }
 .itemAct { width: 24px; height: 24px; border-radius: 5px; border: 1px solid var(--warm-200); background: #fff; cursor: pointer; color: var(--ink-400); display: flex; align-items: center; justify-content: center; font-size: 10px; transition: all .06s; }
 .itemAct:hover { background: var(--warm-100); color: var(--ink-600); }
 .itemActOn { color: var(--ember); border-color: rgba(176,125,79,0.2); background: var(--ember-bg); }

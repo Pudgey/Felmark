@@ -96,6 +96,8 @@ Three tiers:
 | Save Editor as Template — Reusable document layouts | M1 | [MISSION_SAVE_AS_TEMPLATE.md](missions/MISSION_SAVE_AS_TEMPLATE.md) |
 | Services Screen — Make it live (bugs, CRUD, invoice wiring) | M1 | [MISSION_SERVICES_LIVE.md](missions/MISSION_SERVICES_LIVE.md) |
 | The Wire — AI-powered business intelligence via Claude | M2 | [MISSION_THE_WIRE_AI.md](missions/MISSION_THE_WIRE_AI.md) |
+| Felmark Terminal — Command interface in split view | M2 | [MISSION_TERMINAL.md](missions/MISSION_TERMINAL.md) |
+| Terminal Intelligence — Ambient AI business copilot | M2 | [MISSION_TERMINAL_INTELLIGENCE.md](missions/MISSION_TERMINAL_INTELLIGENCE.md) |
 
 ### Completed
 | Mission | Completed | Doc |

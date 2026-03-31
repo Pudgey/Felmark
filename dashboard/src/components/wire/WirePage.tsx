@@ -104,7 +104,7 @@ function SignalItem({ item, selected, onSelect, bookmarked, onBookmark }: { item
           <div className={styles.itemRelBar}><div className={styles.itemRelFill} style={{ width: `${item.relevance}%`, background: item.relevance >= 90 ? "#5a9a3c" : item.relevance >= 75 ? "var(--ember)" : "var(--ink-400)" }} /></div>
         </div>
       </div>
-      <div className={styles.itemActions}>
+      <div className={`${styles.itemActions} ${bookmarked.has(item.id) ? styles.itemActionsVisible : ""}`}>
         <button className={`${styles.itemAct} ${bookmarked.has(item.id) ? styles.itemActOn : ""}`} onClick={e => onBookmark(item.id, e)}>{bookmarked.has(item.id) ? "★" : "☆"}</button>
         <button className={styles.itemAct}>↗</button>
       </div>
@@ -127,6 +127,7 @@ export default function WirePage({ workspaces = [], services = [] }: WirePagePro
   const [hasGenerated, setHasGenerated] = useState(false);
   const [aiSignals, setAiSignals] = useState<Signal[] | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [showFlow, setShowFlow] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined" && localStorage.getItem("felmark_wire_onboarded")) {
@@ -150,13 +151,13 @@ export default function WirePage({ workspaces = [], services = [] }: WirePagePro
   const handleSignalFlowComplete = (config: WireConfig, signals: Signal[]) => {
     localStorage.setItem("felmark_wire_onboarded", "true");
     localStorage.setItem("felmark_wire_config", JSON.stringify(config));
-    // Use the signals from the flow if we got them, otherwise fall back to static FEED
     if (signals && signals.length > 0) {
       setAiSignals(signals);
     } else {
       setAiSignals(FEED);
     }
     setHasGenerated(true);
+    setShowFlow(false);
   };
 
   const toggleBookmark = (id: number, e: React.MouseEvent) => { e.stopPropagation(); setBookmarked(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; }); };
@@ -174,8 +175,8 @@ export default function WirePage({ workspaces = [], services = [] }: WirePagePro
   const clientSignals = FEED.filter(f => f.isClientSignal).length;
   const avgRelevance = Math.round(FEED.reduce((s, f) => s + f.relevance, 0) / FEED.length);
 
-  // Signal flow: replaces Phase A and Phase B for new users
-  if (!hasGenerated && !aiSignals) {
+  // Signal flow: for new users OR when user clicks "New Signal"
+  if (showFlow || (!hasGenerated && !aiSignals)) {
     return (
       <div className={styles.page}>
         <div className={styles.head}>
@@ -186,7 +187,10 @@ export default function WirePage({ workspaces = [], services = [] }: WirePagePro
             </div>
           </div>
         </div>
-        <WireSignalFlow onComplete={handleSignalFlowComplete} />
+        <WireSignalFlow
+          onComplete={handleSignalFlowComplete}
+          onClose={showFlow ? () => setShowFlow(false) : undefined}
+        />
       </div>
     );
   }
@@ -203,6 +207,10 @@ export default function WirePage({ workspaces = [], services = [] }: WirePagePro
             <span className={styles.pro}>PRO</span>
           </div>
           <div className={styles.headRight}>
+            <button className={styles.newSignalBtn} onClick={() => setShowFlow(true)}>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
+              New Signal
+            </button>
             <select className={styles.niche} value={selectedNiche} onChange={e => setSelectedNiche(e.target.value)}>
               {NICHES.map(n => <option key={n}>{n}</option>)}
             </select>

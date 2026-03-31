@@ -31,6 +31,7 @@ interface Signal {
 
 interface WireSignalFlowProps {
   onComplete: (config: WireConfig, signals: Signal[]) => void;
+  onClose?: () => void;
 }
 
 /* ── Constants ── */
@@ -84,7 +85,7 @@ const ANALYSIS_STEPS = [
 const TOTAL_STEPS = 6;
 
 /* ── Component ── */
-export default function WireSignalFlow({ onComplete }: WireSignalFlowProps) {
+export default function WireSignalFlow({ onComplete, onClose }: WireSignalFlowProps) {
   const [step, setStep] = useState(0);
 
   // Step 1: Signal type
@@ -184,6 +185,15 @@ export default function WireSignalFlow({ onComplete }: WireSignalFlowProps) {
     }
   }, [step, runAnalysis]);
 
+  useEffect(() => {
+    if (!onClose) return;
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [onClose]);
+
   /* ── Niche helpers ── */
   const toggleNiche = (n: string) => {
     setNiches(prev => prev.includes(n) ? prev.filter(x => x !== n) : [...prev, n]);
@@ -227,9 +237,17 @@ export default function WireSignalFlow({ onComplete }: WireSignalFlowProps) {
     </div>
   );
 
+  const renderCloseButton = () =>
+    onClose ? (
+      <button className={styles.closeBtn} type="button" onClick={onClose} aria-label="Close signal flow">
+        ×
+      </button>
+    ) : null;
+
   /* ── Step 1: Signal Type ── */
   const renderSignalType = () => (
     <div className={styles.card}>
+      {renderCloseButton()}
       <div className={styles.cardTitle}>What do you want to track?</div>
       <div className={styles.cardSub}>Choose your primary intelligence focus</div>
       <div className={styles.typeGrid}>
@@ -257,6 +275,7 @@ export default function WireSignalFlow({ onComplete }: WireSignalFlowProps) {
   /* ── Step 2: Niches ── */
   const renderNiches = () => (
     <div className={styles.card}>
+      {renderCloseButton()}
       <div className={styles.cardTitle}>Your niche</div>
       <div className={styles.cardSub}>Select the areas you work in (pick all that apply)</div>
       <div className={styles.nichePills}>
@@ -292,6 +311,7 @@ export default function WireSignalFlow({ onComplete }: WireSignalFlowProps) {
   /* ── Step 3: Sources ── */
   const renderSources = () => (
     <div className={`${styles.card} ${styles.cardWide}`}>
+      {renderCloseButton()}
       <div className={styles.cardTitle}>Configure sources</div>
       <div className={styles.cardSub}>Toggle the data sources to monitor</div>
       <div className={styles.sourceList}>
@@ -354,6 +374,7 @@ export default function WireSignalFlow({ onComplete }: WireSignalFlowProps) {
   const selectedType = SIGNAL_TYPE_OPTIONS.find(s => s.id === signalType);
   const renderReview = () => (
     <div className={styles.card}>
+      {renderCloseButton()}
       <div className={styles.cardTitle}>Review your signal configuration</div>
       <div className={styles.cardSub}>Confirm everything looks good before we analyze</div>
       <div className={styles.reviewSections}>
@@ -399,6 +420,7 @@ export default function WireSignalFlow({ onComplete }: WireSignalFlowProps) {
   /* ── Step 5: Analyzing ── */
   const renderAnalysis = () => (
     <div className={styles.card}>
+      {renderCloseButton()}
       <div className={styles.cardTitle}>Analyzing your market</div>
       <div className={styles.cardSub}>Generating personalized intelligence</div>
       <div className={styles.analysisWrap}>
@@ -475,6 +497,7 @@ export default function WireSignalFlow({ onComplete }: WireSignalFlowProps) {
 
     return (
       <div className={`${styles.card} ${styles.cardWide}`}>
+        {renderCloseButton()}
         <div className={styles.cardTitle}>Your intelligence briefing is ready</div>
         <div className={styles.cardSub}>
           {results.length} signals found across {enabledSources.size} sources
