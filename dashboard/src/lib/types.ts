@@ -254,6 +254,8 @@ export interface SignoffParty {
   role: string;
   signed: boolean;
   signedAt: string | null;
+  sigData?: string;
+  sigMode?: "draw" | "type";
 }
 
 export interface SignoffData {
@@ -263,6 +265,7 @@ export interface SignoffData {
   signedAt: string | null;
   locked: boolean;
   parties?: SignoffParty[];
+  agreement?: string;
 }
 
 export type ColumnLayout = "2-col" | "3-col" | "sidebar";

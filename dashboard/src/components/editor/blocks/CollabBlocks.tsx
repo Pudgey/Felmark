@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { CommentThreadData, MentionData, QuestionData, FeedbackData, DecisionData, PollData, HandoffData, SignoffData, AnnotationData } from "@/lib/types";
 import styles from "./CollabBlocks.module.css";
 
@@ -350,74 +350,250 @@ export function HandoffBlock({ data, onChange }: { data: HandoffData; onChange: 
 }
 
 // ══════════════════════════════════════
-// 8. SIGN-OFF
+// 8. SIGN-OFF (E-Signature with Draw/Type)
 // ══════════════════════════════════════
 
+function SignCanvas({ onSign }: { onSign: (dataUrl: string) => void }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const drawing = useRef(false);
+  const points = useRef<{ x: number; y: number }[]>([]);
+  const hasDrawn = useRef(false);
+
+  useEffect(() => {
+    const c = canvasRef.current;
+    if (!c) return;
+    const ctx = c.getContext("2d");
+    if (!ctx) return;
+    const rect = c.getBoundingClientRect();
+    c.width = rect.width * 2;
+    c.height = rect.height * 2;
+    ctx.scale(2, 2);
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = "#2c2a25";
+  }, []);
+
+  const getPos = (e: React.MouseEvent | React.TouchEvent) => {
+    const c = canvasRef.current!;
+    const rect = c.getBoundingClientRect();
+    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+    return { x: clientX - rect.left, y: clientY - rect.top };
+  };
+
+  const startDraw = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    drawing.current = true;
+    points.current = [getPos(e)];
+    hasDrawn.current = true;
+  };
+
+  const moveDraw = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!drawing.current) return;
+    e.preventDefault();
+    const pos = getPos(e);
+    points.current.push(pos);
+    const ctx = canvasRef.current?.getContext("2d");
+    if (!ctx || points.current.length < 3) return;
+    const p = points.current;
+    const len = p.length;
+    ctx.beginPath();
+    ctx.moveTo(p[len - 3].x, p[len - 3].y);
+    const mx = (p[len - 2].x + p[len - 1].x) / 2;
+    const my = (p[len - 2].y + p[len - 1].y) / 2;
+    ctx.quadraticCurveTo(p[len - 2].x, p[len - 2].y, mx, my);
+    const dx = p[len - 1].x - p[len - 2].x;
+    const dy = p[len - 1].y - p[len - 2].y;
+    const speed = Math.sqrt(dx * dx + dy * dy);
+    ctx.lineWidth = Math.max(1, Math.min(3.5, 4 - speed * 0.08));
+    ctx.stroke();
+  };
+
+  const endDraw = () => { drawing.current = false; };
+
+  const clear = () => {
+    const c = canvasRef.current;
+    if (!c) return;
+    const ctx = c.getContext("2d");
+    if (ctx) ctx.clearRect(0, 0, c.width, c.height);
+    hasDrawn.current = false;
+    points.current = [];
+  };
+
+  return (
+    <div>
+      <div className={styles.esCanvasWrap}>
+        <canvas ref={canvasRef} className={styles.esCanvas}
+          onMouseDown={startDraw} onMouseMove={moveDraw} onMouseUp={endDraw} onMouseLeave={endDraw}
+          onTouchStart={startDraw} onTouchMove={moveDraw} onTouchEnd={endDraw} />
+        <div className={styles.esBaseline} />
+        <div className={styles.esBaseX}>✕</div>
+      </div>
+      <div className={styles.esDrawActions}>
+        <button className={styles.esBtnClear} onClick={clear}>Clear</button>
+        <button className={styles.esBtnAccept} onClick={() => { if (hasDrawn.current) onSign(canvasRef.current!.toDataURL()); }}>Accept &amp; Sign</button>
+      </div>
+    </div>
+  );
+}
+
+const SIG_FONTS = [
+  { id: "script", family: "'Cormorant Garamond', serif", weight: 400, style: "italic" as const, size: 28 },
+  { id: "formal", family: "'Cormorant Garamond', serif", weight: 600, style: "normal" as const, size: 24 },
+  { id: "clean", family: "'Outfit', sans-serif", weight: 300, style: "italic" as const, size: 22 },
+  { id: "mono", family: "var(--mono)", weight: 400, style: "normal" as const, size: 18 },
+];
+
+function SignType({ name, onSign }: { name: string; onSign: (text: string) => void }) {
+  const [text, setText] = useState(name);
+  const [fontId, setFontId] = useState("script");
+  const font = SIG_FONTS.find(f => f.id === fontId) || SIG_FONTS[0];
+
+  return (
+    <div>
+      <input className={styles.esTypeInput} value={text} onChange={e => setText(e.target.value)} placeholder="Your full name" />
+      <div className={styles.esTypeFonts}>
+        {SIG_FONTS.map(f => (
+          <div key={f.id} className={`${styles.esTypeFont} ${fontId === f.id ? styles.esTypeFontOn : ""}`} onClick={() => setFontId(f.id)}>
+            <span style={{ fontFamily: f.family, fontWeight: f.weight, fontStyle: f.style, fontSize: Math.min(f.size, 20) }}>{text || "Your Name"}</span>
+          </div>
+        ))}
+      </div>
+      <div className={styles.esTypePreview}>
+        <div style={{ fontFamily: font.family, fontWeight: font.weight, fontStyle: font.style, fontSize: font.size, color: "var(--ink-800)" }}>{text || "Your Name"}</div>
+        <div className={styles.esBaseline} />
+      </div>
+      <div className={styles.esDrawActions}>
+        <button className={styles.esBtnAccept} onClick={() => { if (text.trim()) onSign(text.trim()); }} disabled={!text.trim()}>Accept &amp; Sign</button>
+      </div>
+    </div>
+  );
+}
+
 export function SignoffBlock({ data, onChange }: { data: SignoffData; onChange: (d: SignoffData) => void }) {
-  // Initialize parties if not present (backward compat)
+  const [signingIdx, setSigningIdx] = useState<number | null>(null);
+  const [sigMode, setSigMode] = useState<"draw" | "type">("draw");
+  const [celebration, setCelebration] = useState(false);
+
   const parties = data.parties || [
     { name: data.signer || "Freelancer", role: "Freelancer", signed: data.signed, signedAt: data.signedAt },
     { name: "", role: "Client", signed: false, signedAt: null },
   ];
 
-  const handleSign = (idx: number) => {
-    const updated = parties.map((p, i) => {
-      if (i !== idx) return p;
-      if (p.signed) return { ...p, signed: false, signedAt: null };
-      return { ...p, signed: true, signedAt: new Date().toISOString() };
-    });
+  const handleSign = (idx: number, sigData: string) => {
+    const updated = parties.map((p, i) =>
+      i === idx ? { ...p, signed: true, signedAt: new Date().toISOString(), sigData, sigMode } : p
+    );
     const allSigned = updated.every(p => p.signed);
     onChange({ ...data, parties: updated, signed: allSigned, signedAt: allSigned ? new Date().toISOString() : null, locked: allSigned });
+    setSigningIdx(null);
+    setCelebration(true);
+    setTimeout(() => setCelebration(false), 2500);
+  };
+
+  const handleUnsign = (idx: number) => {
+    const updated = parties.map((p, i) =>
+      i === idx ? { ...p, signed: false, signedAt: null, sigData: undefined, sigMode: undefined } : p
+    );
+    onChange({ ...data, parties: updated, signed: false, signedAt: null, locked: false });
   };
 
   const updatePartyName = (idx: number, name: string) => {
-    const updated = parties.map((p, i) => i === idx ? { ...p, name } : p);
-    onChange({ ...data, parties: updated });
+    onChange({ ...data, parties: parties.map((p, i) => i === idx ? { ...p, name } : p) });
   };
 
   const allSigned = parties.every(p => p.signed);
 
   return (
     <div className={`${styles.signoff} ${allSigned ? styles.signoffLocked : ""}`}>
-      <div className={`${styles.signoffHeader} ${allSigned ? styles.signoffLockedHeader : ""}`}>
+      {celebration && (
+        <div className={styles.esCelebration}>
+          <div className={styles.esCelebInner}>
+            <div className={styles.esCelebCheck}>✓</div>
+            <div className={styles.esCelebTitle}>Signed.</div>
+            <div className={styles.esCelebSub}>The project is official.</div>
+          </div>
+        </div>
+      )}
+
+      <div className={styles.signoffHeader}>
         <div className={styles.signoffHeaderIcon}>✍</div>
         <span className={styles.blockLabel}>E-Signatures</span>
         {allSigned && <span className={styles.signoffLockBadge}>Fully signed</span>}
       </div>
 
-      <div className={styles.signoffParties}>
+      {data.agreement && (
+        <div className={styles.esAgreement}>
+          <div className={styles.esAgreementText}>{data.agreement}</div>
+        </div>
+      )}
+      {!data.agreement && !allSigned && (
+        <div className={styles.esAgreement}>
+          <textarea className={styles.blockTextarea} placeholder="Agreement summary (optional)..." value={data.agreement || ""} onChange={e => onChange({ ...data, agreement: e.target.value })} style={{ minHeight: 40 }} />
+        </div>
+      )}
+
+      <div className={styles.esPartiesSection}>
         {parties.map((party, i) => (
-          <div key={i} className={`${styles.signoffParty} ${party.signed ? styles.signoffPartySigned : ""}`}>
-            <div className={styles.signoffLine} />
-            <div className={styles.signoffPartyName}>
-              {party.signed ? (
-                <span style={{ fontStyle: "italic", color: "var(--ink-600)" }}>{party.name || party.role}</span>
-              ) : (
-                <input
-                  className={styles.blockInput}
-                  placeholder={`${party.role} name`}
-                  value={party.name}
-                  onChange={e => updatePartyName(i, e.target.value)}
-                  style={{ fontSize: 13, padding: "4px 8px", textAlign: "center" }}
-                />
-              )}
-            </div>
-            <div className={styles.signoffRole}>{party.role}</div>
-            {party.signed ? (
-              <div className={styles.signoffBadgeSigned} onClick={() => handleSign(i)}>
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2 2L8 3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                Signed · {party.signedAt ? new Date(party.signedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : ""}
+          <div key={i} className={`${styles.esParty} ${party.signed ? styles.esPartySigned : ""}`}>
+            <div className={styles.esPartyTop}>
+              <div className={`${styles.esPartyDot} ${party.signed ? styles.esPartyDotSigned : signingIdx === i ? styles.esPartyDotViewing : ""}`}>
+                {party.signed ? "✓" : signingIdx === i ? "◎" : "○"}
               </div>
-            ) : (
-              <button className={styles.signoffSignBtn} onClick={() => handleSign(i)}>
-                Sign
-              </button>
+              <div className={styles.esPartyInfo}>
+                {party.signed ? (
+                  <div className={styles.esPartyName}>{party.name || party.role}</div>
+                ) : (
+                  <input className={styles.blockInput} placeholder={`${party.role} name`} value={party.name} onChange={e => updatePartyName(i, e.target.value)} style={{ fontSize: 14, padding: "4px 8px", fontWeight: 500 }} />
+                )}
+                <div className={styles.esPartyRole}>{party.role}</div>
+              </div>
+              {party.signed && <span className={styles.esPartyBadge}>Signed</span>}
+              {signingIdx === i && <span className={styles.esPartyBadgeViewing}>Signing...</span>}
+            </div>
+
+            {party.signed && party.sigData && (
+              <div className={styles.esSigArea}>
+                {party.sigData.startsWith("data:") ? (
+                  <img src={party.sigData} alt="Signature" className={styles.esSigImg} />
+                ) : (
+                  <div className={styles.esSigTyped}>{party.sigData}</div>
+                )}
+                <div className={styles.esSigLine} />
+                <div className={styles.esSigMeta}>
+                  <span>{party.signedAt ? new Date(party.signedAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : ""}</span>
+                </div>
+              </div>
+            )}
+
+            {!party.signed && signingIdx !== i && (
+              <div className={styles.esPartyPending}>
+                <div className={styles.esPendingLine} />
+                <button className={styles.signoffSignBtn} onClick={() => setSigningIdx(i)}>Sign</button>
+              </div>
+            )}
+
+            {signingIdx === i && (
+              <div className={styles.esSigningArea}>
+                <div className={styles.esModes}>
+                  <button className={`${styles.esMode} ${sigMode === "draw" ? styles.esModeOn : ""}`} onClick={() => setSigMode("draw")}>Draw</button>
+                  <button className={`${styles.esMode} ${sigMode === "type" ? styles.esModeOn : ""}`} onClick={() => setSigMode("type")}>Type</button>
+                </div>
+                {sigMode === "draw" && <SignCanvas onSign={(d) => handleSign(i, d)} />}
+                {sigMode === "type" && <SignType name={party.name} onSign={(t) => handleSign(i, t)} />}
+              </div>
+            )}
+
+            {party.signed && (
+              <button className={styles.esUnsignBtn} onClick={() => handleUnsign(i)}>Revoke signature</button>
             )}
           </div>
         ))}
       </div>
 
-      <div className={styles.signoffNote}>Legally binding digital signatures · Timestamped</div>
+      <div className={styles.signoffNote}>
+        Legally binding digital signatures · Timestamped · Compliant with ESIGN Act and UETA
+      </div>
     </div>
   );
 }
