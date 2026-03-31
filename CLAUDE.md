@@ -133,6 +133,7 @@ Before building any feature that creates 3+ files, answer these five questions (
 3. **Which hotspot files does it touch?** — If it touches Editor.tsx, types.ts, or constants.ts, note the exact additions (import, CONTENT_DEFAULTS entry, contentBlockMap entry, margin labels).
 4. **One file or a folder?** — If the component + CSS exceeds ~250 lines, give it its own folder. If it's a block type, follow the category folder pattern (`blocks/content/`, `blocks/collab/`, etc.).
 5. **Will this grow?** — If the feature is likely to gain variants, modes, sub-features, or integrations, start with a folder structure even if the first file is small. A folder with one file is cheaper than a file that becomes a folder later. Signals that something will grow: it has a type/mode picker, it's a category that will expand, the user mentioned future additions, or it touches a domain with natural expansion (e.g. payments → invoices → subscriptions).
+6. **MANIFEST.md** — Every component folder MUST have a `MANIFEST.md`. When creating a new folder, create its manifest in the same pass. When modifying files in a folder, update the manifest if exports, dependencies, or importers changed. The manifest is the folder's self-documentation — it declares what's here, what it needs, and who uses it. Format: Exports, Dependencies, Imported By, Files. This is non-negotiable.
 
 This is not a document — it's a 30-second mental checklist. The goal is to build into the right structure the first time so that a new developer joining the project can navigate the codebase by folder names alone.
 
@@ -155,6 +156,7 @@ The Conductor is a self-sustaining knowledge system. These behaviors are **autom
 - Team agents use their name (architect, data-hawk). Solo sessions use `claude-main`.
 - One sentence max per entry. Detail goes in the journal.
 - **MANDATORY**: When adding, deleting, renaming, or retiring a feature, block type, or primary file, update `conductor/GUARDRAIL.md` in the same commit. Update the Feature Registry, Block Registry, and Codebase Pulse metrics. This is not a follow-up task — it happens in the same pass as the code change.
+- **MANDATORY**: When modifying any file in a component folder, read that folder's `MANIFEST.md` first. If the change affects exports, dependencies, or importers, update the manifest in the same commit. When creating a new folder, create its `MANIFEST.md` in the same pass.
 
 #### On Session Close (Learning Capture + Context Update + Handoff)
 - After any non-trivial session (debug, feature build, audit, refactor):

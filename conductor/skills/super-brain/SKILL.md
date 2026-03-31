@@ -120,6 +120,7 @@ Search for repos known for exceptional code quality regardless of stack:
 6. Average file length (are files <250 lines?)
 7. How they handle 50+ component types (if applicable)
 8. Testing approach (if any)
+9. Self-documentation pattern — do they use manifests, index files, README per folder? Compare against our MANIFEST.md approach. Note what works better.
 
 ### Phase 3: Gap Analysis (5 min)
 
@@ -130,6 +131,7 @@ Compare reference patterns against the current codebase. Produce a decision tabl
 |---------|---------------------------|-------------------|-----|-----|
 | Component org | Feature folders, 1 component per file | Mixed — some mega-files, some folders | Medium | Phase 2 of editor refactor |
 | Shared hooks | Dedicated hooks/ folder, 10+ reusable | 4 hooks in shared/, 10+ duplicated | High | Shared primitives mission |
+| Folder manifests | MANIFEST.md in every folder | 46 manifests, all component folders covered | ✅ Match | Maintain: update on every change |
 | ... | ... | ... | ... | ... |
 ```
 
