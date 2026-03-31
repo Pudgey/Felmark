@@ -167,7 +167,7 @@ export const themeCommand: CommandRegistryEntry = {
   description: "Change the app color scheme",
   icon: "◐",
   category: "Settings",
-  usage: "/theme [ember|midnight|sage|clay|frost]",
+  usage: "/theme [ember|midnight|sage|clay|frost|obsidian|dune|ink|copper|lavender]",
   handler: (parsed) => {
     const themeName = parsed.action || parsed.positional[0];
 
