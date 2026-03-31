@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, type SetStateAction } from "react";
 import { INITIAL_WORKSPACES } from "@/lib/constants";
 import type { Block, Workspace, Project, Tab, ArchivedProject, WorkspaceTemplate } from "@/lib/types";
 import { uid, makeBlocks } from "@/lib/utils";
@@ -73,6 +73,11 @@ export default function Dashboard() {
   const [archived, setArchived] = useState<ArchivedProject[]>([]);
   const [comments, setComments] = useState<Comment[]>(INITIAL_COMMENTS);
   const [activitiesMap, setActivitiesMap] = useState<Record<string, BlockActivity[]>>({ p1: INITIAL_ACTIVITIES });
+  const [saveIndicatorState, setSaveIndicatorState] = useState<"saved" | "saving">("saved");
+  const [saveRequestToken, setSaveRequestToken] = useState(0);
+  const [lastCompletedSaveToken, setLastCompletedSaveToken] = useState<number | null>(null);
+  const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
+  const [saveStatusTick, setSaveStatusTick] = useState(0);
 
   // ── Hydrate from localStorage after mount (avoids SSR mismatch) ──
   const [hydrated, setHydrated] = useState(false);
@@ -91,6 +96,11 @@ export default function Dashboard() {
     if (cm) setComments(cm);
     const am = loadFromStorage("activitiesMap", null);
     if (am) setActivitiesMap(am);
+    const ls = loadFromStorage("lastSavedAt", null);
+    if (typeof ls === "number") {
+      setLastSavedAt(ls);
+      setSaveStatusTick(ls);
+    }
     setHydrated(true);
   }, []);
 
@@ -116,19 +126,121 @@ export default function Dashboard() {
 
   // ── Auto-save to localStorage (debounced 500ms) ──
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const markSavePending = useCallback(() => {
+    if (!hydrated) return;
+    let nextToken = 0;
+    setSaveRequestToken(prev => {
+      nextToken = prev + 1;
+      return nextToken;
+    });
+    setSaveIndicatorState("saving");
+    return nextToken;
+  }, [hydrated]);
+
+  const persistWorkspaceState = useCallback((saveToken: number) => {
+    const savedAt = Date.now();
+    saveToStorage("workspaces", workspaces);
+    saveToStorage("blocksMap", blocksMap);
+    saveToStorage("tabs", tabs);
+    saveToStorage("archived", archived);
+    saveToStorage("comments", comments);
+    saveToStorage("activitiesMap", activitiesMap);
+    saveToStorage("activeProject", activeProject);
+    saveToStorage("lastSavedAt", savedAt);
+    setLastSavedAt(savedAt);
+    setSaveStatusTick(savedAt);
+    setLastCompletedSaveToken(saveToken);
+  }, [workspaces, blocksMap, tabs, archived, comments, activitiesMap, activeProject]);
+
+  const saveNow = useCallback(() => {
+    if (saveTimer.current) {
+      clearTimeout(saveTimer.current);
+      saveTimer.current = null;
+    }
+    const saveToken = markSavePending();
+    if (saveToken) persistWorkspaceState(saveToken);
+  }, [markSavePending, persistWorkspaceState]);
+
+  const updateWorkspaces = useCallback((value: SetStateAction<Workspace[]>) => {
+    markSavePending();
+    setWorkspaces(value);
+  }, [markSavePending]);
+
+  const updateTabs = useCallback((value: SetStateAction<Tab[]>) => {
+    markSavePending();
+    setTabs(value);
+  }, [markSavePending]);
+
+  const updateActiveProject = useCallback((value: SetStateAction<string>) => {
+    markSavePending();
+    setActiveProject(value);
+  }, [markSavePending]);
+
+  const updateBlocksMap = useCallback((value: SetStateAction<Record<string, Block[]>>) => {
+    markSavePending();
+    setBlocksMap(value);
+  }, [markSavePending]);
+
+  const updateArchived = useCallback((value: SetStateAction<ArchivedProject[]>) => {
+    markSavePending();
+    setArchived(value);
+  }, [markSavePending]);
+
+  const updateComments = useCallback((value: SetStateAction<Comment[]>) => {
+    markSavePending();
+    setComments(value);
+  }, [markSavePending]);
+
+  const updateActivitiesMap = useCallback((value: SetStateAction<Record<string, BlockActivity[]>>) => {
+    markSavePending();
+    setActivitiesMap(value);
+  }, [markSavePending]);
+
   useEffect(() => {
+    if (!hydrated || saveRequestToken === 0) return;
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
-      saveToStorage("workspaces", workspaces);
-      saveToStorage("blocksMap", blocksMap);
-      saveToStorage("tabs", tabs);
-      saveToStorage("archived", archived);
-      saveToStorage("comments", comments);
-      saveToStorage("activitiesMap", activitiesMap);
-      saveToStorage("activeProject", activeProject);
-    }, 500);
+      persistWorkspaceState(saveRequestToken);
+      saveTimer.current = null;
+    }, 800);
     return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
-  }, [workspaces, blocksMap, tabs, archived, comments, activitiesMap, activeProject]);
+  }, [hydrated, persistWorkspaceState, saveRequestToken]);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        saveNow();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [saveNow]);
+
+  useEffect(() => {
+    if (lastCompletedSaveToken === null || lastCompletedSaveToken !== saveRequestToken) return;
+    const timer = window.setTimeout(() => setSaveIndicatorState("saved"), 450);
+    return () => window.clearTimeout(timer);
+  }, [lastCompletedSaveToken, saveRequestToken]);
+
+  useEffect(() => {
+    if (!lastSavedAt) return;
+    const tick = window.setInterval(() => setSaveStatusTick(Date.now()), 30000);
+    return () => window.clearInterval(tick);
+  }, [lastSavedAt]);
+
+  const saveStatusLabel = (() => {
+    if (saveIndicatorState === "saving") return "saving...";
+    if (!lastSavedAt) return "saved";
+    const elapsed = Math.max(0, saveStatusTick - lastSavedAt);
+    const minutes = Math.floor(elapsed / 60000);
+    if (minutes <= 0) return "saved just now";
+    if (minutes === 1) return "saved 1m ago";
+    if (minutes < 60) return `saved ${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours === 1) return "saved 1h ago";
+    return `saved ${hours}h ago`;
+  })();
 
   // Zen mode: Escape to exit
   useEffect(() => {
@@ -144,7 +256,13 @@ export default function Dashboard() {
   // ── Forge — the root service layer ──
   const forgeState: StateUpdater = {
     getState: () => ({ workspaces, tabs, activeProject, blocksMap, archived, comments, activitiesMap }),
-    setWorkspaces, setTabs, setActiveProject, setBlocksMap, setArchived, setComments, setActivitiesMap,
+    setWorkspaces: updateWorkspaces,
+    setTabs: updateTabs,
+    setActiveProject: updateActiveProject,
+    setBlocksMap: updateBlocksMap,
+    setArchived: updateArchived,
+    setComments: updateComments,
+    setActivitiesMap: updateActivitiesMap,
   };
   const forge = createForge(forgeState);
 
@@ -161,24 +279,24 @@ export default function Dashboard() {
   const selectWorkspaceHome = (wid: string) => {
     restoreWorkspaceContext();
     setActiveWorkspaceId(wid);
-    setTabs(prev => prev.map(t => ({ ...t, active: false })));
-    setActiveProject("");
+    updateTabs(prev => prev.map(t => ({ ...t, active: false })));
+    updateActiveProject("");
     // Ensure workspace is expanded
-    setWorkspaces(prev => prev.map(w => w.id === wid ? { ...w, open: true } : w));
+    updateWorkspaces(prev => prev.map(w => w.id === wid ? { ...w, open: true } : w));
   };
 
   const selectProject = (project: Project, client: string) => {
     restoreWorkspaceContext();
     setActiveWorkspaceId(null);
-    setActiveProject(project.id);
+    updateActiveProject(project.id);
     if (!tabs.find(t => t.id === project.id)) {
-      setTabs(prev => [...prev.map(t => ({ ...t, active: false })), { id: project.id, name: project.name, client, active: true }]);
+      updateTabs(prev => [...prev.map(t => ({ ...t, active: false })), { id: project.id, name: project.name, client, active: true }]);
     } else {
-      setTabs(prev => prev.map(t => ({ ...t, active: t.id === project.id })));
+      updateTabs(prev => prev.map(t => ({ ...t, active: t.id === project.id })));
     }
     // Ensure blocks exist for this project
     if (!blocksMap[project.id]) {
-      setBlocksMap(prev => ({ ...prev, [project.id]: makeEmptyBlocks() }));
+      updateBlocksMap(prev => ({ ...prev, [project.id]: makeEmptyBlocks() }));
     }
   };
 
@@ -277,8 +395,8 @@ export default function Dashboard() {
           setRailActive(item);
           if (item === "home") {
             setActiveWorkspaceId(null);
-            setTabs(prev => prev.map(t => ({ ...t, active: false })));
-            setActiveProject("");
+            updateTabs(prev => prev.map(t => ({ ...t, active: false })));
+            updateActiveProject("");
             setSidebarOpen(true);
           }
         }}
@@ -310,6 +428,9 @@ export default function Dashboard() {
         onTogglePin={togglePin}
         onCycleStatus={cycleStatus}
         onScrollToCalendarEvent={(projectId) => setCalendarScrollTarget(projectId)}
+        saveIndicatorState={saveIndicatorState}
+        saveStatusLabel={saveStatusLabel}
+        onSaveNow={saveNow}
       />}
       {/* Resize handle */}
       {sidebarOpen && !zenMode && (
@@ -408,8 +529,8 @@ export default function Dashboard() {
             setRailActive(item);
             if (item === "home") {
               setActiveWorkspaceId(null);
-              setTabs(prev => prev.map(t => ({ ...t, active: false })));
-              setActiveProject("");
+              updateTabs(prev => prev.map(t => ({ ...t, active: false })));
+              updateActiveProject("");
               setSidebarOpen(true);
             }
           }}
@@ -420,8 +541,8 @@ export default function Dashboard() {
           onCalendarScrollComplete={() => setCalendarScrollTarget(null)}
           onCalendarOpenProject={calendarOpenProject}
           onRenameWorkspace={(wsId, name) => {
-            setWorkspaces(prev => prev.map(w => w.id === wsId ? { ...w, client: name, avatar: name[0].toUpperCase() } : w));
-            setTabs(prev => prev.map(t => {
+            updateWorkspaces(prev => prev.map(w => w.id === wsId ? { ...w, client: name, avatar: name[0].toUpperCase() } : w));
+            updateTabs(prev => prev.map(t => {
               const ws = workspaces.find(w => w.id === wsId);
               if (ws && ws.projects.some(p => p.id === t.id)) return { ...t, client: name };
               return t;
@@ -429,9 +550,9 @@ export default function Dashboard() {
           }}
           onUpdateProjectDue={updateProjectDue}
           comments={comments}
-          onCommentsChange={setComments}
+          onCommentsChange={updateComments}
           activities={activitiesMap[activeProject] || []}
-          onActivitiesChange={(newActivities) => setActivitiesMap(prev => ({ ...prev, [activeProject]: newActivities }))}
+          onActivitiesChange={(newActivities) => updateActivitiesMap(prev => ({ ...prev, [activeProject]: newActivities }))}
           zenMode={zenMode}
           onToggleZen={() => setZenMode(prev => !prev)}
           splitProject={splitProject}
@@ -461,8 +582,8 @@ export default function Dashboard() {
         setRailActive(screenId);
         if (screenId === "home") {
           setActiveWorkspaceId(null);
-          setTabs(prev => prev.map(t => ({ ...t, active: false })));
-          setActiveProject("");
+          updateTabs(prev => prev.map(t => ({ ...t, active: false })));
+          updateActiveProject("");
         }
         setSidebarOpen(true);
       }}
@@ -492,7 +613,7 @@ export default function Dashboard() {
       }}
       onSelectTemplate={(blocks) => {
         if (activeProject) {
-          setBlocksMap(prev => ({ ...prev, [activeProject]: blocks }));
+          updateBlocksMap(prev => ({ ...prev, [activeProject]: blocks }));
         }
       }}
     />

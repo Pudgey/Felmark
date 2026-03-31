@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from "react";
 import type { ReactNode } from "react";
 import type { Workspace, Project } from "@/lib/types";
-import type { TerminalBlock, TerminalContextType, CommandHandlerContext, AmbientInsight } from "@/lib/terminal/types";
+import type { TerminalBlock, TerminalContextType, CommandHandlerContext, AmbientInsight, TerminalSessionState } from "@/lib/terminal/types";
 import { parseCommand } from "@/lib/terminal/parser";
 import { COMMAND_REGISTRY } from "@/lib/terminal/commands";
 import { extractDocumentContext, hashContext } from "@/lib/terminal/watcher";
@@ -25,6 +25,8 @@ interface TerminalProviderProps {
   editorBlocks?: Array<{ type?: string; content?: string; props?: Record<string, unknown> }>;
   /** Callback for navigate actions (D7) */
   onOpenWorkspace?: (workspaceId: string) => void;
+  sessionState?: TerminalSessionState;
+  onSessionStateChange?: (state: TerminalSessionState) => void;
 }
 
 let blockIdCounter = 0;
@@ -43,10 +45,14 @@ export default function TerminalProvider({
   children,
   editorBlocks,
   onOpenWorkspace,
+  sessionState,
+  onSessionStateChange,
 }: TerminalProviderProps) {
-  const [blocks, setBlocks] = useState<TerminalBlock[]>([]);
-  const [inputHistory, setInputHistory] = useState<string[]>([]);
-  const [dismissedInsights, setDismissedInsights] = useState<Set<string>>(new Set());
+  const [blocks, setBlocks] = useState<TerminalBlock[]>(sessionState?.blocks ?? []);
+  const [inputHistory, setInputHistory] = useState<string[]>(sessionState?.inputHistory ?? []);
+  const [dismissedInsights, setDismissedInsights] = useState<Set<string>>(
+    () => new Set(sessionState?.dismissedInsightKeys ?? [])
+  );
 
   const workspacesRef = useRef(workspaces);
   workspacesRef.current = workspaces;
@@ -63,6 +69,14 @@ export default function TerminalProvider({
     mountedRef.current = true;
     return () => { mountedRef.current = false; };
   }, []);
+
+  useEffect(() => {
+    onSessionStateChange?.({
+      blocks,
+      inputHistory,
+      dismissedInsightKeys: Array.from(dismissedInsights),
+    });
+  }, [blocks, inputHistory, dismissedInsights, onSessionStateChange]);
 
   const allProjects: { project: Project; client: string; workspaceId: string }[] = workspaces.flatMap(
     ws => ws.projects.map(p => ({ project: p, client: ws.client, workspaceId: ws.id }))
@@ -109,7 +123,6 @@ export default function TerminalProvider({
 
     // Default: treat as a terminal command (e.g., "/rate", "/client Meridian")
     if (command.startsWith("/")) {
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
       executeCommandInner(command);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps

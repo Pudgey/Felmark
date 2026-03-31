@@ -13,6 +13,12 @@ export interface TerminalBlock {
   insight?: AmbientInsight;
 }
 
+export interface TerminalSessionState {
+  blocks: TerminalBlock[];
+  inputHistory: string[];
+  dismissedInsightKeys: string[];
+}
+
 export interface AmbientInsight {
   tier: "whisper" | "nudge" | "alert";
   text: string;

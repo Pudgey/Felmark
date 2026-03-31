@@ -1,5 +1,35 @@
 @import "tailwindcss";
 
+/* ═══ @property registrations — enables smooth color transitions between themes ═══ */
+@property --parchment { syntax: '<color>'; inherits: true; initial-value: #faf9f7; }
+@property --warm-50 { syntax: '<color>'; inherits: true; initial-value: #f7f6f3; }
+@property --warm-100 { syntax: '<color>'; inherits: true; initial-value: #f0eee9; }
+@property --warm-200 { syntax: '<color>'; inherits: true; initial-value: #e5e2db; }
+@property --warm-300 { syntax: '<color>'; inherits: true; initial-value: #d5d1c8; }
+@property --warm-400 { syntax: '<color>'; inherits: true; initial-value: #b8b3a8; }
+@property --warm-500 { syntax: '<color>'; inherits: true; initial-value: #9a958a; }
+@property --ink-900 { syntax: '<color>'; inherits: true; initial-value: #2c2a25; }
+@property --ink-800 { syntax: '<color>'; inherits: true; initial-value: #3d3a33; }
+@property --ink-700 { syntax: '<color>'; inherits: true; initial-value: #4f4c44; }
+@property --ink-600 { syntax: '<color>'; inherits: true; initial-value: #65625a; }
+@property --ink-500 { syntax: '<color>'; inherits: true; initial-value: #7d7a72; }
+@property --ink-400 { syntax: '<color>'; inherits: true; initial-value: #9b988f; }
+@property --ink-300 { syntax: '<color>'; inherits: true; initial-value: #b5b2a9; }
+@property --panel { syntax: '<color>'; inherits: true; initial-value: #f2f1ed; }
+@property --panel-hover { syntax: '<color>'; inherits: true; initial-value: #eceae5; }
+@property --panel-active { syntax: '<color>'; inherits: true; initial-value: #e6e4de; }
+@property --rail-bg { syntax: '<color>'; inherits: true; initial-value: #353330; }
+@property --rail-icon { syntax: '<color>'; inherits: true; initial-value: #8a867e; }
+@property --rail-icon-active { syntax: '<color>'; inherits: true; initial-value: #c8c4bb; }
+@property --ember { syntax: '<color>'; inherits: true; initial-value: #b07d4f; }
+@property --ember-light { syntax: '<color>'; inherits: true; initial-value: #c89360; }
+@property --accent { syntax: '<color>'; inherits: true; initial-value: #b07d4f; }
+@property --accent-light { syntax: '<color>'; inherits: true; initial-value: #c89360; }
+@property --success { syntax: '<color>'; inherits: true; initial-value: #5a9a3c; }
+@property --error { syntax: '<color>'; inherits: true; initial-value: #c24b38; }
+@property --info { syntax: '<color>'; inherits: true; initial-value: #5b7fa4; }
+@property --warning { syntax: '<color>'; inherits: true; initial-value: #d4a34a; }
+
 :root {
   /* Warm whites & parchment */
   --parchment: #faf9f7;
@@ -54,6 +84,16 @@
   --radius-lg: 8px;
   --radius-xl: 10px;
   --radius-full: 99px;
+
+  /* Theme transition — all @property-registered colors interpolate smoothly */
+  transition:
+    --parchment 0.5s ease,
+    --warm-50 0.5s ease, --warm-100 0.5s ease, --warm-200 0.5s ease, --warm-300 0.5s ease, --warm-400 0.5s ease, --warm-500 0.5s ease,
+    --ink-900 0.5s ease, --ink-800 0.5s ease, --ink-700 0.5s ease, --ink-600 0.5s ease, --ink-500 0.5s ease, --ink-400 0.5s ease, --ink-300 0.5s ease,
+    --panel 0.5s ease, --panel-hover 0.5s ease, --panel-active 0.5s ease,
+    --rail-bg 0.5s ease, --rail-icon 0.5s ease, --rail-icon-active 0.5s ease,
+    --ember 0.5s ease, --ember-light 0.5s ease, --accent 0.5s ease, --accent-light 0.5s ease,
+    --success 0.5s ease, --error 0.5s ease, --info 0.5s ease, --warning 0.5s ease;
 }
 
 * {

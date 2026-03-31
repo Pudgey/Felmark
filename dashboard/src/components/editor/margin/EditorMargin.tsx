@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useRef, useCallback, useEffect } from "react";
 import type { Block } from "@/lib/types";
+import DocumentOutline from "@/components/shared/DocumentOutline";
 import styles from "./EditorMargin.module.css";
 
 const BLOCK_LABELS: Record<string, string> = {
@@ -265,72 +266,20 @@ export default function EditorMargin({ blocks, hoveredBlock, onHoverBlock, onScr
     navigator.clipboard.writeText(text);
   }, [validSelected, blocks]);
 
-  // Extract sections (h1 and h2 blocks)
-  const sections = useMemo(() =>
-    blocks.filter(b => b.type === "h1" || b.type === "h2").map(b => {
-      const idx = blocks.indexOf(b);
-      let hasContent = false;
-      let allFilled = true;
-      for (let i = idx + 1; i < blocks.length; i++) {
-        const next = blocks[i];
-        if (next.type === "h1" || next.type === "h2") break;
-        if (next.type === "divider") continue;
-        hasContent = true;
-        if (!next.content) { allFilled = false; break; }
-        if (next.type === "todo" && !next.checked) allFilled = false;
-      }
-      const status = !hasContent ? "empty" : allFilled ? "complete" : "active";
-      return { ...b, status };
-    }),
-  [blocks]);
-
-  const completeSections = sections.filter(s => s.status === "complete").length;
-  const totalSections = sections.length;
-  const docProgress = totalSections > 0 ? Math.round((completeSections / totalSections) * 100) : 0;
+  // Section extraction moved to shared DocumentOutline component
 
   return (
     <div className={styles.margin}>
-      {/* Document Spine */}
+      {/* Document Spine — shared outline component */}
       <div className={styles.spine}>
-        <div className={styles.spineHead}>
-          <span className={styles.spineLabel}>outline</span>
-          <span className={styles.spineProgress}>{completeSections}/{totalSections}</span>
-        </div>
-
-        <div className={styles.spineBar}>
-          <div className={styles.spineBarFill} style={{ width: `${docProgress}%` }} />
-        </div>
-
-        <div className={styles.spineSections}>
-          {sections.map((section, i) => {
-            const isActive = hoveredBlock === section.id;
-            const isLast = i === sections.length - 1;
-            const name = section.content.length > 20 ? section.content.slice(0, 18) + "…" : (section.content || "Untitled");
-
-            return (
-              <div
-                key={section.id}
-                className={`${styles.spineItem} ${isActive ? styles.spineItemOn : ""}`}
-                onClick={() => onScrollTo(section.id)}
-                onMouseEnter={() => onHoverBlock(section.id)}
-                onMouseLeave={() => onHoverBlock(null)}
-              >
-                <div className={styles.spineDotWrap}>
-                  <div className={`${styles.spineDot} ${styles[`spineDot_${section.status}`]}`} />
-                  {!isLast && (
-                    <div className={styles.spineConnector} style={{
-                      background: section.status === "complete" ? "rgba(90,154,60,0.2)" : "var(--warm-200)"
-                    }} />
-                  )}
-                </div>
-                <span className={`${styles.spineName} ${section.status === "complete" ? styles.spineNameDone : ""}`}>
-                  {name}
-                </span>
-                {section.status === "complete" && <span className={styles.spineCheck}>✓</span>}
-              </div>
-            );
-          })}
-        </div>
+        <DocumentOutline
+          blocks={blocks}
+          hoveredBlock={hoveredBlock}
+          onScrollTo={onScrollTo}
+          onHoverBlock={onHoverBlock}
+          compact
+          label="outline"
+        />
       </div>
 
       {/* Block Gutter */}

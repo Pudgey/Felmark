@@ -1,26 +1,27 @@
-# Shared -- Manifest
+# Shared — Manifest
 
 > Auto-maintained by AI. Updated on every file change in this folder.
 
 ## Exports
-- `DueDatePicker` -- Date picker with urgency colors and quick-date presets
-- `ErrorBoundary` -- React error boundary with fallback UI
-- `ThemeLoader` -- Applies and syncs theme on mount
-- `useFocusTrap` -- Hook to trap focus within a modal/panel
+
+| File | Type | What | Used by |
+|---|---|---|---|
+| `DueDatePicker.tsx` | UI | Date picker with urgency colors, calendar, quick picks | Editor meta bar, deliverables, deadlines |
+| `DocumentOutline.tsx` | UI | Heading list from blocks — indentation, section numbers, click-to-scroll, active state | EditorMargin, Forge Paper |
+| `ErrorBoundary.tsx` | Layout | React error boundary with fallback UI | Root layout wraps everything |
+| `ThemeLoader.tsx` | UI | Applies and syncs theme on mount | Layout |
+| `useFocusTrap.ts` | Hook | Traps keyboard focus inside a container | Command palette, history modal, share modal |
 
 ## Dependencies
-- `@/lib/due-dates` -- getDueLabel, getDueColor, getDueBg, formatDueShort, getQuickDates, getDueUrgency
-- `@/lib/themes` -- THEMES, applyTheme, getActiveTheme
+- `@/lib/due-dates` — getDueLabel, getDueColor, getDueBg, formatDueShort, getQuickDates, getDueUrgency
+- `@/lib/themes` — THEMES, applyTheme, getActiveTheme
+- `@/lib/types` — Block (for DocumentOutline)
 
-## Imported By
-- `Editor.tsx` -- DueDatePicker used in block rendering
-- `page.tsx` -- ErrorBoundary wraps main layout
-- `CommandPalette.tsx` -- useFocusTrap for modal focus
-- `HistoryModal.tsx` -- useFocusTrap for modal focus
+## Rules
 
-## Files
-- `DueDatePicker.tsx` -- date picker component (109 lines)
-- `DueDatePicker.module.css` -- styles
-- `ErrorBoundary.tsx` -- error boundary (65 lines)
-- `ThemeLoader.tsx` -- theme loader (20 lines)
-- `useFocusTrap.ts` -- focus trap hook
+1. **3+ consumers** — don't extract until three places need it
+2. **Pure UI or pure logic** — no business rules, no forge calls, no API fetches
+3. **Context-agnostic** — must work without knowing which editor/page/panel it's inside
+4. **Flat structure** — no subfolders until 10+ files
+5. **Update this file** when adding, renaming, or removing components
+6. **CSS modules** — each UI component gets its own `.module.css`

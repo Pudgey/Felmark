@@ -85,7 +85,20 @@ function SignalItem({ item, selected, onSelect, bookmarked, onBookmark }: { item
   const tc = SIGNAL_TYPES[item.type];
   const sc = SOURCES[item.source];
   return (
-    <div className={`${styles.item} ${selected === item.id ? styles.itemOn : ""}`} onClick={() => onSelect(item.id)}>
+    <div
+      className={`${styles.item} ${selected === item.id ? styles.itemOn : ""}`}
+      onClick={() => onSelect(item.id)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onSelect(item.id);
+        }
+      }}
+      role="button"
+      tabIndex={0}
+      aria-pressed={selected === item.id}
+      aria-label={`Open signal: ${item.headline}`}
+    >
       <div className={styles.itemRel} style={{ background: tc.color, opacity: item.relevance / 100 }} />
       <div className={styles.itemInner}>
         <div className={styles.itemType} style={{ background: tc.bg, color: tc.color, border: `1px solid ${tc.color}12` }}>{tc.icon}</div>
@@ -99,14 +112,20 @@ function SignalItem({ item, selected, onSelect, bookmarked, onBookmark }: { item
           <div className={styles.itemTags}>{item.tags.slice(0, 3).map((t, i) => <span key={i} className={styles.itemTag}>{t}</span>)}</div>
         </div>
         <div className={styles.itemRight}>
+          <div className={`${styles.itemActions} ${bookmarked.has(item.id) ? styles.itemActionsVisible : ""}`}>
+            <button
+              type="button"
+              className={`${styles.itemAct} ${bookmarked.has(item.id) ? styles.itemActOn : ""}`}
+              onClick={e => onBookmark(item.id, e)}
+              aria-label={bookmarked.has(item.id) ? "Remove signal from saved" : "Save signal"}
+            >
+              {bookmarked.has(item.id) ? "★" : "☆"}
+            </button>
+          </div>
           {item.metric && <><span className={styles.itemMetricVal} style={{ color: tc.color }}>{item.metric.label}</span><span className={styles.itemMetricSub}>{item.metric.sub}</span></>}
           {item.spark && <Spark data={item.spark} color={tc.color} width={48} height={16} />}
           <div className={styles.itemRelBar}><div className={styles.itemRelFill} style={{ width: `${item.relevance}%`, background: item.relevance >= 90 ? "#5a9a3c" : item.relevance >= 75 ? "var(--ember)" : "var(--ink-400)" }} /></div>
         </div>
-      </div>
-      <div className={`${styles.itemActions} ${bookmarked.has(item.id) ? styles.itemActionsVisible : ""}`}>
-        <button className={`${styles.itemAct} ${bookmarked.has(item.id) ? styles.itemActOn : ""}`} onClick={e => onBookmark(item.id, e)}>{bookmarked.has(item.id) ? "★" : "☆"}</button>
-        <button className={styles.itemAct}>↗</button>
       </div>
     </div>
   );
@@ -117,63 +136,98 @@ interface WirePageProps {
   services?: WireService[];
 }
 
-export default function WirePage({ workspaces = [], services = [] }: WirePageProps) {
+export default function WirePage({}: WirePageProps) {
   const [activeFilter, setActiveFilter] = useState("All");
   const [selectedItem, setSelectedItem] = useState<number | null>(3);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedNiche, setSelectedNiche] = useState("Design & Branding");
   const [bookmarked, setBookmarked] = useState<Set<number>>(new Set([3, 7, 10]));
+  const [dismissedSignals, setDismissedSignals] = useState<Set<number>>(new Set());
   const [now, setNow] = useState(new Date());
-  const [hasGenerated, setHasGenerated] = useState(false);
+  const [hasGenerated, setHasGenerated] = useState(() => (
+    typeof window !== "undefined" && localStorage.getItem("felmark_wire_onboarded") === "true"
+  ));
   const [aiSignals, setAiSignals] = useState<Signal[] | null>(null);
-  const [generating, setGenerating] = useState(false);
   const [showFlow, setShowFlow] = useState(false);
 
-  useEffect(() => {
-    if (typeof window !== "undefined" && localStorage.getItem("felmark_wire_onboarded")) {
-      setHasGenerated(true);
-    }
-  }, []);
-
-  useEffect(() => { const i = setInterval(() => setNow(new Date()), 1000); return () => clearInterval(i); }, []);
-
-  const refreshSignals = () => {
-    setGenerating(true);
-    // Simulate AI generation delay
-    setTimeout(() => {
-      setAiSignals(FEED);
-      setGenerating(false);
-      setHasGenerated(true);
-      localStorage.setItem("felmark_wire_onboarded", "true");
-    }, 1500);
-  };
+  useEffect(() => { const i = setInterval(() => setNow(new Date()), 60_000); return () => clearInterval(i); }, []);
 
   const handleSignalFlowComplete = (config: WireConfig, signals: Signal[]) => {
     localStorage.setItem("felmark_wire_onboarded", "true");
     localStorage.setItem("felmark_wire_config", JSON.stringify(config));
-    if (signals && signals.length > 0) {
-      setAiSignals(signals);
-    } else {
-      setAiSignals(FEED);
-    }
+    const nextSignals = signals && signals.length > 0 ? signals : FEED;
+    setAiSignals(nextSignals);
+    setSelectedItem(nextSignals[0]?.id ?? null);
     setHasGenerated(true);
     setShowFlow(false);
   };
 
-  const toggleBookmark = (id: number, e: React.MouseEvent) => { e.stopPropagation(); setBookmarked(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; }); };
+  const toggleSavedSignal = (id: number) => {
+    setBookmarked(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
 
-  const filtered = FEED.filter(item => {
+  const toggleBookmark = (id: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleSavedSignal(id);
+  };
+
+  const activeFeed = aiSignals && aiSignals.length > 0 ? aiSignals : FEED;
+  const normalizedSearch = searchQuery.trim().toLowerCase();
+  const filtered = activeFeed.filter(item => {
+    if (dismissedSignals.has(item.id)) return false;
     if (activeFilter !== "All" && item.type !== filterMap[activeFilter]) return false;
-    if (searchQuery && !item.headline.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    if (normalizedSearch) {
+      const haystack = [item.headline, item.body, item.source, ...item.tags].join(" ").toLowerCase();
+      if (!haystack.includes(normalizedSearch)) return false;
+    }
     return true;
   });
 
   const liveItems = filtered.filter(i => i.group === "live");
   const todayItems = filtered.filter(i => i.group === "today");
   const earlierItems = filtered.filter(i => i.group === "earlier");
-  const selected = FEED.find(i => i.id === selectedItem) || null;
-  const clientSignals = FEED.filter(f => f.isClientSignal).length;
-  const avgRelevance = Math.round(FEED.reduce((s, f) => s + f.relevance, 0) / FEED.length);
+  const activeSelectedId = filtered.some(item => item.id === selectedItem) ? selectedItem : (filtered[0]?.id ?? null);
+  const selected = filtered.find(i => i.id === activeSelectedId) || null;
+  const clientSignals = activeFeed.filter(f => f.isClientSignal && !dismissedSignals.has(f.id)).length;
+  const avgRelevance = activeFeed.length > 0 ? Math.round(activeFeed.reduce((sum, item) => sum + item.relevance, 0) / activeFeed.length) : 0;
+  const hasSearchOrFilter = normalizedSearch.length > 0 || activeFilter !== "All";
+  const hasDismissedSignals = dismissedSignals.size > 0;
+  const emptyTitle = hasSearchOrFilter ? "No matching signals" : hasDismissedSignals ? "No signals left in this view" : "No signals yet";
+  const emptyMessage = hasSearchOrFilter
+    ? "Try a broader search or clear the current filter."
+    : hasDismissedSignals
+      ? "You dismissed every signal in this slice. Restore them to keep scanning."
+      : "Signals will appear here once your intelligence feed has data.";
+  const related = selected
+    ? activeFeed.filter(signal => !dismissedSignals.has(signal.id) && signal.id !== selected.id && signal.tags.some(tag => selected.tags.includes(tag))).slice(0, 3)
+    : [];
+  const saveSignalLabel = selected && bookmarked.has(selected.id) ? "★ Saved signal" : "☆ Save signal";
+  const nowLabel = now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+
+  const clearWireFilters = () => {
+    setSearchQuery("");
+    setActiveFilter("All");
+  };
+
+  const restoreDismissedSignals = () => {
+    setDismissedSignals(new Set());
+  };
+
+  const dismissSignal = (id: number) => {
+    setDismissedSignals(prev => {
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+  };
 
   // Signal flow: for new users OR when user clicks "New Signal"
   if (showFlow || (!hasGenerated && !aiSignals)) {
@@ -216,7 +270,7 @@ export default function WirePage({ workspaces = [], services = [] }: WirePagePro
             </select>
             <div className={styles.searchWrap}>
               <svg className={styles.searchIcon} width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" strokeWidth="1.2"/><path d="M9.5 9.5L13 13" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
-              <input className={styles.search} placeholder="Search signals..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+              <input className={styles.search} placeholder="Search signals..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} aria-label="Search signals" />
             </div>
           </div>
         </div>
@@ -240,17 +294,34 @@ export default function WirePage({ workspaces = [], services = [] }: WirePagePro
       <div className={styles.layout}>
         {/* Feed */}
         <div className={styles.feed}>
+          {filtered.length === 0 && (
+            <div className={styles.emptyState}>
+              <div className={styles.emptyStateIcon}>◎</div>
+              <div className={styles.emptyStateTitle}>{emptyTitle}</div>
+              <div className={styles.emptyStateText}>{emptyMessage}</div>
+              {hasSearchOrFilter && (
+                <button type="button" className={styles.emptyStateBtn} onClick={clearWireFilters}>
+                  Clear search and filters
+                </button>
+              )}
+              {!hasSearchOrFilter && hasDismissedSignals && (
+                <button type="button" className={styles.emptyStateBtn} onClick={restoreDismissedSignals}>
+                  Show dismissed signals
+                </button>
+              )}
+            </div>
+          )}
           {liveItems.length > 0 && <>
             <div className={styles.group}><span className={styles.groupDot} style={{ background: "#5a9a3c", boxShadow: "0 0 0 2px rgba(90,154,60,0.15)" }} />Live now<span className={styles.groupCount}>{liveItems.length}</span></div>
-            {liveItems.map(item => <SignalItem key={item.id} item={item} selected={selectedItem} onSelect={setSelectedItem} bookmarked={bookmarked} onBookmark={toggleBookmark} />)}
+            {liveItems.map(item => <SignalItem key={item.id} item={item} selected={activeSelectedId} onSelect={setSelectedItem} bookmarked={bookmarked} onBookmark={toggleBookmark} />)}
           </>}
           {todayItems.length > 0 && <>
             <div className={styles.group}><span className={styles.groupDot} style={{ background: "var(--ink-300)" }} />Today<span className={styles.groupCount}>{todayItems.length}</span></div>
-            {todayItems.map(item => <SignalItem key={item.id} item={item} selected={selectedItem} onSelect={setSelectedItem} bookmarked={bookmarked} onBookmark={toggleBookmark} />)}
+            {todayItems.map(item => <SignalItem key={item.id} item={item} selected={activeSelectedId} onSelect={setSelectedItem} bookmarked={bookmarked} onBookmark={toggleBookmark} />)}
           </>}
           {earlierItems.length > 0 && <>
             <div className={styles.group}><span className={styles.groupDot} style={{ background: "var(--warm-300)" }} />Earlier<span className={styles.groupCount}>{earlierItems.length}</span></div>
-            {earlierItems.map(item => <SignalItem key={item.id} item={item} selected={selectedItem} onSelect={setSelectedItem} bookmarked={bookmarked} onBookmark={toggleBookmark} />)}
+            {earlierItems.map(item => <SignalItem key={item.id} item={item} selected={activeSelectedId} onSelect={setSelectedItem} bookmarked={bookmarked} onBookmark={toggleBookmark} />)}
           </>}
         </div>
 
@@ -260,14 +331,20 @@ export default function WirePage({ workspaces = [], services = [] }: WirePagePro
             const tc = SIGNAL_TYPES[selected.type];
             const sc = SOURCES[selected.source];
             const actionText = selected.relatedAction || (selected.isClientSignal ? "Reach out to this client about expanded services while the momentum is fresh." : selected.type === "opportunity" ? "Consider adjusting your positioning or outreach to capture this opportunity." : selected.type === "alert" ? "Stay informed and consider how this affects your service positioning." : "Use this data to refine your pricing, positioning, or outreach strategy.");
-            const related = FEED.filter(f => f.id !== selected.id && f.tags.some(t => selected.tags.includes(t))).slice(0, 3);
 
             return <>
               <div className={styles.pvHead}>
                 <div className={styles.pvSourceRow}>
-                  <span className={styles.pvSourceBadge} style={{ background: sc?.color || "#9b988f" }}>{sc?.abbr}</span>
+                  <span className={styles.pvSourceBadge} style={{ background: sc?.color || "#9b988f" }}>{sc?.abbr || "?"}</span>
                   <div><div className={styles.pvSourceName}>{selected.source}</div><div className={styles.pvSourceTime}>{selected.time} ago · {selectedNiche}</div></div>
-                  <button className={`${styles.pvBookmark} ${bookmarked.has(selected.id) ? styles.pvBookmarkOn : ""}`} onClick={() => setBookmarked(prev => { const n = new Set(prev); n.has(selected.id) ? n.delete(selected.id) : n.add(selected.id); return n; })}>{bookmarked.has(selected.id) ? "★" : "☆"}</button>
+                  <button
+                    type="button"
+                    className={`${styles.pvBookmark} ${bookmarked.has(selected.id) ? styles.pvBookmarkOn : ""}`}
+                    onClick={() => toggleSavedSignal(selected.id)}
+                    aria-label={bookmarked.has(selected.id) ? "Remove signal from saved" : "Save signal"}
+                  >
+                    {bookmarked.has(selected.id) ? "★" : "☆"}
+                  </button>
                 </div>
                 <div className={styles.pvTitle}>{selected.headline}</div>
                 <div className={styles.pvBadges}>
@@ -290,14 +367,35 @@ export default function WirePage({ workspaces = [], services = [] }: WirePagePro
                 <div className={styles.pvAction}>
                   <div className={styles.pvActionLabel}>what to do</div>
                   <div className={styles.pvActionText}>{actionText}</div>
-                  <button className={styles.pvActionBtn}>{selected.isClientSignal ? "→ Open Workspace" : selected.type === "opportunity" ? "◆ Create Proposal" : "★ Save Signal"}</button>
-                  <button className={styles.pvActionSecondary}>Dismiss</button>
+                  <div className={styles.pvActionControls}>
+                    <button
+                      type="button"
+                      className={styles.pvActionBtn}
+                      onClick={() => toggleSavedSignal(selected.id)}
+                    >
+                      {saveSignalLabel}
+                    </button>
+                    <button type="button" className={styles.pvActionSecondary} onClick={() => dismissSignal(selected.id)}>Dismiss</button>
+                  </div>
                 </div>
                 {related.length > 0 && <>
                   <div className={styles.pvSec}>related signals</div>
                   <div className={styles.pvRelated}>
                     {related.map(r => { const rtc = SIGNAL_TYPES[r.type]; return (
-                      <div key={r.id} className={styles.pvRelatedItem} onClick={() => setSelectedItem(r.id)}>
+                      <div
+                        key={r.id}
+                        className={styles.pvRelatedItem}
+                        onClick={() => setSelectedItem(r.id)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            setSelectedItem(r.id);
+                          }
+                        }}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`Open related signal: ${r.headline}`}
+                      >
                         <div className={styles.pvRelatedIcon} style={{ background: rtc.bg, color: rtc.color, border: `1px solid ${rtc.color}12` }}>{rtc.icon}</div>
                         <span className={styles.pvRelatedText}>{r.headline}</span>
                         <span className={styles.pvRelatedTime}>{r.time}</span>
@@ -308,12 +406,16 @@ export default function WirePage({ workspaces = [], services = [] }: WirePagePro
               </div>
             </>;
           })() : (
-            <div className={styles.pvEmpty}><div className={styles.pvEmptyIcon}>◎</div><div className={styles.pvEmptyTitle}>Select a signal</div><div className={styles.pvEmptySub}>Click any signal to see the full analysis and suggested actions</div></div>
+            <div className={styles.pvEmpty}>
+              <div className={styles.pvEmptyIcon}>◎</div>
+              <div className={styles.pvEmptyTitle}>{filtered.length === 0 ? emptyTitle : "Select a signal"}</div>
+              <div className={styles.pvEmptySub}>{filtered.length === 0 ? emptyMessage : "Click any signal to see the full analysis and suggested actions"}</div>
+            </div>
           )}
         </div>
       </div>
 
-      <div className={styles.footer}><div className={styles.footerLeft}><span className={styles.footerDot} />Live · {filtered.length} signals · {selectedNiche}</div><span>{now.toLocaleTimeString()} · Updated every 60s</span></div>
+      <div className={styles.footer}><div className={styles.footerLeft}><span className={styles.footerDot} />Live · {filtered.length} signals · {selectedNiche}</div><span>{nowLabel} · Updated every 60s</span></div>
     </div>
   );
 }

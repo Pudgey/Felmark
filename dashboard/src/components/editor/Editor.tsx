@@ -55,6 +55,7 @@ import TeamScreen from "../team/TeamScreen";
 import CalendarFull from "../calendar/CalendarFull";
 import SearchPage from "../search/SearchPage";
 import type { Project, DocumentTemplate } from "@/lib/types";
+import type { TerminalSessionState } from "@/lib/terminal/types";
 import SplitPane from "./split-pane/SplitPane";
 import Terminal from "../terminal/Terminal";
 import TerminalProvider from "../terminal/TerminalProvider";
@@ -138,6 +139,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
   const [forgePaper, setForgePaper] = useState(false);
   const [catOpen, setCatOpen] = useState(false);
   const [notifPanelOpen, setNotifPanelOpen] = useState(false);
+  const [terminalSessions, setTerminalSessions] = useState<Record<string, TerminalSessionState>>({});
   const [notifications, setNotifications] = useState<Notification[]>([
     { id: "n1", type: "payment", title: "Payment received — $1,800", desc: "Nora Kim paid Invoice #046 · Retainer (March)", time: "32m ago", read: false, action: "View invoice", workspace: "Nora Kim" },
     { id: "n2", type: "comment", title: "Sarah commented on Brand Guidelines v2", desc: "\"Can we make the logo usage section more specific? I want exact minimum sizes.\"", time: "2h ago", read: false, action: "Reply", workspace: "Meridian Studio", avatar: "S", avatarBg: "#8a7e63" },
@@ -175,6 +177,25 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
   const restoreContentCache = useCallback((nextBlocks: Block[]) => {
     contentCache.current = Object.fromEntries(nextBlocks.map(block => [block.id, block.content || ""]));
   }, []);
+
+  const terminalSessionKey = activeProject || TERMINAL_SPLIT_ID;
+  const handleTerminalSessionChange = useCallback((session: TerminalSessionState) => {
+    setTerminalSessions(prev => {
+      const current = prev[terminalSessionKey];
+      if (
+        current &&
+        current.blocks === session.blocks &&
+        current.inputHistory === session.inputHistory &&
+        current.dismissedInsightKeys === session.dismissedInsightKeys
+      ) {
+        return prev;
+      }
+      return {
+        ...prev,
+        [terminalSessionKey]: session,
+      };
+    });
+  }, [terminalSessionKey]);
 
   const mergeCachedContent = useCallback((source: Block[]) => {
     let changed = false;
@@ -901,6 +922,22 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
   const activeTab = tabs.find(t => t.active);
   const activeWs = workspaces.find(w => w.projects.some(p => p.id === activeProject));
   const canGoToWorkspaceHome = Boolean(activeWs?.id && onSelectWorkspaceHome);
+  const hasActiveTab = tabs.some(t => t.active);
+  const activeRail = railActive || "workspaces";
+  const surfaceKey = (() => {
+    if (activeRail === "calendar") return "calendar";
+    if (activeRail === "search") return "search";
+    if (activeRail === "services") return "services";
+    if (activeRail === "pipeline") return "pipeline";
+    if (activeRail === "templates") return "templates";
+    if (activeRail === "finance") return "finance";
+    if (activeRail === "wire") return "wire";
+    if (activeRail === "team") return "team";
+    if (activeWorkspaceId) return `workspace:${activeWorkspaceId}`;
+    if (activeRail === "home" && !hasActiveTab) return "dashboard-home";
+    if (activeRail !== "home" && !hasActiveTab) return `terminal:${activeRail}`;
+    return forgePaper ? "forge-paper" : "document";
+  })();
 
   const handleBreadcrumbParentClick = useCallback(() => {
     if (!activeWs?.id || !onSelectWorkspaceHome) return;
@@ -1581,140 +1618,149 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
         <ConversationPanel open={convoPanelOpen} onClose={() => setConvoPanelOpen(false)} />
 
         <div className={styles.editorCol}>
-          {railActive === "calendar" && (
-            <CalendarFull workspaces={workspaces} onOpenProject={onCalendarOpenProject} scrollToProjectId={calendarScrollTarget} onScrollComplete={onCalendarScrollComplete} />
-          )}
-          {railActive === "search" && (
-            <SearchPage workspaces={workspaces} />
-          )}
-          {railActive === "services" && (
-            <ServicesPage />
-          )}
-          {railActive === "pipeline" && (
-            <PipelineBoard />
-          )}
-          {railActive === "templates" && (
-            <TemplatesPage />
-          )}
-          {railActive === "finance" && (
-            <FinancePage />
-          )}
-          {railActive === "wire" && (
-            <WirePage workspaces={workspaces} services={WIRE_SERVICES} />
-          )}
-          {railActive === "team" && (
-            <TeamScreen />
-          )}
-          {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && activeWorkspaceId && (() => {
-            const ws = workspaces.find(w => w.id === activeWorkspaceId);
-            return ws && onSelectProject ? (
-              <WorkspaceHome workspace={ws} onSelectProject={onSelectProject} onNewTab={onNewTab} onRenameWorkspace={onRenameWorkspace} onUpdateProjectDue={onUpdateProjectDue} />
-            ) : null;
-          })()}
-          {railActive === "home" && !activeWorkspaceId && !tabs.some(t => t.active) && (
-            <DashboardHome
-              workspaces={workspaces}
-              onSelectWorkspace={onSelectWorkspaceHome || (() => {})}
-              onSelectProject={onSelectProject || (() => {})}
-              onNewTabInWorkspace={onNewTabInWorkspace || (() => {})}
-            />
-          )}
-          {railActive !== "home" && railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && !activeWorkspaceId && !tabs.some(t => t.active) && (
-            <TerminalWelcome
-              activeCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status !== "completed").length, 0)}
-              reviewCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "review").length, 0)}
-              overdueCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "overdue").length, 0)}
-              onOpenCmdPalette={() => {}}
-              onNewWorkspace={onNewWorkspace}
-            />
-          )}
-          {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && !activeWorkspaceId && tabs.some(t => t.active) && forgePaper && (
-            <ForgePaper
-              blocks={blocks}
-              workspace={activeWs}
-              projectName={activeTab?.name || "Untitled"}
-              onClose={() => setForgePaper(false)}
-              onBlocksChange={(newBlocks) => setBlocks(newBlocks)}
-            />
-          )}
-          {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && !activeWorkspaceId && tabs.some(t => t.active) && !forgePaper && (
-            <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-              {/* Left margin — document spine + block gutter */}
-              {!zenMode && <EditorMargin
+          <div key={surfaceKey} className={styles.surfaceStage}>
+            {railActive === "calendar" && (
+              <CalendarFull workspaces={workspaces} onOpenProject={onCalendarOpenProject} scrollToProjectId={calendarScrollTarget} onScrollComplete={onCalendarScrollComplete} />
+            )}
+            {railActive === "search" && (
+              <SearchPage workspaces={workspaces} />
+            )}
+            {railActive === "services" && (
+              <ServicesPage />
+            )}
+            {railActive === "pipeline" && (
+              <PipelineBoard />
+            )}
+            {railActive === "templates" && (
+              <TemplatesPage />
+            )}
+            {railActive === "finance" && (
+              <FinancePage />
+            )}
+            {railActive === "wire" && (
+              <WirePage workspaces={workspaces} services={WIRE_SERVICES} />
+            )}
+            {railActive === "team" && (
+              <TeamScreen />
+            )}
+            {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && activeWorkspaceId && (() => {
+              const ws = workspaces.find(w => w.id === activeWorkspaceId);
+              return ws && onSelectProject ? (
+                <WorkspaceHome workspace={ws} onSelectProject={onSelectProject} onNewTab={onNewTab} onRenameWorkspace={onRenameWorkspace} onUpdateProjectDue={onUpdateProjectDue} />
+              ) : null;
+            })()}
+            {railActive === "home" && !activeWorkspaceId && !tabs.some(t => t.active) && (
+              <DashboardHome
+                workspaces={workspaces}
+                onSelectWorkspace={onSelectWorkspaceHome || (() => {})}
+                onSelectProject={onSelectProject || (() => {})}
+                onNewTabInWorkspace={onNewTabInWorkspace || (() => {})}
+              />
+            )}
+            {railActive !== "home" && railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && !activeWorkspaceId && !tabs.some(t => t.active) && (
+              <TerminalWelcome
+                activeCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status !== "completed").length, 0)}
+                reviewCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "review").length, 0)}
+                overdueCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "overdue").length, 0)}
+                onOpenCmdPalette={() => {}}
+                onNewWorkspace={onNewWorkspace}
+              />
+            )}
+            {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && !activeWorkspaceId && tabs.some(t => t.active) && forgePaper && (
+              <ForgePaper
                 blocks={blocks}
-                hoveredBlock={hoverBlock}
-                onHoverBlock={setHoverBlock}
-                onScrollTo={(id) => scrollToBlock(id, "start")}
-                onReorderBlock={(fromIdx, toIdx) => {
-                  setBlocks(prev => {
-                    const n = [...prev];
-                    const [moved] = n.splice(fromIdx, 1);
-                    n.splice(toIdx, 0, moved);
-                    return n;
-                  });
-                }}
-                onDeleteBlocks={deleteBlocks}
-              />}
-              {/* Editor area */}
-              <div className={styles.editor} ref={editorRef} onMouseDown={() => { setConvoPanelOpen(false); setCommentPanelOpen(false); }} style={{ flex: 1 }}>
-                <div className={`${styles.page} ${breathe ? styles.pageBreathe : ""} ${splitProject ? styles.pageSplit : ""}`} onClick={handlePageClick}>
-                  {/* Project meta bar with due date picker */}
-                  {activeWs && (() => {
-                    const project = activeWs.projects.find(p => p.id === activeProject);
-                    if (!project) return null;
-                    const st = STATUS[project.status];
-                    return (
-                      <div className={styles.metaBar}>
-                        <div className={styles.metaClient}>
-                          <span className={styles.metaAvatar} style={{ background: activeWs.avatarBg }}>{activeWs.avatar}</span>
-                          {activeWs.client}
-                        </div>
-                        <span className={styles.metaSep}>·</span>
-                        <span className={styles.metaStatus} style={{ color: st.color, background: st.color + "08", borderColor: st.color + "15" }}>● {st.label}</span>
-                        <span className={styles.metaSep}>·</span>
-                        <DueDatePicker
-                          date={project.due}
-                          onChange={(due) => onUpdateProjectDue?.(activeProject, due)}
-                        />
-                        {project.amount !== "—" && <>
+                workspace={activeWs}
+                projectName={activeTab?.name || "Untitled"}
+                onClose={() => setForgePaper(false)}
+                onBlocksChange={(newBlocks) => setBlocks(newBlocks)}
+              />
+            )}
+            {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && !activeWorkspaceId && tabs.some(t => t.active) && !forgePaper && (
+              <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+                {/* Left margin — document spine + block gutter */}
+                {!zenMode && <EditorMargin
+                  blocks={blocks}
+                  hoveredBlock={hoverBlock}
+                  onHoverBlock={setHoverBlock}
+                  onScrollTo={(id) => scrollToBlock(id, "start")}
+                  onReorderBlock={(fromIdx, toIdx) => {
+                    setBlocks(prev => {
+                      const n = [...prev];
+                      const [moved] = n.splice(fromIdx, 1);
+                      n.splice(toIdx, 0, moved);
+                      return n;
+                    });
+                  }}
+                  onDeleteBlocks={deleteBlocks}
+                />}
+                {/* Editor area */}
+                <div className={styles.editor} ref={editorRef} onMouseDown={() => { setConvoPanelOpen(false); setCommentPanelOpen(false); }} style={{ flex: 1 }}>
+                  <div className={`${styles.page} ${breathe ? styles.pageBreathe : ""} ${splitProject ? styles.pageSplit : ""}`} onClick={handlePageClick}>
+                    {/* Project meta bar with due date picker */}
+                    {activeWs && (() => {
+                      const project = activeWs.projects.find(p => p.id === activeProject);
+                      if (!project) return null;
+                      const st = STATUS[project.status];
+                      return (
+                        <div className={styles.metaBar}>
+                          <div className={styles.metaClient}>
+                            <span className={styles.metaAvatar} style={{ background: activeWs.avatarBg }}>{activeWs.avatar}</span>
+                            {activeWs.client}
+                          </div>
                           <span className={styles.metaSep}>·</span>
-                          <span className={styles.metaBudget}>{project.amount}</span>
-                        </>}
-                      </div>
-                    );
-                  })()}
-                  {blocks.map(renderBlock)}
+                          <span className={styles.metaStatus} style={{ color: st.color, background: st.color + "08", borderColor: st.color + "15" }}>● {st.label}</span>
+                          <span className={styles.metaSep}>·</span>
+                          <DueDatePicker
+                            date={project.due}
+                            onChange={(due) => onUpdateProjectDue?.(activeProject, due)}
+                          />
+                          {project.amount !== "—" && <>
+                            <span className={styles.metaSep}>·</span>
+                            <span className={styles.metaBudget}>{project.amount}</span>
+                          </>}
+                        </div>
+                      );
+                    })()}
+                    {blocks.map(renderBlock)}
+                  </div>
+                  {slashMenu && (
+                    <SlashMenu
+                      top={slashMenu.top}
+                      left={slashMenu.left}
+                      filter={slashFilter}
+                      selectedIndex={slashIndex}
+                      onSelect={selectSlashItem}
+                      onClose={() => setSlashMenu(null)}
+                      onIndexChange={setSlashIndex}
+                    />
+                  )}
+                  {formatBar && <FormatBar top={formatBar.top} left={formatBar.left} />}
                 </div>
-                {slashMenu && (
-                  <SlashMenu
-                    top={slashMenu.top}
-                    left={slashMenu.left}
-                    filter={slashFilter}
-                    selectedIndex={slashIndex}
-                    onSelect={selectSlashItem}
-                    onClose={() => setSlashMenu(null)}
-                    onIndexChange={setSlashIndex}
+                {/* Split pane */}
+                {splitProject === TERMINAL_SPLIT_ID && (
+                  <TerminalProvider
+                    key={terminalSessionKey}
+                    workspaces={workspaces}
+                    activeProject={activeProject}
+                    editorBlocks={blocks}
+                    sessionState={terminalSessions[terminalSessionKey]}
+                    onSessionStateChange={handleTerminalSessionChange}
+                  >
+                    <Terminal onClose={() => onSplitClose?.()} />
+                  </TerminalProvider>
+                )}
+                {splitProject && splitProject !== TERMINAL_SPLIT_ID && splitBlocks && (
+                  <SplitPane
+                    blocks={splitBlocks}
+                    projectName={splitProjectName || "Untitled"}
+                    clientName={splitClientName || ""}
+                    onClose={() => onSplitClose?.()}
+                    onMakePrimary={() => onSplitMakePrimary?.()}
                   />
                 )}
-                {formatBar && <FormatBar top={formatBar.top} left={formatBar.left} />}
               </div>
-              {/* Split pane */}
-              {splitProject === TERMINAL_SPLIT_ID && (
-                <TerminalProvider workspaces={workspaces} activeProject={activeProject} editorBlocks={blocks}>
-                  <Terminal onClose={() => onSplitClose?.()} />
-                </TerminalProvider>
-              )}
-              {splitProject && splitProject !== TERMINAL_SPLIT_ID && splitBlocks && (
-                <SplitPane
-                  blocks={splitBlocks}
-                  projectName={splitProjectName || "Untitled"}
-                  clientName={splitClientName || ""}
-                  onClose={() => onSplitClose?.()}
-                  onMakePrimary={() => onSplitMakePrimary?.()}
-                />
-              )}
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Command bar — only show when not in workspace home or zen mode */}
           {!activeWorkspaceId && !zenMode && <CommandBar charCount={charCount} />}

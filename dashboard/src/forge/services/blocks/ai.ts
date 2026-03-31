@@ -1,8 +1,7 @@
 import type { Block } from "@/lib/types";
+import { getDefaultAiActionData } from "@/components/editor/ai-action/AiActionBlock";
 
 export const AI_DEFAULTS: Record<string, () => Partial<Block>> = {
-  ai: () => ({}), // AI block has no default data — it shows the prompt input
-  "ai-action": () => ({
-    aiActionData: { mode: "summarize", output: "", targetLabel: "", ran: false },
-  }),
+  ai: () => ({}),
+  "ai-action": () => ({ aiActionData: getDefaultAiActionData() }),
 };

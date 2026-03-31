@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import type { Block, BlockType, Workspace } from "@/lib/types";
 import { convertBlock, insertAfter, removeBlock, needsPicker } from "@/forge";
 import SlashMenu from "@/components/editor/slash-menu/SlashMenu";
+import DocumentOutline from "@/components/shared/DocumentOutline";
 import styles from "./ForgePaper.module.css";
 
 interface ForgePaperProps {
@@ -12,6 +13,11 @@ interface ForgePaperProps {
   projectName: string;
   onClose: () => void;
   onBlocksChange?: (blocks: Block[]) => void;
+}
+
+function mergeCachedContent(blocks: Block[], cache: Record<string, string>): Block[] {
+  if (Object.keys(cache).length === 0) return blocks;
+  return blocks.map(block => cache[block.id] !== undefined ? { ...block, content: cache[block.id] } : block);
 }
 
 function numberSections(blocks: Block[]): Map<string, number> {
@@ -24,9 +30,10 @@ function numberSections(blocks: Block[]): Map<string, number> {
 // Uses the shared SlashMenu component from the editor
 
 // ── Paper block renderer ──
-function PaperBlock({ block, sectionNum, isFocused, onFocus, onInput }: {
-  block: Block; sectionNum?: number; isFocused: boolean; onFocus: () => void;
+function PaperBlock({ block, sectionNum, onFocus, onInput, onBlurFlush }: {
+  block: Block; sectionNum?: number; onFocus: () => void;
   onInput: (html: string, text: string) => void;
+  onBlurFlush: () => void;
 }) {
   const handleInput = (e: React.FormEvent<HTMLElement>) => {
     const el = e.currentTarget;
@@ -34,8 +41,8 @@ function PaperBlock({ block, sectionNum, isFocused, onFocus, onInput }: {
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLElement>) => {
-    // Save content on blur — this is how typing persists
     onInput(e.currentTarget.innerHTML, e.currentTarget.textContent || "");
+    onBlurFlush();
   };
 
   const editProps = { contentEditable: true, suppressContentEditableWarning: true, onFocus, onInput: handleInput, onBlur: handleBlur };
@@ -78,11 +85,12 @@ export default function ForgePaper({ blocks, workspace, projectName, onClose, on
   const [slashMenu, setSlashMenu] = useState<{ blockId: string; top: number; left: number } | null>(null);
   const [slashFilter, setSlashFilter] = useState("");
   const [slashIndex, setSlashIndex] = useState(0);
+  const [docId] = useState(() => `FM-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 999)).padStart(3, "0")}`);
   const paperRef = useRef<HTMLDivElement>(null);
+  const contentCache = useRef<Record<string, string>>({});
 
   const sectionNums = numberSections(blocks);
   const dateStr = new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
-  const docId = useRef(`FM-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 999)).padStart(3, "0")}`).current;
 
   // ── Draft line ──
   const updateDraftLine = useCallback(() => {
@@ -94,7 +102,10 @@ export default function ForgePaper({ blocks, workspace, projectName, onClose, on
     setDraftLineY(elRect.bottom - paperRect.top);
   }, [focusedBlock, draftLineOn]);
 
-  useEffect(() => { updateDraftLine(); }, [updateDraftLine, blocks]);
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(updateDraftLine);
+    return () => window.cancelAnimationFrame(frame);
+  }, [updateDraftLine, blocks]);
 
   useEffect(() => {
     if (!draftLineOn || !paperRef.current) return;
@@ -103,27 +114,59 @@ export default function ForgePaper({ blocks, workspace, projectName, onClose, on
     return () => observer.disconnect();
   }, [draftLineOn, updateDraftLine]);
 
+  const getWorkingBlocks = useCallback(() => mergeCachedContent(blocks, contentCache.current), [blocks]);
+
+  const focusEditableBlock = useCallback((blockId: string) => {
+    setFocusedBlock(blockId);
+    const el = paperRef.current?.querySelector(`[data-block-id="${blockId}"] [contenteditable]`) as HTMLElement | null;
+    if (!el) return;
+    el.focus();
+    const selection = window.getSelection();
+    if (!selection) return;
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    range.collapse(false);
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }, []);
+
   // ── Block operations (shared via forge) ──
-  const addBlockAfter = (afterId: string, type: BlockType = "paragraph") => {
-    const result = insertAfter(blocks, afterId, type);
+  const addBlockAfter = useCallback((afterId: string, type: BlockType = "paragraph") => {
+    const result = insertAfter(getWorkingBlocks(), afterId, type);
     onBlocksChange?.(result.blocks);
     setTimeout(() => {
-      setFocusedBlock(result.newBlockId);
-      const el = paperRef.current?.querySelector(`[data-block-id="${result.newBlockId}"] [contenteditable]`) as HTMLElement;
-      if (el) el.focus();
+      focusEditableBlock(result.newBlockId);
     }, 50);
-  };
+  }, [focusEditableBlock, getWorkingBlocks, onBlocksChange]);
 
-  const handleDeleteBlock = (blockId: string) => {
-    const result = removeBlock(blocks, blockId);
+  const handleDeleteBlock = useCallback((blockId: string) => {
+    const result = removeBlock(getWorkingBlocks(), blockId);
+    delete contentCache.current[blockId];
     onBlocksChange?.(result.blocks);
     if (result.focusId) setFocusedBlock(result.focusId);
-  };
+  }, [getWorkingBlocks, onBlocksChange]);
+
+  // Flush cached content to parent (called on blur and periodically)
+  const flushContent = useCallback(() => {
+    const cache = contentCache.current;
+    const keys = Object.keys(cache);
+    if (keys.length === 0) return;
+    const updated = mergeCachedContent(blocks, cache);
+    contentCache.current = {};
+    onBlocksChange?.(updated);
+  }, [blocks, onBlocksChange]);
+
+  // Auto-flush every 2 seconds while typing
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (Object.keys(contentCache.current).length > 0) flushContent();
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [flushContent]);
 
   const handleBlockInput = (blockId: string, html: string, text: string) => {
-    // Save content to blocks
-    const updated = blocks.map(b => b.id === blockId ? { ...b, content: html } : b);
-    onBlocksChange?.(updated);
+    // Cache content — don't trigger re-render on every keystroke
+    contentCache.current[blockId] = html;
 
     // Detect slash command
     const rawText = text.replace(/[\u200B\uFEFF\xA0]/g, "").trim();
@@ -149,18 +192,17 @@ export default function ForgePaper({ blocks, workspace, projectName, onClose, on
 
     // Clear the slash text
     const el = paperRef.current?.querySelector(`[data-block-id="${blockId}"] [contenteditable]`) as HTMLElement;
-    if (el) el.textContent = "";
+    if (el) el.innerHTML = "";
+
+    // The slash command itself is transient UI state, not real document content.
+    delete contentCache.current[blockId];
 
     // Convert block using shared forge logic
-    const result = convertBlock(blocks, blockId, type);
+    const slashClearedBlocks = getWorkingBlocks().map(block => block.id === blockId ? { ...block, content: "" } : block);
+    const result = convertBlock(slashClearedBlocks, blockId, type);
     onBlocksChange?.(result.blocks);
-    if (result.newBlockId) {
-      setTimeout(() => {
-        setFocusedBlock(result.newBlockId!);
-        const newEl = paperRef.current?.querySelector(`[data-block-id="${result.newBlockId}"] [contenteditable]`) as HTMLElement;
-        if (newEl) newEl.focus();
-      }, 50);
-    }
+    const focusId = result.newBlockId ?? blockId;
+    setTimeout(() => focusEditableBlock(focusId), 50);
     setSlashMenu(null);
   };
 
@@ -192,10 +234,7 @@ export default function ForgePaper({ blocks, workspace, projectName, onClose, on
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [focusedBlock, blocks, slashMenu]);
-
-  // ── Outline ──
-  const headings = blocks.filter(b => b.type === "h1" || b.type === "h2" || b.type === "h3");
+  }, [addBlockAfter, blocks, focusedBlock, handleDeleteBlock, slashMenu]);
 
   return (
     <div className={styles.page}>
@@ -221,17 +260,18 @@ export default function ForgePaper({ blocks, workspace, projectName, onClose, on
       </div>
 
       <div className={styles.layout}>
-        {/* Outline */}
+        {/* Outline — shared component */}
         <div className={styles.outline}>
-          <div className={styles.outlineLabel}>Outline</div>
-          {headings.map(h => (
-            <button key={h.id} className={`${styles.outlineItem} ${styles[`outlineItem_${h.type}`]} ${focusedBlock === h.id ? styles.outlineItemOn : ""}`}
-              onClick={() => { setFocusedBlock(h.id); paperRef.current?.querySelector(`[data-block-id="${h.id}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" }); }}>
-              {sectionNums.has(h.id) && <span className={styles.outlineNum}>{sectionNums.get(h.id)}</span>}
-              <span className={styles.outlineText} dangerouslySetInnerHTML={{ __html: h.content || "(empty)" }} />
-            </button>
-          ))}
-          {headings.length === 0 && <div className={styles.outlineEmpty}>No headings yet</div>}
+          <DocumentOutline
+            blocks={blocks}
+            focusedBlock={focusedBlock}
+            hoveredBlock={hoveredBlock}
+            onScrollTo={(id) => {
+              setFocusedBlock(id);
+              paperRef.current?.querySelector(`[data-block-id="${id}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+            }}
+            onHoverBlock={setHoveredBlock}
+          />
         </div>
 
         {/* Paper */}
@@ -248,19 +288,28 @@ export default function ForgePaper({ blocks, workspace, projectName, onClose, on
             </div>
 
             <div className={styles.body}>
-              {blocks.map(block => {
+              {blocks.map((block, blockIdx) => {
                 const isFocused = focusedBlock === block.id;
                 const isHovered = hoveredBlock === block.id;
+                // Insert page break every ~25 blocks (rough estimate for page height)
+                const pageBreak = blockIdx > 0 && blockIdx % 25 === 0;
                 return (
-                  <div key={block.id} data-block-id={block.id}
-                    className={`${styles.blockWrap} ${isFocused ? styles.blockWrapFocused : ""} ${isHovered && !isFocused ? styles.blockWrapHovered : ""}`}
-                    onMouseEnter={() => setHoveredBlock(block.id)}
-                    onMouseLeave={() => setHoveredBlock(null)}>
-                    <div className={`${styles.blockChrome} ${isHovered || isFocused ? styles.blockChromeVisible : ""}`}>
-                      <button className={styles.blockChromeBtn} title="Add block below" onClick={(e) => { e.stopPropagation(); addBlockAfter(block.id); }}>+</button>
-                      <button className={styles.blockChromeBtn} title="Delete block" onClick={(e) => { e.stopPropagation(); handleDeleteBlock(block.id); }}>×</button>
+                  <div key={block.id}>
+                    {pageBreak && (
+                      <div className={styles.pageBreak}>
+                        <span className={styles.pageBreakLabel}>Page {Math.floor(blockIdx / 25) + 1}</span>
+                      </div>
+                    )}
+                    <div data-block-id={block.id}
+                      className={`${styles.blockWrap} ${isFocused ? styles.blockWrapFocused : ""} ${isHovered && !isFocused ? styles.blockWrapHovered : ""}`}
+                      onMouseEnter={() => setHoveredBlock(block.id)}
+                      onMouseLeave={() => setHoveredBlock(null)}>
+                      <div className={`${styles.blockChrome} ${isHovered || isFocused ? styles.blockChromeVisible : ""}`}>
+                        <button className={styles.blockChromeBtn} title="Add block below" onClick={(e) => { e.stopPropagation(); addBlockAfter(block.id); }}>+</button>
+                        <button className={styles.blockChromeBtn} title="Delete block" onClick={(e) => { e.stopPropagation(); handleDeleteBlock(block.id); }}>×</button>
+                      </div>
+                      <PaperBlock block={block} sectionNum={sectionNums.get(block.id)} onFocus={() => setFocusedBlock(block.id)} onInput={(html, text) => handleBlockInput(block.id, html, text)} onBlurFlush={flushContent} />
                     </div>
-                    <PaperBlock block={block} sectionNum={sectionNums.get(block.id)} isFocused={isFocused} onFocus={() => setFocusedBlock(block.id)} onInput={(html, text) => handleBlockInput(block.id, html, text)} />
                   </div>
                 );
               })}

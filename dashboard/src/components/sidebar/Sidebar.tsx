@@ -30,6 +30,7 @@ interface SidebarProps {
   onTogglePin: (projectId: string) => void;
   onCycleStatus: (projectId: string) => void;
   saveIndicatorState: "saved" | "saving";
+  saveStatusLabel: string;
   onSaveNow: () => void;
   onScrollToCalendarEvent?: (projectId: string) => void;
 }
@@ -206,7 +207,7 @@ const REVENUE_WEEKS = [
 
 import { getDueLabel as getDueLabelFromDate, getDueColor as getDueColorFromDate } from "@/lib/due-dates";
 
-export default function Sidebar({ workspaces, archived, activeProject, open, width, isResizing, wordCount, railActive, onClose, onToggleWorkspace, onSelectWorkspaceHome, onSelectProject, onArchiveProject, onArchiveCompleted, onArchiveWorkspace, onRestoreProject, onReorderWorkspaces, onRenameWorkspace, onRenameProject, onUpdateProjectDue, onAddWorkspace, onTogglePin, onCycleStatus, saveIndicatorState, onSaveNow, onScrollToCalendarEvent }: SidebarProps) {
+export default function Sidebar({ workspaces, archived, activeProject, open, width, isResizing, wordCount, railActive, onClose, onToggleWorkspace, onSelectWorkspaceHome, onSelectProject, onArchiveProject, onArchiveCompleted, onArchiveWorkspace, onRestoreProject, onReorderWorkspaces, onRenameWorkspace, onRenameProject, onUpdateProjectDue, onAddWorkspace, onTogglePin, onCycleStatus, saveIndicatorState, saveStatusLabel, onSaveNow, onScrollToCalendarEvent }: SidebarProps) {
   const [wsMenu, setWsMenu] = useState<string | null>(null);
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [showAddWs, setShowAddWs] = useState(false);
@@ -288,6 +289,76 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
 
   const clientWorkspaces = filtered.filter(w => !w.personal);
   const personalWorkspaces = filtered.filter(w => w.personal);
+
+  const renderProjects = (ws: Workspace, showAmount: boolean) => (
+    <div className={`${styles.projectList} ${ws.open ? styles.projectListOpen : ""}`} aria-hidden={!ws.open}>
+      <div className={styles.projectListInner}>
+        {ws.projects.map(pj => {
+          const st = STATUS[pj.status];
+          return (
+            <div
+              key={pj.id}
+              className={`${styles.project} ${activeProject === pj.id ? styles.projectActive : ""}`}
+              onClick={() => { if (editingPjId !== pj.id) onSelectProject(pj, ws.client); }}
+            >
+              <div
+                className={styles.projectStatusDot}
+                style={{ background: st.color }}
+                onClick={e => { e.stopPropagation(); onCycleStatus(pj.id); }}
+                title={`${st.label} — click to change`}
+              />
+              <div className={styles.projectContent}>
+                {editingPjId === pj.id ? (
+                  <input className={styles.pjRenameInput} value={editingPjName} autoFocus
+                    onChange={e => setEditingPjName(e.target.value)}
+                    onBlur={() => { onRenameProject(pj.id, editingPjName.trim() || pj.name); setEditingPjId(null); }}
+                    onKeyDown={e => { if (e.key === "Enter") { onRenameProject(pj.id, editingPjName.trim() || pj.name); setEditingPjId(null); } if (e.key === "Escape") setEditingPjId(null); }}
+                    onClick={e => e.stopPropagation()} />
+                ) : (
+                  <span className={styles.projectName} onDoubleClick={e => { e.stopPropagation(); setEditingPjId(pj.id); setEditingPjName(pj.name); }}>{pj.name}</span>
+                )}
+                <div className={styles.projectBottom}>
+                  <label className={styles.projectDue} style={{ color: getDueColorFromDate(pj.due), cursor: "pointer" }} onClick={e => e.stopPropagation()}>
+                    {getDueLabelFromDate(pj.due)}
+                    <input type="date" value={pj.due || ""} onChange={e => onUpdateProjectDue(pj.id, e.target.value || null)} style={{ position: "absolute", opacity: 0, width: 0, height: 0, overflow: "hidden" }} />
+                  </label>
+                  {showAmount && pj.amount !== "—" && <span className={styles.projectAmount}>{pj.amount}</span>}
+                  <div className={styles.projectProgressBar}>
+                    <div className={styles.projectProgressFill} style={{ width: `${pj.progress}%`, background: st.color }} />
+                  </div>
+                  <span className={styles.projectProgressPct}>{pj.progress}%</span>
+                </div>
+              </div>
+              <div className={styles.projectActions}>
+                <button className={`${styles.pjMenuBtn} ${pjMenuOpen === pj.id ? styles.pjMenuBtnOpen : ""}`} onClick={e => { e.stopPropagation(); const rect = (e.currentTarget as HTMLElement).getBoundingClientRect(); setPjMenuPos({ top: rect.bottom + 2, left: rect.right - 170 }); setPjMenuOpen(pjMenuOpen === pj.id ? null : pj.id); }}>···</button>
+                {pjMenuOpen === pj.id && (
+                  <div className={styles.pjMenu} style={{ top: pjMenuPos.top, left: pjMenuPos.left }}>
+                    <button className={styles.pjMenuItem} onClick={e => { e.stopPropagation(); onTogglePin(pj.id); setPjMenuOpen(null); }}>
+                      <span className={styles.pjMenuIcon}><svg width="12" height="12" viewBox="0 0 10 10" fill="none"><path d="M4 8L2 10M7 1.5l2 2-1.5 2-.5-.5L4 8l-1.5-1.5L5.5 3.5 5 3z" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round" fill={pj.pinned ? "currentColor" : "none"} /></svg></span>
+                      {pj.pinned ? "Unpin" : "Pin"}
+                    </button>
+                    <button className={styles.pjMenuItem} onClick={e => { e.stopPropagation(); setEditingPjId(pj.id); setEditingPjName(pj.name); setPjMenuOpen(null); }}>
+                      <span className={styles.pjMenuIcon}><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2-7 7H1.5V8.5z" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
+                      Rename
+                    </button>
+                    <button className={styles.pjMenuItem} onClick={e => { e.stopPropagation(); onCycleStatus(pj.id); setPjMenuOpen(null); }}>
+                      <span className={styles.pjMenuIcon}><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" strokeWidth="1" /><circle cx="6" cy="6" r="1.5" fill="currentColor" /></svg></span>
+                      Cycle status
+                    </button>
+                    <div className={styles.pjMenuSep} />
+                    <button className={`${styles.pjMenuItem} ${styles.pjMenuDanger}`} onClick={e => { e.stopPropagation(); onArchiveProject(pj.id); setPjMenuOpen(null); }}>
+                      <span className={styles.pjMenuIcon}><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 3.5h9M2.5 3.5v6a1 1 0 001 1h5a1 1 0 001-1v-6" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /><path d="M4.5 5.5h3" stroke="currentColor" strokeWidth="1" strokeLinecap="round" /></svg></span>
+                      Archive
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 
   return (
     <div className={`${styles.sidebar} ${open ? "" : styles.closed} ${isResizing ? styles.resizing : ""}`} style={{ "--sidebar-w": `${width}px` } as React.CSSProperties}>
@@ -478,70 +549,7 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
                 </div>
               )}
 
-              {/* Projects */}
-              {ws.open && ws.projects.map(pj => {
-                const st = STATUS[pj.status];
-                return (
-                  <div
-                    key={pj.id}
-                    className={`${styles.project} ${activeProject === pj.id ? styles.projectActive : ""}`}
-                    onClick={() => { if (editingPjId !== pj.id) onSelectProject(pj, ws.client); }}
-                  >
-                    <div
-                      className={styles.projectStatusDot}
-                      style={{ background: st.color }}
-                      onClick={e => { e.stopPropagation(); onCycleStatus(pj.id); }}
-                      title={`${st.label} — click to change`}
-                    />
-                    <div className={styles.projectContent}>
-                      {editingPjId === pj.id ? (
-                        <input className={styles.pjRenameInput} value={editingPjName} autoFocus
-                          onChange={e => setEditingPjName(e.target.value)}
-                          onBlur={() => { onRenameProject(pj.id, editingPjName.trim() || pj.name); setEditingPjId(null); }}
-                          onKeyDown={e => { if (e.key === "Enter") { onRenameProject(pj.id, editingPjName.trim() || pj.name); setEditingPjId(null); } if (e.key === "Escape") setEditingPjId(null); }}
-                          onClick={e => e.stopPropagation()} />
-                      ) : (
-                        <span className={styles.projectName} onDoubleClick={e => { e.stopPropagation(); setEditingPjId(pj.id); setEditingPjName(pj.name); }}>{pj.name}</span>
-                      )}
-                      <div className={styles.projectBottom}>
-                        <label className={styles.projectDue} style={{ color: getDueColorFromDate(pj.due), cursor: "pointer" }} onClick={e => e.stopPropagation()}>
-                          {getDueLabelFromDate(pj.due)}
-                          <input type="date" value={pj.due || ""} onChange={e => onUpdateProjectDue(pj.id, e.target.value || null)} style={{ position: "absolute", opacity: 0, width: 0, height: 0, overflow: "hidden" }} />
-                        </label>
-                        {pj.amount !== "—" && <span className={styles.projectAmount}>{pj.amount}</span>}
-                        <div className={styles.projectProgressBar}>
-                          <div className={styles.projectProgressFill} style={{ width: `${pj.progress}%`, background: st.color }} />
-                        </div>
-                        <span className={styles.projectProgressPct}>{pj.progress}%</span>
-                      </div>
-                    </div>
-                    <div className={styles.projectActions}>
-                      <button className={`${styles.pjMenuBtn} ${pjMenuOpen === pj.id ? styles.pjMenuBtnOpen : ""}`} onClick={e => { e.stopPropagation(); const rect = (e.target as HTMLElement).getBoundingClientRect(); setPjMenuPos({ top: rect.bottom + 2, left: rect.right - 170 }); setPjMenuOpen(pjMenuOpen === pj.id ? null : pj.id); }}>···</button>
-                      {pjMenuOpen === pj.id && (
-                        <div className={styles.pjMenu} style={{ top: pjMenuPos.top, left: pjMenuPos.left }}>
-                          <button className={styles.pjMenuItem} onClick={e => { e.stopPropagation(); onTogglePin(pj.id); setPjMenuOpen(null); }}>
-                            <span className={styles.pjMenuIcon}><svg width="12" height="12" viewBox="0 0 10 10" fill="none"><path d="M4 8L2 10M7 1.5l2 2-1.5 2-.5-.5L4 8l-1.5-1.5L5.5 3.5 5 3z" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round" fill={pj.pinned ? "currentColor" : "none"} /></svg></span>
-                            {pj.pinned ? "Unpin" : "Pin"}
-                          </button>
-                          <button className={styles.pjMenuItem} onClick={e => { e.stopPropagation(); setEditingPjId(pj.id); setEditingPjName(pj.name); setPjMenuOpen(null); }}>
-                            <span className={styles.pjMenuIcon}><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2-7 7H1.5V8.5z" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
-                            Rename
-                          </button>
-                          <button className={styles.pjMenuItem} onClick={e => { e.stopPropagation(); onCycleStatus(pj.id); setPjMenuOpen(null); }}>
-                            <span className={styles.pjMenuIcon}><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" strokeWidth="1" /><circle cx="6" cy="6" r="1.5" fill="currentColor" /></svg></span>
-                            Cycle status
-                          </button>
-                          <div className={styles.pjMenuSep} />
-                          <button className={`${styles.pjMenuItem} ${styles.pjMenuDanger}`} onClick={e => { e.stopPropagation(); onArchiveProject(pj.id); setPjMenuOpen(null); }}>
-                            <span className={styles.pjMenuIcon}><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 3.5h9M2.5 3.5v6a1 1 0 001 1h5a1 1 0 001-1v-6" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /><path d="M4.5 5.5h3" stroke="currentColor" strokeWidth="1" strokeLinecap="round" /></svg></span>
-                            Archive
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+              {renderProjects(ws, true)}
             </div>
           ))}
 
@@ -592,61 +600,7 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
                     </div>
                   )}
 
-                  {ws.open && ws.projects.map(pj => {
-                    const st = STATUS[pj.status];
-                    return (
-                      <div key={pj.id} className={`${styles.project} ${activeProject === pj.id ? styles.projectActive : ""}`}
-                        onClick={() => { if (editingPjId !== pj.id) onSelectProject(pj, ws.client); }}>
-                        <div className={styles.projectStatusDot} style={{ background: st.color }}
-                          onClick={e => { e.stopPropagation(); onCycleStatus(pj.id); }} title={`${st.label} — click to change`} />
-                        <div className={styles.projectContent}>
-                          {editingPjId === pj.id ? (
-                            <input className={styles.pjRenameInput} value={editingPjName} autoFocus
-                              onChange={e => setEditingPjName(e.target.value)}
-                              onBlur={() => { onRenameProject(pj.id, editingPjName.trim() || pj.name); setEditingPjId(null); }}
-                              onKeyDown={e => { if (e.key === "Enter") { onRenameProject(pj.id, editingPjName.trim() || pj.name); setEditingPjId(null); } if (e.key === "Escape") setEditingPjId(null); }}
-                              onClick={e => e.stopPropagation()} />
-                          ) : (
-                            <span className={styles.projectName} onDoubleClick={e => { e.stopPropagation(); setEditingPjId(pj.id); setEditingPjName(pj.name); }}>{pj.name}</span>
-                          )}
-                          <div className={styles.projectBottom}>
-                            <label className={styles.projectDue} style={{ color: getDueColorFromDate(pj.due), cursor: "pointer" }} onClick={e => e.stopPropagation()}>
-                          {getDueLabelFromDate(pj.due)}
-                          <input type="date" value={pj.due || ""} onChange={e => onUpdateProjectDue(pj.id, e.target.value || null)} style={{ position: "absolute", opacity: 0, width: 0, height: 0, overflow: "hidden" }} />
-                        </label>
-                            <div className={styles.projectProgressBar}>
-                              <div className={styles.projectProgressFill} style={{ width: `${pj.progress}%`, background: st.color }} />
-                            </div>
-                            <span className={styles.projectProgressPct}>{pj.progress}%</span>
-                          </div>
-                        </div>
-                        <div className={styles.projectActions}>
-                          <button className={`${styles.pjMenuBtn} ${pjMenuOpen === pj.id ? styles.pjMenuBtnOpen : ""}`} onClick={e => { e.stopPropagation(); const rect = (e.target as HTMLElement).getBoundingClientRect(); setPjMenuPos({ top: rect.bottom + 2, left: rect.right - 170 }); setPjMenuOpen(pjMenuOpen === pj.id ? null : pj.id); }}>···</button>
-                          {pjMenuOpen === pj.id && (
-                            <div className={styles.pjMenu} style={{ top: pjMenuPos.top, left: pjMenuPos.left }}>
-                              <button className={styles.pjMenuItem} onClick={e => { e.stopPropagation(); onTogglePin(pj.id); setPjMenuOpen(null); }}>
-                                <span className={styles.pjMenuIcon}><svg width="12" height="12" viewBox="0 0 10 10" fill="none"><path d="M4 8L2 10M7 1.5l2 2-1.5 2-.5-.5L4 8l-1.5-1.5L5.5 3.5 5 3z" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round" fill={pj.pinned ? "currentColor" : "none"} /></svg></span>
-                                {pj.pinned ? "Unpin" : "Pin"}
-                              </button>
-                              <button className={styles.pjMenuItem} onClick={e => { e.stopPropagation(); setEditingPjId(pj.id); setEditingPjName(pj.name); setPjMenuOpen(null); }}>
-                                <span className={styles.pjMenuIcon}><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2-7 7H1.5V8.5z" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
-                                Rename
-                              </button>
-                              <button className={styles.pjMenuItem} onClick={e => { e.stopPropagation(); onCycleStatus(pj.id); setPjMenuOpen(null); }}>
-                                <span className={styles.pjMenuIcon}><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" strokeWidth="1" /><circle cx="6" cy="6" r="1.5" fill="currentColor" /></svg></span>
-                                Cycle status
-                              </button>
-                              <div className={styles.pjMenuSep} />
-                              <button className={`${styles.pjMenuItem} ${styles.pjMenuDanger}`} onClick={e => { e.stopPropagation(); onArchiveProject(pj.id); setPjMenuOpen(null); }}>
-                                <span className={styles.pjMenuIcon}><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 3.5h9M2.5 3.5v6a1 1 0 001 1h5a1 1 0 001-1v-6" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /><path d="M4.5 5.5h3" stroke="currentColor" strokeWidth="1" strokeLinecap="round" /></svg></span>
-                                Archive
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
+                  {renderProjects(ws, false)}
                 </div>
               ))}
             </>
@@ -682,18 +636,22 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
                 <span className={styles.archiveBadge}>{archived.length}</span>
                 <span className={styles.archiveArrow} style={{ transform: archiveOpen ? "rotate(90deg)" : "rotate(0deg)" }}>▶</span>
               </div>
-              {archiveOpen && archived.map((item, idx) => (
-                <div key={`${item.project.id}-${idx}`} className={styles.archiveItem}>
-                  <div className={styles.archiveItemDot} />
-                  <div className={styles.archiveItemInfo}>
-                    <span className={styles.archiveItemName}>{item.project.name}</span>
-                    <span className={styles.archiveItemMeta}>{item.workspaceName} · {item.archivedAt}</span>
-                  </div>
-                  <button className={styles.archiveRestoreBtn} onClick={() => onRestoreProject(idx)} title="Restore">
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6.5a4 4 0 017.5-1.5M10 2v3H7" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" /><path d="M10 5.5a4 4 0 01-7.5 1.5M2 10V7h3" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                  </button>
+              <div className={`${styles.archiveList} ${archiveOpen ? styles.archiveListOpen : ""}`} aria-hidden={!archiveOpen}>
+                <div className={styles.archiveListInner}>
+                  {archived.map((item, idx) => (
+                    <div key={`${item.project.id}-${idx}`} className={styles.archiveItem}>
+                      <div className={styles.archiveItemDot} />
+                      <div className={styles.archiveItemInfo}>
+                        <span className={styles.archiveItemName}>{item.project.name}</span>
+                        <span className={styles.archiveItemMeta}>{item.workspaceName} · {item.archivedAt}</span>
+                      </div>
+                      <button className={styles.archiveRestoreBtn} onClick={() => onRestoreProject(idx)} title="Restore">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6.5a4 4 0 017.5-1.5M10 2v3H7" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" /><path d="M10 5.5a4 4 0 01-7.5 1.5M2 10V7h3" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
           )}
         </div>
@@ -701,7 +659,7 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
 
         {/* Footer */}
         <div className={styles.footer}>
-          <span>{railActive === "calendar" ? `${workspaces.flatMap(w => w.projects).filter(p => p.due != null).length} deadlines` : `${totalProjects} projects · ${workspaces.length} clients`}</span>
+          <span className={styles.footerMeta}>{railActive === "calendar" ? `${workspaces.flatMap(w => w.projects).filter(p => p.due != null).length} deadlines` : `${totalProjects} projects · ${workspaces.length} clients`}</span>
           <button
             type="button"
             className={`${styles.savedIndicator} ${saveIndicatorState === "saving" ? styles.savedIndicatorSaving : ""}`}
@@ -710,7 +668,7 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
             aria-label="Save now"
           >
             <span className={`${styles.savedDot} ${saveIndicatorState === "saving" ? styles.savedDotSaving : ""}`} />
-            {saveIndicatorState === "saving" ? "saving..." : "saved"}
+            <span className={styles.savedText}>{saveStatusLabel}</span>
           </button>
         </div>
       </div>

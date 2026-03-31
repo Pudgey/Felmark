@@ -23,8 +23,8 @@
 
 | Agent | Task | Completed |
 |-------|------|-----------|
-| codex-main | Fixed empty slash-trigger text blocks so deleting `/` no longer persists filler `<br>` HTML | 2026-03-31 08:12 EDT |
-| codex-main | Hardened the workspace earned-this-month revenue widget so large totals stay compact without destabilizing the chart layout | 2026-03-31 06:21 EDT |
-| codex-main | Normalized the remaining special editor block gutters so e-signature, AI, and other structured blocks now expose the same delete X as standard rows | 2026-03-31 06:15 EDT |
-| codex-main | Realigned the split-terminal editor gutter so project chrome and block cards keep the same left edge under responsive compression | 2026-03-31 06:08 EDT |
-| codex-main | Wired the outline jump target to real editor rows so every block type now scrolls correctly from the left margin | 2026-03-31 06:00 EDT |
+| codex-main | Fixed Forge Paper so slash-created text blocks and the shared outline behave correctly on the live paper surface | 2026-03-31 09:58 EDT |
+| codex-main | Audited Forge Paper so the text block pipeline and shared outline behavior explain why blocks fail to render or register | 2026-03-31 09:47 EDT |
+| codex-main | Polished The Wire so its signal list, favorite state, and panel layout feel intentional instead of overlapping or visually breaking under interaction | 2026-03-31 09:27 EDT |
+| codex-main | Tightened the workspace footer so the save timestamp stays compact instead of shoving the project and client summary around | 2026-03-31 09:16 EDT |
+| codex-main | Hardened the dashboard shell so screen swaps and sidebar disclosure states feel smoother instead of snapping | 2026-03-31 09:11 EDT |
