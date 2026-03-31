@@ -55,8 +55,12 @@ import CalendarFull from "../calendar/CalendarFull";
 import SearchPage from "../search/SearchPage";
 import type { Project, DocumentTemplate } from "@/lib/types";
 import SplitPane from "./SplitPane";
+import Terminal from "../terminal/Terminal";
+import TerminalProvider from "../terminal/TerminalProvider";
 import NotificationPanel, { type Notification } from "../notifications/NotificationPanel";
 import styles from "./Editor.module.css";
+
+const TERMINAL_SPLIT_ID = "__terminal__";
 
 interface EditorProps {
   workspaces: Workspace[];
@@ -1428,7 +1432,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
               const available = allProjects.filter(p => p.id !== activeProject);
               return (
                 <div className={styles.splitPicker}>
-                  <div className={styles.splitPickerLabel}>Open in split</div>
+                  <div className={styles.splitPickerLabel}>Documents</div>
                   {available.length === 0 && <div className={styles.splitPickerEmpty}>No other docs</div>}
                   {available.map(p => (
                     <button key={p.id} className={styles.splitPickerItem} onClick={() => { onSplitOpen?.(p.id); setSplitPickerOpen(false); }}>
@@ -1436,6 +1440,11 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
                       <span className={styles.splitPickerClient}>{p.client}</span>
                     </button>
                   ))}
+                  <div className={styles.splitPickerLabel} style={{ marginTop: 4, borderTop: `1px solid var(--warm-200, #e5e2db)`, paddingTop: 8 }}>Tools</div>
+                  <button className={styles.splitPickerItem} onClick={() => { onSplitOpen?.(TERMINAL_SPLIT_ID); setSplitPickerOpen(false); }}>
+                    <span className={styles.splitPickerName}>Terminal</span>
+                    <span className={styles.splitPickerClient}>❯_</span>
+                  </button>
                 </div>
               );
             })()}
@@ -1630,7 +1639,12 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
                 {formatBar && <FormatBar top={formatBar.top} left={formatBar.left} />}
               </div>
               {/* Split pane */}
-              {splitProject && splitBlocks && (
+              {splitProject === TERMINAL_SPLIT_ID && (
+                <TerminalProvider workspaces={workspaces} activeProject={activeProject}>
+                  <Terminal onClose={() => onSplitClose?.()} />
+                </TerminalProvider>
+              )}
+              {splitProject && splitProject !== TERMINAL_SPLIT_ID && splitBlocks && (
                 <SplitPane
                   blocks={splitBlocks}
                   projectName={splitProjectName || "Untitled"}
