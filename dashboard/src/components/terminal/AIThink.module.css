@@ -1,0 +1,316 @@
+/* ── Thinking Dots ── */
+.dotsRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+}
+
+.dotsLabel {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.dots {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--ember);
+  animation: dotBounce 1.2s ease-in-out infinite;
+}
+
+.dot:nth-child(2) { animation-delay: 0.15s; }
+.dot:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes dotBounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.3; }
+  40% { transform: translateY(-6px); opacity: 1; }
+}
+
+/* ── Scan Line ── */
+.scanLine {
+  height: 2px;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  border-radius: 1px;
+  margin: 6px 0;
+}
+
+.scanLine::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, var(--ember), transparent);
+  animation: scanSweep var(--scan-duration, 1.6s) ease-in-out infinite;
+}
+
+@keyframes scanSweep {
+  0% { left: -40%; }
+  100% { left: 100%; }
+}
+
+/* ── Stream Text ── */
+.stream {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.streamCursor {
+  display: inline-block;
+  width: 2px;
+  height: 14px;
+  background: var(--ember);
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  animation: cursorBlink 0.8s step-end infinite;
+}
+
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ── Skeleton Block ── */
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.skeletonLine {
+  height: 10px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.04);
+  animation: skelPulse 1.6s ease-in-out infinite;
+}
+
+.skeletonLine:nth-child(1) { width: 90%; }
+.skeletonLine:nth-child(2) { width: 75%; animation-delay: 0.15s; }
+.skeletonLine:nth-child(3) { width: 60%; animation-delay: 0.3s; }
+.skeletonLine:nth-child(4) { width: 82%; animation-delay: 0.45s; }
+.skeletonLine:nth-child(5) { width: 50%; animation-delay: 0.6s; }
+
+@keyframes skelPulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+}
+
+/* ── Think Phases ── */
+.phases {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px 0;
+}
+
+.phase {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.25);
+  transition: color 0.3s, opacity 0.3s;
+}
+
+.phase[data-status="active"] { color: rgba(255, 255, 255, 0.6); }
+.phase[data-status="done"] { color: #5a9a3c; }
+
+.phaseIndicator {
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 10px;
+}
+
+.phaseSpinner {
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--ember);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Waveform Pulse ── */
+.waveform {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 20px;
+  padding: 4px 0;
+}
+
+.waveBar {
+  width: 3px;
+  border-radius: 1.5px;
+  background: var(--ember);
+  animation: wavePulse 1s ease-in-out infinite;
+  transform-origin: bottom;
+}
+
+.waveBar:nth-child(1) { animation-delay: 0s; }
+.waveBar:nth-child(2) { animation-delay: 0.1s; }
+.waveBar:nth-child(3) { animation-delay: 0.2s; }
+.waveBar:nth-child(4) { animation-delay: 0.3s; }
+.waveBar:nth-child(5) { animation-delay: 0.4s; }
+.waveBar:nth-child(6) { animation-delay: 0.5s; }
+.waveBar:nth-child(7) { animation-delay: 0.6s; }
+.waveBar:nth-child(8) { animation-delay: 0.7s; }
+
+.waveBarInactive {
+  composes: waveBar;
+  animation: none;
+  opacity: 0.15;
+  height: 4px !important;
+}
+
+@keyframes wavePulse {
+  0%, 100% { height: 4px; opacity: 0.3; }
+  50% { height: 18px; opacity: 0.9; }
+}
+
+/* ── AI Response Block (full sequence) ── */
+.response {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.responseBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ember);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
+  background: rgba(176, 125, 79, 0.08);
+  border-radius: 3px;
+  border: 1px solid rgba(176, 125, 79, 0.1);
+  width: fit-content;
+  margin-bottom: 4px;
+}
+
+.responseText {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.6;
+}
+
+.dataCard {
+  margin: 8px 0;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.dataRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.dataRow:last-child { border-bottom: none; }
+
+.dataRowLabel {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.dataRowValue {
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.actionBtn {
+  padding: 5px 12px;
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.1s;
+}
+
+.actionBtn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.actionBtnPrimary {
+  composes: actionBtn;
+  background: var(--ember);
+  border-color: var(--ember);
+  color: #fff;
+}
+
+.actionBtnPrimary:hover {
+  background: var(--ember-light);
+}
+
+/* ── Whisper fade-in ── */
+.whisperFade {
+  animation: whisperIn 0.6s ease-out both;
+}
+
+@keyframes whisperIn {
+  from { opacity: 0; transform: translateY(4px); filter: blur(2px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+/* ── Nudge scan underline ── */
+.nudgeScan {
+  position: relative;
+  overflow: hidden;
+}
+
+.nudgeScan::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, var(--ember), transparent);
+  animation: scanSweep 2s ease-in-out infinite;
+  opacity: 0.4;
+}

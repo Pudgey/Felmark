@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import type { Block, BlockType, MoneyBlockType } from "@/lib/types";
 import { uid } from "@/lib/utils";
 import styles from "./AiBlock.module.css";
+import { ThinkingDots, StreamText, ThinkPhases, WaveformPulse, ScanLine } from "@/components/terminal/AIThink";
 
 // ── Demo responses — structured block arrays keyed by pattern match ──
 
@@ -498,7 +499,25 @@ export default function AiBlock({ blockId, onGenerate }: AiBlockProps) {
           <span className={styles.termPromptText}>{prompt}</span>
         </div>
         <div className={styles.termOutput}>
-          {thinkLines.map((line, i) => (
+          {/* Animated thinking sequence replaces simple checkmarks */}
+          {phase === "thinking" && (
+            <>
+              <ThinkingDots label="Analyzing your prompt" />
+              <ThinkPhases
+                phases={[
+                  { label: "analyzing prompt...", ms: 600 },
+                  { label: "identifying structure...", ms: 500 },
+                  { label: "selecting block types...", ms: 500 },
+                  { label: "composing content...", ms: 400 },
+                  { label: "formatting output...", ms: 400 },
+                ]}
+              />
+              <WaveformPulse bars={8} />
+              <ScanLine />
+            </>
+          )}
+          {/* Already-completed think lines still show when streaming */}
+          {phase === "streaming" && thinkLines.map((line, i) => (
             <div key={i} className={styles.termLine}>
               <span className={styles.termCheck}>✓</span>
               <span>{line}</span>
@@ -507,10 +526,18 @@ export default function AiBlock({ blockId, onGenerate }: AiBlockProps) {
           {phase === "streaming" && generatedBlocks.slice(0, streamedCount).map((b, i) => (
             <div key={i} className={styles.termBlock}>
               <span className={styles.termBlockType}>{b.type}</span>
-              <span className={styles.termBlockContent}>{b.content ? (b.content.length > 60 ? b.content.slice(0, 60) + "..." : b.content) : "(data block)"}</span>
+              <span className={styles.termBlockContent}>
+                {i === streamedCount - 1 ? (
+                  <StreamText
+                    text={b.content ? (b.content.length > 60 ? b.content.slice(0, 60) + "..." : b.content) : "(data block)"}
+                    speed={12}
+                  />
+                ) : (
+                  b.content ? (b.content.length > 60 ? b.content.slice(0, 60) + "..." : b.content) : "(data block)"
+                )}
+              </span>
             </div>
           ))}
-          {phase === "thinking" && <span className={styles.cursor}>_</span>}
         </div>
       </div>
     </div>
