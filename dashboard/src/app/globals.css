@@ -35,6 +35,15 @@
   --ember: #b07d4f;
   --ember-light: #c89360;
   --ember-bg: rgba(176, 125, 79, 0.08);
+  --accent: #b07d4f;
+  --accent-light: #c89360;
+  --accent-bg: rgba(176, 125, 79, 0.08);
+
+  /* Semantic */
+  --success: #5a9a3c;
+  --error: #c24b38;
+  --info: #5b7fa4;
+  --warning: #d4a34a;
 
   /* Mono font */
   --mono: var(--font-mono), 'JetBrains Mono', 'Fira Code', monospace;
