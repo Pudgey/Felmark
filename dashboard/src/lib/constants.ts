@@ -39,7 +39,7 @@ export const BLOCK_TYPES: BlockTypeInfo[] = [
   { type: "decision", label: "Decision", icon: "⚖", desc: "Log a decision with context", section: "Collaboration", shortcut: "/decision" },
   { type: "poll", label: "Poll", icon: "▣", desc: "Vote between options", section: "Collaboration", shortcut: "/poll" },
   { type: "handoff", label: "Handoff", icon: "→", desc: "Mark ready for next person", section: "Collaboration", shortcut: "/handoff" },
-  { type: "signoff", label: "Sign-off", icon: "✓", desc: "Lock section after approval", section: "Collaboration", shortcut: "/signoff" },
+  { type: "signoff", label: "E-Signature", icon: "✍", desc: "Draw or type legally binding signatures", section: "Collaboration", shortcut: "/esign" },
   { type: "annotation", label: "Annotation", icon: "📌", desc: "Pin comments on an image", section: "Collaboration", shortcut: "/annotate" },
   { type: "canvas", label: "Canvas", icon: "◇", desc: "Sketchy whiteboard drawing", section: "Blocks", shortcut: "/canvas" },
   { type: "ai-action", label: "AI Action", icon: "⚡", desc: "Summarize, suggest, translate, tone-check, or scope-risk", section: "Blocks", shortcut: "/action" },
