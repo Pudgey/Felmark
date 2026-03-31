@@ -1,44 +1,25 @@
-# Session Handoff — 2026-03-30 (Late Evening)
+# Session Handoff — 2026-03-31
 
-## What just happened
+## What happened this session
 
-Two parallel sessions ran: claude-main (this session) did drawing block + editor hardening, codex-main did polish packs.
+Massive feature sprint across the full product surface.
 
-### Claude-main: Drawing block + editor hardening
+### Built & Shipped
+- **Theme System** — 10 themes with `/theme` terminal command, @property smooth CSS transitions, localStorage persistence
+- **Felmark Terminal** — Command interface in split view with 7 commands, provider pattern, scalable architecture
+- **Terminal Intelligence** — Ambient AI (Haiku), whisper/nudge/alert tiers, NL queries, document watcher
+- **AI Think Animations** — 7 animation primitives integrated into terminal and AI blocks
+- **The Wire** — AI signals via /api/wire, 6-step onboarding flow, "New Signal" CTA
+- **Services Live** — CRUD, invoice wiring, client picker
+- **Dashboard Home** — Full freelancer command center replacing TerminalWelcome
 
-#### New: `/drawing` block (8 visual component types)
-- Files: `drawing/DrawingBlock.tsx` (691 lines), `drawing/DrawingBlock.module.css` (570 lines)
-- Sub-picker pattern (same as graph/money): `/drawing` → picks type → inserts
-- Components: Flowchart, User Flow, Device Frames, Sitemap Tree, Sticky Notes, Sketch Chart, Stamps, Wireframe Kit
-
-#### Hardened: Drag-and-drop for all block types
-- `wrapBlock()` helper inside `renderBlock` — all block renders use it now
-- Chrome fix: added `e.dataTransfer.setData()` (was causing silent drag failure)
-
-#### Hardened: Slash menu viewport positioning
-- Viewport-relative coordinates instead of editor-relative
-- Flips above when not enough space below (was rendering off-screen below tall blocks)
-
-#### Hardened: Empty block focus + placeholder
-- CSS `:empty` replaced with `.is-empty` class (strips zero-width chars)
-- `focusNew()` retry helper replaces all `setTimeout(20)` fire-and-forget patterns
-
-#### Added: Click on empty space → new block
-#### Added: Outline sidebar right-click context menu (Go to block, Delete block)
-
-### Codex-main: Polish packs
-- Slash menu ranking fix
-- Template card hover/selected state fix
-- Share modal error handling + clipboard fallback
-- Rail icon tooltips
-- Micro-polish audit
-- Editor polish pack (autosave, focus clarity, insert cues) — may still be in progress
+### Key Architecture
+- Worktree mandatory (Ground Rule #0)
+- AI prompt sync on new blocks (Slash Command Checklist)
+- @property theme transitions (CSS-native, zero JS)
+- Terminal provider pattern (useTerminalContext)
 
 ## Gotchas
-
-- **`wrapBlock()`** is the canonical way to render blocks — never manually build blockRow+gutter
-- **`focusNew(nid)`** replaces all setTimeout+blockElMap patterns for new block creation
-- **Slash menu** uses viewport coordinates now — don't add scrollTop offsets
-- **`is-empty` class** on contentEditable — call `syncEmpty()` after direct innerHTML manipulation
-- **GUARDRAIL.md** was added by Codex — new ground rule requires updating it on every feature/block change
-- **Drawing block** components are read-only for now (no inline editing of nodes/text)
+- Linter renames Workspace → Workstation in some files — check types
+- Wire FEED uses `headline`, AI uses `title` — normalizeSignals() maps between them
+- --ember and --accent are aliased in applyTheme()
