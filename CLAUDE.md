@@ -140,12 +140,13 @@ This is not a document — it's a 30-second mental checklist. The goal is to bui
 
 The Conductor is a self-sustaining knowledge system. These behaviors are **automatic** -- the AI executes them without being asked.
 
-#### On Session Start (Silent Health Check + Handoff + Thoughts + Guardrail)
+#### On Session Start (Silent Health Check + Handoff + Thoughts + Guardrail + Forge)
 - Run `conductor/CONDUCTOR_HEALTH.md` checks silently. Only speak up if issues found.
 - Check: standards past review dates, stale missions, skills out of sync, journal gaps, active context freshness, handoff existence.
 - Read `conductor/HANDOFF.md` if it exists -- it has context from the previous session. Mention briefly if relevant to the current task.
 - Check `conductor/THOUGHTS.md` for stale `ACTIVE` entries (older than 4 hours). Resolve or clear them.
-- **Read `conductor/GUARDRAIL.md`** — check the Codebase Pulse thresholds. Run `find dashboard/src -name "*.tsx" -o -name "*.ts" -o -name "*.css" | wc -l` and compare. If any metric crossed into caution or split, flag it immediately. If the Feature Registry or Block Registry is stale (features exist on disk but aren't listed), fix it before starting work.
+- **Read `conductor/GUARDRAIL.md`** — check the Codebase Pulse thresholds. Run `find dashboard/src -name "*.tsx" -o -name "*.ts" -o -name "*.css" | wc -l` and compare. If any metric crossed into caution or split, flag it immediately.
+- **Read `conductor/FORGE_MAP.md`** — the dependency map. Before modifying any file, check the map for what imports it and what it imports. If the map is stale (file counts don't match, listed files don't exist), run `/forge` to rebuild it before proceeding.
 - If all healthy and no handoff, say nothing.
 
 #### During Work (Thoughts -- Real-Time Status)
@@ -164,6 +165,7 @@ The Conductor is a self-sustaining knowledge system. These behaviors are **autom
   5. Write `conductor/HANDOFF.md` if there's in-progress work or gotchas (per `conductor/sops/SESSION_HANDOFF.md`).
   6. Scan INDEX.md for pattern matches (3+ same tag -> propose standard promotion).
   7. Verify `conductor/GUARDRAIL.md` is current — Feature Registry, Block Registry, and Codebase Pulse all match reality. Update the "Last synced" date. If any threshold was crossed during the session, note it in HANDOFF.md.
+  8. If files were created, deleted, or moved during the session, run `/forge` to rebuild `conductor/FORGE_MAP.md`. The dependency map must match reality before closing.
 - Skip if session was purely conversational or informational.
 
 #### After Creating Any New Standard, Skill, or Mission (Integrity Check)
@@ -190,6 +192,7 @@ All engineering standards, active missions, audit reports, and project tracking 
 | `HANDOFF.md` | Session continuity context |
 | `ACTIVE_CONTEXT.md` | Current project snapshot |
 | `GUARDRAIL.md` | Feature inventory, block registry, codebase metrics, and scale thresholds — read on session start, updated on every feature change |
+| `FORGE_MAP.md` | Living dependency map — routes, hotspots, block registry, import graph. Rebuilt by `/forge` scan, never by memory. Non-negotiable. |
 | `DEVELOPMENT_BRIEF.md` | Master plan: milestones, missions, strategy, ideas |
 | `agent-team/AGENT_TEAM.md` | Multi-agent coordination -- roles, collision prevention |
 | `agent-team/agent-sprint/SPRINT_SOP.md` | Sprint execution protocol -- claiming, status, archival |
