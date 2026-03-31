@@ -161,6 +161,14 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const registerRef = useCallback((id: string, el: HTMLDivElement) => { blockElMap.current[id] = el; }, []);
+  const getBlockScrollTarget = useCallback((id: string) => {
+    const selector = `[data-block-id="${id}"]`;
+    return editorRef.current?.querySelector<HTMLElement>(selector) || blockElMap.current[id] || null;
+  }, []);
+  const scrollToBlock = useCallback((id: string, block: ScrollLogicalPosition = "start") => {
+    const el = getBlockScrollTarget(id);
+    if (el) el.scrollIntoView({ behavior: "smooth", block });
+  }, [getBlockScrollTarget]);
 
   const restoreContentCache = useCallback((nextBlocks: Block[]) => {
     contentCache.current = Object.fromEntries(nextBlocks.map(block => [block.id, block.content || ""]));
@@ -944,7 +952,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     if (block.type === "graph" && block.graphData) {
       const isEditing = editingGraphId === block.id;
       return (
-        <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+        <div key={block.id} data-block-id={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
           <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
             <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
               <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
@@ -987,7 +995,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     // Deliverable block
     if (block.type === "deliverable" && block.deliverableData) {
       return (
-        <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+        <div key={block.id} data-block-id={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
           <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
             <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
               <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
@@ -1059,7 +1067,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       const rendered = contentBlockMap[block.type](block);
       if (rendered !== null) {
         return (
-          <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+          <div key={block.id} data-block-id={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
             <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
               <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
                 <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
@@ -1067,6 +1075,9 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
               <div className={`${styles.gutterBtn} ${styles.grip}`}>
                 <svg width="10" height="14" viewBox="0 0 10 14"><circle cx="3" cy="2.5" r="1" fill="currentColor"/><circle cx="7" cy="2.5" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="11.5" r="1" fill="currentColor"/><circle cx="7" cy="11.5" r="1" fill="currentColor"/></svg>
               </div>
+              <button className={`${styles.gutterBtn} ${styles.gutterDelete}`} onClick={() => deleteBlock(block.id)} title="Delete block">
+                <svg width="10" height="10" viewBox="0 0 10 10"><path d="M3 3l4 4M7 3l-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>
+              </button>
             </div>
             <div style={{ flex: 1 }}>{rendered}</div>
           </div>
@@ -1078,8 +1089,18 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     // Graph sub-picker — shown when user selected "Graph" from slash menu
     if (graphPicker && graphPicker.blockId === block.id && block.type !== "graph") {
       return (
-        <div key={block.id} className={styles.blockRow}>
-          <div className={styles.gutter} style={{ opacity: 0 }} />
+        <div key={block.id} data-block-id={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+          <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
+            <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
+              <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
+            </button>
+            <div className={`${styles.gutterBtn} ${styles.grip}`}>
+              <svg width="10" height="14" viewBox="0 0 10 14"><circle cx="3" cy="2.5" r="1" fill="currentColor"/><circle cx="7" cy="2.5" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="11.5" r="1" fill="currentColor"/><circle cx="7" cy="11.5" r="1" fill="currentColor"/></svg>
+            </div>
+            <button className={`${styles.gutterBtn} ${styles.gutterDelete}`} onClick={() => deleteBlock(block.id)} title="Delete block">
+              <svg width="10" height="10" viewBox="0 0 10 10"><path d="M3 3l4 4M7 3l-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>
+            </button>
+          </div>
           <div style={{ flex: 1 }}>
             <div className={graphStyles.gb}>
               <div className={graphStyles.gbHead}>
@@ -1103,7 +1124,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     // Money block
     if (block.type === "money" && block.moneyData) {
       return (
-        <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+        <div key={block.id} data-block-id={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
           <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
             <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
               <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
@@ -1128,8 +1149,18 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     // Money sub-picker
     if (moneyPicker && moneyPicker.blockId === block.id && block.type !== "money") {
       return (
-        <div key={block.id} className={styles.blockRow}>
-          <div className={styles.gutter} style={{ opacity: 0 }} />
+        <div key={block.id} data-block-id={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+          <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
+            <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
+              <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
+            </button>
+            <div className={`${styles.gutterBtn} ${styles.grip}`}>
+              <svg width="10" height="14" viewBox="0 0 10 14"><circle cx="3" cy="2.5" r="1" fill="currentColor"/><circle cx="7" cy="2.5" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="11.5" r="1" fill="currentColor"/><circle cx="7" cy="11.5" r="1" fill="currentColor"/></svg>
+            </div>
+            <button className={`${styles.gutterBtn} ${styles.gutterDelete}`} onClick={() => deleteBlock(block.id)} title="Delete block">
+              <svg width="10" height="10" viewBox="0 0 10 10"><path d="M3 3l4 4M7 3l-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>
+            </button>
+          </div>
           <div style={{ flex: 1 }}>
             <div className={moneyStyles.mb}>
               <div className={moneyStyles.head}>
@@ -1153,7 +1184,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     // Deadline block
     if (block.type === "deadline" && block.deadlineData) {
       return (
-        <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+        <div key={block.id} data-block-id={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
           <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
             <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
               <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
@@ -1177,8 +1208,18 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
 
     if (block.type === "ai") {
       return (
-        <div key={block.id} className={styles.blockRow}>
-          <div className={styles.gutter} style={{ opacity: 0 }} />
+        <div key={block.id} data-block-id={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+          <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
+            <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
+              <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
+            </button>
+            <div className={`${styles.gutterBtn} ${styles.grip}`}>
+              <svg width="10" height="14" viewBox="0 0 10 14"><circle cx="3" cy="2.5" r="1" fill="currentColor"/><circle cx="7" cy="2.5" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="11.5" r="1" fill="currentColor"/><circle cx="7" cy="11.5" r="1" fill="currentColor"/></svg>
+            </div>
+            <button className={`${styles.gutterBtn} ${styles.gutterDelete}`} onClick={() => deleteBlock(block.id)} title="Delete block">
+              <svg width="10" height="10" viewBox="0 0 10 10"><path d="M3 3l4 4M7 3l-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>
+            </button>
+          </div>
           <div style={{ flex: 1 }}>
             <AiBlock blockId={block.id} onGenerate={handleAiGenerate} />
           </div>
@@ -1188,7 +1229,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
 
     if (block.type === "canvas" && block.canvasData) {
       return (
-        <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+        <div key={block.id} data-block-id={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
           <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
             <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
               <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
@@ -1212,7 +1253,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
 
     if (block.type === "audio" && block.audioData) {
       return (
-        <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+        <div key={block.id} data-block-id={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
           <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
             <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
               <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
@@ -1256,7 +1297,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     const isH = block.type.startsWith("h");
     const isHovered = hoverBlock === block.id;
     return (
-      <div key={block.id} className={`${styles.blockRow} ${dropId === block.id ? styles.dropTarget : ""}`} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+      <div key={block.id} data-block-id={block.id} className={`${styles.blockRow} ${dropId === block.id ? styles.dropTarget : ""}`} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
         <div className={styles.gutter} style={{ opacity: isHovered ? 1 : 0, marginTop: isH ? (block.type === "h1" ? 32 : block.type === "h2" ? 24 : 18) : 2 }}>
           <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
             <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
@@ -1585,10 +1626,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
                 blocks={blocks}
                 hoveredBlock={hoverBlock}
                 onHoverBlock={setHoverBlock}
-                onScrollTo={(id) => {
-                  const el = blockElMap.current[id];
-                  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                }}
+                onScrollTo={(id) => scrollToBlock(id, "start")}
                 onReorderBlock={(fromIdx, toIdx) => {
                   setBlocks(prev => {
                     const n = [...prev];
@@ -1644,7 +1682,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
               </div>
               {/* Split pane */}
               {splitProject === TERMINAL_SPLIT_ID && (
-                <TerminalProvider workspaces={workspaces} activeProject={activeProject}>
+                <TerminalProvider workspaces={workspaces} activeProject={activeProject} editorBlocks={blocks}>
                   <Terminal onClose={() => onSplitClose?.()} />
                 </TerminalProvider>
               )}
@@ -1675,10 +1713,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
           onHoverBlock={setHoverBlock}
           pendingHighlight={commentHighlight}
           onHighlightConsumed={() => setCommentHighlight(null)}
-          onScrollToBlock={(blockId) => {
-            const el = blockElMap.current[blockId];
-            if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-          }}
+          onScrollToBlock={(blockId) => scrollToBlock(blockId, "center")}
         />}
 
         {/* Notification panel (right) */}

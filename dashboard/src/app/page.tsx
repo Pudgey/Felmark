@@ -15,6 +15,8 @@ import CreationAnimation from "@/components/onboarding/CreationAnimation";
 import Launchpad from "@/components/launchpad/Launchpad";
 import type { DocumentTemplate } from "@/lib/types";
 import { STARTER_TEMPLATES } from "@/lib/starter-templates";
+import { createForge } from "@/forge";
+import type { StateUpdater } from "@/forge";
 import SaveTemplateModal from "@/components/templates/SaveTemplateModal";
 import TemplatePicker from "@/components/templates/TemplatePicker";
 
@@ -139,9 +141,15 @@ export default function Dashboard() {
   }, [zenMode]);
 
 
+  // ── Forge — the root service layer ──
+  const forgeState: StateUpdater = {
+    getState: () => ({ workspaces, tabs, activeProject, blocksMap, archived, comments, activitiesMap }),
+    setWorkspaces, setTabs, setActiveProject, setBlocksMap, setArchived, setComments, setActivitiesMap,
+  };
+  const forge = createForge(forgeState);
+
   // Single click — pure expand/collapse toggle
-  const toggleWorkspace = (wid: string) =>
-    setWorkspaces(prev => prev.map(w => w.id === wid ? { ...w, open: !w.open } : w));
+  const toggleWorkspace = (wid: string) => forge.workspaces.toggle(wid);
 
   const restoreWorkspaceContext = () => {
     setRailActive("workspaces");
@@ -185,66 +193,17 @@ export default function Dashboard() {
   const handleTabClick = (id: string) => {
     restoreWorkspaceContext();
     setActiveWorkspaceId(null);
-    setActiveProject(id);
-    setTabs(prev => prev.map(t => ({ ...t, active: t.id === id })));
+    forge.tabs.select(id);
   };
 
-  const handleTabClose = (id: string) => {
-    setTabs(prev => {
-      const n = prev.filter(t => t.id !== id);
-      if (n.length > 0 && !n.some(t => t.active)) {
-        n[n.length - 1].active = true;
-        setActiveProject(n[n.length - 1].id);
-      }
-      if (n.length === 0) {
-        setActiveProject("");
-        setActiveWorkspaceId(null);
-      }
-      return n;
-    });
-  };
+  const handleTabClose = (id: string) => forge.tabs.close(id);
 
-  const handleTabRename = (id: string, name: string) => {
-    setTabs(prev => prev.map(t => t.id === id ? { ...t, name } : t));
-    setWorkspaces(prev => prev.map(w => ({
-      ...w,
-      projects: w.projects.map(p => p.id === id ? { ...p, name } : p),
-    })));
-  };
+  const handleTabRename = (id: string, name: string) => forge.projects.rename(id, name);
 
-  const handleTabReorder = (sourceId: string, targetId: string, position: "before" | "after") => {
-    if (sourceId === targetId) return;
-    setTabs(prev => {
-      const sourceIndex = prev.findIndex(tab => tab.id === sourceId);
-      if (sourceIndex === -1) return prev;
+  const handleTabReorder = (sourceId: string, targetId: string, position: "before" | "after") => forge.tabs.reorder(sourceId, targetId, position);
 
-      const next = [...prev];
-      const [moved] = next.splice(sourceIndex, 1);
-      const targetIndex = next.findIndex(tab => tab.id === targetId);
-      if (!moved || targetIndex === -1) return prev;
-
-      const insertIndex = position === "after" ? targetIndex + 1 : targetIndex;
-      next.splice(insertIndex, 0, moved);
-      return next;
-    });
-  };
-
-  const togglePin = (projectId: string) => {
-    setWorkspaces(prev => prev.map(w => ({
-      ...w, projects: w.projects.map(p => p.id === projectId ? { ...p, pinned: !p.pinned } : p),
-    })));
-  };
-
-  const cycleStatus = (projectId: string) => {
-    const statuses: Array<"active" | "review" | "paused" | "completed"> = ["active", "review", "paused", "completed"];
-    setWorkspaces(prev => prev.map(w => ({
-      ...w, projects: w.projects.map(p => {
-        if (p.id !== projectId) return p;
-        const idx = statuses.indexOf(p.status as typeof statuses[number]);
-        return { ...p, status: statuses[(idx + 1) % statuses.length] };
-      }),
-    })));
-  };
+  const togglePin = (projectId: string) => forge.projects.togglePin(projectId);
+  const cycleStatus = (projectId: string) => forge.projects.cycleStatus(projectId);
 
   const addWorkspace = (name: string) => {
     // Show onboarding card instead of creating immediately
@@ -263,207 +222,37 @@ export default function Dashboard() {
 
   const finishCreation = () => {
     if (!creationAnim) return;
-    const data = creationAnim.pendingData;
-    const wsId = uid();
-    const projectId = uid();
-    const { blocks, projectName } = makeBlocks(data.template, data.name);
-
-    const newProject: Project = {
-      id: projectId,
-      name: projectName,
-      status: "active",
-      due: null,
-      amount: "—",
-      progress: 0,
-      pinned: false,
-    };
-
-    setWorkspaces(prev => [...prev, {
-      id: wsId,
-      client: data.name,
-      avatar: data.name[0].toUpperCase(),
-      avatarBg: data.color,
-      open: true,
-      lastActive: "now",
-      contact: data.contact || undefined,
-      rate: data.rate || undefined,
-      projects: [newProject],
-    }]);
-
-    setBlocksMap(prev => ({ ...prev, [projectId]: blocks }));
-
-    setTabs(prev => [...prev.map(t => ({ ...t, active: false })), {
-      id: projectId, name: projectName, client: data.name, active: true,
-    }]);
-    setActiveProject(projectId);
+    forge.workspaces.create(creationAnim.pendingData);
     setCreationAnim(null);
   };
 
   const skipOnboarding = () => {
     if (!onboardingName) return;
-    const wsId = uid();
-    const projectId = uid();
-    const { blocks } = makeBlocks("blank", onboardingName);
-
-    setWorkspaces(prev => [...prev, {
-      id: wsId,
-      client: onboardingName,
-      avatar: onboardingName[0].toUpperCase(),
-      avatarBg: "#7c8594",
-      open: true,
-      lastActive: "now",
-      projects: [{
-        id: projectId, name: "Untitled", status: "active",
-        due: null, amount: "—", progress: 0, pinned: false,
-      }],
-    }]);
-
-    setBlocksMap(prev => ({ ...prev, [projectId]: blocks }));
-    setTabs(prev => [...prev.map(t => ({ ...t, active: false })), {
-      id: projectId, name: "Untitled", client: onboardingName, active: true,
-    }]);
-    setActiveProject(projectId);
+    forge.workspaces.quickCreate(onboardingName);
     setOnboardingName(null);
   };
 
-  const updateProjectDue = (projectId: string, due: string | null) => {
-    setWorkspaces(prev => prev.map(w => ({
-      ...w,
-      projects: w.projects.map(p => p.id === projectId ? { ...p, due } : p),
-    })));
-  };
+  const updateProjectDue = (projectId: string, due: string | null) => forge.projects.setDue(projectId, due);
 
-  const archiveProject = (projectId: string) => {
-    const ws = workspaces.find(w => w.projects.some(p => p.id === projectId));
-    const project = ws?.projects.find(p => p.id === projectId);
-    if (!ws || !project) return;
-
-    setArchived(prev => [...prev, {
-      project, workspaceId: ws.id, workspaceName: ws.client,
-      archivedAt: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-    }]);
-    setWorkspaces(prev => prev.map(w =>
-      w.id === ws.id ? { ...w, projects: w.projects.filter(p => p.id !== projectId) } : w
-    ));
-    // Close tab if open
-    setTabs(prev => {
-      const n = prev.filter(t => t.id !== projectId);
-      if (n.length > 0 && !n.some(t => t.active)) { n[n.length - 1].active = true; setActiveProject(n[n.length - 1].id); }
-      if (n.length === 0) setActiveProject("");
-      return n;
-    });
-  };
-
-  const archiveCompletedInWorkspace = (wsId: string) => {
-    const ws = workspaces.find(w => w.id === wsId);
-    if (!ws) return;
-    const completed = ws.projects.filter(p => p.status === "completed");
-    if (completed.length === 0) return;
-
-    setArchived(prev => [...prev, ...completed.map(project => ({
-      project, workspaceId: ws.id, workspaceName: ws.client,
-      archivedAt: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-    }))]);
-    const completedIds = new Set(completed.map(p => p.id));
-    setWorkspaces(prev => prev.map(w =>
-      w.id === wsId ? { ...w, projects: w.projects.filter(p => !completedIds.has(p.id)) } : w
-    ));
-    setTabs(prev => {
-      const n = prev.filter(t => !completedIds.has(t.id));
-      if (n.length > 0 && !n.some(t => t.active)) { n[n.length - 1].active = true; setActiveProject(n[n.length - 1].id); }
-      if (n.length === 0) setActiveProject("");
-      return n;
-    });
-  };
-
-  const archiveWorkspace = (wsId: string) => {
-    const ws = workspaces.find(w => w.id === wsId);
-    if (!ws) return;
-    // Prevent archiving the last personal workspace
-    if (ws.personal && workspaces.filter(w => w.personal).length <= 1) return;
-
-    setArchived(prev => [...prev, ...ws.projects.map(project => ({
-      project, workspaceId: ws.id, workspaceName: ws.client,
-      archivedAt: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-    }))]);
-    const projectIds = new Set(ws.projects.map(p => p.id));
-    setWorkspaces(prev => prev.filter(w => w.id !== wsId));
-    setTabs(prev => {
-      const n = prev.filter(t => !projectIds.has(t.id));
-      if (n.length > 0 && !n.some(t => t.active)) { n[n.length - 1].active = true; setActiveProject(n[n.length - 1].id); }
-      if (n.length === 0) setActiveProject("");
-      return n;
-    });
-  };
-
-  const restoreProject = (archivedIdx: number) => {
-    const item = archived[archivedIdx];
-    if (!item) return;
-
-    // Restore to original workspace, or create it if it was archived
-    setWorkspaces(prev => {
-      const existing = prev.find(w => w.id === item.workspaceId);
-      if (existing) {
-        return prev.map(w => w.id === item.workspaceId ? { ...w, projects: [...w.projects, item.project] } : w);
-      }
-      // Workspace was archived — recreate it
-      return [...prev, { id: item.workspaceId, client: item.workspaceName, avatar: item.workspaceName[0], avatarBg: "#7c8594", open: true, lastActive: "now", projects: [item.project] }];
-    });
-    setArchived(prev => prev.filter((_, i) => i !== archivedIdx));
-  };
+  const archiveProject = (projectId: string) => forge.projects.archive(projectId);
+  const archiveCompletedInWorkspace = (wsId: string) => forge.workspaces.archiveCompleted(wsId);
+  const archiveWorkspace = (wsId: string) => forge.workspaces.archive(wsId);
+  const restoreProject = (archivedIdx: number) => forge.projects.restore(archivedIdx);
 
   const handleNewTab = () => {
     restoreWorkspaceContext();
-    // Find the active workspace (or default to first)
     const activeWs = workspaces.find(w => w.projects.some(p => p.id === activeProject)) || workspaces[0];
-    const newId = uid();
-    const newProject: Project = {
-      id: newId,
-      name: "Untitled",
-      status: "active",
-      due: null,
-      amount: "—",
-      progress: 0,
-      pinned: false,
-    };
-
-    // Add project to workspace
-    setWorkspaces(prev => prev.map(w =>
-      w.id === activeWs.id ? { ...w, open: true, projects: [...w.projects, newProject] } : w
-    ));
-
-    // Create empty blocks
-    setBlocksMap(prev => ({ ...prev, [newId]: makeEmptyBlocks() }));
-
-    // Open as new active tab
-    setTabs(prev => [...prev.map(t => ({ ...t, active: false })), {
-      id: newId, name: "Untitled", client: activeWs.client, active: true,
-    }]);
-    setActiveProject(newId);
+    forge.projects.createInWorkspace(activeWs.id);
   };
 
   const handleNewTabInWorkspace = (wsId: string) => {
     restoreWorkspaceContext();
-    const ws = workspaces.find(w => w.id === wsId);
-    if (!ws) return;
-    const newId = uid();
-    const newProject: Project = {
-      id: newId, name: "Untitled", status: "active",
-      due: null, amount: "—", progress: 0, pinned: false,
-    };
-    setWorkspaces(prev => prev.map(w =>
-      w.id === wsId ? { ...w, open: true, projects: [...w.projects, newProject] } : w
-    ));
-    setBlocksMap(prev => ({ ...prev, [newId]: makeEmptyBlocks() }));
     setActiveWorkspaceId(null);
-    setTabs(prev => [...prev.map(t => ({ ...t, active: false })), {
-      id: newId, name: "Untitled", client: ws.client, active: true,
-    }]);
-    setActiveProject(newId);
+    forge.projects.createInWorkspace(wsId);
   };
 
   const handleBlocksChange = useCallback((projectId: string, blocks: Block[]) => {
-    setBlocksMap(prev => ({ ...prev, [projectId]: blocks }));
+    forge.documents.setBlocks(projectId, blocks);
   }, []);
 
   const handleWordCountChange = useCallback((words: number, chars: number) => {
@@ -515,22 +304,8 @@ export default function Dashboard() {
         onRestoreProject={restoreProject}
         onRenameProject={handleTabRename}
         onUpdateProjectDue={updateProjectDue}
-        onRenameWorkspace={(wsId, name) => {
-          setWorkspaces(prev => prev.map(w => w.id === wsId ? { ...w, client: name, avatar: name[0].toUpperCase() } : w));
-          setTabs(prev => prev.map(t => {
-            const ws = workspaces.find(w => w.id === wsId);
-            if (ws && ws.projects.some(p => p.id === t.id)) return { ...t, client: name };
-            return t;
-          }));
-        }}
-        onReorderWorkspaces={(fromIdx, toIdx) => {
-          setWorkspaces(prev => {
-            const next = [...prev];
-            const [moved] = next.splice(fromIdx, 1);
-            next.splice(toIdx, 0, moved);
-            return next;
-          });
-        }}
+        onRenameWorkspace={(wsId, name) => forge.workspaces.rename(wsId, name)}
+        onReorderWorkspaces={(fromIdx, toIdx) => forge.workspaces.reorder(fromIdx, toIdx)}
         onAddWorkspace={addWorkspace}
         onTogglePin={togglePin}
         onCycleStatus={cycleStatus}

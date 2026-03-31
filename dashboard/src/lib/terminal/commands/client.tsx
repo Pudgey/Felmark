@@ -86,18 +86,18 @@ export const clientCommand: CommandRegistryEntry = {
         </div>
 
         {/* Stats grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 12 }}>
-          <div style={{ padding: "8px 10px", background: "#f7f6f3", borderRadius: 6 }}>
-            <div style={{ fontSize: 16, fontWeight: 700, color: "#3d3a33" }}>{match.projects.length}</div>
-            <div style={{ fontSize: 10, color: "#9b988f", textTransform: "uppercase" as const }}>Projects</div>
+        <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+          <div style={{ flex: 1, padding: "6px 8px", background: "#f7f6f3", borderRadius: 6, minWidth: 0 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#3d3a33" }}>{match.projects.length}</div>
+            <div style={{ fontSize: 9, color: "#9b988f", textTransform: "uppercase" as const, letterSpacing: "0.04em" }}>Projects</div>
           </div>
-          <div style={{ padding: "8px 10px", background: "#f7f6f3", borderRadius: 6 }}>
-            <div style={{ fontSize: 16, fontWeight: 700, color: "#3d3a33" }}>{activeProjects.length}</div>
-            <div style={{ fontSize: 10, color: "#9b988f", textTransform: "uppercase" as const }}>Active</div>
+          <div style={{ flex: 1, padding: "6px 8px", background: "#f7f6f3", borderRadius: 6, minWidth: 0 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#3d3a33" }}>{activeProjects.length}</div>
+            <div style={{ fontSize: 9, color: "#9b988f", textTransform: "uppercase" as const, letterSpacing: "0.04em" }}>Active</div>
           </div>
-          <div style={{ padding: "8px 10px", background: "#f7f6f3", borderRadius: 6 }}>
-            <div style={{ fontSize: 16, fontWeight: 700, color: "#3d3a33" }}>{totalValue > 0 ? `$${totalValue.toLocaleString()}` : "—"}</div>
-            <div style={{ fontSize: 10, color: "#9b988f", textTransform: "uppercase" as const }}>Value</div>
+          <div style={{ flex: 1, padding: "6px 8px", background: "#f7f6f3", borderRadius: 6, minWidth: 0 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#3d3a33" }}>{totalValue > 0 ? `$${totalValue.toLocaleString()}` : "—"}</div>
+            <div style={{ fontSize: 9, color: "#9b988f", textTransform: "uppercase" as const, letterSpacing: "0.04em" }}>Value</div>
           </div>
         </div>
 

@@ -533,12 +533,12 @@
 
 .pageSplit .gutter {
   width: 88px;
-  margin-left: -76px;
+  margin-left: -90px;
 }
 
 .pageSplit .blockRowActive::after,
 .pageSplit .blockRowFresh::after {
-  left: -4px;
+  left: -8px;
 }
 
 /* Breathe toggle button */

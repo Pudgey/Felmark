@@ -7,11 +7,13 @@ import styles from "./EditorMargin.module.css";
 const BLOCK_LABELS: Record<string, string> = {
   h1: "H1", h2: "H2", h3: "H3", paragraph: "¶", todo: "☐", callout: "◆",
   divider: "—", code: "<>", bullet: "•", numbered: "1.", quote: "❝", graph: "▥", deliverable: "☰", money: "$", table: "⊞", accordion: "▸", math: "∑", gallery: "▦", swatches: "●", beforeafter: "◐", bookmark: "↗", deadline: "⚑",
+  audio: "♫", ai: "AI", canvas: "✎", drawing: "✐",
   "comment-thread": "💬", mention: "@", question: "?", feedback: "↺", decision: "⚖", poll: "▣", handoff: "→", signoff: "✍", annotation: "📌",
   "ai-action": "⚡",
   timeline: "⏱", flow: "◎", brandboard: "✦", moodboard: "◇", wireframe: "☐", pullquote: "❝",
   "hero-spotlight": "★", "kinetic-type": "Aa", "number-cascade": "#",
   "stat-reveal": "◎", "value-counter": "$",
+  "pricing-config": "≋", "scope-boundary": "⊟", "asset-checklist": "☑",
   "decision-picker": "⇄", "availability-picker": "◇", "progress-stream": "→", "dependency-map": "⊞", "revision-heatmap": "▥",
 };
 
@@ -20,13 +22,144 @@ const BLOCK_LABEL_COLORS: Record<string, string> = {
   paragraph: "var(--ink-300)", todo: "#5a9a3c", callout: "var(--ember)",
   divider: "var(--warm-300)", code: "#5b7fa4", bullet: "var(--ink-400)",
   numbered: "var(--ink-400)", quote: "var(--ink-400)", graph: "#5b7fa4", deliverable: "#5b7fa4", money: "#5a9a3c", table: "var(--ink-500)", accordion: "var(--ink-500)", math: "var(--ember)", gallery: "#5b7fa4", swatches: "var(--ember)", beforeafter: "var(--ink-500)", bookmark: "#5b7fa4", deadline: "#c24b38",
+  audio: "#8a7e63", ai: "#7864b4", canvas: "#5b7fa4", drawing: "var(--ink-500)",
   "comment-thread": "var(--ember)", mention: "var(--ember)", question: "#b89a20", feedback: "#5b7fa4", decision: "#7c8594", poll: "var(--ember)", handoff: "#5a9a3c", signoff: "#5a9a3c", annotation: "#c24b38",
   "ai-action": "#7864b4",
   timeline: "#5b7fa4", flow: "#7c6b9e", brandboard: "var(--ember)", moodboard: "#8a7e63", wireframe: "#7c8594", pullquote: "var(--ember)",
   "hero-spotlight": "var(--ember)", "kinetic-type": "var(--ink-500)", "number-cascade": "var(--ember)",
   "stat-reveal": "#5a9a3c", "value-counter": "var(--ember)",
+  "pricing-config": "var(--ember)", "scope-boundary": "#7c8594", "asset-checklist": "#5a9a3c",
   "decision-picker": "var(--ember)", "availability-picker": "#5b7fa4", "progress-stream": "var(--ink-500)", "dependency-map": "#7c8594", "revision-heatmap": "var(--ember)",
 };
+
+function humanizeToken(value: string) {
+  return value.replace(/-/g, " ");
+}
+
+function firstText(...values: Array<string | null | undefined>) {
+  for (const value of values) {
+    if (typeof value === "string" && value.trim() && value.trim() !== "[]") return value.trim();
+  }
+  return "";
+}
+
+function countLabel(count: number, singular: string, plural = `${singular}s`) {
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
+function getBlockSummary(block: Block) {
+  switch (block.type) {
+    case "divider":
+      return "divider";
+    case "graph":
+      return firstText(block.graphData?.title, block.graphData?.graphType ? `${humanizeToken(block.graphData.graphType)} chart` : "");
+    case "deliverable":
+      return firstText(block.deliverableData?.title, block.deliverableData?.description, "deliverable");
+    case "money":
+      return firstText(block.moneyData?.moneyType ? humanizeToken(block.moneyData.moneyType) : "", "money");
+    case "table":
+      return block.tableData?.rows?.length ? countLabel(Math.max(0, block.tableData.rows.length - 1), "row") : "table";
+    case "accordion":
+      return firstText(block.accordionData?.items?.[0]?.title, block.accordionData?.items?.length ? countLabel(block.accordionData.items.length, "section") : "", "accordion");
+    case "math":
+      return firstText(block.mathData?.formula, block.mathData?.result, "formula");
+    case "gallery":
+      return block.galleryData?.images?.length ? countLabel(block.galleryData.images.length, "image") : "gallery";
+    case "swatches":
+      return block.swatchesData?.colors?.length ? countLabel(block.swatchesData.colors.length, "color") : "swatches";
+    case "beforeafter":
+      return firstText(
+        block.beforeAfterData?.beforeLabel && block.beforeAfterData?.afterLabel
+          ? `${block.beforeAfterData.beforeLabel} → ${block.beforeAfterData.afterLabel}`
+          : "",
+        "before / after"
+      );
+    case "bookmark":
+      return firstText(block.bookmarkData?.title, block.bookmarkData?.source, block.bookmarkData?.url, "bookmark");
+    case "deadline":
+      return firstText(block.deadlineData?.title, block.deadlineData?.assignee, "deadline");
+    case "audio":
+      return firstText(block.audioData?.transcript, block.audioData?.audioUrl ? "recorded audio" : "", "audio note");
+    case "ai":
+      return "AI generation";
+    case "comment-thread":
+      return firstText(block.commentThreadData?.messages?.[0]?.text, "comment thread");
+    case "mention":
+      return firstText(block.mentionData?.person ? `mention ${block.mentionData.person}` : "", block.mentionData?.message, "mention");
+    case "question":
+      return firstText(block.questionData?.question, block.questionData?.answer, "question");
+    case "feedback":
+      return firstText(block.feedbackData?.description, block.feedbackData?.reviewer ? `feedback from ${block.feedbackData.reviewer}` : "", "feedback");
+    case "decision":
+      return firstText(block.decisionData?.title, block.decisionData?.decision, "decision");
+    case "poll":
+      return firstText(block.pollData?.question, block.pollData?.options?.length ? countLabel(block.pollData.options.length, "option") : "", "poll");
+    case "handoff":
+      return firstText(block.handoffData?.notes, block.handoffData?.from && block.handoffData?.to ? `${block.handoffData.from} → ${block.handoffData.to}` : "", "handoff");
+    case "signoff":
+      return firstText(block.signoffData?.section, block.signoffData?.signer, "signoff");
+    case "annotation":
+      return firstText(block.annotationData?.pins?.[0]?.comment, block.annotationData?.pins?.length ? countLabel(block.annotationData.pins.length, "annotation") : "", "annotation");
+    case "canvas":
+      return firstText(
+        block.canvasData?.elements?.find(element => typeof element.text === "string" && element.text.trim())?.text,
+        block.canvasData?.elements?.length ? countLabel(block.canvasData.elements.length, "element") : "",
+        "canvas"
+      );
+    case "drawing":
+      return firstText(block.drawingData?.title, block.drawingData?.drawingType ? humanizeToken(block.drawingData.drawingType) : "", "drawing");
+    case "ai-action":
+      return firstText(block.aiActionData?.targetLabel, block.aiActionData?.output, block.aiActionData?.mode ? `${humanizeToken(block.aiActionData.mode)} action` : "", "AI action");
+    case "timeline":
+      return firstText(block.timelineData?.title, block.timelineData?.phases?.[0]?.label, "timeline");
+    case "flow":
+      return firstText(block.flowData?.title, block.flowData?.nodes?.[0]?.label, "flow");
+    case "brandboard":
+      return firstText(block.brandBoardData?.title, block.brandBoardData?.logoName, "brand board");
+    case "moodboard":
+      return firstText(block.moodBoardData?.title, block.moodBoardData?.keywords?.[0], "mood board");
+    case "wireframe":
+      return firstText(block.wireframeData?.title, block.wireframeData?.viewport, "wireframe");
+    case "pullquote":
+      return firstText(block.pullQuoteData?.text, block.pullQuoteData?.author, "pull quote");
+    case "hero-spotlight":
+      return firstText(block.heroSpotlightData?.name, block.heroSpotlightData?.preLine, "hero spotlight");
+    case "kinetic-type":
+      return firstText(block.kineticTypeData?.lines?.[0]?.text, "kinetic type");
+    case "number-cascade":
+      return firstText(block.numberCascadeData?.stats?.[0]?.label, "number cascade");
+    case "stat-reveal":
+      return firstText(block.statRevealData?.footer, block.statRevealData?.stats?.[0]?.label, "stat reveal");
+    case "value-counter":
+      return firstText(block.valueCounterData?.topLabel, block.valueCounterData?.bottomLine, "value counter");
+    case "pricing-config":
+      return block.pricingConfigData ? `${block.pricingConfigData.selected.length}/${block.pricingConfigData.options.length} selected` : "pricing config";
+    case "scope-boundary":
+      return firstText(block.scopeBoundaryData?.note, block.scopeBoundaryData ? `${countLabel(block.scopeBoundaryData.inScope.length, "scope item")}` : "", "scope boundary");
+    case "asset-checklist":
+      return block.assetChecklistData?.items?.length ? countLabel(block.assetChecklistData.items.length, "asset") : "asset checklist";
+    case "decision-picker": {
+      const picked = block.decisionPickerData?.options.find(option => option.id === block.decisionPickerData?.choice);
+      return firstText(picked?.label, block.decisionPickerData?.options?.length ? countLabel(block.decisionPickerData.options.length, "option") : "", "decision picker");
+    }
+    case "availability-picker":
+      return firstText(block.availabilityPickerData?.selected, block.availabilityPickerData?.days?.length ? countLabel(block.availabilityPickerData.days.length, "day") : "", "availability");
+    case "progress-stream":
+      return firstText(block.progressStreamData?.snapshots?.[0]?.label, block.progressStreamData?.snapshots?.length ? countLabel(block.progressStreamData.snapshots.length, "update") : "", "progress stream");
+    case "dependency-map":
+      return firstText(block.dependencyMapData?.nodes?.[0]?.label, block.dependencyMapData?.nodes?.length ? countLabel(block.dependencyMapData.nodes.length, "dependency") : "", "dependency map");
+    case "revision-heatmap":
+      return firstText(block.revisionHeatmapData?.sections?.[0]?.name, block.revisionHeatmapData?.sections?.length ? countLabel(block.revisionHeatmapData.sections.length, "section") : "", "revision heatmap");
+    default:
+      return firstText(block.content);
+  }
+}
+
+function formatBlockPreview(block: Block, max = 24) {
+  const summary = getBlockSummary(block);
+  if (!summary) return "";
+  return summary.length > max ? `${summary.slice(0, max - 2)}…` : summary;
+}
 
 interface EditorMarginProps {
   blocks: Block[];
@@ -45,6 +178,8 @@ export default function EditorMargin({ blocks, hoveredBlock, onHoverBlock, onScr
   const lastClickIdx = useRef<number | null>(null);
   const gutterRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<number | null>(null);
+  const blockIds = useMemo(() => new Set(blocks.map(b => b.id)), [blocks]);
+  const validSelected = useMemo(() => new Set([...selected].filter(id => blockIds.has(id))), [selected, blockIds]);
 
   // Close context menu on outside click
   useEffect(() => {
@@ -54,15 +189,6 @@ export default function EditorMargin({ blocks, hoveredBlock, onHoverBlock, onScr
     window.addEventListener("contextmenu", close);
     return () => { window.removeEventListener("click", close); window.removeEventListener("contextmenu", close); };
   }, [ctxMenu]);
-
-  // Clear selection when blocks change (e.g. after delete)
-  useEffect(() => {
-    setSelected(prev => {
-      const blockIds = new Set(blocks.map(b => b.id));
-      const filtered = new Set([...prev].filter(id => blockIds.has(id)));
-      return filtered.size === prev.size ? prev : filtered;
-    });
-  }, [blocks]);
 
   const handleItemClick = useCallback((e: React.MouseEvent, block: Block, index: number) => {
     if (e.shiftKey && lastClickIdx.current !== null) {
@@ -93,7 +219,7 @@ export default function EditorMargin({ blocks, hoveredBlock, onHoverBlock, onScr
   }, [blocks, onScrollTo]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (selected.size === 0) return;
+    if (validSelected.size === 0) return;
 
     if (e.key === "Escape") {
       setSelected(new Set());
@@ -102,7 +228,7 @@ export default function EditorMargin({ blocks, hoveredBlock, onHoverBlock, onScr
 
     if ((e.key === "Delete" || e.key === "Backspace") && onDeleteBlocks) {
       e.preventDefault();
-      onDeleteBlocks([...selected]);
+      onDeleteBlocks([...validSelected]);
       setSelected(new Set());
       return;
     }
@@ -115,39 +241,29 @@ export default function EditorMargin({ blocks, hoveredBlock, onHoverBlock, onScr
 
     if (e.key === "c" && (e.metaKey || e.ctrlKey)) {
       e.preventDefault();
-      const selectedBlocks = blocks.filter(b => selected.has(b.id));
-      const text = selectedBlocks.map(b => {
-        if (b.type === "divider") return "---";
-        if (b.type === "graph" && b.graphData) return b.graphData.title || "chart";
-        if (b.type === "deliverable" && b.deliverableData) return b.deliverableData.title || "deliverable";
-        if (b.type === "money" && b.moneyData) return b.moneyData.moneyType;
-        if (b.type === "deadline" && b.deadlineData) return b.deadlineData.title || "deadline";
-        return b.content || "";
-      }).join("\n");
+      const text = blocks
+        .filter(b => validSelected.has(b.id))
+        .map(b => (b.type === "divider" ? "---" : getBlockSummary(b)))
+        .join("\n");
       navigator.clipboard.writeText(text);
       return;
     }
-  }, [selected, blocks, onDeleteBlocks]);
+  }, [validSelected, blocks, onDeleteBlocks]);
 
   const handleDelete = useCallback(() => {
-    if (selected.size > 0 && onDeleteBlocks) {
-      onDeleteBlocks([...selected]);
+    if (validSelected.size > 0 && onDeleteBlocks) {
+      onDeleteBlocks([...validSelected]);
       setSelected(new Set());
     }
-  }, [selected, onDeleteBlocks]);
+  }, [validSelected, onDeleteBlocks]);
 
   const handleCopy = useCallback(() => {
-    const selectedBlocks = blocks.filter(b => selected.has(b.id));
-    const text = selectedBlocks.map(b => {
-      if (b.type === "divider") return "---";
-      if (b.type === "graph" && b.graphData) return b.graphData.title || "chart";
-      if (b.type === "deliverable" && b.deliverableData) return b.deliverableData.title || "deliverable";
-      if (b.type === "money" && b.moneyData) return b.moneyData.moneyType;
-      if (b.type === "deadline" && b.deadlineData) return b.deadlineData.title || "deadline";
-      return b.content || "";
-    }).join("\n");
+    const text = blocks
+      .filter(b => validSelected.has(b.id))
+      .map(b => (b.type === "divider" ? "---" : getBlockSummary(b)))
+      .join("\n");
     navigator.clipboard.writeText(text);
-  }, [selected, blocks]);
+  }, [validSelected, blocks]);
 
   // Extract sections (h1 and h2 blocks)
   const sections = useMemo(() =>
@@ -229,23 +345,16 @@ export default function EditorMargin({ blocks, hoveredBlock, onHoverBlock, onScr
             const label = BLOCK_LABELS[block.type] || "?";
             const color = BLOCK_LABEL_COLORS[block.type] || "var(--ink-300)";
             const isHovered = hoveredBlock === block.id;
-            const isSelected = selected.has(block.id);
+            const isSelected = validSelected.has(block.id);
             const isSection = block.type === "h1" || block.type === "h2";
-            const graphTitle = block.type === "graph" && block.graphData ? block.graphData.title : "";
-            const delivTitle = block.type === "deliverable" && block.deliverableData ? block.deliverableData.title : "";
-            const moneyLabel = block.type === "money" && block.moneyData ? block.moneyData.moneyType.replace("-", " ") : "";
-            const deadlineTitle = block.type === "deadline" && block.deadlineData ? block.deadlineData.title : "";
-            const displayContent = block.type === "graph" ? graphTitle : block.type === "deliverable" ? delivTitle : block.type === "money" ? moneyLabel : block.type === "deadline" ? deadlineTitle : block.content;
-            const preview = displayContent
-              ? (displayContent.length > 24 ? displayContent.slice(0, 22) + "…" : displayContent)
-              : "";
-            const isEmpty = !displayContent && block.type !== "divider" && block.type !== "graph" && block.type !== "deliverable" && block.type !== "money" && block.type !== "deadline";
+            const preview = formatBlockPreview(block);
+            const isEmpty = preview === "";
 
             return (
               <div
                 key={block.id}
                 className={`${styles.gutterItem} ${isHovered ? styles.gutterItemOn : ""} ${isSelected ? styles.gutterItemSelected : ""} ${isSection ? styles.gutterItemSection : ""} ${dropIdx === i ? styles.gutterItemDrop : ""} ${dragIdx === i ? styles.gutterItemDrag : ""}`}
-                draggable={!!onReorderBlock && selected.size === 0}
+                draggable={!!onReorderBlock && validSelected.size === 0}
                 onDragStart={e => { setDragIdx(i); dragRef.current = i; e.dataTransfer.effectAllowed = "move"; }}
                 onDragEnd={() => { setDragIdx(null); setDropIdx(null); dragRef.current = null; }}
                 onDragOver={e => { e.preventDefault(); if (dragRef.current !== null && dragRef.current !== i) setDropIdx(i); }}
@@ -267,7 +376,7 @@ export default function EditorMargin({ blocks, hoveredBlock, onHoverBlock, onScr
                 <span className={styles.gutterType} style={{ color }}>{label}</span>
                 <span className={`${styles.gutterPreview} ${isEmpty ? styles.gutterPreviewEmpty : ""} ${block.type === "divider" ? styles.gutterPreviewDivider : ""}`}
                   style={!isEmpty && block.type !== "paragraph" && block.type !== "bullet" && block.type !== "numbered" ? { color, opacity: 0.7 } : undefined}>
-                  {block.type === "divider" ? "divider" : block.type === "graph" ? (graphTitle || "chart") : block.type === "deliverable" ? (delivTitle || "deliverable") : block.type === "money" ? (moneyLabel || "money") : block.type === "deadline" ? (deadlineTitle || "deadline") : isEmpty ? "empty" : preview}
+                  {block.type === "divider" ? "divider" : isEmpty ? "empty" : preview}
                 </span>
               </div>
             );
@@ -276,9 +385,9 @@ export default function EditorMargin({ blocks, hoveredBlock, onHoverBlock, onScr
       </div>
 
       {/* Selection toolbar */}
-      {selected.size > 0 && (
+      {validSelected.size > 0 && (
         <div className={styles.selectionBar}>
-          <span className={styles.selectionCount}>{selected.size} selected</span>
+          <span className={styles.selectionCount}>{validSelected.size} selected</span>
           <button className={styles.selectionBtn} title="Copy (⌘C)" onClick={handleCopy}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="4" y="4" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.2"/><path d="M10 4V3a1.5 1.5 0 00-1.5-1.5H3A1.5 1.5 0 001.5 3v5.5A1.5 1.5 0 003 10h1" stroke="currentColor" strokeWidth="1.2"/></svg>
           </button>

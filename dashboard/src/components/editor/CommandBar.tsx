@@ -30,6 +30,7 @@ export default function CommandBar({ charCount }: CommandBarProps) {
         <span className={styles.hint}>
           <span className={styles.connectedDot} /> {charCount}c
         </span>
+        <span className={styles.forge}>⚒ forge</span>
       </div>
     </div>
   );

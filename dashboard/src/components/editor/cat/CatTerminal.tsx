@@ -320,7 +320,7 @@ export default function CatTerminal({ open, onClose }: CatTerminalProps) {
       </div>
 
       <div className={styles.foot}>
-        <span>No cats were harmed</span>
+        <span>⚒ @felmark/forge</span>
         <div className={styles.footHints}>
           <span><span className={styles.kbd}>⏎</span> run</span>
           <span><span className={styles.kbd}>⎋</span> close</span>

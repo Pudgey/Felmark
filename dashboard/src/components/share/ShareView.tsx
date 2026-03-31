@@ -178,7 +178,7 @@ export default function ShareView({ projectName, clientName, clientAvatar, clien
                   <path d="M14 2L4 8v12l10 6 10-6V8L14 2z" stroke="currentColor" strokeWidth="1.2" />
                   <path d="M14 8l-6 3.5v7L14 22l6-3.5v-7L14 8z" fill="currentColor" opacity="0.15" />
                 </svg>
-                <span>Shared via Felmark</span>
+                <span>⚒ Powered by @felmark/forge</span>
               </div>
             </>
           ) : (

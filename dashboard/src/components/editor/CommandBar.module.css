@@ -63,3 +63,15 @@
   background: #5a9a3c;
   display: inline-block;
 }
+
+.forge {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-300);
+  opacity: 0.4;
+  letter-spacing: 0.03em;
+  margin-left: 4px;
+  transition: opacity 0.2s;
+}
+
+.forge:hover { opacity: 0.7; }
