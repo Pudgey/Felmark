@@ -1,16 +1,34 @@
-# Session Handoff — 2026-04-01
+# Session Handoff — 2026-04-01 (Session 2)
 
 ## What happened
-- Settings page exists and is wired into the rail/editor flow, but the gear icon still does not transition cleanly into the dedicated settings surface.
-- Forge Paper behavior was narrowed correctly: shared `Block[]` infrastructure is fine, but the shared outline UI is probably the wrong abstraction for the paper surface.
-- Session ended before the settings routing bug was fixed.
+Major codebase reorganization session. No new features — pure structural cleanup.
 
-## Remaining fix needed
-Debug the rail-to-settings path in [page.tsx](/Users/donteennis/Felmark/dashboard/src/app/page.tsx) and [Editor.tsx](/Users/donteennis/Felmark/dashboard/src/components/editor/Editor.tsx). The settings render branch exists, but the page/editor state hierarchy still lets another surface win. Treat this as a full-page surface priority bug, not a missing settings page.
+### Completed
+1. **Deleted settings component** — wiped SettingsPage, CSS, manifest, and all imports from page.tsx and Editor.tsx. Ready for fresh rebuild.
+2. **Renamed files** — `workspace-page/` → `workspace/`, `WorkspacePage` → `Workspace`, `WorkstationHome` → `Workstation` (files + CSS modules)
+3. **Extracted view routing from Editor.tsx** — moved all `railActive === "X"` branches (12 views) out of Editor into page.tsx. Editor no longer routes; it only renders documents.
+4. **Created views/ layer** — `ViewRouter.tsx` + 14 individual view wrappers. Adding a new rail view = 1 file + 1 line in ViewRouter.
+5. **Nested workstation features** — moved editor, calendar, search, pipeline, finance, wire, team, services, templates, forge-paper, dashboard, terminal-welcome under `components/workstation/`.
+6. **Reorganized editor internals** — created `blocks/` (41 individual block folders), `chrome/` (7 editor UI folders), `panels/` (3 panel folders). Unbundled 4 multi-block files into 27 individual components.
+7. **Added organization standard** — CLAUDE.md ground rule #2, AGENTS.md rules, `conductor/standards/ORGANIZATION.md` with hard thresholds.
+8. **Forge MANIFEST.md** — documented the state management engine.
+9. **Workspace icon** — changed from text lines to planet with orbital ring.
 
-If Forge Paper gets another pass, do not keep stretching the shared `DocumentOutline` abstraction. Either give Forge Paper its own outline rules/component or hide the outline when the paper lacks real section structure.
+### Line counts after cleanup
+- `page.tsx`: 686 lines (was 788)
+- `Editor.tsx`: 1744 lines (was 1847) — still red, needs further splitting
+- `ViewRouter.tsx`: 146 lines
+- Individual view files: 7-94 lines each
+
+## Remaining work
+- **Settings page rebuild** — original task, not started. Component deleted, ready for clean build. Should be a view in `views/settings.tsx` + component in `components/workstation/settings/`.
+- **Editor.tsx still at 1744 lines** — red threshold. Needs block rendering logic extracted (the massive renderBlock switch + all getDefault calls). Next refactor target.
+- **Workspace.tsx at 546 lines** — yellow threshold. Audit and split before adding features.
+- **Stale MANIFEST.md files** — workspace/MANIFEST.md still says "WorkspaceHome". Several moved folders may have stale manifests.
+- **GUARDRAIL.md and FORGE_MAP.md** — both stale after this restructure. Need rebuild next session.
+- **22 old worktrees** — all pushed to remote but most are stale. Consider pruning.
 
 ## Gotchas
-- The workstation rename touched a broad area of the dashboard, so string- or route-based assumptions about `workspace` may still be stale in some codepaths.
-- `Editor.tsx` remains a large surface router, so full-page view guards are easy to get wrong and should be tested when new rail pages are added.
-- Build verification in sandbox is still vulnerable to blocked Google Fonts fetches, so browser/manual verification remains important for UI routing fixes.
+- Worktrees branched during this session may have stale paths (pre-restructure). Don't try to merge them — the main branch has all changes.
+- The `settings/` directory still exists but is empty (git doesn't track empty dirs, so it'll disappear on clone).
+- `dashboard/src/forge/services/blocks/.next/` has stale trace files that shouldn't be there — consider adding to .gitignore.
