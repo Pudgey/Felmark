@@ -455,6 +455,11 @@ export default function Dashboard() {
     }));
   }, [updateWorkstations, updateTabs, workstations]);
 
+  const showWorkstationSidebar = !zenMode
+    && railActive === "workstations"
+    && !creationAnim
+    && onboardingName === null;
+
   return (
     <ErrorBoundary>
     <div style={{ display: "flex", height: "100dvh", background: "var(--parchment)" }}>
@@ -482,7 +487,7 @@ export default function Dashboard() {
         zenMode={zenMode}
         onToggleZen={() => setZenMode(true)}
       />}
-      {!zenMode && railActive !== "workspace" && <Sidebar
+      {showWorkstationSidebar && <Sidebar
         workstations={workstations}
         archived={archived}
         activeProject={activeProject}
@@ -512,7 +517,7 @@ export default function Dashboard() {
         onSaveNow={saveNow}
       />}
       {/* Resize handle */}
-      {sidebarOpen && !zenMode && railActive !== "workspace" && (
+      {sidebarOpen && showWorkstationSidebar && (
         <div
           style={{
             width: 5,
