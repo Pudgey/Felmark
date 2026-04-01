@@ -71,6 +71,7 @@ import SplitPane from "./chrome/split-pane/SplitPane";
 import Terminal from "../../terminal/Terminal";
 import TerminalProvider from "../../terminal/TerminalProvider";
 import NotificationPanel, { type Notification } from "../../notifications/NotificationPanel";
+import TerminalWelcome from "../terminal-welcome/TerminalWelcome";
 import styles from "./Editor.module.css";
 
 const TERMINAL_SPLIT_ID = "__terminal__";
@@ -1628,66 +1629,76 @@ export default function Editor({ workstations, tabs, activeProject, blocks: bloc
           ) : (
           <div className={styles.surfaceStage}>
               <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-                {/* Left margin — document spine + block gutter */}
-                {!zenMode && <EditorMargin
-                  blocks={blocks}
-                  hoveredBlock={hoverBlock}
-                  onHoverBlock={setHoverBlock}
-                  onScrollTo={(id) => scrollToBlock(id, "start")}
-                  onReorderBlock={(fromIdx, toIdx) => {
-                    setBlocks(prev => {
-                      const n = [...prev];
-                      const [moved] = n.splice(fromIdx, 1);
-                      n.splice(toIdx, 0, moved);
-                      return n;
-                    });
-                  }}
-                  onDeleteBlocks={deleteBlocks}
-                />}
-                {/* Editor area */}
-                <div className={styles.editor} ref={editorRef} onMouseDown={() => { setConvoPanelOpen(false); setCommentPanelOpen(false); }} style={{ flex: 1 }}>
-                  <div className={`${styles.page} ${breathe ? styles.pageBreathe : ""} ${splitProject ? styles.pageSplit : ""}`} onClick={handlePageClick}>
-                    {/* Project meta bar with due date picker */}
-                    {activeWs && (() => {
-                      const project = activeWs.projects.find(p => p.id === activeProject);
-                      if (!project) return null;
-                      const st = STATUS[project.status];
-                      return (
-                        <div className={styles.metaBar}>
-                          <div className={styles.metaClient}>
-                            <span className={styles.metaAvatar} style={{ background: activeWs.avatarBg }}>{activeWs.avatar}</span>
-                            {activeWs.client}
-                          </div>
-                          <span className={styles.metaSep}>·</span>
-                          <span className={styles.metaStatus} style={{ color: st.color, background: st.color + "08", borderColor: st.color + "15" }}>● {st.label}</span>
-                          <span className={styles.metaSep}>·</span>
-                          <DueDatePicker
-                            date={project.due}
-                            onChange={(due) => onUpdateProjectDue?.(activeProject, due)}
-                          />
-                          {project.amount !== "—" && <>
-                            <span className={styles.metaSep}>·</span>
-                            <span className={styles.metaBudget}>{project.amount}</span>
-                          </>}
-                        </div>
-                      );
-                    })()}
-                    {blocks.map(renderBlock)}
-                  </div>
-                  {slashMenu && (
-                    <SlashMenu
-                      top={slashMenu.top}
-                      left={slashMenu.left}
-                      filter={slashFilter}
-                      selectedIndex={slashIndex}
-                      onSelect={selectSlashItem}
-                      onClose={() => setSlashMenu(null)}
-                      onIndexChange={setSlashIndex}
-                    />
-                  )}
-                  {formatBar && <FormatBar top={formatBar.top} left={formatBar.left} />}
-                </div>
-                {/* Split pane */}
+                {!activeTab ? (
+                  <TerminalWelcome
+                    activeCount={workstations.reduce((s, w) => s + w.projects.filter(p => p.status !== "completed").length, 0)}
+                    reviewCount={workstations.reduce((s, w) => s + w.projects.filter(p => p.status === "review").length, 0)}
+                    overdueCount={0}
+                  />
+                ) : (
+                  <>
+                    {/* Left margin — document spine + block gutter */}
+                    {!zenMode && <EditorMargin
+                      blocks={blocks}
+                      hoveredBlock={hoverBlock}
+                      onHoverBlock={setHoverBlock}
+                      onScrollTo={(id) => scrollToBlock(id, "start")}
+                      onReorderBlock={(fromIdx, toIdx) => {
+                        setBlocks(prev => {
+                          const n = [...prev];
+                          const [moved] = n.splice(fromIdx, 1);
+                          n.splice(toIdx, 0, moved);
+                          return n;
+                        });
+                      }}
+                      onDeleteBlocks={deleteBlocks}
+                    />}
+                    {/* Editor area */}
+                    <div className={styles.editor} ref={editorRef} onMouseDown={() => { setConvoPanelOpen(false); setCommentPanelOpen(false); }} style={{ flex: 1 }}>
+                      <div className={`${styles.page} ${breathe ? styles.pageBreathe : ""} ${splitProject ? styles.pageSplit : ""}`} onClick={handlePageClick}>
+                        {/* Project meta bar with due date picker */}
+                        {activeWs && (() => {
+                          const project = activeWs.projects.find(p => p.id === activeProject);
+                          if (!project) return null;
+                          const st = STATUS[project.status];
+                          return (
+                            <div className={styles.metaBar}>
+                              <div className={styles.metaClient}>
+                                <span className={styles.metaAvatar} style={{ background: activeWs.avatarBg }}>{activeWs.avatar}</span>
+                                {activeWs.client}
+                              </div>
+                              <span className={styles.metaSep}>·</span>
+                              <span className={styles.metaStatus} style={{ color: st.color, background: st.color + "08", borderColor: st.color + "15" }}>● {st.label}</span>
+                              <span className={styles.metaSep}>·</span>
+                              <DueDatePicker
+                                date={project.due}
+                                onChange={(due) => onUpdateProjectDue?.(activeProject, due)}
+                              />
+                              {project.amount !== "—" && <>
+                                <span className={styles.metaSep}>·</span>
+                                <span className={styles.metaBudget}>{project.amount}</span>
+                              </>}
+                            </div>
+                          );
+                        })()}
+                        {blocks.map(renderBlock)}
+                      </div>
+                      {slashMenu && (
+                        <SlashMenu
+                          top={slashMenu.top}
+                          left={slashMenu.left}
+                          filter={slashFilter}
+                          selectedIndex={slashIndex}
+                          onSelect={selectSlashItem}
+                          onClose={() => setSlashMenu(null)}
+                          onIndexChange={setSlashIndex}
+                        />
+                      )}
+                      {formatBar && <FormatBar top={formatBar.top} left={formatBar.left} />}
+                    </div>
+                  </>
+                )}
+                {/* Terminal split pane — always available */}
                 {splitProject === TERMINAL_SPLIT_ID && (
                   <TerminalProvider
                     key={terminalSessionKey}
@@ -1700,6 +1711,7 @@ export default function Editor({ workstations, tabs, activeProject, blocks: bloc
                     <Terminal onClose={() => onSplitClose?.()} />
                   </TerminalProvider>
                 )}
+                {/* SplitPane — always available */}
                 {splitProject && splitProject !== TERMINAL_SPLIT_ID && splitBlocks && (
                   <SplitPane
                     blocks={splitBlocks}
