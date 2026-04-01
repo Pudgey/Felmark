@@ -75,6 +75,21 @@
   --info: #5b7fa4;
   --warning: #d4a34a;
 
+  /* Canvas surface tokens */
+  --ink-200: #d0cdc6;
+  --bg: #f2f0ec;
+  --card: #fff;
+  --card-tint: #f9f8fc;
+  --border: #e8e5df;
+  --border-light: #f0ede8;
+  --sage: #6b9a6b;
+  --sage-bg: rgba(107, 154, 107, 0.04);
+  --lavender: #8b8bba;
+  --lavender-bg: rgba(139, 139, 186, 0.04);
+  --rose: #c07a6a;
+  --rose-bg: rgba(192, 122, 106, 0.03);
+  --ember-soft: #d4b896;
+
   /* Mono font */
   --mono: var(--font-mono), 'JetBrains Mono', 'Fira Code', monospace;
 

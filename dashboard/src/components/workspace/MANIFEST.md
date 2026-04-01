@@ -1,4 +1,4 @@
-# workspace-page/
+# workspace/
 
 Workspace — task/project management surface. ClickUp-style: tasks, subtasks, statuses, priorities, time tracking, list/board/timeline views. For freelancers who need to get stuff done.
 
@@ -6,7 +6,7 @@ Workspace — task/project management surface. ClickUp-style: tasks, subtasks, s
 
 | Export | File | Description |
 |--------|------|-------------|
-| `WorkspacePage` (default) | `WorkspacePage.tsx` | Full workspace surface with sidebar, task list, board, detail panel |
+| `Workspace` (default) | `Workspace.tsx` | Full workspace surface with sidebar, task list, board, detail panel |
 
 ## Dependencies
 
@@ -18,11 +18,13 @@ Workspace — task/project management surface. ClickUp-style: tasks, subtasks, s
 
 | Importer | What |
 |----------|------|
-| `editor/Editor.tsx` | `WorkspacePage` — rendered when `railActive === "workspace"` |
+| `views/workspace.tsx` | `WorkspacePage` — rendered via ViewRouter when `railActive === "workspace"` |
 
 ## Files
 
 | File | Lines | Purpose |
 |------|-------|---------|
-| `WorkspacePage.tsx` | ~340 | Full workspace: sidebar, project header, toolbar, list/board views, detail panel |
-| `WorkspacePage.module.css` | ~220 | All workspace styles — sidebar, tasks, board, detail panel |
+| `Workspace.tsx` | ~546 | Full workspace: sidebar, project header, toolbar, list/board views, detail panel |
+| `Workspace.module.css` | ~242 | All workspace styles — sidebar, tasks, board, detail panel |
+| `timer/FloatingTimer.tsx` | — | Floating timer widget |
+| `timer/FloatingTimer.module.css` | — | Timer styles |

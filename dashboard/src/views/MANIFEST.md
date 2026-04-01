@@ -20,7 +20,7 @@ View routing layer. Each file wires a single rail destination to its component w
 | `workstation.tsx` | `WorkstationView` | workstations, activeWorkstationId, onSelectProject, onNewTab, onRenameWorkstation, onUpdateProjectDue |
 | `terminal-welcome.tsx` | `TerminalWelcomeView` | workstations, overdueCount, onNewWorkstation |
 | `editor.tsx` | `EditorView` | Full editor props (31 fields) — see file for interface |
-| `workspace.tsx` | `WorkspaceView` | none |
+| `workspace.tsx` | `WorkspaceView` | none (renders Canvas from `workspace/canvas/`) |
 
 ## Dependencies
 

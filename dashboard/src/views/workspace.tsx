@@ -1,7 +1,7 @@
 "use client";
 
-import WorkspacePage from "@/components/workspace/Workspace";
+import Canvas from "@/components/workspace/canvas/Canvas";
 
 export default function WorkspaceView() {
-  return <WorkspacePage />;
+  return <Canvas />;
 }

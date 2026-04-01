@@ -1,0 +1,1020 @@
+/* ── Canvas — Grid Dashboard ── */
+
+/* Root container */
+.canvas {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Toolbar ── */
+
+.toolbar {
+  height: 48px;
+  padding: 0 20px;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  z-index: 20;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.mark {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: var(--ink-900);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ember);
+  font-size: 11px;
+}
+
+.logoName {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink-900);
+}
+
+.toolbarSep {
+  width: 1px;
+  height: 18px;
+  background: var(--border);
+  margin: 0 4px;
+}
+
+.workspaceBadge {
+  font-family: var(--mono);
+  font-size: 8px;
+  color: var(--ink-300);
+  background: var(--border-light);
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+.spaces {
+  display: flex;
+  gap: 2px;
+  flex: 1;
+}
+
+.space {
+  padding: 7px 16px;
+  border-radius: 7px;
+  border: none;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--ink-400);
+  background: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.space:hover {
+  background: var(--ember-bg);
+  color: var(--ink-600);
+}
+
+.spaceActive {
+  background: var(--ember-bg);
+  color: var(--ink-900);
+  font-weight: 500;
+}
+
+.spaceAdd {
+  padding: 7px 12px;
+  border-radius: 7px;
+  border: 1px dashed var(--border);
+  background: none;
+  font-size: 11px;
+  color: var(--ink-300);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.spaceAdd:hover {
+  border-color: var(--ember);
+  color: var(--ember);
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.btn {
+  padding: 7px 18px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--ink-500);
+  cursor: pointer;
+  transition: all 0.1s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.btn:hover {
+  background: var(--border-light);
+}
+
+.btnOn {
+  background: var(--ink-900);
+  color: #fff;
+  border-color: var(--ink-900);
+}
+
+.btnOn:hover {
+  background: var(--ink-800);
+}
+
+.btnPrimary {
+  background: var(--ember);
+  color: #fff;
+  border-color: var(--ember);
+}
+
+.btnPrimary:hover {
+  background: #c89360;
+}
+
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: var(--ember);
+  color: var(--card);
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+}
+
+/* ── Grid Area ── */
+
+.gridArea {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+}
+
+.gridArea::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.gridArea::-webkit-scrollbar-thumb {
+  background: var(--ink-200);
+  border-radius: 4px;
+}
+
+.gridContainer {
+  position: relative;
+  margin: 24px auto;
+  padding: 0 24px;
+}
+
+/* ── Dot Grid ── */
+
+.dots {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.dot {
+  position: absolute;
+  border-radius: 50%;
+  transition: opacity 0.2s, transform 0.2s, background 0.2s;
+}
+
+/* ── Blocks ── */
+
+.block {
+  position: absolute;
+  border-radius: 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              top 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              width 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              height 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.2s;
+  z-index: 2;
+}
+
+.block:hover {
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.03);
+}
+
+.blockSelected {
+  border-color: var(--lavender);
+  box-shadow: 0 0 0 3px rgba(139, 139, 186, 0.06);
+}
+
+.blockEditing {
+  border-style: dashed;
+  border-color: var(--ink-200);
+}
+
+.blockEditing:hover {
+  border-color: var(--lavender);
+}
+
+/* ── Block Accent Line ── */
+
+.blockLine {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: 0;
+  z-index: 5;
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 0 0 14px 14px;
+}
+
+.block:hover .blockLine {
+  width: 100%;
+}
+
+/* ── Block Chrome Bar ── */
+
+.blockChrome {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+  z-index: 6;
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+
+.blockEditing .blockChrome {
+  opacity: 1;
+}
+
+.blockHandle {
+  cursor: grab;
+  font-size: 10px;
+  color: var(--ink-300);
+  padding: 2px;
+}
+
+.blockType {
+  font-family: var(--mono);
+  font-size: 8px;
+  color: var(--ink-400);
+  flex: 1;
+}
+
+.blockSize {
+  font-family: var(--mono);
+  font-size: 8px;
+  color: var(--ink-300);
+  background: var(--border-light);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+.blockEditBtn {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--ink-300);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+}
+
+.blockEditBtn:hover {
+  background: var(--border-light);
+  color: var(--ink-600);
+}
+
+.blockEditBtnDanger:hover {
+  background: rgba(192, 122, 106, 0.04);
+  color: var(--rose);
+  border-color: rgba(192, 122, 106, 0.12);
+}
+
+/* ── Resize Handles ── */
+
+.resize {
+  position: absolute;
+  z-index: 7;
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+
+.blockEditing:hover .resize {
+  opacity: 1;
+}
+
+.resizeRight {
+  right: -4px;
+  top: 20%;
+  bottom: 20%;
+  width: 8px;
+  cursor: ew-resize;
+}
+
+.resizeBottom {
+  bottom: -4px;
+  left: 20%;
+  right: 20%;
+  height: 8px;
+  cursor: ns-resize;
+}
+
+.resizeCorner {
+  right: -4px;
+  bottom: -4px;
+  width: 14px;
+  height: 14px;
+  cursor: nwse-resize;
+}
+
+.resizeDot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--lavender);
+  border: 2px solid var(--card);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.resizeRight .resizeDot {
+  right: 1px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.resizeBottom .resizeDot {
+  bottom: 1px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.resizeCorner .resizeDot {
+  right: 1px;
+  bottom: 1px;
+}
+
+/* ── Ghost Block ── */
+
+.ghost {
+  position: absolute;
+  border-radius: 14px;
+  border: 2px dashed var(--lavender);
+  background: rgba(139, 139, 186, 0.04);
+  z-index: 3;
+  pointer-events: none;
+  transition: left 0.08s, top 0.08s;
+}
+
+.ghostLabel {
+  padding: 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--lavender);
+}
+
+.ghostMeta {
+  font-size: 8px;
+  color: var(--ink-300);
+  margin-top: 2px;
+}
+
+/* ── Cell Highlight ── */
+
+.cellHighlight {
+  position: absolute;
+  border-radius: 8px;
+  background: rgba(139, 139, 186, 0.03);
+  border: 1px solid rgba(139, 139, 186, 0.06);
+  z-index: 1;
+  pointer-events: none;
+  transition: left 0.06s, top 0.06s;
+}
+
+/* ── Footer ── */
+
+.footer {
+  height: 28px;
+  padding: 0 20px;
+  border-top: 1px solid var(--border);
+  background: var(--card);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-300);
+  flex-shrink: 0;
+  z-index: 20;
+}
+
+/* ── Library Panel ── */
+
+.library {
+  position: fixed;
+  top: 48px;
+  right: 0;
+  width: 280px;
+  height: calc(100vh - 48px);
+  background: var(--card);
+  border-left: 1px solid var(--border);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -8px 0 30px rgba(0, 0, 0, 0.03);
+  animation: libIn 0.15s ease;
+}
+
+@keyframes libIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.libraryHead {
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.libraryTitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink-900);
+}
+
+.libraryClose {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--ink-300);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.libraryClose:hover {
+  background: var(--border-light);
+}
+
+.libraryHint {
+  padding: 8px 18px;
+  font-size: 11px;
+  color: var(--ink-400);
+  background: var(--lavender-bg);
+  border-bottom: 1px solid var(--border-light);
+  line-height: 1.5;
+}
+
+.libraryList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.libraryList::-webkit-scrollbar {
+  width: 4px;
+}
+
+.libraryList::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+.libraryItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.1s;
+  margin-bottom: 2px;
+}
+
+.libraryItem:hover {
+  background: var(--lavender-bg);
+  transform: translateX(2px);
+}
+
+.libraryItemIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+  border: 1px solid;
+}
+
+.libraryItemName {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-700);
+}
+
+.libraryItemMeta {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-300);
+}
+
+/* ── Placing Bar ── */
+
+.placing {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  background: var(--ink-900);
+  color: #fff;
+  border-radius: 10px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  z-index: 40;
+  animation: plIn 0.15s ease;
+}
+
+@keyframes plIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.placingLabel {
+  font-family: var(--mono);
+  font-size: 10px;
+  opacity: 0.5;
+}
+
+.placingHint {
+  font-family: var(--mono);
+  font-size: 10px;
+  opacity: 0.3;
+}
+
+.placingCancel {
+  padding: 4px 12px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* ── Drag Cursor Preview ── */
+
+.dragPreview {
+  position: fixed;
+  z-index: 200;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  background: var(--card);
+  border: 1px solid var(--lavender);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 0 0 3px rgba(139, 139, 186, 0.06);
+  animation: dragIn 0.1s ease;
+}
+
+@keyframes dragIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.dragPreviewIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.dragPreviewName {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-900);
+  white-space: nowrap;
+}
+
+.dragPreviewSize {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-300);
+}
+
+/* ── Block Content ── */
+
+/* Whisper block */
+.whisperContent {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  height: 100%;
+}
+
+.whisperBadge {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--ember);
+  background: rgba(176, 125, 79, 0.04);
+  padding: 3px 8px;
+  border-radius: 5px;
+  border: 1px solid rgba(176, 125, 79, 0.04);
+}
+
+.whisperDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--ember);
+  flex-shrink: 0;
+}
+
+.whisperText {
+  font-size: 13px;
+  color: var(--ink-500);
+  flex: 1;
+  line-height: 1.4;
+}
+
+.whisperAction {
+  padding: 5px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: #fff;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--ink-600);
+  cursor: pointer;
+}
+
+/* Metric block */
+.metricContent {
+  padding: 20px 22px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.metricLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-300);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.metricValue {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 700;
+  line-height: 1;
+  margin-top: 6px;
+}
+
+.metricValueLarge {
+  font-size: 34px;
+}
+
+.metricValueSmall {
+  font-size: 24px;
+}
+
+.metricSub {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-300);
+  margin-top: 6px;
+}
+
+.metricProgress {
+  margin-top: 8px;
+  height: 4px;
+  background: var(--border-light);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.metricProgressFill {
+  height: 100%;
+  border-radius: 2px;
+}
+
+/* Placeholder block (tasks, activity, health, etc.) */
+.placeholderContent {
+  padding: 16px 20px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.placeholderLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-300);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 10px;
+}
+
+.placeholderRows {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.placeholderRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+}
+
+.placeholderDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.placeholderBar {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border-light);
+  flex: 1;
+}
+
+.placeholderBarFill {
+  height: 100%;
+  border-radius: 2px;
+  opacity: 0.08;
+}
+
+.placeholderTime {
+  font-family: var(--mono);
+  font-size: 8px;
+  color: var(--ink-300);
+  width: 24px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* ── Click-to-Replace Popover ── */
+
+.replacePopover {
+  position: absolute;
+  top: 32px;
+  left: 8px;
+  width: 220px;
+  max-height: 320px;
+  overflow-y: auto;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  z-index: 10;
+  padding: 6px;
+  animation: popIn 0.15s ease;
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.95) translateY(-4px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.replacePopoverHeader {
+  font-family: var(--mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-300);
+  padding: 6px 8px 4px;
+}
+
+.replacePopoverItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.replacePopoverItem:hover {
+  background: var(--lavender-bg);
+}
+
+.replacePopoverActive {
+  background: var(--lavender-bg);
+}
+
+.replacePopoverIcon {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.replacePopoverName {
+  font-size: 12px;
+  color: var(--ink-700);
+}
+
+.replacePopover::-webkit-scrollbar {
+  width: 4px;
+}
+.replacePopover::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+/* ── Row Insertion Bars ── */
+
+.insertionZone {
+  position: absolute;
+  height: 24px;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.insertionZone:hover {
+  opacity: 1;
+}
+
+.insertionLine {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  border-top: 1px dashed var(--ink-200);
+  transition: border-color 0.15s;
+}
+
+.insertionZone:hover .insertionLine {
+  border-color: var(--lavender);
+}
+
+.insertionBtn {
+  position: relative;
+  z-index: 1;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--ink-400);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.insertionBtn:hover {
+  border-color: var(--lavender);
+  color: var(--lavender);
+  transform: scale(1.05);
+}
+
+/* ── Column Insertion (vertical between blocks) ── */
+
+.colInsertionZone {
+  position: absolute;
+  width: 24px;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.colInsertionZone:hover {
+  opacity: 1;
+}
+
+.colInsertionLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  border-left: 1px dashed var(--ink-200);
+  transition: border-color 0.15s;
+}
+
+.colInsertionZone:hover .colInsertionLine {
+  border-color: var(--lavender);
+}
+
+.emptyRow {
+  position: absolute;
+  border: 2px dashed var(--ink-200);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.emptyRowText {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-300);
+}
