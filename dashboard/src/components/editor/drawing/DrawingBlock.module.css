@@ -1,0 +1,569 @@
+/* ── Drawing Block: shared panel ── */
+.dcPanel {
+  border: 1.5px solid var(--warm-200);
+  border-radius: var(--radius-lg);
+  background: var(--parchment);
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.dcPanel:hover {
+  border-color: var(--warm-300);
+}
+.dcPanelHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--warm-100);
+}
+.dcBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-sm);
+  background: var(--warm-100);
+  font-size: 12px;
+  color: var(--ink-600);
+}
+.dcPanelTitle {
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-700);
+  letter-spacing: -0.01em;
+}
+.dcBody {
+  padding: 16px;
+}
+
+/* ── Sub-picker (type selection grid) ── */
+.subPicker {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  padding: 8px;
+}
+.subPickerItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--warm-200);
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.1s;
+  font-family: inherit;
+  color: var(--ink-600);
+  min-height: 28px;
+}
+.subPickerItem:hover {
+  border-color: var(--ember);
+  background: var(--ember-bg);
+  color: var(--ember);
+}
+.subPickerIcon {
+  font-size: 18px;
+}
+.subPickerLabel {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* ── SVG canvas ── */
+.dcSvg {
+  width: 100%;
+  display: block;
+}
+
+/* ── Flowchart ── */
+.flowNode {
+  cursor: default;
+  transition: fill-opacity 0.15s, stroke-width 0.15s;
+}
+.flowNode:hover {
+  fill-opacity: 0.85;
+  stroke-width: 2;
+}
+.dcArrowLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  fill: var(--ink-400);
+}
+
+/* ── User Flow ── */
+.ufScreen {
+  cursor: default;
+}
+.ufAnnotation {
+  font-family: var(--mono);
+  font-size: 9px;
+}
+.ufFunnel {
+  margin-top: 12px;
+  display: flex;
+  height: 18px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.ufFunnelBar {
+  height: 100%;
+  transition: opacity 0.15s;
+}
+
+/* ── Device Frames ── */
+.dcDevices {
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  justify-content: center;
+  padding: 8px 0;
+}
+.dcDevice {
+  border: 1.5px solid var(--warm-300);
+  border-radius: 10px;
+  background: #fff;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.dcDeviceBar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--warm-100);
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-300);
+}
+.dcTrafficDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.dcUrlBar {
+  flex: 1;
+  background: var(--warm-50);
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-size: 8px;
+  color: var(--ink-300);
+}
+.dcDeviceContent {
+  padding: 8px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.dcDeviceLabel {
+  text-align: center;
+  font-family: 'Outfit', sans-serif;
+  font-size: 11px;
+  color: var(--ink-400);
+  margin-top: 6px;
+}
+.dcNotch {
+  width: 40px;
+  height: 4px;
+  background: var(--warm-200);
+  border-radius: 2px;
+  margin: 4px auto 0;
+}
+.dcDynIsland {
+  width: 32px;
+  height: 8px;
+  background: var(--ink-900);
+  border-radius: 6px;
+  margin: 4px auto 0;
+}
+
+/* ── Mock content (device internals) ── */
+.dcMockNav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  padding: 0 2px;
+}
+.dcMLogo {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background: var(--ember);
+}
+.dcMLinks {
+  display: flex;
+  gap: 3px;
+}
+.dcMLink {
+  width: 16px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--warm-200);
+}
+.dcMHero {
+  background: var(--warm-50);
+  border-radius: 4px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.dcMHeroTitle {
+  width: 60%;
+  height: 6px;
+  background: var(--warm-200);
+  border-radius: 2px;
+}
+.dcMHeroSub {
+  width: 80%;
+  height: 3px;
+  background: var(--warm-100);
+  border-radius: 2px;
+}
+.dcMCta {
+  width: 36px;
+  height: 10px;
+  background: var(--ember);
+  border-radius: 3px;
+  margin-top: 2px;
+}
+.dcMGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+.dcMCard {
+  height: 24px;
+  border-radius: 3px;
+  background: var(--warm-50);
+}
+
+/* ── Sitemap Tree ── */
+.smTree {
+  width: 100%;
+  display: block;
+}
+.smNode {
+  cursor: default;
+  transition: fill-opacity 0.15s;
+}
+.smNode:hover {
+  fill-opacity: 0.85;
+}
+.smBadge {
+  font-family: var(--mono);
+  font-size: 7px;
+  fill: #fff;
+}
+
+/* ── Sticky Notes ── */
+.dcStickyCanvas {
+  position: relative;
+  width: 100%;
+  height: 340px;
+}
+.dcSticky {
+  position: absolute;
+  width: 140px;
+  padding: 12px;
+  border-radius: 3px;
+  box-shadow: 2px 3px 8px rgba(0, 0, 0, 0.08);
+  cursor: default;
+  transition: transform 0.2s, box-shadow 0.2s;
+  font-family: 'Outfit', sans-serif;
+}
+.dcSticky:hover {
+  transform: rotate(0deg) translateY(-2px) !important;
+  box-shadow: 3px 5px 14px rgba(0, 0, 0, 0.12);
+}
+.dcStickyText {
+  font-size: 12px;
+  color: var(--ink-800);
+  line-height: 1.4;
+  margin-bottom: 6px;
+}
+.dcStickyAuthor {
+  font-size: 9px;
+  color: var(--ink-400);
+  font-style: italic;
+}
+.dcStickyLines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ── Hand-drawn Chart ── */
+.hdChart {
+  width: 100%;
+  display: block;
+}
+.hdBar {
+  transition: fill-opacity 0.15s;
+}
+.hdBar:hover {
+  fill-opacity: 0.85;
+}
+.hdLabel {
+  font-family: 'Outfit', sans-serif;
+  font-size: 10px;
+  fill: var(--ink-400);
+}
+.hdValue {
+  font-family: var(--mono);
+  font-size: 9px;
+  fill: var(--ink-600);
+}
+.hdAnnotation {
+  font-family: var(--mono);
+  font-size: 9px;
+  fill: var(--ember);
+}
+
+/* ── Stamps ── */
+.dcStampsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.dcStamp {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  min-height: 28px;
+  cursor: default;
+  transition: transform 0.1s;
+}
+.dcStamp:hover {
+  transform: scale(1.03);
+}
+.dcStampIcon {
+  font-size: 14px;
+}
+.dcStampApplied {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1.5px solid var(--warm-200);
+  border-radius: var(--radius-sm);
+  background: var(--warm-50);
+}
+.dcStampAppliedIcon {
+  font-size: 24px;
+}
+.dcStampAppliedInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.dcStampAppliedLabel {
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-800);
+}
+.dcStampAppliedMeta {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-400);
+}
+
+/* ── Wireframe Kit ── */
+.dcWfGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.dcWfItem {
+  border: 1px solid var(--warm-200);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  overflow: hidden;
+  cursor: default;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.dcWfItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+.dcWfPreview {
+  padding: 10px;
+  min-height: 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.dcWfLabel {
+  text-align: center;
+  padding: 6px;
+  border-top: 1px solid var(--warm-100);
+  font-family: 'Outfit', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-500);
+}
+
+/* ── Wireframe kit primitives ── */
+.wkNav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--warm-100);
+}
+.wkLogo {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--warm-300);
+}
+.wkLinks {
+  display: flex;
+  gap: 3px;
+}
+.wkLink {
+  width: 14px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--warm-200);
+}
+.wkHeroSplit {
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+}
+.wkHeroText {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  justify-content: center;
+}
+.wkHeroImg {
+  width: 40%;
+  height: 40px;
+  border-radius: 3px;
+  background: var(--warm-100);
+}
+.wkTextLine {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--warm-200);
+}
+.wkTextLineSm {
+  height: 2px;
+  width: 60%;
+  border-radius: 2px;
+  background: var(--warm-100);
+}
+.wkCards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  padding: 6px;
+}
+.wkCard {
+  height: 28px;
+  border-radius: 3px;
+  background: var(--warm-50);
+  border: 1px solid var(--warm-100);
+}
+.wkTestimonial {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px;
+}
+.wkAvatar {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--warm-200);
+}
+.wkQuote {
+  width: 80%;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--warm-200);
+}
+.wkPricing {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  padding: 6px;
+}
+.wkPricingCol {
+  border: 1px solid var(--warm-100);
+  border-radius: 3px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.wkPricingColFeatured {
+  composes: wkPricingCol;
+  border-color: var(--ember);
+  background: var(--ember-bg);
+}
+.wkPrice {
+  font-family: var(--mono);
+  font-size: 8px;
+  color: var(--ink-600);
+}
+.wkBtn {
+  width: 24px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--ember);
+}
+.wkBtnOutline {
+  width: 24px;
+  height: 6px;
+  border-radius: 3px;
+  border: 1px solid var(--warm-200);
+  background: transparent;
+}
+.wkFooter {
+  background: var(--ink-800);
+  padding: 8px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  border-radius: 0 0 4px 4px;
+}
+.wkFooterCol {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.wkFooterLine {
+  height: 2px;
+  border-radius: 2px;
+  background: var(--ink-600);
+}
+.wkFooterLineSm {
+  height: 2px;
+  width: 60%;
+  border-radius: 2px;
+  background: var(--ink-700);
+}

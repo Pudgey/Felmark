@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import type { Block, BlockType, GraphType, MoneyBlockType, Tab, Workspace } from "@/lib/types";
+import type { Block, BlockType, GraphType, MoneyBlockType, DrawingType, Tab, Workspace } from "@/lib/types";
 import GraphBlockComponent, { getDefaultGraphData, GRAPH_TYPE_OPTIONS } from "./graphs/GraphBlock";
 import GraphDataEditor from "./graphs/GraphDataEditor";
 import graphStyles from "./graphs/GraphBlock.module.css";
@@ -12,6 +12,8 @@ import DeadlineBlockComponent, { getDefaultDeadlineData } from "./deadline-block
 import AudioBlockComponent, { getDefaultAudioData } from "./audio/AudioBlock";
 import AiBlock from "./ai/AiBlock";
 import CanvasBlock, { getDefaultCanvasData } from "./canvas/CanvasBlock";
+import DrawingBlockComponent, { getDefaultDrawingData, DRAWING_TYPE_OPTIONS } from "./drawing/DrawingBlock";
+import drawingStyles from "./drawing/DrawingBlock.module.css";
 import ShareModal from "./ShareModal";
 import ServicesPage from "../services/ServicesPage";
 import PipelineBoard from "../pipeline/PipelineBoard";
@@ -112,6 +114,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
   const [graphPicker, setGraphPicker] = useState<{ blockId: string } | null>(null);
   const [editingGraphId, setEditingGraphId] = useState<string | null>(null);
   const [moneyPicker, setMoneyPicker] = useState<{ blockId: string } | null>(null);
+  const [drawingPicker, setDrawingPicker] = useState<{ blockId: string } | null>(null);
   const [splitPickerOpen, setSplitPickerOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [notifPanelOpen, setNotifPanelOpen] = useState(false);
@@ -306,6 +309,11 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       setSlashMenu(null);
       return;
     }
+    if (type === "drawing") {
+      setDrawingPicker({ blockId });
+      setSlashMenu(null);
+      return;
+    }
     if (type === "deadline") {
       setBlocks(prev => {
         const idx = prev.findIndex(b => b.id === blockId);
@@ -480,6 +488,23 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     });
     setMoneyPicker(null);
   }, [moneyPicker]);
+
+  const selectDrawingType = useCallback((drawingType: DrawingType) => {
+    if (!drawingPicker) return;
+    const { blockId } = drawingPicker;
+    const drawingData = getDefaultDrawingData(drawingType);
+    setBlocks(prev => {
+      const idx = prev.findIndex(b => b.id === blockId);
+      const n = [...prev];
+      n[idx] = { ...n[idx], type: "drawing" as BlockType, content: "", drawingData };
+      const nid = uid();
+      contentCache.current[nid] = "";
+      n.splice(idx + 1, 0, { id: nid, type: "paragraph", content: "", checked: false });
+      setTimeout(() => { const ne = blockElMap.current[nid]; if (ne) cursorTo(ne, false); }, 20);
+      return n;
+    });
+    setDrawingPicker(null);
+  }, [drawingPicker]);
 
   const handleSelect = () => {
     const sel = window.getSelection();
@@ -941,6 +966,56 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
               data={block.canvasData}
               onUpdate={(updated) => setBlocks(prev => prev.map(b => b.id === block.id ? { ...b, canvasData: updated } : b))}
             />
+          </div>
+        </div>
+      );
+    }
+
+    // Drawing block
+    if (block.type === "drawing" && block.drawingData) {
+      return (
+        <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+          <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
+            <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
+              <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
+            </button>
+            <div className={`${styles.gutterBtn} ${styles.grip}`}>
+              <svg width="10" height="14" viewBox="0 0 10 14"><circle cx="3" cy="2.5" r="1" fill="currentColor"/><circle cx="7" cy="2.5" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="11.5" r="1" fill="currentColor"/><circle cx="7" cy="11.5" r="1" fill="currentColor"/></svg>
+            </div>
+            <button className={`${styles.gutterBtn} ${styles.gutterDelete}`} onClick={() => deleteBlock(block.id)} title="Delete block">
+              <svg width="10" height="10" viewBox="0 0 10 10"><path d="M3 3l4 4M7 3l-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>
+            </button>
+          </div>
+          <div style={{ flex: 1 }}>
+            <DrawingBlockComponent
+              drawingData={block.drawingData}
+              onUpdate={(updated) => setBlocks(prev => prev.map(b => b.id === block.id ? { ...b, drawingData: updated } : b))}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    // Drawing sub-picker
+    if (drawingPicker && drawingPicker.blockId === block.id && block.type !== "drawing") {
+      return (
+        <div key={block.id} className={styles.blockRow}>
+          <div className={styles.gutter} style={{ opacity: 0 }} />
+          <div style={{ flex: 1 }}>
+            <div className={drawingStyles.dcPanel}>
+              <div className={drawingStyles.dcPanelHead}>
+                <span className={drawingStyles.dcPanelTitle}>Choose a drawing type</span>
+                <button onClick={() => setDrawingPicker(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-300)", fontSize: 14, marginLeft: "auto" }}>&times;</button>
+              </div>
+              <div className={drawingStyles.subPicker}>
+                {DRAWING_TYPE_OPTIONS.map(opt => (
+                  <button key={opt.type} className={drawingStyles.subPickerItem} onClick={() => selectDrawingType(opt.type)}>
+                    <span className={drawingStyles.subPickerIcon}>{opt.icon}</span>
+                    <span className={drawingStyles.subPickerLabel}>{opt.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       );

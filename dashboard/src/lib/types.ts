@@ -33,6 +33,7 @@ export type BlockType =
   | "signoff"
   | "annotation"
   | "canvas"
+  | "drawing"
   | "ai-action"
   | "timeline"
   | "flow"
@@ -323,6 +324,14 @@ export interface CanvasBlockData {
   elements: CanvasElement[];
 }
 
+export type DrawingType = "flowchart" | "userflow" | "devices" | "sitemap" | "stickies" | "sketch-chart" | "stamps" | "wireframe-kit";
+
+export interface DrawingBlockData {
+  drawingType: DrawingType;
+  title: string;
+  data: unknown;
+}
+
 export type AiActionMode = "summarize" | "suggest" | "translate" | "tone" | "scope";
 
 export interface AiActionBlockData {
@@ -524,6 +533,7 @@ export interface Block {
   signoffData?: SignoffData;
   annotationData?: AnnotationData;
   canvasData?: CanvasBlockData;
+  drawingData?: DrawingBlockData;
   columnsData?: ColumnsBlockData;
   dataChipsData?: DataChipsBlockData;
   visualData?: VisualBlockData;

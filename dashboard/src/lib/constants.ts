@@ -42,6 +42,7 @@ export const BLOCK_TYPES: BlockTypeInfo[] = [
   { type: "signoff", label: "Sign-off", icon: "✓", desc: "Lock section after approval", section: "Collaboration", shortcut: "/signoff" },
   { type: "annotation", label: "Annotation", icon: "📌", desc: "Pin comments on an image", section: "Collaboration", shortcut: "/annotate" },
   { type: "canvas", label: "Canvas", icon: "◇", desc: "Sketchy whiteboard drawing", section: "Blocks", shortcut: "/canvas" },
+  { type: "drawing", label: "Drawing", icon: "✎", desc: "Pre-built visual diagrams", section: "Visual", shortcut: "/drawing" },
   { type: "ai-action", label: "AI Action", icon: "⚡", desc: "Summarize, suggest, translate, tone-check, or scope-risk", section: "Blocks", shortcut: "/action" },
   { type: "timeline", label: "Timeline", icon: "⏱", desc: "Project roadmap with phases", section: "Visual", shortcut: "/timeline" },
   { type: "flow", label: "Process Flow", icon: "◎", desc: "Step-by-step visual process", section: "Visual", shortcut: "/flow" },
