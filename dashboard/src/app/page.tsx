@@ -6,10 +6,8 @@ import type { Block, Workstation, Project, Tab, ArchivedProject, WorkstationTemp
 import { uid, makeBlocks } from "@/lib/utils";
 import Rail from "@/components/rail/Rail";
 import Sidebar from "@/components/sidebar/Sidebar";
-import Editor from "@/components/editor/Editor";
 import WorkstationOnboarding from "@/components/onboarding/WorkstationOnboarding";
 import ErrorBoundary from "@/components/shared/ErrorBoundary";
-import WorkspacePage from "@/components/workspace-page/WorkspacePage";
 import { INITIAL_COMMENTS, type Comment } from "@/components/comments/CommentPanel";
 import { INITIAL_ACTIVITIES, type BlockActivity } from "@/components/activity/ActivityMargin";
 import CreationAnimation from "@/components/onboarding/CreationAnimation";
@@ -18,8 +16,9 @@ import type { DocumentTemplate } from "@/lib/types";
 import { STARTER_TEMPLATES } from "@/lib/starter-templates";
 import { createForge } from "@/forge";
 import type { StateUpdater } from "@/forge";
-import SaveTemplateModal from "@/components/templates/SaveTemplateModal";
-import TemplatePicker from "@/components/templates/TemplatePicker";
+import SaveTemplateModal from "@/components/workstation/templates/SaveTemplateModal";
+import TemplatePicker from "@/components/workstation/templates/TemplatePicker";
+import ViewRouter from "@/views/ViewRouter";
 
 const INITIAL_TABS: Tab[] = [
   { id: "p1", name: "Brand Guidelines v2", client: "Meridian Studio", active: true },
@@ -428,6 +427,34 @@ export default function Dashboard() {
 
   const activeBlocks = blocksMap[activeProject] || makeEmptyBlocks();
 
+  const navigateRail = useCallback((item: string) => {
+    if (item === "workstations") {
+      restoreWorkstationContext();
+      return;
+    }
+    if (item === "forge") {
+      openForgeRail();
+      return;
+    }
+    setLaunchpadOpen(false);
+    setRailActive(item);
+    if (item === "home") {
+      setActiveWorkstationId(null);
+      updateTabs(prev => prev.map(t => ({ ...t, active: false })));
+      updateActiveProject("");
+      setSidebarOpen(true);
+    }
+  }, [restoreWorkstationContext, openForgeRail, updateTabs, updateActiveProject]);
+
+  const handleRenameWorkstation = useCallback((wsId: string, name: string) => {
+    updateWorkstations(prev => prev.map(w => w.id === wsId ? { ...w, client: name, avatar: name[0].toUpperCase() } : w));
+    updateTabs(prev => prev.map(t => {
+      const ws = workstations.find(w => w.id === wsId);
+      if (ws && ws.projects.some(p => p.id === t.id)) return { ...t, client: name };
+      return t;
+    }));
+  }, [updateWorkstations, updateTabs, workstations]);
+
   return (
     <ErrorBoundary>
     <div style={{ display: "flex", height: "100dvh", background: "var(--parchment)" }}>
@@ -550,18 +577,25 @@ export default function Dashboard() {
             onSkip={skipOnboarding}
           />
         </div>
-      ) : railActive === "workspace" ? (
-        <WorkspacePage />
       ) : (
-        <Editor
+        <ViewRouter
+          railActive={railActive}
           workstations={workstations}
           tabs={tabs}
           activeProject={activeProject}
           activeWorkstationId={activeWorkstationId}
-          blocks={activeBlocks}
+          activeBlocks={activeBlocks}
+          blocksMap={blocksMap}
           sidebarOpen={sidebarOpen}
           wordCount={wordCount}
           charCount={charCount}
+          overdueCount={overdueCount}
+          splitProject={splitProject}
+          comments={comments}
+          activities={activitiesMap[activeProject] || []}
+          docTemplates={docTemplates}
+          zenMode={zenMode}
+          calendarScrollTarget={calendarScrollTarget}
           onOpenSidebar={() => setSidebarOpen(true)}
           onTabClick={handleTabClick}
           onTabClose={handleTabClose}
@@ -571,52 +605,14 @@ export default function Dashboard() {
           onBlocksChange={handleBlocksChange}
           onWordCountChange={handleWordCountChange}
           onSelectProject={selectProject}
-          onNewWorkstation={() => setOnboardingName("New Client")}
-          onNewTabInWorkstation={handleNewTabInWorkstation}
           onSelectWorkstationHome={selectWorkstationHome}
-          onNavigateRail={(item) => {
-            if (item === "workstations") {
-              restoreWorkstationContext();
-              return;
-            }
-            if (item === "forge") {
-              openForgeRail();
-              return;
-            }
-            setLaunchpadOpen(false);
-            setRailActive(item);
-            if (item === "home") {
-              setActiveWorkstationId(null);
-              updateTabs(prev => prev.map(t => ({ ...t, active: false })));
-              updateActiveProject("");
-              setSidebarOpen(true);
-            }
-          }}
+          onNavigateRail={navigateRail}
           onSaveAsTemplate={() => setShowSaveTemplate(true)}
-          docTemplates={docTemplates}
-          railActive={railActive}
-          calendarScrollTarget={calendarScrollTarget}
-          onCalendarScrollComplete={() => setCalendarScrollTarget(null)}
-          onCalendarOpenProject={calendarOpenProject}
-          onRenameWorkstation={(wsId, name) => {
-            updateWorkstations(prev => prev.map(w => w.id === wsId ? { ...w, client: name, avatar: name[0].toUpperCase() } : w));
-            updateTabs(prev => prev.map(t => {
-              const ws = workstations.find(w => w.id === wsId);
-              if (ws && ws.projects.some(p => p.id === t.id)) return { ...t, client: name };
-              return t;
-            }));
-          }}
+          onRenameWorkstation={handleRenameWorkstation}
           onUpdateProjectDue={updateProjectDue}
-          comments={comments}
           onCommentsChange={updateComments}
-          activities={activitiesMap[activeProject] || []}
           onActivitiesChange={(newActivities) => updateActivitiesMap(prev => ({ ...prev, [activeProject]: newActivities }))}
-          zenMode={zenMode}
           onToggleZen={() => setZenMode(prev => !prev)}
-          splitProject={splitProject}
-          splitBlocks={splitProject ? blocksMap[splitProject] || [] : undefined}
-          splitProjectName={splitProject ? (() => { for (const w of workstations) { const p = w.projects.find(p => p.id === splitProject); if (p) return p.name; } return "Untitled"; })() : undefined}
-          splitClientName={splitProject ? (() => { for (const w of workstations) { if (w.projects.some(p => p.id === splitProject)) return w.client; } return ""; })() : undefined}
           onSplitOpen={(id) => setSplitProject(id)}
           onSplitClose={() => setSplitProject(null)}
           onSplitMakePrimary={() => {
@@ -626,6 +622,16 @@ export default function Dashboard() {
             if (ws && proj) {
               selectProject(proj, ws.client);
               setSplitProject(null);
+            }
+          }}
+          onNewWorkstation={() => setOnboardingName("New Client")}
+          onNewTabInWorkstation={handleNewTabInWorkstation}
+          onCalendarOpenProject={calendarOpenProject}
+          onCalendarScrollComplete={() => setCalendarScrollTarget(null)}
+          onForgeClose={restoreWorkstationContext}
+          onForgeSave={(newBlocks) => {
+            if (activeProject) {
+              updateBlocksMap(prev => ({ ...prev, [activeProject]: newBlocks }));
             }
           }}
         />

@@ -1,0 +1,34 @@
+/* ── Shared ── */
+.block { border: 1px solid var(--warm-200); border-radius: var(--radius-lg); overflow: hidden; margin: 8px 0; }
+.blockHeader { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--warm-50); border-bottom: 1px solid var(--warm-100); }
+.blockIcon { font-size: 14px; flex-shrink: 0; width: 32px; height: 32px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; }
+.blockLabel { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+.blockBody { padding: 14px 16px; }
+.blockMeta { font-family: var(--mono); font-size: 11px; color: var(--ink-400); margin-left: auto; flex-shrink: 0; }
+
+/* ── Timeline ── */
+.timeline { composes: block; }
+.timelineHeader { composes: blockHeader; }
+.timelineIcon { composes: blockIcon; background: rgba(91, 127, 164, 0.1); color: #5b7fa4; }
+.timelineLabel { composes: blockLabel; color: #5b7fa4; }
+.timelineBody { composes: blockBody; padding: 20px 16px 16px; }
+.timelinePhases { position: relative; padding-left: 28px; }
+.timelinePhase { position: relative; padding-bottom: 24px; }
+.timelinePhase:last-child { padding-bottom: 0; }
+.timelineDot { position: absolute; left: -28px; top: 2px; width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--warm-300); background: var(--parchment); z-index: 1; display: flex; align-items: center; justify-content: center; font-size: 8px; }
+.timelineDotDone { border-color: #5a9a3c; background: #5a9a3c; color: #fff; }
+.timelineDotCurrent { border-color: var(--ember); background: var(--ember); }
+.timelineDotUpcoming { border-color: var(--warm-300); background: var(--warm-100); opacity: 0.6; }
+.timelineLine { position: absolute; left: -22px; top: 16px; bottom: 0; width: 2px; background: var(--warm-200); }
+.timelinePhase:last-child .timelineLine { display: none; }
+.timelinePhaseLabel { font-family: var(--font-heading); font-size: 15px; font-weight: 600; color: var(--ink-800); }
+.timelinePhaseDate { font-family: var(--mono); font-size: 11px; color: var(--ink-400); margin-left: 8px; }
+.timelineItems { margin-top: 6px; list-style: none; padding: 0; }
+.timelineItem { font-size: 13px; color: var(--ink-600); padding: 3px 0; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.timelineItem:hover { color: var(--ink-800); }
+.timelineItemCheck { width: 14px; height: 14px; border-radius: 3px; border: 1.5px solid var(--warm-300); display: flex; align-items: center; justify-content: center; font-size: 9px; flex-shrink: 0; }
+.timelineItemCheckDone { border-color: #5a9a3c; background: #5a9a3c; color: #fff; }
+.timelineItemText { line-height: 1.4; }
+.timelineItemTextDone { text-decoration: line-through; color: var(--ink-400); }
+.timelinePhaseUpcoming .timelinePhaseLabel,
+.timelinePhaseUpcoming .timelineItems { opacity: 0.5; }

@@ -1,9 +1,9 @@
 import type { Block } from "@/lib/types";
-import { getDefaultDeadlineData } from "@/components/editor/deadline-block/DeadlineBlock";
-import { getDefaultCanvasData } from "@/components/editor/canvas/CanvasBlock";
-import { getDefaultAudioData } from "@/components/editor/audio/AudioBlock";
-import { getDefaultDataChipsData } from "@/components/editor/data-chips/DataChipsBlock";
-import { getDefaultColumnsData } from "@/components/editor/columns/ColumnsBlock";
+import { getDefaultDeadlineData } from "@/components/workstation/editor/blocks/deadline/DeadlineBlock";
+import { getDefaultCanvasData } from "@/components/workstation/editor/blocks/canvas/CanvasBlock";
+import { getDefaultAudioData } from "@/components/workstation/editor/blocks/audio/AudioBlock";
+import { getDefaultDataChipsData } from "@/components/workstation/editor/blocks/data-chips/DataChipsBlock";
+import { getDefaultColumnsData } from "@/components/workstation/editor/blocks/columns/ColumnsBlock";
 
 export const CONTENT_DEFAULTS: Record<string, () => Partial<Block>> = {
   table: () => ({ tableData: { rows: [["Column 1", "Column 2", "Column 3"], ["—", "—", "—"], ["—", "—", "—"]] } }),

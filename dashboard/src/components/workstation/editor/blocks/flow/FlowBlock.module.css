@@ -1,0 +1,24 @@
+/* ── Shared ── */
+.block { border: 1px solid var(--warm-200); border-radius: var(--radius-lg); overflow: hidden; margin: 8px 0; }
+.blockHeader { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--warm-50); border-bottom: 1px solid var(--warm-100); }
+.blockIcon { font-size: 14px; flex-shrink: 0; width: 32px; height: 32px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; }
+.blockLabel { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+.blockBody { padding: 14px 16px; }
+.blockMeta { font-family: var(--mono); font-size: 11px; color: var(--ink-400); margin-left: auto; flex-shrink: 0; }
+
+/* ── Flow ── */
+.flow { composes: block; }
+.flowHeader { composes: blockHeader; }
+.flowIcon { composes: blockIcon; background: rgba(124, 107, 158, 0.1); color: #7c6b9e; }
+.flowLabel { composes: blockLabel; color: #7c6b9e; }
+.flowBody { composes: blockBody; padding: 20px 16px; overflow-x: auto; }
+.flowTrack { display: flex; align-items: flex-start; position: relative; gap: 0; min-width: max-content; }
+.flowConnector { position: absolute; top: 28px; left: 28px; right: 28px; height: 2px; background: var(--warm-200); z-index: 0; }
+.flowNode { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; width: 120px; flex-shrink: 0; cursor: pointer; padding: 0 4px; }
+.flowNodeIcon { width: 56px; height: 56px; border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; font-size: 22px; transition: transform 0.15s; border: 2px solid transparent; }
+.flowNode:hover .flowNodeIcon { transform: scale(1.08); }
+.flowNodeActive .flowNodeIcon { border-color: var(--ink-800); }
+.flowNodeLabel { font-family: var(--font-heading); font-size: 13px; font-weight: 600; color: var(--ink-800); margin-top: 8px; text-align: center; }
+.flowNodeSub { font-family: var(--mono); font-size: 11px; color: var(--ink-400); text-align: center; margin-top: 2px; }
+.flowDetail { margin-top: 16px; padding: 12px 16px; background: var(--warm-50); border: 1px solid var(--warm-100); border-radius: var(--radius-md); font-size: 13.5px; color: var(--ink-600); line-height: 1.5; }
+.flowDetailLabel { font-family: var(--mono); font-size: 11px; color: var(--ink-400); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }

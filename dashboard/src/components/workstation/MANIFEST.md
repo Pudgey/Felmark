@@ -1,18 +1,44 @@
-# WorkspaceHome -- Manifest
+# workstation/
 
-> Auto-maintained by AI. Updated on every file change in this folder.
+The Workstation is Felmark's flagship product surface — the full-featured freelancer command center. Everything a power user needs to manage clients, projects, documents, and business operations lives here.
 
-## Exports
-- `WorkspaceHome` -- Workspace landing page with project grid, stats, and deadline overview
+## Core Features
 
-## Dependencies
-- `@/lib/types` -- Workspace, Project
-- `@/lib/constants` -- STATUS
-- `@/lib/due-dates` -- getDaysLeft, formatDueShort, getDueLabel, getDueColor
+| Folder | Feature | Description |
+|--------|---------|-------------|
+| `editor/` | **Block Editor** | Notion-style document editor with slash commands, format bar, drag-and-drop, 40+ block types, split pane, and command palette |
+| `calendar/` | **Calendar** | Full calendar view with project deadlines, timeline visualization |
+| `search/` | **Search** | Cross-workstation search across projects and documents |
+| `pipeline/` | **Pipeline** | Kanban-style project pipeline board |
+| `finance/` | **Finance** | Revenue tracking, invoicing, and financial overview |
+| `wire/` | **The Wire** | Activity feed and communication stream |
+| `team/` | **Team** | Team member management and collaboration |
+| `services/` | **Services** | Service offerings and pricing management |
+| `templates/` | **Templates** | Document and project templates (SaveTemplateModal, TemplatePicker, TemplatesPage) |
+| `forge-paper/` | **Forge Paper** | AI-assisted document generation surface |
+| `dashboard/` | **Dashboard Home** | Workstation landing with project overview and quick actions |
+| `terminal-welcome/` | **Terminal Welcome** | First-run / empty-state welcome screen with stats |
+
+## Root Files
+
+| File | Description |
+|------|-------------|
+| `Workstation.tsx` | Workstation home view — project grid, stats, deadline overview |
+| `Workstation.module.css` | Workstation home styles |
 
 ## Imported By
-- `Editor.tsx` -- rendered when workspace home view is active
 
-## Files
-- `WorkspaceHome.tsx` -- main component (300 lines)
-- `WorkspaceHome.module.css` -- styles
+| Consumer | What |
+|----------|------|
+| `views/ViewRouter.tsx` | Routes `railActive` to the correct feature view |
+| `views/*.tsx` | Individual view wrappers import their feature component |
+| `app/page.tsx` | Templates (SaveTemplateModal, TemplatePicker) |
+
+## Shared Dependencies (top-level components used by workstation features)
+
+- `components/comments/` — comment threads
+- `components/activity/` — activity margin
+- `components/history/` — version history modal
+- `components/terminal/` — embedded terminal
+- `components/notifications/` — notification panel
+- `components/shared/` — hooks, primitives, utilities

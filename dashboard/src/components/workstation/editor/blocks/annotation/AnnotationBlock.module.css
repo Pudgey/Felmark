@@ -1,0 +1,37 @@
+/* ── Shared ── */
+.block { border: 1px solid var(--warm-200); border-radius: var(--radius-lg); overflow: hidden; margin: 8px 0; }
+.blockHeader { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--warm-50); border-bottom: 1px solid var(--warm-100); }
+.blockIcon { font-size: 14px; flex-shrink: 0; width: 32px; height: 32px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; }
+.blockMeta { font-family: var(--mono); font-size: 11px; color: var(--ink-400); margin-left: auto; flex-shrink: 0; }
+.blockInput { width: 100%; padding: 8px 12px; border: 1px solid var(--warm-200); border-radius: var(--radius-md); font-family: inherit; font-size: 14px; color: var(--ink-800); outline: none; background: var(--parchment); transition: border-color 0.1s; }
+.blockInput:focus { border-color: var(--ember); }
+.blockInput::placeholder { color: var(--warm-400); }
+.blockBtn { padding: 6px 14px; border-radius: var(--radius-md); border: 1px solid var(--warm-200); background: none; font-family: inherit; font-size: 13px; color: var(--ink-600); cursor: pointer; transition: all 0.08s; display: flex; align-items: center; gap: 6px; }
+.blockBtn:hover { background: var(--warm-100); color: var(--ink-800); }
+.blockBtnPrimary { background: var(--ember); border-color: var(--ember); color: #fff; }
+.blockBtnPrimary:hover { background: var(--ember-light, #c89360); }
+.blockBtnSmall { padding: 4px 10px; font-size: 12px; }
+
+/* ── Annotation ── */
+.annotation { composes: block; }
+.annotationHeader { composes: blockHeader; }
+.annotationIcon { composes: blockIcon; background: rgba(194, 75, 56, 0.08); color: #c24b38; }
+.annotationLabel { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #c24b38; }
+.annotationCanvas { position: relative; background: var(--warm-100); min-height: 200px; cursor: crosshair; overflow: hidden; }
+.annotationImg { width: 100%; display: block; }
+.annotationPlaceholder { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px; color: var(--ink-300); gap: 8px; font-size: 13px; }
+.annotationPin { position: absolute; width: 24px; height: 24px; border-radius: 50%; background: #c24b38; color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; transform: translate(-50%, -50%); cursor: pointer; border: 2px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: transform 0.1s; z-index: 2; }
+.annotationPin:hover { transform: translate(-50%, -50%) scale(1.15); }
+.annotationPinResolved { background: #5a9a3c; }
+.annotationPinList { padding: 8px 16px; }
+.annotationPinItem { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--warm-100); align-items: flex-start; }
+.annotationPinItem:last-child { border-bottom: none; }
+.annotationPinNum { width: 22px; height: 22px; border-radius: 50%; background: #c24b38; color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.annotationPinNumResolved { background: #5a9a3c; }
+.annotationPinBody { flex: 1; min-width: 0; }
+.annotationPinAuthor { font-size: 12px; font-weight: 500; color: var(--ink-600); }
+.annotationPinComment { font-size: 13px; color: var(--ink-500); margin-top: 1px; }
+.annotationPinResolve { font-family: var(--mono); font-size: 11px; color: var(--ink-300); background: none; border: none; cursor: pointer; padding: 2px 6px; border-radius: var(--radius-sm); margin-top: 2px; transition: all 0.08s; }
+.annotationPinResolve:hover { background: var(--warm-100); color: var(--ink-500); }
+
+.annotationCompose { display: flex; gap: 8px; padding: 10px 16px; border-top: 1px solid var(--warm-100); background: var(--warm-50); align-items: center; }

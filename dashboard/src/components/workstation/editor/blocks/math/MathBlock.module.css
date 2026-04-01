@@ -1,0 +1,12 @@
+/* MATH */
+.math { border: 1px solid var(--warm-200); border-radius: var(--radius-lg); overflow: hidden; margin: 8px 0; }
+.mathHead { display: flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--warm-50); border-bottom: 1px solid var(--warm-100); }
+.mathIcon { font-size: 14px; color: var(--ember); }
+.mathLabel { font-family: var(--mono); font-size: 10px; color: var(--ink-400); text-transform: uppercase; letter-spacing: .06em; }
+.mathFormula { padding: 16px 20px; font-family: var(--mono); font-size: 16px; color: var(--ink-800); }
+.mathVars { padding: 0 16px 12px; display: flex; gap: 12px; flex-wrap: wrap; }
+.mathVar { display: flex; align-items: center; gap: 4px; font-family: var(--mono); font-size: 12px; }
+.mathVarName { color: var(--ink-500); } .mathVarEq { color: var(--ink-300); } .mathVarVal { color: var(--ink-700); font-weight: 500; }
+.mathResult { padding: 10px 16px; border-top: 1px solid var(--warm-100); display: flex; justify-content: space-between; align-items: center; background: var(--warm-50); }
+.mathResultLabel { font-family: var(--mono); font-size: 10px; color: var(--ink-400); text-transform: uppercase; letter-spacing: .06em; }
+.mathResultVal { font-family: var(--font-heading), 'Cormorant Garamond', serif; font-size: 24px; font-weight: 600; color: var(--ember); }

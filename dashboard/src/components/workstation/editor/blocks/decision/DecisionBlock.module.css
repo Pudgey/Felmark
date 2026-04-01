@@ -1,0 +1,26 @@
+/* ── Shared ── */
+.block { border: 1px solid var(--warm-200); border-radius: var(--radius-lg); overflow: hidden; margin: 8px 0; }
+.blockHeader { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--warm-50); border-bottom: 1px solid var(--warm-100); }
+.blockIcon { font-size: 14px; flex-shrink: 0; width: 32px; height: 32px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; }
+.blockBody { padding: 14px 16px; }
+.blockMeta { font-family: var(--mono); font-size: 11px; color: var(--ink-400); margin-left: auto; flex-shrink: 0; }
+.blockInput { width: 100%; padding: 8px 12px; border: 1px solid var(--warm-200); border-radius: var(--radius-md); font-family: inherit; font-size: 14px; color: var(--ink-800); outline: none; background: var(--parchment); transition: border-color 0.1s; }
+.blockInput:focus { border-color: var(--ember); }
+.blockInput::placeholder { color: var(--warm-400); }
+.blockTextarea { composes: blockInput; min-height: 60px; resize: vertical; line-height: 1.5; font-size: 13.5px; }
+.blockBtn { padding: 6px 14px; border-radius: var(--radius-md); border: 1px solid var(--warm-200); background: none; font-family: inherit; font-size: 13px; color: var(--ink-600); cursor: pointer; transition: all 0.08s; display: flex; align-items: center; gap: 6px; }
+.blockBtn:hover { background: var(--warm-100); color: var(--ink-800); }
+.blockBtnSmall { padding: 4px 10px; font-size: 12px; }
+.blockActions { display: flex; gap: 6px; margin-top: 12px; }
+.feedbackFieldLabel { font-family: var(--mono); font-size: 11px; color: var(--ink-400); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; display: block; }
+
+/* ── Decision ── */
+.decision { composes: block; border-color: rgba(124, 133, 148, 0.3); }
+.decisionHeader { composes: blockHeader; background: rgba(124, 133, 148, 0.04); }
+.decisionIcon { composes: blockIcon; background: rgba(124, 133, 148, 0.1); color: #7c8594; }
+.decisionLabel { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #7c8594; }
+.decisionResult { padding: 10px 14px; background: rgba(90, 154, 60, 0.04); border: 1px solid rgba(90, 154, 60, 0.12); border-radius: var(--radius-md); margin-bottom: 10px; }
+.decisionResultLabel { font-family: var(--mono); font-size: 11px; color: #5a9a3c; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 2px; }
+.decisionAlt { display: flex; align-items: flex-start; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--warm-100); }
+.decisionAlt:last-child { border-bottom: none; }
+.decisionAltDot { width: 6px; height: 6px; border-radius: 50%; background: var(--warm-300); flex-shrink: 0; margin-top: 6px; }

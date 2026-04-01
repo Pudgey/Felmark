@@ -1,0 +1,22 @@
+/* ── Shared ── */
+.block { border: 1px solid var(--warm-200); border-radius: var(--radius-lg); overflow: hidden; margin: 8px 0; }
+.blockHeader { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--warm-50); border-bottom: 1px solid var(--warm-100); }
+.blockIcon { font-size: 14px; flex-shrink: 0; width: 32px; height: 32px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; }
+.blockBody { padding: 14px 16px; }
+.blockMeta { font-family: var(--mono); font-size: 11px; color: var(--ink-400); margin-left: auto; flex-shrink: 0; }
+
+/* ── Mood Board ── */
+.mood { composes: block; }
+.moodHeader { composes: blockHeader; }
+.moodIcon { composes: blockIcon; background: rgba(138, 126, 99, 0.1); color: #8a7e63; }
+.moodLabel { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #8a7e63; }
+.moodBody { composes: blockBody; padding: 12px; }
+.moodGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.moodCell { border-radius: var(--radius-md); padding: 24px 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: transform 0.15s; min-height: 100px; }
+.moodCell:hover { transform: scale(1.03); }
+.moodCellLarge { grid-row: span 2; }
+.moodCellWide { grid-column: span 2; }
+.moodCellIcon { font-size: 28px; }
+.moodCellLabel { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.85; }
+.moodKeywords { display: flex; gap: 6px; flex-wrap: wrap; padding: 12px 16px; border-top: 1px solid var(--warm-100); margin-top: 4px; }
+.moodKeyword { font-family: var(--mono); font-size: 11px; padding: 4px 10px; border-radius: var(--radius-sm); background: var(--warm-100); color: var(--ink-500); }

@@ -1,0 +1,123 @@
+/* ── Shared ── */
+
+.inlineInput {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--warm-300);
+  outline: none;
+  font: inherit;
+  color: inherit;
+  text-align: center;
+  width: 100%;
+  padding: 0;
+}
+
+/* ═══════════════════════════════════════════
+   Value Counter
+   ═══════════════════════════════════════════ */
+
+.valueCounter {
+  padding: 48px 36px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--ink-900, #1c1b18);
+  color: #fff;
+  text-align: center;
+}
+
+.vcTopLabel {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.04em;
+  margin-bottom: 16px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.vcTopLabelVisible {
+  composes: vcTopLabel;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.vcAmount {
+  font-family: var(--font-heading), 'Cormorant Garamond', serif;
+  font-size: 56px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 28px;
+  color: #fff;
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.vcAmountVisible {
+  composes: vcAmount;
+  opacity: 1;
+  transform: scale(1);
+}
+
+.vcRows {
+  max-width: 360px;
+  margin: 0 auto 24px;
+}
+
+.vcRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.vcRowVisible {
+  composes: vcRow;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.vcRowLabel {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.vcRowAmountPos {
+  font-size: 13px;
+  font-weight: 600;
+  color: #5a9a3c;
+}
+
+.vcRowAmountNeg {
+  font-size: 13px;
+  font-weight: 600;
+  color: #c24b38;
+}
+
+.vcBottom {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.5s ease 0.6s, transform 0.5s ease 0.6s;
+}
+
+.vcBottom strong {
+  color: var(--ember);
+  font-weight: 600;
+}
+
+.vcBottomVisible {
+  composes: vcBottom;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.valueCounter .inlineInput {
+  color: #fff;
+  border-bottom-color: rgba(255, 255, 255, 0.3);
+}

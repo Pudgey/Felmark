@@ -1,0 +1,18 @@
+/* SWATCHES */
+.swatches { margin: 8px 0; }
+.swatchGrid { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+.swatch { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; padding: 6px; border-radius: var(--radius-md); transition: all .08s; border: 1px solid transparent; }
+.swatch:hover { background: var(--warm-50); }
+.swatchOn { border-color: var(--ember); background: var(--ember-bg); }
+.swatchCircle { width: 52px; height: 52px; border-radius: var(--radius-lg); border: 1px solid rgba(0,0,0,.06); box-shadow: 0 2px 6px rgba(0,0,0,.04); }
+.swatchName { font-size: 11px; color: var(--ink-500); font-weight: 500; }
+.swatchHex { font-family: var(--mono); font-size: 10px; color: var(--ink-300); }
+.contrastPanel { border: 1px solid var(--warm-200); border-radius: var(--radius-lg); padding: 12px 14px; margin-top: 8px; }
+.contrastLabel { font-family: var(--mono); font-size: 9px; color: var(--ink-400); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
+.contrastRow { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 12px; }
+.contrastDot { width: 14px; height: 14px; border-radius: 3px; border: 1px solid rgba(0,0,0,.06); flex-shrink: 0; }
+.contrastName { flex: 1; color: var(--ink-500); }
+.contrastRatio { font-family: var(--mono); font-size: 11px; color: var(--ink-700); font-weight: 500; min-width: 50px; text-align: right; }
+.contrastBadge { font-family: var(--mono); font-size: 9px; font-weight: 500; padding: 1px 6px; border-radius: 3px; min-width: 40px; text-align: center; }
+.pass { color: #5a9a3c; background: rgba(90,154,60,.06); border: 1px solid rgba(90,154,60,.1); }
+.fail { color: #c24b38; background: rgba(194,75,56,.06); border: 1px solid rgba(194,75,56,.1); }
