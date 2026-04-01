@@ -9,18 +9,32 @@ interface RowInsertionBarProps {
 }
 
 export default function RowInsertionBar({ y, width, onInsert }: RowInsertionBarProps) {
+  const handleInsert = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onInsert();
+  };
+
   return (
     <div
       className={styles.insertionZone}
       style={{ top: y - 12, width }}
+      onMouseDown={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
+      onClick={handleInsert}
     >
       <div className={styles.insertionLine} />
       <button
+        type="button"
         className={styles.insertionBtn}
-        onClick={(e) => {
+        aria-label="Insert row"
+        onMouseDown={(e) => {
+          e.preventDefault();
           e.stopPropagation();
-          onInsert();
         }}
+        onClick={handleInsert}
       >
         +
       </button>
