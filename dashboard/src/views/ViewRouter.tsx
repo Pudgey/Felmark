@@ -16,7 +16,6 @@ import TeamView from "./team";
 import HomeView from "./home";
 import ForgeView from "./forge";
 import WorkstationView from "./workstation";
-import TerminalWelcomeView from "./terminal-welcome";
 import EditorView from "./editor";
 
 export interface ViewRouterProps {
@@ -99,10 +98,6 @@ export default function ViewRouter(props: ViewRouterProps) {
   // Non-rail-name routes: workstation home, terminal welcome, or editor
   if (activeWorkstationId && !tabs.some(t => t.active)) {
     return wrap(<WorkstationView workstations={props.workstations} activeWorkstationId={activeWorkstationId} onSelectProject={props.onSelectProject} onNewTab={props.onNewTab} onRenameWorkstation={props.onRenameWorkstation} onUpdateProjectDue={props.onUpdateProjectDue} />);
-  }
-
-  if (!tabs.some(t => t.active)) {
-    return wrap(<TerminalWelcomeView workstations={props.workstations} overdueCount={props.overdueCount} onNewWorkstation={props.onNewWorkstation} />);
   }
 
   return (

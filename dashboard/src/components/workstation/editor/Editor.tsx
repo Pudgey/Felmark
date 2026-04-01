@@ -12,6 +12,7 @@ import DeadlineBlockComponent, { getDefaultDeadlineData } from "./blocks/deadlin
 import AudioBlockComponent, { getDefaultAudioData } from "./blocks/audio/AudioBlock";
 import AiBlock from "./blocks/ai/AiBlock";
 import CanvasBlock, { getDefaultCanvasData } from "./blocks/canvas/CanvasBlock";
+import TerminalWelcome from "../terminal-welcome/TerminalWelcome";
 import ShareModal from "./panels/share-modal/ShareModal";
 import TableBlock from "./blocks/table/TableBlock";
 import AccordionBlock from "./blocks/accordion/AccordionBlock";
@@ -1617,6 +1618,14 @@ export default function Editor({ workstations, tabs, activeProject, blocks: bloc
         <ConversationPanel open={convoPanelOpen} onClose={() => setConvoPanelOpen(false)} />
 
         <div className={styles.editorCol}>
+          {!activeTab ? (
+            <TerminalWelcome
+              activeCount={workstations.reduce((s, w) => s + w.projects.filter(p => p.status !== "completed").length, 0)}
+              reviewCount={workstations.reduce((s, w) => s + w.projects.filter(p => p.status === "review").length, 0)}
+              overdueCount={workstations.reduce((s, w) => s + w.projects.filter(p => p.status === "overdue" || (p.due && new Date(p.due) < new Date())).length, 0)}
+              onNewWorkstation={() => {}}
+            />
+          ) : (
           <div className={styles.surfaceStage}>
               <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
                 {/* Left margin — document spine + block gutter */}
@@ -1702,6 +1711,7 @@ export default function Editor({ workstations, tabs, activeProject, blocks: bloc
                 )}
               </div>
           </div>
+          )}
 
           {/* Command bar — only show when not in workstation home or zen mode */}
           {!activeWorkstationId && !zenMode && <CommandBar charCount={charCount} />}
