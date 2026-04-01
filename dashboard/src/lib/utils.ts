@@ -1,10 +1,10 @@
-import type { Block, WorkspaceTemplate } from "./types";
+import type { Block, WorkstationTemplate } from "./types";
 
 export const uid = () => Math.random().toString(36).slice(2, 10);
 
 // Date utilities moved to @/lib/due-dates.ts — use getDaysLeft, formatDueShort, getDueLabel, getDueColor
 
-export function makeBlocks(template: WorkspaceTemplate, clientName: string): { blocks: Block[]; projectName: string } {
+export function makeBlocks(template: WorkstationTemplate, clientName: string): { blocks: Block[]; projectName: string } {
   switch (template) {
     case "proposal":
       return {

@@ -37,7 +37,7 @@ RULES:
 - Max 3 items. Usually 0-1 is right. Only 2-3 when truly warranted.
 - Be specific: reference actual numbers, client names, dates from the context.
 - Never be generic. "Consider adding a timeline" is bad. "This proposal has 4 deliverables but no deadline block — Meridian's last project had a 2-week turnaround" is good.
-- Actions use terminal commands: "/rate", "/client ClientName", "/status", or special actions: "navigate:workspace:id", "insert:money", "insert:deadline"
+- Actions use terminal commands: "/rate", "/client ClientName", "/status", or special actions: "navigate:workstation:id", "insert:money", "insert:deadline"
 - Keep total response under 300 tokens.`;
 
 interface AmbientInsight {

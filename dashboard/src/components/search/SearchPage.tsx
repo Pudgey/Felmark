@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo, useCallback, type ReactNode } from "react";
-import type { Workspace } from "@/lib/types";
+import type { Workstation } from "@/lib/types";
 import styles from "./SearchPage.module.css";
 
 // ── Types ──
@@ -60,9 +60,9 @@ const RESULTS: SearchResult[] = [
   { id: "r9", type: "invoices", icon: "$", color: "#c24b38", title: "Invoice #044", subtitle: "Bolt Fitness · $4,000", meta: "Overdue · 4 days", preview: "App Onboarding UX — full project fee. Net 15. Was due Mar 25.", lastEdited: "4 days ago", path: "Bolt Fitness / Invoices / #044" },
   { id: "r10", type: "invoices", icon: "$", color: "#7c8594", title: "Invoice #046", subtitle: "Nora Kim · $1,800", meta: "Paid · Mar 15", preview: "Retainer (March) — monthly coaching content support.", lastEdited: "Mar 15", path: "Nora Kim / Invoices / #046" },
 
-  { id: "r11", type: "clients", icon: "⬡", color: "#7c8594", title: "Meridian Studio", subtitle: "sarah@meridianstudio.co", meta: "4 projects · $12.4k earned", preview: "Design & Branding · Client since Oct 2025 · Rate: $95/hr", lastEdited: "Active", path: "Workspaces / Meridian Studio", avatar: "M", avatarBg: "#7c8594" },
-  { id: "r12", type: "clients", icon: "⬡", color: "#a08472", title: "Nora Kim", subtitle: "nora@coachkim.com", meta: "2 projects · $4.8k earned", preview: "Coaching · Client since Feb 2026 · Rate: $95/hr", lastEdited: "Active", path: "Workspaces / Nora Kim", avatar: "N", avatarBg: "#a08472" },
-  { id: "r13", type: "clients", icon: "⬡", color: "#8a7e63", title: "Bolt Fitness", subtitle: "team@boltfit.co", meta: "2 projects · $4.8k earned", preview: "Fitness Tech · Client since Jan 2026 · Rate: $95/hr", lastEdited: "Overdue", path: "Workspaces / Bolt Fitness", avatar: "B", avatarBg: "#8a7e63" },
+  { id: "r11", type: "clients", icon: "⬡", color: "#7c8594", title: "Meridian Studio", subtitle: "sarah@meridianstudio.co", meta: "4 projects · $12.4k earned", preview: "Design & Branding · Client since Oct 2025 · Rate: $95/hr", lastEdited: "Active", path: "Workstations / Meridian Studio", avatar: "M", avatarBg: "#7c8594" },
+  { id: "r12", type: "clients", icon: "⬡", color: "#a08472", title: "Nora Kim", subtitle: "nora@coachkim.com", meta: "2 projects · $4.8k earned", preview: "Coaching · Client since Feb 2026 · Rate: $95/hr", lastEdited: "Active", path: "Workstations / Nora Kim", avatar: "N", avatarBg: "#a08472" },
+  { id: "r13", type: "clients", icon: "⬡", color: "#8a7e63", title: "Bolt Fitness", subtitle: "team@boltfit.co", meta: "2 projects · $4.8k earned", preview: "Fitness Tech · Client since Jan 2026 · Rate: $95/hr", lastEdited: "Overdue", path: "Workstations / Bolt Fitness", avatar: "B", avatarBg: "#8a7e63" },
 
   { id: "r14", type: "messages", icon: "→", color: "#5b7fa4", title: "Sarah Chen", subtitle: "Brand Guidelines v2 · 2m ago", meta: "Comment", preview: "Can we make the logo usage section more specific? I want exact minimum sizes.", path: "Meridian Studio / Brand Guidelines v2 / Comments", avatar: "S", avatarBg: "#8a7e63" },
   { id: "r15", type: "messages", icon: "→", color: "#5b7fa4", title: "Jamie Park", subtitle: "Brand Guidelines v2 · 15m ago", meta: "Comment", preview: "I'd suggest adding a 'don't' section with misuse examples.", path: "Meridian Studio / Brand Guidelines v2 / Comments", avatar: "J", avatarBg: "#7c8594" },
@@ -70,17 +70,17 @@ const RESULTS: SearchResult[] = [
 
   { id: "r17", type: "commands", icon: "❯", color: "var(--ember)", title: "New proposal", meta: "⌘⇧P", preview: "Create a new proposal from template", path: "Command" },
   { id: "r18", type: "commands", icon: "❯", color: "var(--ember)", title: "New invoice", meta: "⌘⇧I", preview: "Generate and send an invoice", path: "Command" },
-  { id: "r19", type: "commands", icon: "❯", color: "var(--ember)", title: "Switch workspace", meta: "⌘J", preview: "Jump to another client workspace", path: "Command" },
+  { id: "r19", type: "commands", icon: "❯", color: "var(--ember)", title: "Switch workstation", meta: "⌘J", preview: "Jump to another client workstation", path: "Command" },
   { id: "r20", type: "commands", icon: "❯", color: "var(--ember)", title: "Open calendar", meta: "⌘⇧C", preview: "View today's schedule", path: "Command" },
 ];
 
 // ── Component ──
 
 interface SearchPageProps {
-  workspaces: Workspace[];
+  workstations: Workstation[];
 }
 
-export default function SearchPage({ workspaces }: SearchPageProps) {
+export default function SearchPage({ workstations }: SearchPageProps) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("all");
   const [selectedIdx, setSelectedIdx] = useState(0);

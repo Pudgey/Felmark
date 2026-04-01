@@ -268,7 +268,7 @@ export default function FinancePage() {
         </div>
       </div>
 
-      <div className={styles.footer}><span>Felmark Finance · All data from your workspace</span><span>{now.toLocaleTimeString()}</span></div>
+      <div className={styles.footer}><span>Felmark Finance · All data from your workstation</span><span>{now.toLocaleTimeString()}</span></div>
     </div>
   );
 }

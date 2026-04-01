@@ -1,5 +1,5 @@
 import type { StateUpdater, ForgeContext } from "./types";
-import { createWorkspaceServices } from "./services/workspaces";
+import { createWorkstationServices } from "./services/workstations";
 import { createProjectServices } from "./services/projects";
 import { createDocumentServices } from "./services/documents";
 import { createTabServices } from "./services/tabs";
@@ -19,7 +19,7 @@ export {
 } from "./services/blocks";
 
 export interface Forge {
-  workspaces: ReturnType<typeof createWorkspaceServices>;
+  workstations: ReturnType<typeof createWorkstationServices>;
   projects: ReturnType<typeof createProjectServices>;
   documents: ReturnType<typeof createDocumentServices>;
   tabs: ReturnType<typeof createTabServices>;
@@ -28,7 +28,7 @@ export interface Forge {
 /** Create a forge instance from a state updater */
 export function createForge(state: StateUpdater): Forge {
   return {
-    workspaces: createWorkspaceServices(state),
+    workstations: createWorkstationServices(state),
     projects: createProjectServices(state),
     documents: createDocumentServices(state),
     tabs: createTabServices(state),

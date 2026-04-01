@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { Workspace } from "@/lib/types";
+import type { Workstation } from "@/lib/types";
 import type { WireService } from "@/lib/wire-context";
 import styles from "./WirePage.module.css";
 import WireSignalFlow from "./WireSignalFlow";
@@ -45,7 +45,7 @@ interface Signal {
 const FEED: Signal[] = [
   { id:1, type:"trend", source:"Google Trends", time:"2m", live:true, headline:"\"Brand guidelines\" searches up 34% this quarter", body:"Google Trends shows steady increase in searches for brand guidelines and visual identity systems. This correlates with the rise of early-stage startups prioritizing brand consistency before Series A fundraising — they're learning that investors respond to polished brands.", tags:["Brand Identity","Growing Demand","Startups"], relevance:95, metric:{label:"+34%",sub:"search volume"}, spark:[40,42,48,52,58,65,72,80,88,95,102,115], group:"live" },
   { id:2, type:"opportunity", source:"Upwork", time:"5m", live:true, headline:"12 new brand identity projects posted in the last hour — avg budget $4.2k", body:"Unusual spike in brand identity project postings on Upwork. Average budget is $4,200, up from $3,100 last month. Most are from Series A startups in fintech and healthtech verticals. Several mention 'brand guidelines' as a key deliverable — directly aligned with your top service.", tags:["Upwork","High Budget","Fintech","Healthtech"], relevance:92, metric:{label:"12 new",sub:"in 1 hour"}, spark:[2,3,2,4,3,5,4,6,5,8,7,12], group:"live" },
-  { id:3, type:"client", source:"Client Activity", time:"8m", live:true, headline:"Meridian Studio posted a job listing for a Marketing Director", body:"Your client Meridian Studio has posted a job listing for a Marketing Director on LinkedIn. This could signal upcoming brand campaigns and additional design work. Companies that hire marketing leadership typically increase creative spend by 40–60% within the first quarter.", tags:["Meridian Studio","Expansion Signal","Upsell"], relevance:98, metric:{label:"Your client",sub:"hiring signal"}, isClientSignal:true, group:"live", relatedAction:"Open Meridian workspace and draft an expanded scope proposal" },
+  { id:3, type:"client", source:"Client Activity", time:"8m", live:true, headline:"Meridian Studio posted a job listing for a Marketing Director", body:"Your client Meridian Studio has posted a job listing for a Marketing Director on LinkedIn. This could signal upcoming brand campaigns and additional design work. Companies that hire marketing leadership typically increase creative spend by 40–60% within the first quarter.", tags:["Meridian Studio","Expansion Signal","Upsell"], relevance:98, metric:{label:"Your client",sub:"hiring signal"}, isClientSignal:true, group:"live", relatedAction:"Open Meridian workstation and draft an expanded scope proposal" },
   { id:4, type:"insight", source:"Industry Report", time:"14m", headline:"Average freelance design rate now $112/hr in US metros — up 8% YoY", body:"The 2026 Freelance Design Rate Report shows average hourly rates have increased to $112/hr for US metro-based designers, up from $104/hr in 2025. Brand identity specialists command a premium at $125/hr. Web design rates are flat at $95/hr.", tags:["Rate Benchmarks","2026 Data","Pricing"], relevance:88, metric:{label:"$112/hr",sub:"avg US rate"}, spark:[82,85,88,90,92,95,98,100,104,104,108,112], group:"today" },
   { id:5, type:"trend", source:"Dribbble", time:"18m", headline:"Warm earth tone palettes trending — 3× more saves than cool palettes", body:"Dribbble's trending data shows warm, organic color palettes (earth tones, terracotta, sage, parchment) are receiving significantly more engagement than cool-toned work. This aligns with the broader 'organic minimalism' trend in brand design.", tags:["Color Trends","Earth Tones","Organic Minimalism"], relevance:82, metric:{label:"3×",sub:"more saves"}, group:"today" },
   { id:6, type:"tool", source:"ProductHunt", time:"22m", headline:"Fontshare launches 14 new variable fonts — all free for commercial use", body:"Indian Type Foundry's Fontshare just released 14 new variable font families, all free for commercial use. Includes several serif and sans-serif options suitable for brand identity work.", tags:["Typography","Free Resource","Variable Fonts"], relevance:75, metric:{label:"14 fonts",sub:"free commercial"}, group:"today" },
@@ -132,7 +132,7 @@ function SignalItem({ item, selected, onSelect, bookmarked, onBookmark }: { item
 }
 
 interface WirePageProps {
-  workspaces?: Workspace[];
+  workstations?: Workstation[];
   services?: WireService[];
 }
 

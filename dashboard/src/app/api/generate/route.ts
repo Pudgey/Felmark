@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
-const SYSTEM_PROMPT = `You are a block generator for a freelancer workspace app called Felmark. Given a user prompt, return a JSON array of document blocks.
+const SYSTEM_PROMPT = `You are a block generator for a freelancer workstation app called Felmark. Given a user prompt, return a JSON array of document blocks.
 
 BLOCK TYPES:
 

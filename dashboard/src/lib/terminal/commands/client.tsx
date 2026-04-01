@@ -13,12 +13,12 @@ function fuzzyMatch(query: string, target: string): boolean {
 }
 
 export const clientCommand: CommandRegistryEntry = {
-  description: "Look up a client workspace",
+  description: "Look up a client workstation",
   icon: "◇",
   category: "Business",
   usage: "/client [name]",
   handler: (parsed, context) => {
-    const { workspaces } = context;
+    const { workstations } = context;
     const query = parsed.action || parsed.positional.join(" ");
 
     if (!query) {
@@ -28,7 +28,7 @@ export const clientCommand: CommandRegistryEntry = {
           <div style={{ color: "#9b988f", marginBottom: 8, fontSize: 11, textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>
             All Clients
           </div>
-          {workspaces.map(ws => (
+          {workstations.map(ws => (
             <div key={ws.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "5px 0", borderBottom: "1px solid #f0eee9" }}>
               <span style={{
                 width: 24, height: 24, borderRadius: 6, background: ws.avatarBg,
@@ -49,14 +49,14 @@ export const clientCommand: CommandRegistryEntry = {
     }
 
     // Fuzzy match
-    const match = workspaces.find(ws => fuzzyMatch(query, ws.client));
+    const match = workstations.find(ws => fuzzyMatch(query, ws.client));
 
     if (!match) {
       return (
         <div style={{ fontFamily: "var(--mono), 'JetBrains Mono', monospace", fontSize: 12, color: "#dc2626" }}>
           No client matching &quot;{query}&quot; found.
           <div style={{ color: "#9b988f", marginTop: 4 }}>
-            Available: {workspaces.map(w => w.client).join(", ")}
+            Available: {workstations.map(w => w.client).join(", ")}
           </div>
         </div>
       );

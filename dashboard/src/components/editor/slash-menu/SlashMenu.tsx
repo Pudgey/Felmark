@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { BLOCK_TYPES, BLOCK_CATEGORIES } from "@/lib/constants";
 import type { BlockType } from "@/lib/types";
@@ -14,6 +14,7 @@ interface SlashMenuProps {
   onSelect: (type: BlockType) => void;
   onClose: () => void;
   onIndexChange: (index: number) => void;
+  allowedTypes?: BlockType[];
 }
 
 type MatchResult = {
@@ -41,11 +42,11 @@ function scoreMatch(query: string, value: string, base: number) {
   return -1;
 }
 
-function getFilteredBlocks(filter: string) {
+function getFilteredBlocks(filter: string, blocks: typeof BLOCK_TYPES) {
   const query = filter.trim().toLowerCase();
-  if (!query) return BLOCK_TYPES;
+  if (!query) return blocks;
 
-  const matches: MatchResult[] = BLOCK_TYPES.map((type, order) => {
+  const matches: MatchResult[] = blocks.map((type, order) => {
     const bestScore = Math.max(
       scoreMatch(query, type.label, 1000),
       scoreMatch(query, type.type, 900),
@@ -76,17 +77,26 @@ function highlightMatch(value: string, query: string) {
   );
 }
 
-export default function SlashMenu({ top, left, filter, selectedIndex, onSelect, onClose, onIndexChange }: SlashMenuProps) {
+export default function SlashMenu({ top, left, filter, selectedIndex, onSelect, onClose, onIndexChange, allowedTypes }: SlashMenuProps) {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const effectiveCategory = filter ? null : activeCategory;
+  const availableBlocks = useMemo(() => {
+    if (!allowedTypes || allowedTypes.length === 0) return BLOCK_TYPES;
+    const allowed = new Set(allowedTypes);
+    return BLOCK_TYPES.filter(block => allowed.has(block.type));
+  }, [allowedTypes]);
+  const visibleCategories = useMemo(
+    () => BLOCK_CATEGORIES.filter(category => availableBlocks.some(block => block.section === category.id)),
+    [availableBlocks]
+  );
 
   // Build filtered list
   const filtered = filter
-    ? getFilteredBlocks(filter)
+    ? getFilteredBlocks(filter, availableBlocks)
     : effectiveCategory
-      ? BLOCK_TYPES.filter(t => t.section === effectiveCategory)
-      : BLOCK_TYPES;
+      ? availableBlocks.filter(t => t.section === effectiveCategory)
+      : availableBlocks;
 
   // Keyboard navigation
   useEffect(() => {
@@ -127,7 +137,7 @@ export default function SlashMenu({ top, left, filter, selectedIndex, onSelect, 
 
   // Group by section for "All" view (no filter, no active category)
   const showGrouped = !filter && !effectiveCategory;
-  const sections = BLOCK_CATEGORIES.map(c => c.id);
+  const sections = visibleCategories.map(c => c.id);
 
   return createPortal(
     <div className={styles.menu} style={{ top, left }}>
@@ -146,7 +156,7 @@ export default function SlashMenu({ top, left, filter, selectedIndex, onSelect, 
           className={`${styles.cat} ${!effectiveCategory && !filter ? styles.catOn : ""}`}
           onClick={() => { setActiveCategory(null); onIndexChange(0); }}
         >All</button>
-        {BLOCK_CATEGORIES.map(c => (
+        {visibleCategories.map(c => (
           <button
             key={c.id}
             className={`${styles.cat} ${effectiveCategory === c.id ? styles.catOn : ""}`}
@@ -163,9 +173,9 @@ export default function SlashMenu({ top, left, filter, selectedIndex, onSelect, 
         {showGrouped ? (
           // Grouped view — show 3 per category
           sections.map(section => {
-            const items = BLOCK_TYPES.filter(t => t.section === section);
+            const items = availableBlocks.filter(t => t.section === section);
             if (!items.length) return null;
-            const cat = BLOCK_CATEGORIES.find(c => c.id === section);
+            const cat = visibleCategories.find(c => c.id === section);
             return (
               <div key={section}>
                 <div className={styles.group}>{cat?.icon} {cat?.label}</div>
@@ -218,7 +228,7 @@ export default function SlashMenu({ top, left, filter, selectedIndex, onSelect, 
 
       {/* Footer */}
       <div className={styles.footer}>
-        <span>{BLOCK_TYPES.length} blocks · {BLOCK_CATEGORIES.length} categories</span>
+        <span>{availableBlocks.length} blocks · {visibleCategories.length} categories</span>
         <div className={styles.hints}>
           <span><span className={styles.kbd}>↑↓</span> navigate</span>
           <span><span className={styles.kbd}>⏎</span> insert</span>

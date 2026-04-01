@@ -20,7 +20,7 @@ export const statusCommand: CommandRegistryEntry = {
     if (projects.length === 0) {
       return (
         <div style={{ padding: "8px 0", color: "#9b988f", fontFamily: "var(--mono), 'JetBrains Mono', monospace", fontSize: 12 }}>
-          No projects found. Create a workspace first.
+          No projects found. Create a workstation first.
         </div>
       );
     }

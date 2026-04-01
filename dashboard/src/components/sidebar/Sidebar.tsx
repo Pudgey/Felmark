@@ -2,11 +2,11 @@
 
 import { useState, useRef, useEffect } from "react";
 import { STATUS } from "@/lib/constants";
-import type { Workspace, Project, ArchivedProject } from "@/lib/types";
+import type { Workstation, Project, ArchivedProject } from "@/lib/types";
 import styles from "./Sidebar.module.css";
 
 interface SidebarProps {
-  workspaces: Workspace[];
+  workstations: Workstation[];
   archived: ArchivedProject[];
   activeProject: string;
   open: boolean;
@@ -15,18 +15,18 @@ interface SidebarProps {
   wordCount: number;
   railActive: string;
   onClose: () => void;
-  onToggleWorkspace: (id: string) => void;
-  onSelectWorkspaceHome: (id: string) => void;
+  onToggleWorkstation: (id: string) => void;
+  onSelectWorkstationHome: (id: string) => void;
   onSelectProject: (project: Project, client: string) => void;
   onArchiveProject: (projectId: string) => void;
   onArchiveCompleted: (wsId: string) => void;
-  onArchiveWorkspace: (wsId: string) => void;
+  onArchiveWorkstation: (wsId: string) => void;
   onRestoreProject: (archivedIdx: number) => void;
-  onReorderWorkspaces: (fromIndex: number, toIndex: number) => void;
-  onRenameWorkspace: (wsId: string, name: string) => void;
+  onReorderWorkstations: (fromIndex: number, toIndex: number) => void;
+  onRenameWorkstation: (wsId: string, name: string) => void;
   onRenameProject: (projectId: string, name: string) => void;
   onUpdateProjectDue: (projectId: string, due: string | null) => void;
-  onAddWorkspace: (name: string) => void;
+  onAddWorkstation: (name: string) => void;
   onTogglePin: (projectId: string) => void;
   onCycleStatus: (projectId: string) => void;
   saveIndicatorState: "saved" | "saving";
@@ -46,7 +46,7 @@ const COMPACT_CURRENCY = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 1,
 });
 
-function CalendarView({ workspaces, onSelectProject, onScrollToEvent }: { workspaces: Workspace[]; onSelectProject: (project: Project, client: string) => void; onScrollToEvent?: (projectId: string) => void }) {
+function CalendarView({ workstations, onSelectProject, onScrollToEvent }: { workstations: Workstation[]; onSelectProject: (project: Project, client: string) => void; onScrollToEvent?: (projectId: string) => void }) {
   const today = new Date();
   const [viewMonth, setViewMonth] = useState(today.getMonth());
   const [viewYear, setViewYear] = useState(today.getFullYear());
@@ -54,7 +54,7 @@ function CalendarView({ workspaces, onSelectProject, onScrollToEvent }: { worksp
 
   // Build deadline map: day number → projects due that day
   const deadlineMap = new Map<number, { project: Project; client: string }[]>();
-  workspaces.forEach(ws => {
+  workstations.forEach(ws => {
     ws.projects.forEach(p => {
       if (!p.due || p.due === "—") return;
       // Parse "Apr 3", "Mar 20", etc.
@@ -207,7 +207,7 @@ const REVENUE_WEEKS = [
 
 import { getDueLabel as getDueLabelFromDate, getDueColor as getDueColorFromDate } from "@/lib/due-dates";
 
-export default function Sidebar({ workspaces, archived, activeProject, open, width, isResizing, wordCount, railActive, onClose, onToggleWorkspace, onSelectWorkspaceHome, onSelectProject, onArchiveProject, onArchiveCompleted, onArchiveWorkspace, onRestoreProject, onReorderWorkspaces, onRenameWorkspace, onRenameProject, onUpdateProjectDue, onAddWorkspace, onTogglePin, onCycleStatus, saveIndicatorState, saveStatusLabel, onSaveNow, onScrollToCalendarEvent }: SidebarProps) {
+export default function Sidebar({ workstations, archived, activeProject, open, width, isResizing, wordCount, railActive, onClose, onToggleWorkstation, onSelectWorkstationHome, onSelectProject, onArchiveProject, onArchiveCompleted, onArchiveWorkstation, onRestoreProject, onReorderWorkstations, onRenameWorkstation, onRenameProject, onUpdateProjectDue, onAddWorkstation, onTogglePin, onCycleStatus, saveIndicatorState, saveStatusLabel, onSaveNow, onScrollToCalendarEvent }: SidebarProps) {
   const [wsMenu, setWsMenu] = useState<string | null>(null);
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [showAddWs, setShowAddWs] = useState(false);
@@ -251,46 +251,46 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
     return () => document.removeEventListener("mousedown", handler);
   }, [pjMenuOpen]);
 
-  const totalEarnings = workspaces.reduce((s, w) =>
+  const totalEarnings = workstations.reduce((s, w) =>
     s + w.projects.reduce((a, p) => {
       const m = p.amount.match(/[\d,]+/);
       return a + (m ? parseInt(m[0].replace(",", "")) : 0);
     }, 0), 0);
-  const activeCount = workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "active").length, 0);
-  const overdueCount = workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "overdue").length, 0);
-  const totalProjects = workspaces.reduce((s, w) => s + w.projects.length, 0);
-  const completedTotal = workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "completed").length, 0);
+  const activeCount = workstations.reduce((s, w) => s + w.projects.filter(p => p.status === "active").length, 0);
+  const overdueCount = workstations.reduce((s, w) => s + w.projects.filter(p => p.status === "overdue").length, 0);
+  const totalProjects = workstations.reduce((s, w) => s + w.projects.length, 0);
+  const completedTotal = workstations.reduce((s, w) => s + w.projects.filter(p => p.status === "completed").length, 0);
 
   const completedCount = (wsId: string) =>
-    workspaces.find(w => w.id === wsId)?.projects.filter(p => p.status === "completed").length || 0;
+    workstations.find(w => w.id === wsId)?.projects.filter(p => p.status === "completed").length || 0;
 
   // Revenue flow — bar chart uses sample weekly data, totals computed from real projects
   const maxBarVal = Math.max(...REVENUE_WEEKS.map(w => w.earned + w.pending));
   const parseAmount = (amt: string) => { const m = amt.match(/[\d,]+/); return m ? parseInt(m[0].replace(",", "")) : 0; };
-  const totalEarned = workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "completed").reduce((a, p) => a + parseAmount(p.amount), 0), 0);
-  const totalPending = workspaces.reduce((s, w) => s + w.projects.filter(p => p.status !== "completed").reduce((a, p) => a + parseAmount(p.amount), 0), 0);
+  const totalEarned = workstations.reduce((s, w) => s + w.projects.filter(p => p.status === "completed").reduce((a, p) => a + parseAmount(p.amount), 0), 0);
+  const totalPending = workstations.reduce((s, w) => s + w.projects.filter(p => p.status !== "completed").reduce((a, p) => a + parseAmount(p.amount), 0), 0);
   const totalEarnedDisplay = COMPACT_CURRENCY.format(totalEarned);
   const totalPendingDisplay = COMPACT_CURRENCY.format(totalPending);
   const totalPipelineDisplay = COMPACT_CURRENCY.format(totalEarned + totalPending);
 
   // Pinned projects
-  const pinnedProjects = workspaces.flatMap(w =>
+  const pinnedProjects = workstations.flatMap(w =>
     w.projects.filter(p => p.pinned).map(p => ({ ...p, wsName: w.client, wsColor: w.avatarBg }))
   );
 
   // Filtered workspaces
   const filtered = search
-    ? workspaces.map(w => ({
+    ? workstations.map(w => ({
         ...w,
         projects: w.projects.filter(p => p.name.toLowerCase().includes(search.toLowerCase())),
         open: true,
       })).filter(w => w.client.toLowerCase().includes(search.toLowerCase()) || w.projects.length > 0)
-    : workspaces;
+    : workstations;
 
-  const clientWorkspaces = filtered.filter(w => !w.personal);
-  const personalWorkspaces = filtered.filter(w => w.personal);
+  const clientWorkstations = filtered.filter(w => !w.personal);
+  const personalWorkstations = filtered.filter(w => w.personal);
 
-  const renderProjects = (ws: Workspace, showAmount: boolean) => (
+  const renderProjects = (ws: Workstation, showAmount: boolean) => (
     <div className={`${styles.projectList} ${ws.open ? styles.projectListOpen : ""}`} aria-hidden={!ws.open}>
       <div className={styles.projectListInner}>
         {ws.projects.map(pj => {
@@ -365,10 +365,10 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
       <div className={styles.inner}>
         {/* Header */}
         <div className={styles.head}>
-          <span className={styles.title}>{railActive === "calendar" ? "calendar" : "workspaces"}</span>
+          <span className={styles.title}>{railActive === "calendar" ? "calendar" : "workstations"}</span>
           <div className={styles.headActions}>
             {railActive !== "calendar" && (
-              <button className={styles.iconBtn} title="Add workspace" aria-label="Add workspace" onClick={() => setShowAddWs(true)}>
+              <button className={styles.iconBtn} title="Add workstation" aria-label="Add workstation" onClick={() => setShowAddWs(true)}>
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
               </button>
             )}
@@ -379,7 +379,7 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
         </div>
 
         {/* Calendar view */}
-        {railActive === "calendar" && <CalendarView workspaces={workspaces} onSelectProject={onSelectProject} onScrollToEvent={onScrollToCalendarEvent} />}
+        {railActive === "calendar" && <CalendarView workstations={workstations} onSelectProject={onSelectProject} onScrollToEvent={onScrollToCalendarEvent} />}
 
         {/* Revenue Flow */}
         {railActive !== "calendar" && <>
@@ -469,7 +469,7 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
             <div className={styles.sectionLabel}>pinned</div>
             {pinnedProjects.map(p => (
               <div key={p.id} className={`${styles.pinnedItem} ${activeProject === p.id ? styles.pinnedItemOn : ""}`} onClick={() => {
-                const ws = workspaces.find(w => w.projects.some(pr => pr.id === p.id));
+                const ws = workstations.find(w => w.projects.some(pr => pr.id === p.id));
                 if (ws) onSelectProject(p, ws.client);
               }}>
                 <div className={styles.pinnedDot} style={{ background: p.wsColor }} />
@@ -489,13 +489,13 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
         <div className={styles.scroll}>
           {!search && <div className={styles.sectionLabel}>clients</div>}
 
-          {clientWorkspaces.map((ws, wsIdx) => (
+          {clientWorkstations.map((ws, wsIdx) => (
             <div
               key={ws.id}
               className={`${styles.wsBlock} ${dropWsId === ws.id ? styles.wsDropTarget : ""} ${dragWsId === ws.id ? styles.wsDragging : ""}`}
               onDragOver={e => { e.preventDefault(); if (dragWsId && dragWsId !== ws.id) setDropWsId(ws.id); }}
               onDragLeave={() => { if (dropWsId === ws.id) setDropWsId(null); }}
-              onDrop={e => { e.preventDefault(); if (dragRef.current !== null && dragRef.current !== wsIdx) onReorderWorkspaces(dragRef.current, wsIdx); setDragWsId(null); setDropWsId(null); dragRef.current = null; }}
+              onDrop={e => { e.preventDefault(); if (dragRef.current !== null && dragRef.current !== wsIdx) onReorderWorkstations(dragRef.current, wsIdx); setDragWsId(null); setDropWsId(null); dragRef.current = null; }}
             >
               <div
                 className={styles.wsHead}
@@ -503,14 +503,14 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
                 onDragStart={e => { setDragWsId(ws.id); dragRef.current = wsIdx; e.dataTransfer.effectAllowed = "move"; }}
                 onDragEnd={() => { setDragWsId(null); setDropWsId(null); dragRef.current = null; }}
               >
-                <div className={styles.wsHeadClick} onClick={() => { if (editingWsId !== ws.id) onToggleWorkspace(ws.id); }}>
-                  <div className={styles.wsAvatar} style={{ background: ws.avatarBg }} onDoubleClick={e => { e.stopPropagation(); onSelectWorkspaceHome(ws.id); }}>{ws.avatar}</div>
+                <div className={styles.wsHeadClick} onClick={() => { if (editingWsId !== ws.id) onToggleWorkstation(ws.id); }}>
+                  <div className={styles.wsAvatar} style={{ background: ws.avatarBg }} onDoubleClick={e => { e.stopPropagation(); onSelectWorkstationHome(ws.id); }}>{ws.avatar}</div>
                   <div className={styles.wsInfo}>
                     {editingWsId === ws.id ? (
                       <input className={styles.wsRenameInput} value={editingWsName} autoFocus
                         onChange={e => setEditingWsName(e.target.value)}
-                        onBlur={() => { onRenameWorkspace(ws.id, editingWsName.trim() || ws.client); setEditingWsId(null); }}
-                        onKeyDown={e => { if (e.key === "Enter") { onRenameWorkspace(ws.id, editingWsName.trim() || ws.client); setEditingWsId(null); } if (e.key === "Escape") setEditingWsId(null); }}
+                        onBlur={() => { onRenameWorkstation(ws.id, editingWsName.trim() || ws.client); setEditingWsId(null); }}
+                        onKeyDown={e => { if (e.key === "Enter") { onRenameWorkstation(ws.id, editingWsName.trim() || ws.client); setEditingWsId(null); } if (e.key === "Escape") setEditingWsId(null); }}
                         onClick={e => e.stopPropagation()} />
                     ) : (
                       <span className={styles.wsName} onDoubleClick={e => { e.stopPropagation(); setEditingWsId(ws.id); setEditingWsName(ws.client); }}>{ws.client}</span>
@@ -542,9 +542,9 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
                       <span className={styles.wsDropBadge}>{completedCount(ws.id)}</span>
                     </button>
                   )}
-                  <button className={styles.wsDropItem} onClick={() => { onArchiveWorkspace(ws.id); setWsMenu(null); }}>
+                  <button className={styles.wsDropItem} onClick={() => { onArchiveWorkstation(ws.id); setWsMenu(null); }}>
                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 3.5h9M2.5 3.5v6a1 1 0 001 1h5a1 1 0 001-1v-6" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /><path d="M4 6l1.5 1.5L8 5" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                    <span>Archive workspace</span>
+                    <span>Archive workstation</span>
                   </button>
                 </div>
               )}
@@ -554,23 +554,23 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
           ))}
 
           {/* Personal */}
-          {personalWorkspaces.length > 0 && (
+          {personalWorkstations.length > 0 && (
             <>
               {!search && <div className={styles.sectionLabel} style={{ marginTop: 12 }}>personal</div>}
-              {personalWorkspaces.map((ws, wsIdx) => (
+              {personalWorkstations.map((ws, wsIdx) => (
                 <div
                   key={ws.id}
                   className={`${styles.wsBlock} ${dropWsId === ws.id ? styles.wsDropTarget : ""} ${dragWsId === ws.id ? styles.wsDragging : ""}`}
                 >
                   <div className={styles.wsHead}>
-                    <div className={styles.wsHeadClick} onClick={() => { if (editingWsId !== ws.id) onToggleWorkspace(ws.id); }}>
-                      <div className={styles.wsAvatar} style={{ background: ws.avatarBg }} onDoubleClick={e => { e.stopPropagation(); onSelectWorkspaceHome(ws.id); }}>{ws.avatar}</div>
+                    <div className={styles.wsHeadClick} onClick={() => { if (editingWsId !== ws.id) onToggleWorkstation(ws.id); }}>
+                      <div className={styles.wsAvatar} style={{ background: ws.avatarBg }} onDoubleClick={e => { e.stopPropagation(); onSelectWorkstationHome(ws.id); }}>{ws.avatar}</div>
                       <div className={styles.wsInfo}>
                         {editingWsId === ws.id ? (
                           <input className={styles.wsRenameInput} value={editingWsName} autoFocus
                             onChange={e => setEditingWsName(e.target.value)}
-                            onBlur={() => { onRenameWorkspace(ws.id, editingWsName.trim() || ws.client); setEditingWsId(null); }}
-                            onKeyDown={e => { if (e.key === "Enter") { onRenameWorkspace(ws.id, editingWsName.trim() || ws.client); setEditingWsId(null); } if (e.key === "Escape") setEditingWsId(null); }}
+                            onBlur={() => { onRenameWorkstation(ws.id, editingWsName.trim() || ws.client); setEditingWsId(null); }}
+                            onKeyDown={e => { if (e.key === "Enter") { onRenameWorkstation(ws.id, editingWsName.trim() || ws.client); setEditingWsId(null); } if (e.key === "Escape") setEditingWsId(null); }}
                             onClick={e => e.stopPropagation()} />
                         ) : (
                           <span className={styles.wsName} onDoubleClick={e => { e.stopPropagation(); setEditingWsId(ws.id); setEditingWsName(ws.client); }}>{ws.client}</span>
@@ -593,9 +593,9 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
                         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2-7 7H1.5v-2l7-7z" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /></svg>
                         <span>Rename</span>
                       </button>
-                      {personalWorkspaces.length > 1 && <button className={styles.wsDropItem} onClick={() => { onArchiveWorkspace(ws.id); setWsMenu(null); }}>
+                      {personalWorkstations.length > 1 && <button className={styles.wsDropItem} onClick={() => { onArchiveWorkstation(ws.id); setWsMenu(null); }}>
                         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 3.5h9M2.5 3.5v6a1 1 0 001 1h5a1 1 0 001-1v-6" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /><path d="M4 6l1.5 1.5L8 5" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                        <span>Archive workspace</span>
+                        <span>Archive workstation</span>
                       </button>}
                     </div>
                   )}
@@ -610,15 +610,15 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
           {!search && !showAddWs && (
             <div className={styles.addWsRow} onClick={() => setShowAddWs(true)}>
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 3v8M3 7h8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>
-              <span>Add workspace</span>
+              <span>Add workstation</span>
             </div>
           )}
           {showAddWs && (
             <div className={styles.addWsInputRow}>
               <input className={styles.addWsInput} placeholder="Client name..." value={newWsName} autoFocus
                 onChange={e => setNewWsName(e.target.value)}
-                onKeyDown={e => { if (e.key === "Enter" && newWsName.trim()) { onAddWorkspace(newWsName.trim()); setNewWsName(""); setShowAddWs(false); } if (e.key === "Escape") { setNewWsName(""); setShowAddWs(false); } }} />
-              <button className={styles.addWsConfirm} onClick={() => { if (newWsName.trim()) { onAddWorkspace(newWsName.trim()); setNewWsName(""); setShowAddWs(false); } }}>
+                onKeyDown={e => { if (e.key === "Enter" && newWsName.trim()) { onAddWorkstation(newWsName.trim()); setNewWsName(""); setShowAddWs(false); } if (e.key === "Escape") { setNewWsName(""); setShowAddWs(false); } }} />
+              <button className={styles.addWsConfirm} onClick={() => { if (newWsName.trim()) { onAddWorkstation(newWsName.trim()); setNewWsName(""); setShowAddWs(false); } }}>
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </button>
               <button className={styles.addWsCancel} onClick={() => { setNewWsName(""); setShowAddWs(false); }}>
@@ -643,7 +643,7 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
                       <div className={styles.archiveItemDot} />
                       <div className={styles.archiveItemInfo}>
                         <span className={styles.archiveItemName}>{item.project.name}</span>
-                        <span className={styles.archiveItemMeta}>{item.workspaceName} · {item.archivedAt}</span>
+                        <span className={styles.archiveItemMeta}>{item.workstationName} · {item.archivedAt}</span>
                       </div>
                       <button className={styles.archiveRestoreBtn} onClick={() => onRestoreProject(idx)} title="Restore">
                         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6.5a4 4 0 017.5-1.5M10 2v3H7" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" /><path d="M10 5.5a4 4 0 01-7.5 1.5M2 10V7h3" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -659,7 +659,7 @@ export default function Sidebar({ workspaces, archived, activeProject, open, wid
 
         {/* Footer */}
         <div className={styles.footer}>
-          <span className={styles.footerMeta}>{railActive === "calendar" ? `${workspaces.flatMap(w => w.projects).filter(p => p.due != null).length} deadlines` : `${totalProjects} projects · ${workspaces.length} clients`}</span>
+          <span className={styles.footerMeta}>{railActive === "calendar" ? `${workstations.flatMap(w => w.projects).filter(p => p.due != null).length} deadlines` : `${totalProjects} projects · ${workstations.length} clients`}</span>
           <button
             type="button"
             className={`${styles.savedIndicator} ${saveIndicatorState === "saving" ? styles.savedIndicatorSaving : ""}`}

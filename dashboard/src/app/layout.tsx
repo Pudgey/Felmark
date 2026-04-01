@@ -22,8 +22,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Felmark — Freelancer Workspace",
-  description: "Your clients. Your notes. Your time. One browser workspace.",
+  title: "Felmark — Freelancer Workstation",
+  description: "Your clients. Your notes. Your time. One browser workstation.",
 };
 
 export default function RootLayout({

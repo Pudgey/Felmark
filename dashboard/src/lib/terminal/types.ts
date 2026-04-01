@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { Workspace, Project } from "@/lib/types";
+import type { Workstation, Project } from "@/lib/types";
 
 export interface TerminalBlock {
   id: string;
@@ -40,8 +40,8 @@ export interface ParsedCommand {
 }
 
 export interface CommandHandlerContext {
-  workspaces: Workspace[];
-  projects: { project: Project; client: string; workspaceId: string }[];
+  workstations: Workstation[];
+  projects: { project: Project; client: string; workstationId: string }[];
   activeProject: string | null;
 }
 
@@ -59,8 +59,8 @@ export interface CommandRegistryEntry {
 }
 
 export interface TerminalContextType {
-  workspaces: Workspace[];
-  projects: { project: Project; client: string; workspaceId: string }[];
+  workstations: Workstation[];
+  projects: { project: Project; client: string; workstationId: string }[];
   activeProject: string | null;
   blocks: TerminalBlock[];
   addBlock: (block: TerminalBlock) => void;

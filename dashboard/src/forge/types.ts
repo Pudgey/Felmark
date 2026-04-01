@@ -1,10 +1,10 @@
-import type { Workspace, Project, Block, Tab, ArchivedProject } from "@/lib/types";
+import type { Workstation, Project, Block, Tab, ArchivedProject } from "@/lib/types";
 import type { Comment } from "@/components/comments/CommentPanel";
 import type { BlockActivity } from "@/components/activity/ActivityMargin";
 
 // ── Forge state shape ──
 export interface ForgeState {
-  workspaces: Workspace[];
+  workstations: Workstation[];
   tabs: Tab[];
   activeProject: string;
   blocksMap: Record<string, Block[]>;
@@ -30,7 +30,7 @@ export type ForgeResult<T = void> =
 // This abstracts over React setState today, Supabase tomorrow
 export type StateUpdater = {
   getState: () => ForgeState;
-  setWorkspaces: (fn: (prev: Workspace[]) => Workspace[]) => void;
+  setWorkstations: (fn: (prev: Workstation[]) => Workstation[]) => void;
   setTabs: (fn: (prev: Tab[]) => Tab[]) => void;
   setActiveProject: (id: string) => void;
   setBlocksMap: (fn: (prev: Record<string, Block[]>) => Record<string, Block[]>) => void;

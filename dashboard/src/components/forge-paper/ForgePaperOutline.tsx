@@ -10,7 +10,6 @@ interface ForgePaperOutlineProps {
   hoveredBlock?: string | null;
   onScrollTo: (blockId: string) => void;
   onHoverSection?: (sectionId: string | null) => void;
-  projectName: string;
   clientName: string;
 }
 
@@ -58,6 +57,75 @@ function countWords(text: string): number {
   return text.split(/\s+/).filter(Boolean).length;
 }
 
+function truncateLabel(text: string, max = 38): string {
+  return text.length > max ? `${text.slice(0, max - 1)}…` : text;
+}
+
+function buildChildSection(block: Block, text: string, words: number): ChildSection | null {
+  const trimmed = text.trim();
+  const excerpt = trimmed ? truncateLabel(trimmed) : "";
+
+  switch (block.type) {
+    case "h3":
+      return { id: block.id, label: excerpt || "Untitled", status: words > 0 ? "complete" : "empty", words };
+    case "deliverable":
+      if (!block.deliverableData) return null;
+      return {
+        id: block.id,
+        label: block.deliverableData.title,
+        status: block.deliverableData.status === "approved" ? "complete" : "draft",
+        words: 0,
+        meta: block.deliverableData.dueDate,
+      };
+    case "table":
+      if (!block.tableData) return null;
+      return {
+        id: block.id,
+        label: "Table",
+        status: block.tableData.rows.length > 1 ? "complete" : "draft",
+        words: 0,
+        meta: `${block.tableData.rows.length} rows`,
+      };
+    case "signoff": {
+      const parties = block.signoffData?.parties || [];
+      const signedCount = parties.filter(p => p.signed).length;
+      return {
+        id: block.id,
+        label: "Signature",
+        status: parties.length > 0 && signedCount === parties.length ? "complete" : "draft",
+        words: 0,
+        meta: parties.length > 0 ? `${signedCount}/${parties.length} signed` : undefined,
+      };
+    }
+    case "ai":
+      return {
+        id: block.id,
+        label: "AI generation",
+        status: "draft",
+        words: 0,
+        meta: "Prompt and insert blocks",
+      };
+    case "paragraph":
+      return trimmed ? { id: block.id, label: excerpt, status: "complete", words } : null;
+    case "bullet":
+      return { id: block.id, label: excerpt || "Bullet item", status: trimmed ? "complete" : "draft", words };
+    case "numbered":
+      return { id: block.id, label: excerpt || "Numbered item", status: trimmed ? "complete" : "draft", words };
+    case "todo":
+      return { id: block.id, label: excerpt || "To-do item", status: trimmed ? "draft" : "empty", words };
+    case "quote":
+      return { id: block.id, label: excerpt || "Quote", status: trimmed ? "complete" : "draft", words };
+    case "callout":
+      return { id: block.id, label: excerpt || "Callout", status: trimmed ? "complete" : "draft", words };
+    case "code":
+      return { id: block.id, label: excerpt || "Code block", status: trimmed ? "complete" : "draft", words };
+    case "divider":
+      return block.content ? { id: block.id, label: truncateLabel(getPlainText(block.content) || "Divider"), status: "draft", words: 0 } : null;
+    default:
+      return trimmed ? { id: block.id, label: excerpt, status: "complete", words } : null;
+  }
+}
+
 // ── Build sections from blocks ──
 function buildSections(blocks: Block[]): Section[] {
   const sections: Section[] = [];
@@ -78,30 +146,25 @@ function buildSections(blocks: Block[]): Section[] {
       continue;
     }
 
-    if (!currentSection) {
-      // Blocks before first heading — create an intro section
-      currentSection = { id: "__intro", label: "Introduction", status: "empty", icon: "¶", children: [], words: 0, target: 120 };
-    }
-
-    // Add block as child
     const text = getPlainText(block.content);
     const words = countWords(text);
-    currentSection.words += words;
 
-    // Build child entry for certain block types
-    if (block.type === "h3") {
-      currentSection.children.push({ id: block.id, label: text || "Untitled", status: words > 0 ? "complete" : "empty", words });
-    } else if (block.type === "deliverable" && block.deliverableData) {
-      currentSection.children.push({ id: block.id, label: block.deliverableData.title, status: block.deliverableData.status === "approved" ? "complete" : "draft", words: 0, meta: block.deliverableData.dueDate });
-    } else if (block.type === "table" && block.tableData) {
-      currentSection.children.push({ id: block.id, label: "Table", status: "complete", words: 0, meta: `${block.tableData.rows.length} rows` });
-    } else if (block.type === "signoff") {
-      const parties = block.signoffData?.parties || [];
-      const signedCount = parties.filter(p => p.signed).length;
-      currentSection.children.push({ id: block.id, label: "Signature", status: signedCount === parties.length ? "complete" : "draft", words: 0, meta: `${signedCount}/${parties.length} signed` });
-    } else if (block.type === "todo") {
-      // Don't add individual todos as children — they affect section status
+    if (!currentSection) {
+      // Blocks before first heading — create an intro section
+      currentSection = {
+        id: block.id,
+        label: text ? truncateLabel(text, 24) : "Introduction",
+        status: "empty",
+        icon: "¶",
+        children: [],
+        words: 0,
+        target: 120,
+      };
     }
+
+    currentSection.words += words;
+    const child = buildChildSection(block, text, words);
+    if (child) currentSection.children.push(child);
   }
 
   // Flush last section
@@ -156,7 +219,7 @@ function WordBar({ count, target, color }: { count: number; target: number; colo
   );
 }
 
-export default function ForgePaperOutline({ blocks, focusedBlock, hoveredBlock, onScrollTo, onHoverSection, projectName, clientName }: ForgePaperOutlineProps) {
+export default function ForgePaperOutline({ blocks, focusedBlock, hoveredBlock, onScrollTo, onHoverSection, clientName }: ForgePaperOutlineProps) {
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [showAI, setShowAI] = useState(true);
   const [hoveredSection, setHoveredSection] = useState<string | null>(null);
@@ -192,7 +255,15 @@ export default function ForgePaperOutline({ blocks, focusedBlock, hoveredBlock, 
   }, [focusedBlock, hoveredBlock, blocks, sections]);
 
   const toggleCollapse = (id: string) => {
-    setCollapsed(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+    setCollapsed(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
   };
 
   return (
@@ -272,7 +343,6 @@ export default function ForgePaperOutline({ blocks, focusedBlock, hoveredBlock, 
               {hasChildren && !isCollapsed && (
                 <div className={styles.children}>
                   {sec.children.map(child => {
-                    const cSt = SECTION_STATUS[child.status];
                     return (
                       <div key={child.id} className={`${styles.child} ${focusedBlock === child.id ? styles.childActive : ""}`}
                         onClick={() => onScrollTo(child.id)}>

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import type { WorkspaceTemplate, Workspace } from "@/lib/types";
-import styles from "./WorkspaceOnboarding.module.css";
+import type { WorkstationTemplate, Workstation } from "@/lib/types";
+import styles from "./WorkstationOnboarding.module.css";
 
 const COLORS = [
   { id: "slate", value: "#7c8594" },
@@ -17,7 +17,7 @@ const COLORS = [
   { id: "ember", value: "#b07d4f" },
 ];
 
-const TEMPLATES: { id: WorkspaceTemplate; icon: string; label: string; desc: string; sections: string[]; color: string }[] = [
+const TEMPLATES: { id: WorkstationTemplate; icon: string; label: string; desc: string; sections: string[]; color: string }[] = [
   { id: "blank", icon: "◇", label: "Blank project", desc: "Start from scratch", sections: ["Notes"], color: "var(--ink-400)" },
   { id: "proposal", icon: "◆", label: "Proposal", desc: "Scope, timeline, pricing, terms", sections: ["Intro", "Scope", "Timeline", "Pricing", "Terms"], color: "var(--ember)" },
   { id: "meeting", icon: "○", label: "Meeting notes", desc: "Agenda, notes, action items", sections: ["Agenda", "Notes", "Action Items"], color: "#5a9a3c" },
@@ -26,32 +26,32 @@ const TEMPLATES: { id: WorkspaceTemplate; icon: string; label: string; desc: str
   { id: "invoice", icon: "$", label: "Invoice only", desc: "Quick invoice, no project docs", sections: ["Line Items", "Terms"], color: "#8b5c3a" },
 ];
 
-interface WorkspaceOnboardingProps {
+interface WorkstationOnboardingProps {
   initialName: string;
-  workspaces: Workspace[];
+  workstations: Workstation[];
   onComplete: (data: {
     name: string;
     contact: string;
     rate: string;
     budget: string;
     color: string;
-    template: WorkspaceTemplate;
+    template: WorkstationTemplate;
   }) => void;
   onSkip: () => void;
 }
 
-export default function WorkspaceOnboarding({ initialName, workspaces, onComplete, onSkip }: WorkspaceOnboardingProps) {
+export default function WorkstationOnboarding({ initialName, workstations, onComplete, onSkip }: WorkstationOnboardingProps) {
   const [name, setName] = useState(initialName);
   const [contact, setContact] = useState("");
   const [rate, setRate] = useState("");
   const [budget, setBudget] = useState("");
   const [color, setColor] = useState(COLORS[9].value);
-  const [selectedTemplate, setSelectedTemplate] = useState<WorkspaceTemplate>("proposal");
+  const [selectedTemplate, setSelectedTemplate] = useState<WorkstationTemplate>("proposal");
   const [showRecent, setShowRecent] = useState(false);
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiProcessing, setAiProcessing] = useState(false);
   const [aiResult, setAiResult] = useState<{
-    template: WorkspaceTemplate;
+    template: WorkstationTemplate;
     templateLabel: string;
     projectName: string;
     sections: string[];
@@ -80,8 +80,8 @@ export default function WorkspaceOnboarding({ initialName, workspaces, onComplet
     ? name.trim().split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)
     : "?";
 
-  // Recent clients from existing workspaces
-  const recentClients = workspaces
+  // Recent clients from existing workstations
+  const recentClients = workstations
     .filter(w => w.contact)
     .slice(0, 5)
     .map(w => ({ name: w.client, color: w.avatarBg, contact: w.contact || "" }));
@@ -103,7 +103,7 @@ export default function WorkspaceOnboarding({ initialName, workspaces, onComplet
     onComplete({ name: name.trim(), contact, rate, budget, color, template: selectedTemplate });
   };
 
-  const SECTION_PRESETS: Record<string, { template: WorkspaceTemplate; label: string; sections: string[]; keywords: string[] }> = {
+  const SECTION_PRESETS: Record<string, { template: WorkstationTemplate; label: string; sections: string[]; keywords: string[] }> = {
     brand: { template: "proposal", label: "Brand Identity Proposal", sections: ["Brand Audit", "Logo Exploration", "Color Palette", "Typography", "Brand Voice", "Applications", "Timeline", "Pricing"], keywords: ["brand", "identity", "logo", "branding"] },
     website: { template: "proposal", label: "Web Project Proposal", sections: ["Sitemap", "Wireframes", "Design Concepts", "Development", "Content Strategy", "Launch Plan", "Timeline", "Pricing"], keywords: ["website", "landing", "web", "app", "site"] },
     proposal: { template: "proposal", label: "Project Proposal", sections: ["Introduction", "Scope of Work", "Deliverables", "Timeline", "Pricing", "Terms"], keywords: ["proposal", "pitch", "bid", "project"] },
@@ -193,8 +193,8 @@ export default function WorkspaceOnboarding({ initialName, workspaces, onComplet
           {initials}
         </div>
         <div className={styles.headerInfo}>
-          <h2 className={styles.headerTitle}>{name.trim() || "New workspace"}</h2>
-          <p className={styles.headerSub}>{contact || "Set up a new client workspace"}</p>
+          <h2 className={styles.headerTitle}>{name.trim() || "New workstation"}</h2>
+          <p className={styles.headerSub}>{contact || "Set up a new client workstation"}</p>
         </div>
       </div>
 
@@ -382,7 +382,7 @@ export default function WorkspaceOnboarding({ initialName, workspaces, onComplet
           <kbd className={styles.kbd}>esc</kbd> skip
         </div>
         <button className={styles.createBtn} onClick={handleSubmit} disabled={!name.trim()}>
-          Create workspace
+          Create workstation
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
         </button>
       </div>

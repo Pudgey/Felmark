@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { DataChipsBlockData, DataChip, DataChipType, Workspace } from "@/lib/types";
+import type { DataChipsBlockData, DataChip, DataChipType, Workstation } from "@/lib/types";
 import styles from "./DataChipsBlock.module.css";
 
 interface DataChipsBlockProps {
   data: DataChipsBlockData;
   onUpdate: (data: DataChipsBlockData) => void;
-  workspace?: Workspace | null;
+  workstation?: Workstation | null;
   projectId?: string;
 }
 
@@ -32,9 +32,9 @@ export function getDefaultDataChipsData(): DataChipsBlockData {
   };
 }
 
-// Resolve live values from workspace/project context
-function resolveChipValue(chip: DataChip, workspace?: Workspace | null, projectId?: string): { value: string; color: string; secondary?: string } {
-  const project = workspace?.projects.find(p => p.id === projectId);
+// Resolve live values from workstation/project context
+function resolveChipValue(chip: DataChip, workstation?: Workstation | null, projectId?: string): { value: string; color: string; secondary?: string } {
+  const project = workstation?.projects.find(p => p.id === projectId);
 
   switch (chip.type) {
     case "revenue": {
@@ -128,8 +128,8 @@ function LiveTimer() {
   );
 }
 
-function ChipRenderer({ chip, workspace, projectId }: { chip: DataChip; workspace?: Workspace | null; projectId?: string }) {
-  const resolved = resolveChipValue(chip, workspace, projectId);
+function ChipRenderer({ chip, workstation, projectId }: { chip: DataChip; workstation?: Workstation | null; projectId?: string }) {
+  const resolved = resolveChipValue(chip, workstation, projectId);
 
   return (
     <div className={styles.chip}>
@@ -149,7 +149,7 @@ function ChipRenderer({ chip, workspace, projectId }: { chip: DataChip; workspac
   );
 }
 
-export default function DataChipsBlock({ data, onUpdate, workspace, projectId }: DataChipsBlockProps) {
+export default function DataChipsBlock({ data, onUpdate, workstation, projectId }: DataChipsBlockProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const addChip = (type: DataChipType) => {
@@ -170,7 +170,7 @@ export default function DataChipsBlock({ data, onUpdate, workspace, projectId }:
       <div className={styles.chips}>
         {data.chips.map((chip, i) => (
           <div key={`${chip.type}-${i}`} className={styles.chipWrap}>
-            <ChipRenderer chip={chip} workspace={workspace} projectId={projectId} />
+            <ChipRenderer chip={chip} workstation={workstation} projectId={projectId} />
             <button className={styles.chipRemove} onClick={() => removeChip(i)} title="Remove">×</button>
           </div>
         ))}

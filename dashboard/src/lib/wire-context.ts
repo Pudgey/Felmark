@@ -1,4 +1,4 @@
-import type { Workspace } from "./types";
+import type { Workstation } from "./types";
 
 export interface WireServiceTier {
   name: string;
@@ -21,7 +21,7 @@ export interface WireService {
  * Kept under ~1000 tokens.
  */
 export function buildWireContext(
-  workspaces: Workspace[],
+  workstations: Workstation[],
   services: WireService[]
 ): string {
   const parts: string[] = [];
@@ -42,9 +42,9 @@ export function buildWireContext(
   }
 
   // Workspaces / clients summary
-  if (workspaces.length > 0) {
+  if (workstations.length > 0) {
     parts.push("\nCLIENTS:");
-    for (const w of workspaces) {
+    for (const w of workstations) {
       const projectCount = w.projects.length;
       const statuses = w.projects.map((p) => p.status);
       const activeCount = statuses.filter((s) => s === "active").length;
@@ -69,11 +69,11 @@ export function buildWireContext(
       );
     }
   } else {
-    parts.push("\nCLIENTS: No workspaces created yet.");
+    parts.push("\nCLIENTS: No workstations created yet.");
   }
 
   // Overall stats
-  const totalProjects = workspaces.reduce((s, w) => s + w.projects.length, 0);
+  const totalProjects = workstations.reduce((s, w) => s + w.projects.length, 0);
   const totalRevenue = services.reduce((s, svc) => s + svc.totalEarned, 0);
   const avgRate = services.length > 0
     ? Math.round(
@@ -84,7 +84,7 @@ export function buildWireContext(
       )
     : 0;
 
-  parts.push(`\nSTATS: ${workspaces.length} clients, ${totalProjects} projects, ${services.length} services, $${totalRevenue.toLocaleString()} total earned, ~$${avgRate} avg service price`);
+  parts.push(`\nSTATS: ${workstations.length} clients, ${totalProjects} projects, ${services.length} services, $${totalRevenue.toLocaleString()} total earned, ~$${avgRate} avg service price`);
   parts.push(`DATE: ${new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`);
 
   return parts.join("\n");

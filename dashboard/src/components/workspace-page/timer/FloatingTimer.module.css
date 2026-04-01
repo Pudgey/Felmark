@@ -1,0 +1,42 @@
+/* ═══ Floating Timer Bar ═══ */
+
+.bar { display: flex; align-items: center; gap: 12px; padding: 8px 12px; background: #fff; border-top: 1px solid var(--warm-200); transition: all .15s; flex-shrink: 0; }
+.barActive { border-top-color: rgba(90,154,60,0.12); background: rgba(90,154,60,0.01); }
+
+.left { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+
+.pulse { width: 8px; height: 8px; border-radius: 50%; background: #5a9a3c; flex-shrink: 0; animation: tmPulse 1.5s ease infinite; }
+@keyframes tmPulse { 0%,60%,100% { opacity: .3; transform: scale(1); } 15% { opacity: 1; transform: scale(1.2); } }
+
+.info { min-width: 0; }
+.task { font-size: 13px; font-weight: 500; color: var(--ink-800); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.client { display: flex; align-items: center; gap: 4px; font-family: var(--mono); font-size: 9px; color: var(--ink-300); }
+.clientDot { width: 6px; height: 6px; border-radius: 3px; flex-shrink: 0; }
+
+.time { text-align: center; flex-shrink: 0; min-width: 120px; }
+.timeVal { font-family: var(--mono); font-size: 20px; font-weight: 600; color: var(--ink-900); letter-spacing: .02em; }
+.timeLabel { font-family: var(--mono); font-size: 8px; color: #5a9a3c; display: block; text-transform: uppercase; letter-spacing: .04em; }
+.timeLabelPaused { color: var(--ink-400); }
+
+.controls { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+
+.btn { padding: 5px 12px; border-radius: 5px; border: none; font-size: 11px; font-weight: 500; font-family: inherit; cursor: pointer; transition: all .08s; }
+.btnStart { background: var(--ink-900); color: #fff; }
+.btnStart:hover { background: var(--ink-800); }
+.btnPause { background: var(--warm-100); color: var(--ink-500); padding: 5px 8px; }
+.btnPause:hover { background: var(--warm-200); }
+.btnStop { background: #fff; color: var(--ink-400); border: 1px solid var(--warm-200); }
+.btnStop:hover { background: var(--warm-50); }
+.btnLog { background: #5a9a3c; color: #fff; }
+.btnLog:hover { background: #4e8a34; }
+.btnIcon { width: 24px; height: 24px; border-radius: 4px; border: 1px solid var(--warm-200); background: #fff; color: var(--ink-300); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 10px; }
+.btnIcon:hover { background: var(--warm-50); color: var(--ink-600); }
+
+/* Idle state — no task selected */
+.idle { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: #fff; border-top: 1px solid var(--warm-200); flex-shrink: 0; font-family: var(--mono); font-size: 10px; color: var(--ink-300); }
+.idleDot { width: 4px; height: 4px; border-radius: 50%; background: var(--warm-300); }
+
+/* Minimized pill */
+.mini { position: fixed; bottom: 16px; right: 16px; padding: 6px 12px; background: #5a9a3c; color: #fff; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); font-family: var(--mono); font-size: 12px; font-weight: 500; z-index: 50; transition: transform .1s; }
+.mini:hover { transform: scale(1.03); }
+.miniPulse { width: 6px; height: 6px; border-radius: 50%; background: #fff; animation: tmPulse 1.5s ease infinite; }

@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from "react";
 import type { ReactNode } from "react";
-import type { Workspace, Project } from "@/lib/types";
+import type { Workstation, Project } from "@/lib/types";
 import type { TerminalBlock, TerminalContextType, CommandHandlerContext, AmbientInsight, TerminalSessionState } from "@/lib/terminal/types";
 import { parseCommand } from "@/lib/terminal/parser";
 import { COMMAND_REGISTRY } from "@/lib/terminal/commands";
@@ -18,13 +18,13 @@ export function useTerminalContext() {
 }
 
 interface TerminalProviderProps {
-  workspaces: Workspace[];
+  workstations: Workstation[];
   activeProject: string;
   children: ReactNode;
   /** Editor blocks for ambient intelligence — enables D5 ambient loop */
   editorBlocks?: Array<{ type?: string; content?: string; props?: Record<string, unknown> }>;
   /** Callback for navigate actions (D7) */
-  onOpenWorkspace?: (workspaceId: string) => void;
+  onOpenWorkstation?: (workstationId: string) => void;
   sessionState?: TerminalSessionState;
   onSessionStateChange?: (state: TerminalSessionState) => void;
 }
@@ -40,11 +40,11 @@ const AMBIENT_THROTTLE_MS = 30_000;
 const AMBIENT_DEBOUNCE_MS = 2_000;
 
 export default function TerminalProvider({
-  workspaces,
+  workstations,
   activeProject,
   children,
   editorBlocks,
-  onOpenWorkspace,
+  onOpenWorkstation,
   sessionState,
   onSessionStateChange,
 }: TerminalProviderProps) {
@@ -54,8 +54,8 @@ export default function TerminalProvider({
     () => new Set(sessionState?.dismissedInsightKeys ?? [])
   );
 
-  const workspacesRef = useRef(workspaces);
-  workspacesRef.current = workspaces;
+  const workstationsRef = useRef(workstations);
+  workstationsRef.current = workstations;
 
   // Refs for ambient intelligence loop (D5)
   const lastAmbientCallRef = useRef<number>(0);
@@ -78,8 +78,8 @@ export default function TerminalProvider({
     });
   }, [blocks, inputHistory, dismissedInsights, onSessionStateChange]);
 
-  const allProjects: { project: Project; client: string; workspaceId: string }[] = workspaces.flatMap(
-    ws => ws.projects.map(p => ({ project: p, client: ws.client, workspaceId: ws.id }))
+  const allProjects: { project: Project; client: string; workstationId: string }[] = workstations.flatMap(
+    ws => ws.projects.map(p => ({ project: p, client: ws.client, workstationId: ws.id }))
   );
 
   const addBlock = useCallback((block: TerminalBlock) => {
@@ -98,9 +98,9 @@ export default function TerminalProvider({
 
   // ─── D7: Action routing ───────────────────────────
   const executeAction = useCallback((command: string) => {
-    if (command.startsWith("navigate:workspace:")) {
-      const wsId = command.replace("navigate:workspace:", "");
-      onOpenWorkspace?.(wsId);
+    if (command.startsWith("navigate:workstation:")) {
+      const wsId = command.replace("navigate:workstation:", "");
+      onOpenWorkstation?.(wsId);
       return;
     }
 
@@ -126,7 +126,7 @@ export default function TerminalProvider({
       executeCommandInner(command);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onOpenWorkspace]);
+  }, [onOpenWorkstation]);
 
   // ─── Core command execution ───────────────────────
   const executeCommandInner = useCallback((input: string) => {
@@ -162,9 +162,9 @@ export default function TerminalProvider({
     }
 
     const context: CommandHandlerContext = {
-      workspaces: workspacesRef.current,
-      projects: workspacesRef.current.flatMap(ws =>
-        ws.projects.map(p => ({ project: p, client: ws.client, workspaceId: ws.id }))
+      workstations: workstationsRef.current,
+      projects: workstationsRef.current.flatMap(ws =>
+        ws.projects.map(p => ({ project: p, client: ws.client, workstationId: ws.id }))
       ),
       activeProject: activeProject || null,
     };
@@ -211,7 +211,7 @@ export default function TerminalProvider({
     setInputHistory(prev => [...prev, query]);
 
     try {
-      const businessCtx = buildWireContext(workspacesRef.current, []);
+      const businessCtx = buildWireContext(workstationsRef.current, []);
       const res = await fetch("/api/terminal/query", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -259,7 +259,7 @@ export default function TerminalProvider({
     if (!mountedRef.current) return;
     if (!editorBlocks || editorBlocks.length === 0) return;
 
-    const activeWs = workspacesRef.current.find(ws =>
+    const activeWs = workstationsRef.current.find(ws =>
       ws.projects.some(p => p.id === activeProject)
     );
     const activeProj = activeWs?.projects.find(p => p.id === activeProject);
@@ -284,7 +284,7 @@ export default function TerminalProvider({
     lastAmbientCallRef.current = now;
 
     try {
-      const businessCtx = buildWireContext(workspacesRef.current, []);
+      const businessCtx = buildWireContext(workstationsRef.current, []);
 
       const res = await fetch("/api/terminal/ambient", {
         method: "POST",
@@ -344,7 +344,7 @@ export default function TerminalProvider({
   }, [editorBlocks, activeProject, runAmbientCheck]);
 
   const value: TerminalContextType = {
-    workspaces,
+    workstations,
     projects: allProjects,
     activeProject: activeProject || null,
     blocks,

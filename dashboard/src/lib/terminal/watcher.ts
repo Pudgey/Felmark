@@ -40,7 +40,7 @@ interface BlockLike {
   props?: Record<string, unknown>;
 }
 
-interface WorkspaceLike {
+interface WorkstationLike {
   client?: string;
 }
 
@@ -55,7 +55,7 @@ interface ProjectLike {
  */
 export function extractDocumentContext(
   blocks: BlockLike[],
-  workspace: WorkspaceLike | null,
+  workstation: WorkstationLike | null,
   project: ProjectLike | null
 ): DocumentContext {
   // Collect block types
@@ -111,7 +111,7 @@ export function extractDocumentContext(
     blockTypes,
     textSummary,
     amounts: amounts.slice(0, 10), // cap at 10
-    clientName: workspace?.client || null,
+    clientName: workstation?.client || null,
     projectName: project?.name || null,
     projectStatus: project?.status || null,
     projectDue: project?.due || null,

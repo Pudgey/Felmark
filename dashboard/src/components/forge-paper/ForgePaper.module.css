@@ -76,8 +76,8 @@
 
 /* ═══ Typography ═══ */
 .h1 { font-family: var(--font-heading), 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600; color: var(--ink-900); line-height: 1.15; margin: 0 0 4px; text-align: center; outline: none; }
-.h2 { font-family: var(--mono); font-size: 10px; font-weight: 600; color: var(--ink-900); text-transform: uppercase; letter-spacing: 0.04em; margin: 24px 0 8px; display: flex; align-items: center; gap: 6px; }
-.sectionNum { color: var(--ember); font-weight: 600; }
+.h2 { font-family: var(--mono); font-size: 10px; font-weight: 600; color: var(--ink-900); text-transform: uppercase; letter-spacing: 0.04em; margin: 24px 0 8px; outline: none; }
+.h2[data-section]::before { content: attr(data-section) ". "; color: var(--ember); font-weight: 600; }
 .h3 { font-size: 15px; font-weight: 600; color: var(--ink-800); margin: 16px 0 6px; outline: none; }
 .para { font-size: 14px; color: var(--ink-600); line-height: 1.75; margin: 0 0 8px; outline: none; min-height: 20px; }
 .para:empty::before { content: attr(data-placeholder); color: var(--warm-400); pointer-events: none; }

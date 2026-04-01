@@ -31,7 +31,7 @@ interface Conversation {
   id: string;
   type: "team" | "project" | "dm";
   name: string;
-  workspace?: string;
+  workstation?: string;
   wsColor?: string;
   icon?: string;
   userId?: string;
@@ -73,7 +73,7 @@ const SEED_MESSAGES: Record<string, Message[]> = {
     { id: "m1", user: "u4", text: "Meridian just approved the mood board direction — we're good to move forward", time: "10:42am" },
     { id: "m2", user: "u2", text: "Nice! I'll start the typography system today", time: "10:45am" },
     { id: "m3", user: "u3", text: "Can someone share the latest color palette file? Need it for the social templates", time: "11:01am" },
-    { id: "m4", user: "u4", text: "Just dropped it in the Brand Guidelines workspace", time: "11:03am" },
+    { id: "m4", user: "u4", text: "Just dropped it in the Brand Guidelines workstation", time: "11:03am" },
     { id: "m5", user: "u1", text: "Thanks Marcus. Priya check the callout block in the doc — linked it there too", time: "11:15am" },
   ],
   "c-p1": [
@@ -108,7 +108,7 @@ const INITIAL_CONVOS: Conversation[] = [
     reactions: { "👍": 2 },
   },
   {
-    id: "c-p1", type: "project", name: "Brand Guidelines v2", workspace: "Meridian Studio", wsColor: "#7c8594",
+    id: "c-p1", type: "project", name: "Brand Guidelines v2", workstation: "Meridian Studio", wsColor: "#7c8594",
     icon: "#", unread: 1, pinned: true, muted: false, priority: true,
     typing: [], threads: 2,
     lastMsg: { user: "u2", text: "Jamie: Got it, I'll set up the scale with Outfit variable then", time: "9:35am", timeSort: 935 },
@@ -116,14 +116,14 @@ const INITIAL_CONVOS: Conversation[] = [
     attachment: { type: "file", name: "typography-scale.fig" },
   },
   {
-    id: "c-p4", type: "project", name: "Course Landing Page", workspace: "Nora Kim", wsColor: "#a08472",
+    id: "c-p4", type: "project", name: "Course Landing Page", workstation: "Nora Kim", wsColor: "#a08472",
     icon: "#", unread: 0, pinned: false, muted: false, priority: false,
     typing: [], threads: 1,
     lastMsg: { user: "u1", text: "You: I'll pull some reference screenshots. That's basically our whole Felmark palette lol", time: "Yesterday", timeSort: -1 },
     participants: ["u1", "u3"],
   },
   {
-    id: "c-p6", type: "project", name: "App Onboarding UX", workspace: "Bolt Fitness", wsColor: "#8a7e63",
+    id: "c-p6", type: "project", name: "App Onboarding UX", workstation: "Bolt Fitness", wsColor: "#8a7e63",
     icon: "#", unread: 0, pinned: false, muted: true, priority: false,
     typing: [], threads: 0,
     lastMsg: { user: "u1", text: "You: Waiting on their API docs. I'll follow up today", time: "Yesterday", timeSort: -1 },
@@ -145,7 +145,7 @@ const INITIAL_CONVOS: Conversation[] = [
     lastMsg: { user: "u4", text: "Meridian approved the mood board", time: "Yesterday", timeSort: -1 },
   },
   {
-    id: "c-p7", type: "project", name: "Monthly Blog Posts", workspace: "Bolt Fitness", wsColor: "#8a7e63",
+    id: "c-p7", type: "project", name: "Monthly Blog Posts", workstation: "Bolt Fitness", wsColor: "#8a7e63",
     icon: "#", unread: 0, pinned: false, muted: false, priority: false,
     typing: [], threads: 0,
     lastMsg: { user: "u4", text: "Marcus: I'll draft the outline by Friday", time: "Mon", timeSort: -2 },
@@ -238,7 +238,7 @@ export default function ConversationPanel({ open, onClose }: ConversationPanelPr
     let list = convos;
     if (search) list = list.filter(c =>
       c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.workspace?.toLowerCase().includes(search.toLowerCase())
+      c.workstation?.toLowerCase().includes(search.toLowerCase())
     );
     if (filter === "unread") list = list.filter(c => c.unread > 0);
     if (filter === "pinned") list = list.filter(c => c.pinned);
@@ -358,7 +358,7 @@ export default function ConversationPanel({ open, onClose }: ConversationPanelPr
             <span className={styles.chatHeadName}>{active.name}</span>
             <span className={styles.chatHeadMeta}>
               {active.type === "team" && `${TEAM.filter(u => u.online).length} online · ${TEAM.length} members`}
-              {active.type === "project" && active.workspace}
+              {active.type === "project" && active.workstation}
               {active.type === "dm" && (dmUser?.online ? "Online" : "Offline")}
             </span>
           </div>
@@ -483,8 +483,8 @@ export default function ConversationPanel({ open, onClose }: ConversationPanelPr
             <span className={styles.convTime}>{c.lastMsg.time}</span>
           </div>
 
-          {c.type === "project" && c.workspace && (
-            <div className={styles.convWorkspace}>{c.workspace}</div>
+          {c.type === "project" && c.workstation && (
+            <div className={styles.convWorkspace}>{c.workstation}</div>
           )}
 
           {typingUsers.length > 0 ? (

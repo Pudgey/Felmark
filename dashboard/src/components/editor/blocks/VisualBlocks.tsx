@@ -64,7 +64,7 @@ export function getDefaultFlow(): FlowBlockData {
       { id: "n1", label: "Inquiry", sub: "Day 0", desc: "Client fills out the contact form. We review fit and schedule a discovery call within 24 hours.", icon: "✉", color: "rgba(91, 127, 164, 0.15)" },
       { id: "n2", label: "Discovery", sub: "Day 1-2", desc: "30-minute call to understand goals, timeline, and budget. Send summary + proposal link after.", icon: "◎", color: "rgba(124, 107, 158, 0.15)" },
       { id: "n3", label: "Proposal", sub: "Day 3", desc: "Custom proposal with scope, milestones, and pricing. Client signs and pays 50% deposit.", icon: "◆", color: "rgba(176, 125, 79, 0.15)" },
-      { id: "n4", label: "Kickoff", sub: "Day 5", desc: "Create workspace, share brand questionnaire, set up project timeline and first milestone.", icon: "▶", color: "rgba(90, 154, 60, 0.15)" },
+      { id: "n4", label: "Kickoff", sub: "Day 5", desc: "Create workstation, share brand questionnaire, set up project timeline and first milestone.", icon: "▶", color: "rgba(90, 154, 60, 0.15)" },
       { id: "n5", label: "Deliver", sub: "Ongoing", desc: "Work through milestones with weekly check-ins. Invoice remaining 50% on final delivery.", icon: "✦", color: "rgba(176, 125, 79, 0.15)" },
     ],
   };

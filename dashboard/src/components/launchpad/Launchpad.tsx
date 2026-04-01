@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from "react";
-import type { Workspace } from "@/lib/types";
+import type { Workstation } from "@/lib/types";
 import styles from "./Launchpad.module.css";
 
 // ── Data ──
@@ -19,7 +19,7 @@ interface Screen {
 interface RecentItem {
   id: string;
   name: string;
-  workspace: string;
+  workstation: string;
   type: string;
   icon: string;
   color: string;
@@ -49,11 +49,11 @@ const SCREENS: Screen[] = [
 ];
 
 const RECENTS: RecentItem[] = [
-  { id: "r1", name: "Brand Guidelines v2", workspace: "Meridian Studio", type: "doc", icon: "☰", color: "#7c8594", time: "2m ago", progress: 65 },
-  { id: "r2", name: "Course Landing Page Proposal", workspace: "Nora Kim", type: "proposal", icon: "◆", color: "#a08472", time: "1h ago", progress: null },
-  { id: "r3", name: "Invoice #047", workspace: "Meridian Studio", type: "invoice", icon: "$", color: "#7c8594", time: "3h ago", progress: null, status: "sent" },
-  { id: "r4", name: "App Onboarding UX", workspace: "Bolt Fitness", type: "doc", icon: "☰", color: "#8a7e63", time: "Yesterday", progress: 70 },
-  { id: "r5", name: "Typography Scale v3", workspace: "Meridian Studio", type: "doc", icon: "☰", color: "#7c8594", time: "Yesterday", progress: 45 },
+  { id: "r1", name: "Brand Guidelines v2", workstation: "Meridian Studio", type: "doc", icon: "☰", color: "#7c8594", time: "2m ago", progress: 65 },
+  { id: "r2", name: "Course Landing Page Proposal", workstation: "Nora Kim", type: "proposal", icon: "◆", color: "#a08472", time: "1h ago", progress: null },
+  { id: "r3", name: "Invoice #047", workstation: "Meridian Studio", type: "invoice", icon: "$", color: "#7c8594", time: "3h ago", progress: null, status: "sent" },
+  { id: "r4", name: "App Onboarding UX", workstation: "Bolt Fitness", type: "doc", icon: "☰", color: "#8a7e63", time: "Yesterday", progress: 70 },
+  { id: "r5", name: "Typography Scale v3", workstation: "Meridian Studio", type: "doc", icon: "☰", color: "#7c8594", time: "Yesterday", progress: 45 },
 ];
 
 const PINNED: PinnedItem[] = [
@@ -76,13 +76,13 @@ const TYPE_CFG: Record<string, { label: string; tagColor: string }> = {
 interface LaunchpadProps {
   open: boolean;
   onClose: () => void;
-  workspaces: Workspace[];
+  workstations: Workstation[];
   onNavigate: (screenId: string) => void;
-  onSelectWorkspace: (wsId: string) => void;
+  onSelectWorkstation: (wsId: string) => void;
   onOpenCommandPalette: () => void;
 }
 
-export default function Launchpad({ open, onClose, workspaces, onNavigate, onSelectWorkspace, onOpenCommandPalette }: LaunchpadProps) {
+export default function Launchpad({ open, onClose, workstations, onNavigate, onSelectWorkstation, onOpenCommandPalette }: LaunchpadProps) {
   const [search, setSearch] = useState("");
   const [hoveredScreen, setHoveredScreen] = useState<string | null>(null);
   const [hoveredRecent, setHoveredRecent] = useState<string | null>(null);
@@ -120,7 +120,7 @@ export default function Launchpad({ open, onClose, workspaces, onNavigate, onSel
 
   const filteredRecents = useMemo(() =>
     search
-      ? RECENTS.filter(r => r.name.toLowerCase().includes(search.toLowerCase()) || r.workspace.toLowerCase().includes(search.toLowerCase()))
+      ? RECENTS.filter(r => r.name.toLowerCase().includes(search.toLowerCase()) || r.workstation.toLowerCase().includes(search.toLowerCase()))
       : RECENTS,
     [search]
   );
@@ -139,7 +139,7 @@ export default function Launchpad({ open, onClose, workspaces, onNavigate, onSel
   };
 
   const handleWsClick = (wsId: string) => {
-    onSelectWorkspace(wsId);
+    onSelectWorkstation(wsId);
     onClose();
   };
 
@@ -213,9 +213,9 @@ export default function Launchpad({ open, onClose, workspaces, onNavigate, onSel
           {/* Workspaces */}
           {!search && (
             <>
-              <div className={styles.sec}>workspaces</div>
+              <div className={styles.sec}>workstations</div>
               <div className={styles.wsRow}>
-                {workspaces.slice(0, 5).map(ws => (
+                {workstations.slice(0, 5).map(ws => (
                   <div key={ws.id} className={styles.ws} onClick={() => handleWsClick(ws.id)}>
                     <div className={styles.wsAv} style={{ background: ws.avatarBg }}>
                       {ws.avatar}
@@ -246,7 +246,7 @@ export default function Launchpad({ open, onClose, workspaces, onNavigate, onSel
                         <div className={styles.recentName}>{r.name}</div>
                         <div className={styles.recentMeta}>
                           <span className={styles.recentType} style={{ color: tc.tagColor, background: tc.tagColor + "08" }}>{tc.label}</span>
-                          <span>{r.workspace}</span>
+                          <span>{r.workstation}</span>
                         </div>
                       </div>
                       <div className={styles.recentRight}>

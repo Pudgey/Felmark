@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import type { Block, BlockType, GraphType, MoneyBlockType, Tab, Workspace } from "@/lib/types";
+import type { Block, BlockType, GraphType, MoneyBlockType, Tab, Workstation } from "@/lib/types";
 import GraphBlockComponent, { getDefaultGraphData, GRAPH_TYPE_OPTIONS } from "./graphs/GraphBlock";
 import GraphDataEditor from "./graphs/GraphDataEditor";
 import graphStyles from "./graphs/GraphBlock.module.css";
@@ -49,12 +49,11 @@ import ActivityMargin, { type BlockActivity } from "../activity/ActivityMargin";
 import HistoryModal from "../history/HistoryModal";
 import TerminalWelcome from "./terminal-welcome/TerminalWelcome";
 import EditorMargin from "./margin/EditorMargin";
-import WorkspaceHome from "../workspace/WorkspaceHome";
+import WorkstationHome from "../workstation/WorkstationHome";
 import DashboardHome from "../dashboard/DashboardHome";
 import TeamScreen from "../team/TeamScreen";
 import CalendarFull from "../calendar/CalendarFull";
 import SearchPage from "../search/SearchPage";
-import SettingsPage from "../settings/SettingsPage";
 import type { Project, DocumentTemplate } from "@/lib/types";
 import type { TerminalSessionState } from "@/lib/terminal/types";
 import SplitPane from "./split-pane/SplitPane";
@@ -66,7 +65,7 @@ import styles from "./Editor.module.css";
 const TERMINAL_SPLIT_ID = "__terminal__";
 
 interface EditorProps {
-  workspaces: Workspace[];
+  workstations: Workstation[];
   tabs: Tab[];
   activeProject: string;
   blocks: Block[];
@@ -81,11 +80,11 @@ interface EditorProps {
   onTabReorder?: (sourceId: string, targetId: string, position: "before" | "after") => void;
   onBlocksChange: (projectId: string, blocks: Block[]) => void;
   onWordCountChange: (words: number, chars: number) => void;
-  activeWorkspaceId?: string | null;
+  activeWorkstationId?: string | null;
   onSelectProject?: (project: Project, client: string) => void;
-  onNewWorkspace?: () => void;
-  onNewTabInWorkspace?: (wsId: string) => void;
-  onSelectWorkspaceHome?: (wsId: string) => void;
+  onNewWorkstation?: () => void;
+  onNewTabInWorkstation?: (wsId: string) => void;
+  onSelectWorkstationHome?: (wsId: string) => void;
   onSaveAsTemplate?: () => void;
   docTemplates?: DocumentTemplate[];
   onNavigateRail?: (item: string) => void;
@@ -93,7 +92,7 @@ interface EditorProps {
   onCalendarOpenProject?: (projectId: string) => void;
   calendarScrollTarget?: string | null;
   onCalendarScrollComplete?: () => void;
-  onRenameWorkspace?: (wsId: string, name: string) => void;
+  onRenameWorkstation?: (wsId: string, name: string) => void;
   onUpdateProjectDue?: (projectId: string, due: string | null) => void;
   comments: CommentType[];
   onCommentsChange: (comments: CommentType[]) => void;
@@ -110,7 +109,7 @@ interface EditorProps {
   onSplitMakePrimary?: () => void;
 }
 
-export default function Editor({ workspaces, tabs, activeProject, blocks: blocksProp, sidebarOpen, wordCount, charCount, onOpenSidebar, onTabClick, onTabClose, onNewTab, onTabRename, onBlocksChange, onWordCountChange, activeWorkspaceId, onSelectProject, onNewWorkspace, onNewTabInWorkspace, onSelectWorkspaceHome, onSaveAsTemplate, docTemplates, onNavigateRail, railActive, onCalendarOpenProject, calendarScrollTarget, onCalendarScrollComplete, onRenameWorkspace, onUpdateProjectDue, comments, onCommentsChange, activities, onActivitiesChange, zenMode, onToggleZen, splitProject, splitBlocks, splitProjectName, splitClientName, onSplitOpen, onSplitClose, onSplitMakePrimary }: EditorProps) {
+export default function Editor({ workstations, tabs, activeProject, blocks: blocksProp, sidebarOpen, wordCount, charCount, onOpenSidebar, onTabClick, onTabClose, onNewTab, onTabRename, onBlocksChange, onWordCountChange, activeWorkstationId, onSelectProject, onNewWorkstation, onNewTabInWorkstation, onSelectWorkstationHome, onSaveAsTemplate, docTemplates, onNavigateRail, railActive, onCalendarOpenProject, calendarScrollTarget, onCalendarScrollComplete, onRenameWorkstation, onUpdateProjectDue, comments, onCommentsChange, activities, onActivitiesChange, zenMode, onToggleZen, splitProject, splitBlocks, splitProjectName, splitClientName, onSplitOpen, onSplitClose, onSplitMakePrimary }: EditorProps) {
   const [blocks, setBlocksLocal] = useState<Block[]>(blocksProp);
   const [editingTabId, setEditingTabId] = useState<string | null>(null);
   const [editingTabName, setEditingTabName] = useState("");
@@ -137,21 +136,20 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
   const [splitPickerOpen, setSplitPickerOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [breathe, setBreathe] = useState(false);
-  const [forgePaper, setForgePaper] = useState(false);
   const [catOpen, setCatOpen] = useState(false);
   const [notifPanelOpen, setNotifPanelOpen] = useState(false);
   const [terminalSessions, setTerminalSessions] = useState<Record<string, TerminalSessionState>>({});
   const [notifications, setNotifications] = useState<Notification[]>([
-    { id: "n1", type: "payment", title: "Payment received — $1,800", desc: "Nora Kim paid Invoice #046 · Retainer (March)", time: "32m ago", read: false, action: "View invoice", workspace: "Nora Kim" },
-    { id: "n2", type: "comment", title: "Sarah commented on Brand Guidelines v2", desc: "\"Can we make the logo usage section more specific? I want exact minimum sizes.\"", time: "2h ago", read: false, action: "Reply", workspace: "Meridian Studio", avatar: "S", avatarBg: "#8a7e63" },
-    { id: "n3", type: "view", title: "Sarah viewed Invoice #047", desc: "2nd view · 1m 45s on page · Meridian Studio", time: "2h ago", read: false, action: "Track", workspace: "Meridian Studio" },
-    { id: "n4", type: "signed", title: "Nora signed the Course Landing Page proposal", desc: "Proposal accepted · $3,200 project value · Ready to start", time: "3h ago", read: true, action: "Open project", workspace: "Nora Kim" },
-    { id: "n5", type: "overdue", title: "Invoice #044 is 4 days overdue", desc: "Bolt Fitness · $4,000 · Sent Mar 25 · No views in 48h", time: "Today", read: false, action: "Send reminder", workspace: "Bolt Fitness" },
-    { id: "n6", type: "edit", title: "Jamie edited Typography section", desc: "Brand Guidelines v2 · 8 changes · Typography Scale v3 updated", time: "6h ago", read: true, action: "Review changes", workspace: "Meridian Studio", avatar: "J", avatarBg: "#7c8594" },
-    { id: "n7", type: "deadline", title: "Brand Guidelines v2 due in 5 days", desc: "65% complete · 3 deliverables remaining · Meridian Studio", time: "Today", read: true, action: "Open project", workspace: "Meridian Studio" },
-    { id: "n8", type: "proposal", title: "Proposal sent to Luna Boutique", desc: "E-commerce Rebrand · $6,500 · Awaiting response", time: "Yesterday", read: true, action: "Track", workspace: "Luna Boutique" },
+    { id: "n1", type: "payment", title: "Payment received — $1,800", desc: "Nora Kim paid Invoice #046 · Retainer (March)", time: "32m ago", read: false, action: "View invoice", workstation: "Nora Kim" },
+    { id: "n2", type: "comment", title: "Sarah commented on Brand Guidelines v2", desc: "\"Can we make the logo usage section more specific? I want exact minimum sizes.\"", time: "2h ago", read: false, action: "Reply", workstation: "Meridian Studio", avatar: "S", avatarBg: "#8a7e63" },
+    { id: "n3", type: "view", title: "Sarah viewed Invoice #047", desc: "2nd view · 1m 45s on page · Meridian Studio", time: "2h ago", read: false, action: "Track", workstation: "Meridian Studio" },
+    { id: "n4", type: "signed", title: "Nora signed the Course Landing Page proposal", desc: "Proposal accepted · $3,200 project value · Ready to start", time: "3h ago", read: true, action: "Open project", workstation: "Nora Kim" },
+    { id: "n5", type: "overdue", title: "Invoice #044 is 4 days overdue", desc: "Bolt Fitness · $4,000 · Sent Mar 25 · No views in 48h", time: "Today", read: false, action: "Send reminder", workstation: "Bolt Fitness" },
+    { id: "n6", type: "edit", title: "Jamie edited Typography section", desc: "Brand Guidelines v2 · 8 changes · Typography Scale v3 updated", time: "6h ago", read: true, action: "Review changes", workstation: "Meridian Studio", avatar: "J", avatarBg: "#7c8594" },
+    { id: "n7", type: "deadline", title: "Brand Guidelines v2 due in 5 days", desc: "65% complete · 3 deliverables remaining · Meridian Studio", time: "Today", read: true, action: "Open project", workstation: "Meridian Studio" },
+    { id: "n8", type: "proposal", title: "Proposal sent to Luna Boutique", desc: "E-commerce Rebrand · $6,500 · Awaiting response", time: "Yesterday", read: true, action: "Track", workstation: "Luna Boutique" },
     { id: "n9", type: "wire", title: "3 new signals on The Wire", desc: "Nora Kim raised $2M · Meridian hiring · Brand demand +34%", time: "Yesterday", read: true, action: "Open The Wire", pro: true },
-    { id: "n10", type: "milestone", title: "Logo usage rules — approved by all", desc: "Brand Guidelines v2 · Sarah ✓ · Jamie ✓ · Ready for next milestone", time: "2 days ago", read: true, action: "View deliverable", workspace: "Meridian Studio" },
+    { id: "n10", type: "milestone", title: "Logo usage rules — approved by all", desc: "Brand Guidelines v2 · Sarah ✓ · Jamie ✓ · Ready for next milestone", time: "2 days ago", read: true, action: "View deliverable", workstation: "Meridian Studio" },
   ]);
   const splitPickerRef = useRef<HTMLDivElement>(null);
   const cmdPaletteSourceBlockId = useRef<string | null>(null);
@@ -921,10 +919,10 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
   })();
 
   const activeTab = tabs.find(t => t.active);
-  const activeWs = workspaces.find(w => w.projects.some(p => p.id === activeProject));
-  const canGoToWorkspaceHome = Boolean(activeWs?.id && onSelectWorkspaceHome);
+  const activeWs = workstations.find(w => w.projects.some(p => p.id === activeProject));
+  const canGoToWorkstationHome = Boolean(activeWs?.id && onSelectWorkstationHome);
   const hasActiveTab = tabs.some(t => t.active);
-  const activeRail = railActive || "workspaces";
+  const activeRail = railActive || "workstations";
   const surfaceKey = (() => {
     if (activeRail === "calendar") return "calendar";
     if (activeRail === "search") return "search";
@@ -934,16 +932,17 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     if (activeRail === "finance") return "finance";
     if (activeRail === "wire") return "wire";
     if (activeRail === "team") return "team";
-    if (activeWorkspaceId) return `workspace:${activeWorkspaceId}`;
+    if (activeRail === "forge") return "forge-paper";
+    if (activeWorkstationId) return `workstation:${activeWorkstationId}`;
     if (activeRail === "home" && !hasActiveTab) return "dashboard-home";
     if (activeRail !== "home" && !hasActiveTab) return `terminal:${activeRail}`;
-    return forgePaper ? "forge-paper" : "document";
+    return "document";
   })();
 
   const handleBreadcrumbParentClick = useCallback(() => {
-    if (!activeWs?.id || !onSelectWorkspaceHome) return;
-    onSelectWorkspaceHome(activeWs.id);
-  }, [activeWs?.id, onSelectWorkspaceHome]);
+    if (!activeWs?.id || !onSelectWorkstationHome) return;
+    onSelectWorkstationHome(activeWs.id);
+  }, [activeWs?.id, onSelectWorkstationHome]);
 
   const handleCommandSelect = useCallback((commandId: string) => {
     switch (commandId) {
@@ -960,11 +959,11 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
         onNavigateRail?.("search");
         return true;
       case "switch-ws":
-        if (activeWs?.id && onSelectWorkspaceHome) {
-          onSelectWorkspaceHome(activeWs.id);
+        if (activeWs?.id && onSelectWorkstationHome) {
+          onSelectWorkstationHome(activeWs.id);
           return true;
         }
-        onNavigateRail?.("workspaces");
+        onNavigateRail?.("workstations");
         return true;
       case "recent":
         setHistoryOpen(true);
@@ -985,7 +984,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       default:
         return false;
     }
-  }, [activeProject, activeWs?.id, duplicateBlockById, hoverBlock, onNavigateRail, onNewTab, onSelectWorkspaceHome]);
+  }, [activeProject, activeWs?.id, duplicateBlockById, hoverBlock, onNavigateRail, onNewTab, onSelectWorkstationHome]);
 
   const renderBlock = (block: Block) => {
     // Graph block — click to select, double-click to edit data
@@ -1537,7 +1536,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
               </svg>
             </button>
             {splitPickerOpen && (() => {
-              const allProjects = workspaces.flatMap(w => w.projects.map(p => ({ ...p, client: w.client })));
+              const allProjects = workstations.flatMap(w => w.projects.map(p => ({ ...p, client: w.client })));
               const available = allProjects.filter(p => p.id !== activeProject);
               return (
                 <div className={styles.splitPicker}>
@@ -1581,13 +1580,6 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
               <path d="M10 10l2 2 4-4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
-          <button className={`${styles.tabBarAction} ${forgePaper ? styles.tabBarActionActive : ""}`} title="Forge Paper" aria-label="Forge Paper" onClick={() => setForgePaper(p => !p)}>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M4 2h5.5L13 5.5V13a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
-              <path d="M9 2v4h4" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
-              <path d="M6 9h4M6 11.5h2.5" stroke="currentColor" strokeWidth="1" strokeLinecap="round"/>
-            </svg>
-          </button>
           <div className={styles.profileAvatar} title="Profile">A</div>
         </div>
       </div>}
@@ -1598,10 +1590,10 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
           <button
             className={styles.breadNav}
             type="button"
-            aria-label="Back to workspace"
-            title="Back to workspace"
+            aria-label="Back to workstation"
+            title="Back to workstation"
             onClick={handleBreadcrumbParentClick}
-            disabled={!canGoToWorkspaceHome}
+            disabled={!canGoToWorkstationHome}
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M8 3L4 7l4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </button>
@@ -1610,14 +1602,14 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
             className={styles.breadLink}
             type="button"
             onClick={handleBreadcrumbParentClick}
-            disabled={!canGoToWorkspaceHome}
+            disabled={!canGoToWorkstationHome}
           >
-            {activeWs?.client || "Workspace"}
+            {activeWs?.client || "Workstation"}
           </button>
           <span style={{ color: "var(--warm-300)" }}>/</span>
           <span style={{ color: "var(--ink-700)", margin: "0 4px", fontWeight: 500 }}>{activeTab?.name || "Untitled"}</span>
           {(() => {
-            const pj = workspaces.flatMap(w => w.projects).find(p => p.id === activeProject);
+            const pj = workstations.flatMap(w => w.projects).find(p => p.id === activeProject);
             if (!pj) return null;
             const st = STATUS[pj.status];
             return <span className={styles.breadStatus} style={{ background: `${st.color}12`, color: st.color, border: `1px solid ${st.color}20` }}>{st.label}</span>;
@@ -1640,10 +1632,10 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
         <div className={styles.editorCol}>
           <div key={surfaceKey} className={styles.surfaceStage}>
             {railActive === "calendar" && (
-              <CalendarFull workspaces={workspaces} onOpenProject={onCalendarOpenProject} scrollToProjectId={calendarScrollTarget} onScrollComplete={onCalendarScrollComplete} />
+              <CalendarFull workstations={workstations} onOpenProject={onCalendarOpenProject} scrollToProjectId={calendarScrollTarget} onScrollComplete={onCalendarScrollComplete} />
             )}
             {railActive === "search" && (
-              <SearchPage workspaces={workspaces} />
+              <SearchPage workstations={workstations} />
             )}
             {railActive === "services" && (
               <ServicesPage />
@@ -1658,47 +1650,44 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
               <FinancePage />
             )}
             {railActive === "wire" && (
-              <WirePage workspaces={workspaces} services={WIRE_SERVICES} />
+              <WirePage workstations={workstations} services={WIRE_SERVICES} />
             )}
             {railActive === "team" && (
               <TeamScreen />
             )}
-            {railActive === "settings" && (
-              <SettingsPage />
-            )}
-            {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && railActive !== "settings" && activeWorkspaceId && (() => {
-              const ws = workspaces.find(w => w.id === activeWorkspaceId);
+            {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && railActive !== "forge" && activeWorkstationId && (() => {
+              const ws = workstations.find(w => w.id === activeWorkstationId);
               return ws && onSelectProject ? (
-                <WorkspaceHome workspace={ws} onSelectProject={onSelectProject} onNewTab={onNewTab} onRenameWorkspace={onRenameWorkspace} onUpdateProjectDue={onUpdateProjectDue} />
+                <WorkstationHome workstation={ws} onSelectProject={onSelectProject} onNewTab={onNewTab} onRenameWorkstation={onRenameWorkstation} onUpdateProjectDue={onUpdateProjectDue} />
               ) : null;
             })()}
-            {railActive === "home" && !activeWorkspaceId && !tabs.some(t => t.active) && (
+            {railActive === "home" && !activeWorkstationId && !tabs.some(t => t.active) && (
               <DashboardHome
-                workspaces={workspaces}
-                onSelectWorkspace={onSelectWorkspaceHome || (() => {})}
+                workstations={workstations}
+                onSelectWorkstation={onSelectWorkstationHome || (() => {})}
                 onSelectProject={onSelectProject || (() => {})}
-                onNewTabInWorkspace={onNewTabInWorkspace || (() => {})}
+                onNewTabInWorkstation={onNewTabInWorkstation || (() => {})}
               />
             )}
-            {railActive !== "home" && railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && railActive !== "settings" && !activeWorkspaceId && !tabs.some(t => t.active) && (
+            {railActive !== "home" && railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && railActive !== "forge" && !activeWorkstationId && !tabs.some(t => t.active) && (
               <TerminalWelcome
-                activeCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status !== "completed").length, 0)}
-                reviewCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "review").length, 0)}
-                overdueCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "overdue").length, 0)}
+                activeCount={workstations.reduce((s, w) => s + w.projects.filter(p => p.status !== "completed").length, 0)}
+                reviewCount={workstations.reduce((s, w) => s + w.projects.filter(p => p.status === "review").length, 0)}
+                overdueCount={workstations.reduce((s, w) => s + w.projects.filter(p => p.status === "overdue").length, 0)}
                 onOpenCmdPalette={() => {}}
-                onNewWorkspace={onNewWorkspace}
+                onNewWorkstation={onNewWorkstation}
               />
             )}
-            {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && railActive !== "settings" && !activeWorkspaceId && tabs.some(t => t.active) && forgePaper && (
+            {railActive === "forge" && tabs.some(t => t.active) && (
               <ForgePaper
-                blocks={blocks}
-                workspace={activeWs}
+                initialBlocks={blocks}
+                workstation={activeWs}
                 projectName={activeTab?.name || "Untitled"}
-                onClose={() => setForgePaper(false)}
-                onBlocksChange={(newBlocks) => setBlocks(newBlocks)}
+                onClose={() => onNavigateRail?.("workstations")}
+                onSave={(newBlocks) => setBlocks(newBlocks)}
               />
             )}
-            {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && railActive !== "settings" && !activeWorkspaceId && tabs.some(t => t.active) && !forgePaper && (
+            {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && railActive !== "forge" && !activeWorkstationId && tabs.some(t => t.active) && (
               <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
                 {/* Left margin — document spine + block gutter */}
                 {!zenMode && <EditorMargin
@@ -1763,7 +1752,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
                 {splitProject === TERMINAL_SPLIT_ID && (
                   <TerminalProvider
                     key={terminalSessionKey}
-                    workspaces={workspaces}
+                    workstations={workstations}
                     activeProject={activeProject}
                     editorBlocks={blocks}
                     sessionState={terminalSessions[terminalSessionKey]}
@@ -1785,8 +1774,8 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
             )}
           </div>
 
-          {/* Command bar — only show when not in workspace home or zen mode */}
-          {!activeWorkspaceId && !zenMode && <CommandBar charCount={charCount} />}
+          {/* Command bar — only show when not in workstation home or zen mode */}
+          {!activeWorkstationId && !zenMode && <CommandBar charCount={charCount} />}
         </div>
 
         {/* Activity margin (right) — hidden in zen mode */}

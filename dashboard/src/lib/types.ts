@@ -672,7 +672,7 @@ export interface Project {
   pinned: boolean;
 }
 
-export interface Workspace {
+export interface Workstation {
   id: string;
   client: string;
   avatar: string;
@@ -685,7 +685,7 @@ export interface Workspace {
   projects: Project[];
 }
 
-export type WorkspaceTemplate = "blank" | "proposal" | "meeting" | "brief" | "retainer" | "invoice";
+export type WorkstationTemplate = "blank" | "proposal" | "meeting" | "brief" | "retainer" | "invoice";
 
 export type TemplateCategory = "proposals" | "contracts" | "notes" | "planning" | "financial" | "onboarding" | "custom";
 
@@ -724,8 +724,8 @@ export interface Tab {
 
 export interface ArchivedProject {
   project: Project;
-  workspaceId: string;
-  workspaceName: string;
+  workstationId: string;
+  workstationName: string;
   archivedAt: string;
 }
 

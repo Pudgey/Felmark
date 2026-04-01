@@ -1,4 +1,4 @@
-import type { BlockTypeInfo, Workspace, StatusInfo, ProjectStatus } from "./types";
+import type { BlockTypeInfo, Workstation, StatusInfo, ProjectStatus } from "./types";
 
 export const BLOCK_CATEGORIES = [
   { id: "Basic", label: "Basic", icon: "Aa" },
@@ -78,7 +78,7 @@ export const COMMANDS: Command[] = [
   { id: "new-proposal", label: "New Proposal", section: "Create", shortcut: "⌘⇧P", icon: "◆" },
   { id: "new-invoice", label: "New Invoice", section: "Create", shortcut: "⌘⇧I", icon: "$" },
   { id: "search", label: "Search Notes", section: "Navigate", shortcut: "⌘F", icon: "⌕" },
-  { id: "switch-ws", label: "Switch Workspace", section: "Navigate", shortcut: "⌘J", icon: "⇄" },
+  { id: "switch-ws", label: "Switch Workstation", section: "Navigate", shortcut: "⌘J", icon: "⇄" },
   { id: "recent", label: "Recent Files", section: "Navigate", shortcut: "⌘E", icon: "↺" },
   { id: "export-pdf", label: "Export as PDF", section: "Actions", shortcut: "⌘⇧E", icon: "↓" },
   { id: "share", label: "Share with Client", section: "Actions", shortcut: "⌘⇧S", icon: "→" },
@@ -93,7 +93,7 @@ export const STATUS: Record<ProjectStatus, StatusInfo> = {
   overdue: { color: "#c24b38", label: "Overdue" },
 };
 
-export const INITIAL_WORKSPACES: Workspace[] = [
+export const INITIAL_WORKSTATIONS: Workstation[] = [
   {
     id: "w1", client: "Meridian Studio", avatar: "M", avatarBg: "#7c8594", open: true, lastActive: "2m ago",
     projects: [

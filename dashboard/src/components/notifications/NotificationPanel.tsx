@@ -13,7 +13,7 @@ export interface Notification {
   action: string;
   project?: string;
   projectColor?: string;
-  workspace?: string;
+  workstation?: string;
   avatar?: string;
   avatarBg?: string;
   pro?: boolean;
@@ -176,8 +176,8 @@ export default function NotificationPanel({ open, onClose, notifications, onMark
                       <div className={styles.itemDesc}>{n.desc}</div>
                       <div className={styles.itemFooter}>
                         <span className={styles.itemTime}>{n.time}</span>
-                        {n.workspace && (
-                          <span className={styles.itemWs}>{n.workspace}</span>
+                        {n.workstation && (
+                          <span className={styles.itemWs}>{n.workstation}</span>
                         )}
                         {n.pro && (
                           <span className={styles.itemPro}>PRO</span>

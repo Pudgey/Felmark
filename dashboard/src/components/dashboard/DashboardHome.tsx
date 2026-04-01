@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import type { Workspace, Project } from "@/lib/types";
+import type { Workstation, Project } from "@/lib/types";
 import { STATUS } from "@/lib/constants";
 import { getDaysLeft as daysLeft, getDueLabel as getDueLabelFromDate, getDueColor as getDueColorFromDate } from "@/lib/due-dates";
 import styles from "./DashboardHome.module.css";
@@ -33,7 +33,7 @@ const REVENUE_MONTHS = [
 const QUICK_ACTIONS = [
   { id: "proposal", label: "New proposal", icon: "◆", shortcut: "⌘⇧P" },
   { id: "invoice", label: "New invoice", icon: "$", shortcut: "⌘⇧I" },
-  { id: "workspace", label: "New workspace", icon: "→", shortcut: "⌘⇧W" },
+  { id: "workspace", label: "New workstation", icon: "→", shortcut: "⌘⇧W" },
   { id: "note", label: "Quick note", icon: "✎", shortcut: "⌘N" },
 ];
 
@@ -75,13 +75,13 @@ const STATUS_CFG: Record<string, { color: string; label: string }> = {
 // ── Component ──
 
 interface DashboardHomeProps {
-  workspaces: Workspace[];
-  onSelectWorkspace: (wsId: string) => void;
+  workstations: Workstation[];
+  onSelectWorkstation: (wsId: string) => void;
   onSelectProject: (project: Project, client: string) => void;
-  onNewTabInWorkspace: (wsId: string) => void;
+  onNewTabInWorkstation: (wsId: string) => void;
 }
 
-export default function DashboardHome({ workspaces, onSelectWorkspace, onSelectProject, onNewTabInWorkspace }: DashboardHomeProps) {
+export default function DashboardHome({ workstations, onSelectWorkstation, onSelectProject, onNewTabInWorkstation }: DashboardHomeProps) {
   const [now, setNow] = useState<Date | null>(null);
   const [showWsPicker, setShowWsPicker] = useState(false);
   const [wsSearch, setWsSearch] = useState("");
@@ -95,7 +95,7 @@ export default function DashboardHome({ workspaces, onSelectWorkspace, onSelectP
   }, []);
 
   // ── Computed from real workspace data ──
-  const allProjects = workspaces.flatMap(ws => ws.projects);
+  const allProjects = workstations.flatMap(ws => ws.projects);
   const activeProjects = allProjects.filter(p => p.status !== "completed");
   const overdueProjects = allProjects.filter(p => { const dl = daysLeft(p.due); return p.status === "overdue" || (dl != null && dl < 0); });
 
@@ -114,7 +114,7 @@ export default function DashboardHome({ workspaces, onSelectWorkspace, onSelectP
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 
   // Workspace picker: Personal first, then alphabetical, filtered by search
-  const sortedWorkspaces = [...workspaces].sort((a, b) => {
+  const sortedWorkspaces = [...workstations].sort((a, b) => {
     const aPers = a.client.toLowerCase() === "personal" ? 0 : 1;
     const bPers = b.client.toLowerCase() === "personal" ? 0 : 1;
     if (aPers !== bPers) return aPers - bPers;
@@ -145,7 +145,7 @@ export default function DashboardHome({ workspaces, onSelectWorkspace, onSelectP
   const handlePickWorkspace = (wsId: string) => {
     setShowWsPicker(false);
     setWsSearch("");
-    onNewTabInWorkspace(wsId);
+    onNewTabInWorkstation(wsId);
   };
 
   return (
@@ -172,7 +172,7 @@ export default function DashboardHome({ workspaces, onSelectWorkspace, onSelectP
                       <input
                         ref={searchInputRef}
                         className={styles.wsPickerInput}
-                        placeholder="Search workspaces..."
+                        placeholder="Search workstations..."
                         value={wsSearch}
                         onChange={e => setWsSearch(e.target.value)}
                         onKeyDown={e => {
@@ -190,7 +190,7 @@ export default function DashboardHome({ workspaces, onSelectWorkspace, onSelectP
                         </div>
                       ))}
                       {filteredPicker.length === 0 && (
-                        <div className={styles.wsPickerEmpty}>No workspaces match &ldquo;{wsSearch}&rdquo;</div>
+                        <div className={styles.wsPickerEmpty}>No workstations match &ldquo;{wsSearch}&rdquo;</div>
                       )}
                     </div>
                   </div>
@@ -237,7 +237,7 @@ export default function DashboardHome({ workspaces, onSelectWorkspace, onSelectP
         <div className={styles.stat}>
           <div className={styles.statVal}><AnimNum value={totalEarned} prefix="$" /></div>
           <div className={styles.statLabel}>total value</div>
-          <div className={styles.statSub}>{workspaces.length} clients</div>
+          <div className={styles.statSub}>{workstations.length} clients</div>
         </div>
       </div>
 
@@ -247,14 +247,14 @@ export default function DashboardHome({ workspaces, onSelectWorkspace, onSelectP
           {/* Workspaces */}
           <div className={styles.section}>
             <div className={styles.sectionHead}>
-              <span className={styles.sectionTitle}>Workspaces</span>
+              <span className={styles.sectionTitle}>Workstations</span>
               <button className={styles.sectionAction}>View all</button>
             </div>
             <div className={styles.wsList}>
-              {workspaces.length === 0 && (
-                <div style={{ padding: "24px 14px", textAlign: "center", color: "var(--ink-300)", fontSize: 13 }}>No workspaces yet. Create one to get started.</div>
+              {workstations.length === 0 && (
+                <div style={{ padding: "24px 14px", textAlign: "center", color: "var(--ink-300)", fontSize: 13 }}>No workstations yet. Create one to get started.</div>
               )}
-              {workspaces.map(ws => {
+              {workstations.map(ws => {
                 const wsActive = ws.projects.filter(p => p.status !== "completed");
                 const wsValue = wsActive.reduce((s, p) => s + parseAmount(p.amount), 0);
                 const wsTotal = ws.projects.reduce((s, p) => s + parseAmount(p.amount), 0);
@@ -265,7 +265,7 @@ export default function DashboardHome({ workspaces, onSelectWorkspace, onSelectP
                 const dlText = !nextDl ? "No deadline" : getDueLabelFromDate(nextDl.due);
 
                 return (
-                  <div key={ws.id} className={styles.ws} role="button" tabIndex={0} aria-label={`${ws.client} workspace`} onClick={() => onSelectWorkspace(ws.id)} onKeyDown={e => { if (e.key === "Enter") onSelectWorkspace(ws.id); }}>
+                  <div key={ws.id} className={styles.ws} role="button" tabIndex={0} aria-label={`${ws.client} workstation`} onClick={() => onSelectWorkstation(ws.id)} onKeyDown={e => { if (e.key === "Enter") onSelectWorkstation(ws.id); }}>
                     <div className={styles.wsAvatar} style={{ background: ws.avatarBg }}>{ws.avatar}</div>
                     <div className={styles.wsInfo}>
                       <div className={styles.wsName}>{ws.client}</div>
@@ -298,7 +298,7 @@ export default function DashboardHome({ workspaces, onSelectWorkspace, onSelectP
                 <div style={{ padding: "20px 14px", textAlign: "center", color: "var(--ink-300)", fontSize: 13 }}>No upcoming deadlines</div>
               )}
               {deadlines.slice(0, 6).map(p => {
-                const ws = workspaces.find(w => w.projects.some(pr => pr.id === p.id));
+                const ws = workstations.find(w => w.projects.some(pr => pr.id === p.id));
                 const dl = daysLeft(p.due);
                 const isOverdue = (dl ?? 0) < 0;
                 const dlColor = getDueColorFromDate(p.due);
@@ -403,7 +403,7 @@ export default function DashboardHome({ workspaces, onSelectWorkspace, onSelectP
 
       {/* Footer */}
       <div className={styles.footer}>
-        <span>Felmark · {workspaces.length} workspaces · {allProjects.length} projects</span>
+        <span>Felmark · {workstations.length} workstations · {allProjects.length} projects</span>
         <span>{now ? now.toLocaleTimeString() : "\u00A0"}</span>
       </div>
     </div>

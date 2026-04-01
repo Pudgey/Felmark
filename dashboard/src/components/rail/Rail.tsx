@@ -21,8 +21,12 @@ export default function Rail({ activeItem, overdueCount, onItemClick, zenMode, o
         </svg>
       </button>
 
-      <button className={`${styles.btn} ${activeItem === "workspaces" ? styles.active : ""}`} onClick={() => onItemClick("workspaces")} aria-label="Workspaces" title="workspaces">
-        <svg width="20" height="20" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.2"/><rect x="10" y="2" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.2"/><rect x="2" y="10" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.2"/><rect x="10" y="10" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.2"/></svg>
+      <button className={`${styles.btn} ${activeItem === "workspace" ? styles.active : ""}`} onClick={() => onItemClick("workspace")} aria-label="Workspace" title="workspace">
+        <svg width="20" height="20" viewBox="0 0 18 18" fill="none"><path d="M3 4h12M3 8h8M3 12h10" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/><path d="M14 7l2 2-2 2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      </button>
+
+      <button className={`${styles.btn} ${activeItem === "workstations" ? styles.active : ""}`} onClick={() => onItemClick("workstations")} aria-label="Workstations" title="workstations">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="7" x2="22" y2="7"/><circle cx="5" cy="5" r="0.75" fill="currentColor" stroke="none"/><circle cx="7.5" cy="5" r="0.75" fill="currentColor" stroke="none"/><circle cx="10" cy="5" r="0.75" fill="currentColor" stroke="none"/><polyline points="6,11 8.5,13 6,15"/><line x1="10" y1="15" x2="18" y2="15"/><line x1="10" y1="11" x2="16" y2="11"/></svg>
       </button>
 
       <button className={`${styles.btn} ${activeItem === "search" ? styles.active : ""}`} onClick={() => onItemClick("search")} aria-label="Search" title="search">
@@ -48,6 +52,10 @@ export default function Rail({ activeItem, overdueCount, onItemClick, zenMode, o
 
       <button className={`${styles.btn} ${activeItem === "finance" ? styles.active : ""}`} onClick={() => onItemClick("finance")} aria-label="Finance" title="finance">
         <svg width="20" height="20" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6.5" stroke="currentColor" strokeWidth="1.2"/><path d="M9 5.5v7M7 7.5c0-.8.9-1.5 2-1.5s2 .7 2 1.5-.9 1.5-2 1.5-2 .7-2 1.5.9 1.5 2 1.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/></svg>
+      </button>
+
+      <button className={`${styles.btn} ${activeItem === "forge" ? styles.active : ""}`} onClick={() => onItemClick("forge")} aria-label="Forge Paper" title="forge">
+        <svg width="20" height="20" viewBox="0 0 18 18" fill="none"><path d="M4.5 2h6l4 4v9a1.5 1.5 0 01-1.5 1.5H4.5A1.5 1.5 0 013 15V3.5A1.5 1.5 0 014.5 2z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/><path d="M10 2v4.5h4.5" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/><path d="M6.5 10h5M6.5 12.5h3" stroke="currentColor" strokeWidth="1" strokeLinecap="round"/></svg>
       </button>
 
       <button className={`${styles.btn} ${activeItem === "wire" ? styles.active : ""}`} onClick={() => onItemClick("wire")} aria-label="The Wire" title="wire">

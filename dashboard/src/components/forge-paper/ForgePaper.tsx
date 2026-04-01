@@ -1,18 +1,38 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
-import type { Block, BlockType, Workspace } from "@/lib/types";
-import { convertBlock, insertAfter, removeBlock, needsPicker } from "@/forge";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import type { Block, BlockType, Workstation } from "@/lib/types";
+import { uid } from "@/lib/utils";
+import { convertBlock, insertAfter, removeBlock } from "@/forge";
+import AiBlock from "@/components/editor/ai/AiBlock";
 import SlashMenu from "@/components/editor/slash-menu/SlashMenu";
 import ForgePaperOutline from "./ForgePaperOutline";
 import styles from "./ForgePaper.module.css";
 
+const FORGE_PAPER_SLASH_TYPES: BlockType[] = [
+  "paragraph",
+  "h1",
+  "h2",
+  "h3",
+  "bullet",
+  "numbered",
+  "todo",
+  "quote",
+  "code",
+  "callout",
+  "divider",
+  "ai",
+  "deliverable",
+  "table",
+  "signoff",
+];
+
 interface ForgePaperProps {
-  blocks: Block[];
-  workspace?: Workspace | null;
+  initialBlocks: Block[];
+  workstation?: Workstation | null;
   projectName: string;
   onClose: () => void;
-  onBlocksChange?: (blocks: Block[]) => void;
+  onSave: (blocks: Block[]) => void;
 }
 
 function mergeCachedContent(blocks: Block[], cache: Record<string, string>): Block[] {
@@ -27,14 +47,36 @@ function numberSections(blocks: Block[]): Map<string, number> {
   return map;
 }
 
-// Uses the shared SlashMenu component from the editor
-
 // ── Paper block renderer ──
-function PaperBlock({ block, sectionNum, onFocus, onInput, onBlurFlush }: {
-  block: Block; sectionNum?: number; onFocus: () => void;
+// Uses ref-based content management to prevent dangerouslySetInnerHTML from
+// overwriting live typing during React re-renders (Bug 1 fix).
+function PaperBlock({ block, sectionNum, isFocused, onFocus, onInput, onBlurFlush }: {
+  block: Block; sectionNum?: number; isFocused: boolean; onFocus: () => void;
   onInput: (html: string, text: string) => void;
   onBlurFlush: () => void;
 }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const elRef = useRef<any>(null);
+
+  // Sync content from props ONLY when the block is not focused.
+  // When focused, the user's live DOM is the source of truth.
+  useEffect(() => {
+    if (!elRef.current) return;
+    if (isFocused) return;
+    const newHtml = block.content || "";
+    if (elRef.current.innerHTML !== newHtml) {
+      elRef.current.innerHTML = newHtml;
+    }
+  }, [block.content, isFocused]);
+
+  // Set initial content on mount
+  useEffect(() => {
+    if (elRef.current && !elRef.current.innerHTML && block.content) {
+      elRef.current.innerHTML = block.content;
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleInput = (e: React.FormEvent<HTMLElement>) => {
     const el = e.currentTarget;
     onInput(el.innerHTML, el.textContent || "");
@@ -45,19 +87,26 @@ function PaperBlock({ block, sectionNum, onFocus, onInput, onBlurFlush }: {
     onBlurFlush();
   };
 
-  const editProps = { contentEditable: true, suppressContentEditableWarning: true, onFocus, onInput: handleInput, onBlur: handleBlur };
+  const editProps = {
+    ref: elRef,
+    contentEditable: true,
+    suppressContentEditableWarning: true,
+    onFocus,
+    onInput: handleInput,
+    onBlur: handleBlur,
+  };
 
   switch (block.type) {
-    case "h1": return <h1 className={styles.h1} {...editProps} dangerouslySetInnerHTML={{ __html: block.content }} />;
-    case "h2": return <h2 className={styles.h2} onFocus={onFocus}>{sectionNum !== undefined && <span className={styles.sectionNum}>{sectionNum}.</span>}<span {...editProps} dangerouslySetInnerHTML={{ __html: block.content }} /></h2>;
-    case "h3": return <h3 className={styles.h3} {...editProps} dangerouslySetInnerHTML={{ __html: block.content }} />;
-    case "paragraph": return <p className={styles.para} {...editProps} data-placeholder="Type / for blocks..." dangerouslySetInnerHTML={{ __html: block.content || "" }} />;
-    case "bullet": return <div className={styles.bullet}><span className={styles.bulletDot} /><span {...editProps} dangerouslySetInnerHTML={{ __html: block.content }} /></div>;
-    case "numbered": return <div className={styles.numbered}><span {...editProps} dangerouslySetInnerHTML={{ __html: block.content }} /></div>;
-    case "todo": return <div className={`${styles.todo} ${block.checked ? styles.todoDone : ""}`}><span className={`${styles.todoCheck} ${block.checked ? styles.todoChecked : ""}`}>{block.checked && "✓"}</span><span {...editProps} dangerouslySetInnerHTML={{ __html: block.content }} /></div>;
-    case "quote": return <blockquote className={styles.quote} onFocus={onFocus}><div className={styles.quoteMark}>❝</div><div {...editProps} dangerouslySetInnerHTML={{ __html: block.content }} /></blockquote>;
-    case "callout": return <div className={styles.callout} {...editProps} dangerouslySetInnerHTML={{ __html: block.content }} />;
-    case "code": return <pre className={styles.code} {...editProps} dangerouslySetInnerHTML={{ __html: block.content }} />;
+    case "h1": return <h1 className={styles.h1} {...editProps} />;
+    case "h2": return <h2 className={styles.h2} data-section={sectionNum !== undefined ? `${sectionNum}` : undefined} {...editProps} />;
+    case "h3": return <h3 className={styles.h3} {...editProps} />;
+    case "paragraph": return <p className={styles.para} data-placeholder="Type / for blocks..." {...editProps} />;
+    case "bullet": return <div className={styles.bullet}><span className={styles.bulletDot} /><span {...editProps} /></div>;
+    case "numbered": return <div className={styles.numbered}><span {...editProps} /></div>;
+    case "todo": return <div className={`${styles.todo} ${block.checked ? styles.todoDone : ""}`}><span className={`${styles.todoCheck} ${block.checked ? styles.todoChecked : ""}`}>{block.checked && "✓"}</span><span {...editProps} /></div>;
+    case "quote": return <blockquote className={styles.quote}><div className={styles.quoteMark}>❝</div><div {...editProps} /></blockquote>;
+    case "callout": return <div className={styles.callout} {...editProps} />;
+    case "code": return <pre className={styles.code} {...editProps} />;
     case "divider": return block.content ? <div className={styles.labeledDivider}><span className={styles.labeledDividerText}>{block.content}</span></div> : <hr className={styles.divider} />;
     case "table":
       if (!block.tableData?.rows?.length) return null;
@@ -72,11 +121,13 @@ function PaperBlock({ block, sectionNum, onFocus, onInput, onBlurFlush }: {
       const parties = block.signoffData.parties || [{ name: block.signoffData.signer || "Signer", role: "Party", signed: block.signoffData.signed, signedAt: block.signoffData.signedAt }];
       return <div className={styles.sigArea}><div className={styles.sigTitle}>Signatures</div><div className={styles.sigParties}>{parties.map((p, i) => <div key={i} className={styles.sigParty}><div className={styles.sigRole}>{p.role}</div>{p.signed ? <><div className={styles.sigSigned}>{p.name}</div><div className={styles.sigLine} /><div className={styles.sigName}>{p.name}</div><span className={styles.sigBadge}>✓ Signed</span></> : <div className={styles.sigPending}><div className={styles.sigPendingLine} /><div className={styles.sigPendingText}>Awaiting signature</div></div>}</div>)}</div></div>;
     default:
-      return block.content ? <p className={styles.para} {...editProps} dangerouslySetInnerHTML={{ __html: block.content }} /> : null;
+      return block.content ? <p className={styles.para} {...editProps} /> : null;
   }
 }
 
-export default function ForgePaper({ blocks, workspace, projectName, onClose, onBlocksChange }: ForgePaperProps) {
+export default function ForgePaper({ initialBlocks, workstation, projectName, onClose, onSave }: ForgePaperProps) {
+  // ── ForgePaper owns its blocks state ──
+  const [blocks, setBlocks] = useState<Block[]>(initialBlocks);
   const [sent, setSent] = useState(false);
   const [focusedBlock, setFocusedBlock] = useState<string | null>(null);
   const [draftLineY, setDraftLineY] = useState(-1);
@@ -88,9 +139,49 @@ export default function ForgePaper({ blocks, workspace, projectName, onClose, on
   const [docId] = useState(() => `FM-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 999)).padStart(3, "0")}`);
   const paperRef = useRef<HTMLDivElement>(null);
   const contentCache = useRef<Record<string, string>>({});
+  const outlineTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Tracks content changes for the outline — debounced so it doesn't fire every keystroke
+  const [contentVersion, setContentVersion] = useState(0);
 
   const sectionNums = numberSections(blocks);
   const dateStr = new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+
+  // ── Merge cache into blocks (local helper) ──
+  const getWorkingBlocks = useCallback(() => mergeCachedContent(blocks, contentCache.current), [blocks]);
+
+  // Outline reads cache-merged blocks, recomputed when blocks change OR content version ticks
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const outlineBlocks = useMemo(() => mergeCachedContent(blocks, contentCache.current), [blocks, contentVersion]);
+
+  // Flush cached content into local state
+  const flushContent = useCallback(() => {
+    const cache = contentCache.current;
+    if (Object.keys(cache).length === 0) return;
+    setBlocks(prev => mergeCachedContent(prev, cache));
+    contentCache.current = {};
+  }, []);
+
+  // Auto-flush every 2 seconds while typing
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (Object.keys(contentCache.current).length > 0) flushContent();
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [flushContent]);
+
+  // Clean up outline debounce timer
+  useEffect(() => {
+    return () => { if (outlineTimer.current) clearTimeout(outlineTimer.current); };
+  }, []);
+
+  // ── Save & close ──
+  const handleSaveAndClose = useCallback(() => {
+    const final = mergeCachedContent(blocks, contentCache.current);
+    contentCache.current = {};
+    onSave(final);
+    onClose();
+  }, [blocks, onClose, onSave]);
 
   // ── Draft line ──
   const updateDraftLine = useCallback(() => {
@@ -114,8 +205,6 @@ export default function ForgePaper({ blocks, workspace, projectName, onClose, on
     return () => observer.disconnect();
   }, [draftLineOn, updateDraftLine]);
 
-  const getWorkingBlocks = useCallback(() => mergeCachedContent(blocks, contentCache.current), [blocks]);
-
   const focusEditableBlock = useCallback((blockId: string) => {
     setFocusedBlock(blockId);
     const el = paperRef.current?.querySelector(`[data-block-id="${blockId}"] [contenteditable]`) as HTMLElement | null;
@@ -130,43 +219,55 @@ export default function ForgePaper({ blocks, workspace, projectName, onClose, on
     selection.addRange(range);
   }, []);
 
-  // ── Block operations (shared via forge) ──
+  // ── Block operations (all local state) ──
   const addBlockAfter = useCallback((afterId: string, type: BlockType = "paragraph") => {
+    flushContent();
     const result = insertAfter(getWorkingBlocks(), afterId, type);
-    onBlocksChange?.(result.blocks);
-    setTimeout(() => {
-      focusEditableBlock(result.newBlockId);
-    }, 50);
-  }, [focusEditableBlock, getWorkingBlocks, onBlocksChange]);
+    setBlocks(result.blocks);
+    setTimeout(() => focusEditableBlock(result.newBlockId), 50);
+  }, [flushContent, focusEditableBlock, getWorkingBlocks]);
 
   const handleDeleteBlock = useCallback((blockId: string) => {
+    flushContent();
     const result = removeBlock(getWorkingBlocks(), blockId);
     delete contentCache.current[blockId];
-    onBlocksChange?.(result.blocks);
+    setBlocks(result.blocks);
     if (result.focusId) setFocusedBlock(result.focusId);
-  }, [getWorkingBlocks, onBlocksChange]);
+  }, [flushContent, getWorkingBlocks]);
 
-  // Flush cached content to parent (called on blur and periodically)
-  const flushContent = useCallback(() => {
-    const cache = contentCache.current;
-    const keys = Object.keys(cache);
-    if (keys.length === 0) return;
-    const updated = mergeCachedContent(blocks, cache);
-    contentCache.current = {};
-    onBlocksChange?.(updated);
-  }, [blocks, onBlocksChange]);
+  const handleAiGenerate = useCallback((blockId: string, generatedBlocks: Block[]) => {
+    delete contentCache.current[blockId];
+    setBlocks(prev => {
+      const idx = prev.findIndex(block => block.id === blockId);
+      if (idx === -1) return prev;
+      const next = [...prev];
 
-  // Auto-flush every 2 seconds while typing
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (Object.keys(contentCache.current).length > 0) flushContent();
-    }, 2000);
-    return () => clearInterval(interval);
-  }, [flushContent]);
+      if (generatedBlocks.length === 0) {
+        next[idx] = { ...next[idx], type: "paragraph", content: "" };
+        setTimeout(() => focusEditableBlock(blockId), 50);
+        return next;
+      }
+
+      next.splice(idx, 1, ...generatedBlocks);
+      const trailingId = uid();
+      contentCache.current[trailingId] = "";
+      next.splice(idx + generatedBlocks.length, 0, {
+        id: trailingId,
+        type: "paragraph",
+        content: "",
+        checked: false,
+      });
+      setTimeout(() => focusEditableBlock(trailingId), 50);
+      return next;
+    });
+  }, [focusEditableBlock]);
 
   const handleBlockInput = (blockId: string, html: string, text: string) => {
-    // Cache content — don't trigger re-render on every keystroke
     contentCache.current[blockId] = html;
+
+    // Debounced outline refresh — 300ms after last keystroke
+    if (outlineTimer.current) clearTimeout(outlineTimer.current);
+    outlineTimer.current = setTimeout(() => setContentVersion(v => v + 1), 300);
 
     // Detect slash command
     const rawText = text.replace(/[\u200B\uFEFF\xA0]/g, "").trim();
@@ -187,20 +288,20 @@ export default function ForgePaper({ blocks, workspace, projectName, onClose, on
     if (!slashMenu) return;
     const { blockId } = slashMenu;
 
-    // Skip picker types — those need the full Editor UI
-    if (needsPicker(type)) { setSlashMenu(null); return; }
+    if (!FORGE_PAPER_SLASH_TYPES.includes(type)) {
+      setSlashMenu(null);
+      return;
+    }
 
     // Clear the slash text
     const el = paperRef.current?.querySelector(`[data-block-id="${blockId}"] [contenteditable]`) as HTMLElement;
     if (el) el.innerHTML = "";
-
-    // The slash command itself is transient UI state, not real document content.
     delete contentCache.current[blockId];
 
     // Convert block using shared forge logic
-    const slashClearedBlocks = getWorkingBlocks().map(block => block.id === blockId ? { ...block, content: "" } : block);
+    const slashClearedBlocks = getWorkingBlocks().map(b => b.id === blockId ? { ...b, content: "" } : b);
     const result = convertBlock(slashClearedBlocks, blockId, type);
-    onBlocksChange?.(result.blocks);
+    setBlocks(result.blocks);
     const focusId = result.newBlockId ?? blockId;
     setTimeout(() => focusEditableBlock(focusId), 50);
     setSlashMenu(null);
@@ -209,13 +310,12 @@ export default function ForgePaper({ blocks, workspace, projectName, onClose, on
   // ── Keyboard: Enter to add block, Backspace to delete empty ──
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (slashMenu) return; // Let slash menu handle keys
+      if (slashMenu) return;
       if (!focusedBlock) return;
 
       if (e.key === "Enter" && !e.shiftKey) {
         const target = e.target as HTMLElement;
         if (!target.closest?.("[contenteditable]")) return;
-        // Don't intercept Enter in non-paragraph types that need it
         const block = blocks.find(b => b.id === focusedBlock);
         if (block && block.type === "code") return;
         e.preventDefault();
@@ -240,12 +340,12 @@ export default function ForgePaper({ blocks, workspace, projectName, onClose, on
     <div className={styles.page}>
       {/* Top bar */}
       <div className={styles.topBar}>
-        <button className={styles.backBtn} onClick={onClose}>
+        <button className={styles.backBtn} onClick={handleSaveAndClose}>
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M8 3L4 7l4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
         </button>
         <div className={styles.topInfo}>
           <div className={styles.topTitle}>{projectName}<span className={styles.topBadge}>FORGE PAPER</span></div>
-          <div className={styles.topSub}>{workspace?.client || "Document"} · {dateStr}</div>
+          <div className={styles.topSub}>{workstation?.client || "Document"} · {dateStr}</div>
         </div>
         <div className={styles.topRight}>
           <div className={styles.draftToggle}>
@@ -262,7 +362,7 @@ export default function ForgePaper({ blocks, workspace, projectName, onClose, on
       <div className={styles.layout}>
         {/* Forge Paper dedicated outline */}
         <ForgePaperOutline
-          blocks={blocks}
+          blocks={outlineBlocks}
           focusedBlock={focusedBlock}
           hoveredBlock={hoveredBlock}
           onScrollTo={(id) => {
@@ -270,8 +370,7 @@ export default function ForgePaper({ blocks, workspace, projectName, onClose, on
             paperRef.current?.querySelector(`[data-block-id="${id}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" });
           }}
           onHoverSection={(id) => setHoveredBlock(id)}
-          projectName={projectName}
-          clientName={workspace?.client || "Client"}
+          clientName={workstation?.client || "Client"}
         />
 
         {/* Paper */}
@@ -281,7 +380,7 @@ export default function ForgePaper({ blocks, workspace, projectName, onClose, on
 
             <div className={styles.header}>
               <div className={styles.headerGrid}>
-                <div className={styles.headerLeft}><div className={styles.headerLogo}>{workspace?.avatar && <span className={styles.headerLogoMark} style={{ background: workspace.avatarBg }}>{workspace.avatar}</span>}<span className={styles.headerLogoText}>{workspace?.client || "Felmark"}</span></div></div>
+                <div className={styles.headerLeft}><div className={styles.headerLogo}>{workstation?.avatar && <span className={styles.headerLogoMark} style={{ background: workstation.avatarBg }}>{workstation.avatar}</span>}<span className={styles.headerLogoText}>{workstation?.client || "Felmark"}</span></div></div>
                 <div className={styles.headerRight}><div className={styles.headerMeta}><span>Date: {dateStr}</span><span>Document: {docId}</span></div></div>
               </div>
               <div className={styles.headerDivider} />
@@ -293,6 +392,29 @@ export default function ForgePaper({ blocks, workspace, projectName, onClose, on
                 const isHovered = hoveredBlock === block.id;
                 // Insert page break every ~25 blocks (rough estimate for page height)
                 const pageBreak = blockIdx > 0 && blockIdx % 25 === 0;
+                if (block.type === "ai") {
+                  return (
+                    <div key={block.id}>
+                      {pageBreak && (
+                        <div className={styles.pageBreak}>
+                          <span className={styles.pageBreakLabel}>Page {Math.floor(blockIdx / 25) + 1}</span>
+                        </div>
+                      )}
+                      <div
+                        data-block-id={block.id}
+                        className={`${styles.blockWrap} ${isFocused ? styles.blockWrapFocused : ""} ${isHovered && !isFocused ? styles.blockWrapHovered : ""}`}
+                        onMouseEnter={() => setHoveredBlock(block.id)}
+                        onMouseLeave={() => setHoveredBlock(null)}
+                      >
+                        <div className={`${styles.blockChrome} ${isHovered || isFocused ? styles.blockChromeVisible : ""}`}>
+                          <button className={styles.blockChromeBtn} title="Add block below" onClick={(e) => { e.stopPropagation(); addBlockAfter(block.id); }}>+</button>
+                          <button className={styles.blockChromeBtn} title="Delete block" onClick={(e) => { e.stopPropagation(); handleDeleteBlock(block.id); }}>×</button>
+                        </div>
+                        <AiBlock blockId={block.id} onGenerate={handleAiGenerate} />
+                      </div>
+                    </div>
+                  );
+                }
                 return (
                   <div key={block.id}>
                     {pageBreak && (
@@ -308,7 +430,7 @@ export default function ForgePaper({ blocks, workspace, projectName, onClose, on
                         <button className={styles.blockChromeBtn} title="Add block below" onClick={(e) => { e.stopPropagation(); addBlockAfter(block.id); }}>+</button>
                         <button className={styles.blockChromeBtn} title="Delete block" onClick={(e) => { e.stopPropagation(); handleDeleteBlock(block.id); }}>×</button>
                       </div>
-                      <PaperBlock block={block} sectionNum={sectionNums.get(block.id)} onFocus={() => setFocusedBlock(block.id)} onInput={(html, text) => handleBlockInput(block.id, html, text)} onBlurFlush={flushContent} />
+                      <PaperBlock block={block} sectionNum={sectionNums.get(block.id)} isFocused={isFocused} onFocus={() => setFocusedBlock(block.id)} onInput={(html, text) => handleBlockInput(block.id, html, text)} onBlurFlush={flushContent} />
                     </div>
                   </div>
                 );
@@ -332,6 +454,7 @@ export default function ForgePaper({ blocks, workspace, projectName, onClose, on
           left={slashMenu.left}
           filter={slashFilter}
           selectedIndex={slashIndex}
+          allowedTypes={FORGE_PAPER_SLASH_TYPES}
           onSelect={handleSlashSelect}
           onClose={() => setSlashMenu(null)}
           onIndexChange={setSlashIndex}

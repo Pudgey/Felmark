@@ -82,7 +82,7 @@ export default function CreationAnimation({ clientName, templateName, color, onC
             <div className={styles.dot} style={{ background: "#febc2e" }} />
             <div className={styles.dot} style={{ background: "#28c840" }} />
           </div>
-          <div className={styles.termTitle}>felmark — creating workspace</div>
+          <div className={styles.termTitle}>felmark — creating workstation</div>
           <div style={{ width: 52 }} />
         </div>
 
@@ -93,7 +93,7 @@ export default function CreationAnimation({ clientName, templateName, color, onC
               <div className={styles.sectionLabel}>
                 <span className={styles.spinner}>⠋</span> thinking
               </div>
-              <div className={styles.fadeLine}>Analyzing workspace context...</div>
+              <div className={styles.fadeLine}>Analyzing workstation context...</div>
               <div className={styles.fadeLine} style={{ animationDelay: "0.3s" }}>Client: {clientName}</div>
               <div className={styles.fadeLine} style={{ animationDelay: "0.6s" }}>Template: {templateName}</div>
             </div>
@@ -105,7 +105,7 @@ export default function CreationAnimation({ clientName, templateName, color, onC
               <div className={styles.divider} />
               <div className={styles.command}>
                 <span className={styles.prompt}>❯</span>
-                <span className={styles.cmdText}>felmark create-workspace</span>
+                <span className={styles.cmdText}>felmark create-workstation</span>
                 <span className={styles.cmdFlags}>--client &quot;{clientName}&quot; --template {templateName.toLowerCase().replace(/\s+/g, "-")}</span>
               </div>
             </>
@@ -115,7 +115,7 @@ export default function CreationAnimation({ clientName, templateName, color, onC
           {phase >= 2 && (
             <div className={styles.section}>
               <div className={styles.sectionLabel}>scaffolding</div>
-              {["Creating workspace structure", "Setting up document tree", "Initializing block editor", `Loading template: ${templateName}`].map((text, i) => (
+              {["Creating workstation structure", "Setting up document tree", "Initializing block editor", `Loading template: ${templateName}`].map((text, i) => (
                 <div key={i} className={styles.stepLine} style={{ animationDelay: `${i * 0.35}s` }}>
                   <span className={styles.check}>✓</span>
                   <span>{text}</span>
@@ -149,7 +149,7 @@ export default function CreationAnimation({ clientName, templateName, color, onC
               <div className={styles.section}>
                 <div className={styles.aiLabel}><span>✦</span> ai context</div>
                 {[
-                  "Scanning workspace for client history...",
+                  "Scanning workstation for client history...",
                   "Pre-filling scope from template defaults",
                   "Suggesting pricing based on similar projects",
                   `Timeline auto-set based on ${templateName.toLowerCase()} template`,
@@ -167,9 +167,9 @@ export default function CreationAnimation({ clientName, templateName, color, onC
               <div className={styles.success}>
                 <div className={styles.successAvatar} style={{ background: color }}>{initials}</div>
                 <div className={styles.successTitle}>{clientName}</div>
-                <div className={styles.successSub}>Workspace ready · {templateName} template applied</div>
+                <div className={styles.successSub}>Workstation ready · {templateName} template applied</div>
                 <button className={styles.openBtn} onClick={onComplete}>
-                  Open Workspace
+                  Open Workstation
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
                 </button>
               </div>

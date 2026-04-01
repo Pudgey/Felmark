@@ -13,7 +13,7 @@ const SUGGESTIONS = [
   { cmd: "new proposal --client nora", desc: "Start Nora's proposal", icon: "+", hot: false },
   { cmd: "view calendar", desc: "3 events today", icon: "◎", hot: false },
   { cmd: "send reminder --client bolt", desc: "Nudge overdue payment", icon: "→", hot: false },
-  { cmd: "new workspace", desc: "Onboard a new client", icon: "⊞", hot: false },
+  { cmd: "new workstation", desc: "Onboard a new client", icon: "⊞", hot: false },
 ];
 
 function EmberParticles() {
@@ -98,10 +98,10 @@ interface TerminalWelcomeProps {
   totalPending?: number;
   pipeline?: number;
   onOpenCmdPalette?: () => void;
-  onNewWorkspace?: () => void;
+  onNewWorkstation?: () => void;
 }
 
-export default function TerminalWelcome({ activeCount = 4, reviewCount = 1, overdueCount = 1, totalEarned = 14800, totalPending = 7200, pipeline = 22000, onOpenCmdPalette, onNewWorkspace }: TerminalWelcomeProps) {
+export default function TerminalWelcome({ activeCount = 4, reviewCount = 1, overdueCount = 1, totalEarned = 14800, totalPending = 7200, pipeline = 22000, onOpenCmdPalette, onNewWorkstation }: TerminalWelcomeProps) {
   const [phase, setPhase] = useState(0);
   const [inputValue, setInputValue] = useState("");
   const [inputFocused, setInputFocused] = useState(false);
@@ -158,7 +158,7 @@ export default function TerminalWelcome({ activeCount = 4, reviewCount = 1, over
       else if (cmd.includes("proposal")) setCmdOutput({ text: "Scaffolding proposal for Nora Kim\nTemplate: Brand & Identity \u00b7 6 sections\nPre-filling from discovery notes...", icon: "+", color: "#b07d4f" });
       else if (cmd.includes("calendar")) setCmdOutput({ text: "09:00  Brand review call \u2014 Meridian\n11:30  Deep work block (current)\n14:00  Nora kickoff \u2014 Course Landing Page", icon: "\u25ce", color: "#7c8594" });
       else if (cmd.includes("reminder")) setCmdOutput({ text: "Sending payment reminder to Bolt Fitness\nRe: Invoice #044 \u2014 $4,000 (4 days overdue)\nDraft ready \u2014 review before sending?", icon: "\u2192", color: "#b07d4f" });
-      else if (cmd.includes("workspace")) { onNewWorkspace?.(); return; }
+      else if (cmd.includes("workstation") || cmd.includes("workspace")) { onNewWorkstation?.(); return; }
       else setCmdOutput({ text: `Command not found: ${cmd}\nTry: open, create, new, view, send`, icon: "?", color: "#9b988f" });
     }, 700);
   };
@@ -673,7 +673,7 @@ export default function TerminalWelcome({ activeCount = 4, reviewCount = 1, over
             <span className="tw-footer-dot" />
             <span>felmark v0.1.0</span>
             <span>&middot;</span>
-            <span>4 workspaces &middot; 8 projects</span>
+            <span>4 workstations &middot; 8 projects</span>
           </div>
           <span>{mounted ? `${dateStr} \u00b7 ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}` : "\u00a0"}</span>
         </div>

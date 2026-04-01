@@ -24,16 +24,16 @@ export function createProjectServices(state: StateUpdater) {
       }
     },
 
-    /** Create a new project in a workspace */
-    createInWorkspace(wsId: string): string | null {
-      const ws = state.getState().workspaces.find(w => w.id === wsId);
+    /** Create a new project in a workstation */
+    createInWorkstation(wsId: string): string | null {
+      const ws = state.getState().workstations.find(w => w.id === wsId);
       if (!ws) return null;
       const newId = uid();
       const newProject: Project = {
         id: newId, name: "Untitled", status: "active",
         due: null, amount: "—", progress: 0, pinned: false,
       };
-      state.setWorkspaces(prev => prev.map(w =>
+      state.setWorkstations(prev => prev.map(w =>
         w.id === wsId ? { ...w, open: true, projects: [...w.projects, newProject] } : w
       ));
       state.setBlocksMap(prev => ({ ...prev, [newId]: makeEmptyBlocks() }));
@@ -47,7 +47,7 @@ export function createProjectServices(state: StateUpdater) {
     /** Rename a project (and its tab) */
     rename(projectId: string, name: string) {
       state.setTabs(prev => prev.map(t => t.id === projectId ? { ...t, name } : t));
-      state.setWorkspaces(prev => prev.map(w => ({
+      state.setWorkstations(prev => prev.map(w => ({
         ...w,
         projects: w.projects.map(p => p.id === projectId ? { ...p, name } : p),
       })));
@@ -55,7 +55,7 @@ export function createProjectServices(state: StateUpdater) {
 
     /** Toggle pin */
     togglePin(projectId: string) {
-      state.setWorkspaces(prev => prev.map(w => ({
+      state.setWorkstations(prev => prev.map(w => ({
         ...w, projects: w.projects.map(p => p.id === projectId ? { ...p, pinned: !p.pinned } : p),
       })));
     },
@@ -63,7 +63,7 @@ export function createProjectServices(state: StateUpdater) {
     /** Cycle status: active → review → paused → completed */
     cycleStatus(projectId: string) {
       const statuses: Array<"active" | "review" | "paused" | "completed"> = ["active", "review", "paused", "completed"];
-      state.setWorkspaces(prev => prev.map(w => ({
+      state.setWorkstations(prev => prev.map(w => ({
         ...w, projects: w.projects.map(p => {
           if (p.id !== projectId) return p;
           const idx = statuses.indexOf(p.status as typeof statuses[number]);
@@ -74,7 +74,7 @@ export function createProjectServices(state: StateUpdater) {
 
     /** Update due date */
     setDue(projectId: string, due: string | null) {
-      state.setWorkspaces(prev => prev.map(w => ({
+      state.setWorkstations(prev => prev.map(w => ({
         ...w,
         projects: w.projects.map(p => p.id === projectId ? { ...p, due } : p),
       })));
@@ -82,16 +82,16 @@ export function createProjectServices(state: StateUpdater) {
 
     /** Archive a single project */
     archive(projectId: string) {
-      const { workspaces } = state.getState();
-      const ws = workspaces.find(w => w.projects.some(p => p.id === projectId));
+      const { workstations } = state.getState();
+      const ws = workstations.find((w: { id: string; projects: { id: string }[] }) => w.projects.some((p: { id: string }) => p.id === projectId));
       const project = ws?.projects.find(p => p.id === projectId);
       if (!ws || !project) return;
 
       state.setArchived(prev => [...prev, {
-        project, workspaceId: ws.id, workspaceName: ws.client,
+        project, workstationId: ws.id, workstationName: ws.client,
         archivedAt: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" }),
       }]);
-      state.setWorkspaces(prev => prev.map(w =>
+      state.setWorkstations(prev => prev.map(w =>
         w.id === ws.id ? { ...w, projects: w.projects.filter(p => p.id !== projectId) } : w
       ));
       state.setTabs(prev => {
@@ -108,12 +108,12 @@ export function createProjectServices(state: StateUpdater) {
       const item = archived[archivedIdx];
       if (!item) return;
 
-      state.setWorkspaces(prev => {
-        const existing = prev.find(w => w.id === item.workspaceId);
+      state.setWorkstations(prev => {
+        const existing = prev.find(w => w.id === item.workstationId);
         if (existing) {
-          return prev.map(w => w.id === item.workspaceId ? { ...w, projects: [...w.projects, item.project] } : w);
+          return prev.map(w => w.id === item.workstationId ? { ...w, projects: [...w.projects, item.project] } : w);
         }
-        return [...prev, { id: item.workspaceId, client: item.workspaceName, avatar: item.workspaceName[0], avatarBg: "#7c8594", open: true, lastActive: "now", projects: [item.project] }];
+        return [...prev, { id: item.workstationId, client: item.workstationName, avatar: item.workstationName[0], avatarBg: "#7c8594", open: true, lastActive: "now", projects: [item.project] }];
       });
       state.setArchived(prev => prev.filter((_, i) => i !== archivedIdx));
     },

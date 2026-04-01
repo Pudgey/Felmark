@@ -1,14 +1,15 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect, type SetStateAction } from "react";
-import { INITIAL_WORKSPACES } from "@/lib/constants";
-import type { Block, Workspace, Project, Tab, ArchivedProject, WorkspaceTemplate } from "@/lib/types";
+import { INITIAL_WORKSTATIONS } from "@/lib/constants";
+import type { Block, Workstation, Project, Tab, ArchivedProject, WorkstationTemplate } from "@/lib/types";
 import { uid, makeBlocks } from "@/lib/utils";
 import Rail from "@/components/rail/Rail";
 import Sidebar from "@/components/sidebar/Sidebar";
 import Editor from "@/components/editor/Editor";
-import WorkspaceOnboarding from "@/components/onboarding/WorkspaceOnboarding";
+import WorkstationOnboarding from "@/components/onboarding/WorkstationOnboarding";
 import ErrorBoundary from "@/components/shared/ErrorBoundary";
+import WorkspacePage from "@/components/workspace-page/WorkspacePage";
 import { INITIAL_COMMENTS, type Comment } from "@/components/comments/CommentPanel";
 import { INITIAL_ACTIVITIES, type BlockActivity } from "@/components/activity/ActivityMargin";
 import CreationAnimation from "@/components/onboarding/CreationAnimation";
@@ -66,7 +67,7 @@ function saveToStorage(key: string, data: unknown) {
 }
 
 export default function Dashboard() {
-  const [workspaces, setWorkspaces] = useState<Workspace[]>(INITIAL_WORKSPACES);
+  const [workstations, setWorkstations] = useState<Workstation[]>(INITIAL_WORKSTATIONS);
   const [tabs, setTabs] = useState<Tab[]>(INITIAL_TABS.map(t => ({ ...t, active: false })));
   const [activeProject, setActiveProject] = useState("");
   const [blocksMap, setBlocksMap] = useState<Record<string, Block[]>>(INITIAL_BLOCKS);
@@ -82,8 +83,8 @@ export default function Dashboard() {
   // ── Hydrate from localStorage after mount (avoids SSR mismatch) ──
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => {
-    const ws = loadFromStorage("workspaces", null);
-    if (ws) setWorkspaces(ws);
+    const ws = loadFromStorage("workstations", null);
+    if (ws) setWorkstations(ws);
     const t = loadFromStorage("tabs", null);
     if (t) setTabs(t);
     const ap = loadFromStorage("activeProject", null);
@@ -105,14 +106,14 @@ export default function Dashboard() {
   }, []);
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [railActive, setRailActive] = useState("workspaces");
+  const [railActive, setRailActive] = useState("workstations");
   const [wordCount, setWordCount] = useState(0);
   const [charCount, setCharCount] = useState(0);
   const [onboardingName, setOnboardingName] = useState<string | null>(null);
-  const [creationAnim, setCreationAnim] = useState<{ name: string; template: string; color: string; pendingData: { name: string; contact: string; rate: string; budget: string; color: string; template: WorkspaceTemplate } } | null>(null);
+  const [creationAnim, setCreationAnim] = useState<{ name: string; template: string; color: string; pendingData: { name: string; contact: string; rate: string; budget: string; color: string; template: WorkstationTemplate } } | null>(null);
   const [sidebarWidth, setSidebarWidth] = useState(260);
   const [isResizing, setIsResizing] = useState(false);
-  const [activeWorkspaceId, setActiveWorkspaceId] = useState<string | null>(null);
+  const [activeWorkstationId, setActiveWorkstationId] = useState<string | null>(null);
   const [calendarScrollTarget, setCalendarScrollTarget] = useState<string | null>(null);
   const [launchpadOpen, setLaunchpadOpen] = useState(false);
   const [docTemplates, setDocTemplates] = useState<DocumentTemplate[]>(STARTER_TEMPLATES);
@@ -122,7 +123,7 @@ export default function Dashboard() {
   const [splitProject, setSplitProject] = useState<string | null>(null);
   const resizeRef = useRef<{ startX: number; startW: number } | null>(null);
 
-  const overdueCount = workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "overdue").length, 0);
+  const overdueCount = workstations.reduce((s, w) => s + w.projects.filter(p => p.status === "overdue").length, 0);
 
   // ── Auto-save to localStorage (debounced 500ms) ──
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -137,9 +138,9 @@ export default function Dashboard() {
     return nextToken;
   }, [hydrated]);
 
-  const persistWorkspaceState = useCallback((saveToken: number) => {
+  const persistWorkstationState = useCallback((saveToken: number) => {
     const savedAt = Date.now();
-    saveToStorage("workspaces", workspaces);
+    saveToStorage("workstations", workstations);
     saveToStorage("blocksMap", blocksMap);
     saveToStorage("tabs", tabs);
     saveToStorage("archived", archived);
@@ -150,7 +151,7 @@ export default function Dashboard() {
     setLastSavedAt(savedAt);
     setSaveStatusTick(savedAt);
     setLastCompletedSaveToken(saveToken);
-  }, [workspaces, blocksMap, tabs, archived, comments, activitiesMap, activeProject]);
+  }, [workstations, blocksMap, tabs, archived, comments, activitiesMap, activeProject]);
 
   const saveNow = useCallback(() => {
     if (saveTimer.current) {
@@ -158,12 +159,12 @@ export default function Dashboard() {
       saveTimer.current = null;
     }
     const saveToken = markSavePending();
-    if (saveToken) persistWorkspaceState(saveToken);
-  }, [markSavePending, persistWorkspaceState]);
+    if (saveToken) persistWorkstationState(saveToken);
+  }, [markSavePending, persistWorkstationState]);
 
-  const updateWorkspaces = useCallback((value: SetStateAction<Workspace[]>) => {
+  const updateWorkstations = useCallback((value: SetStateAction<Workstation[]>) => {
     markSavePending();
-    setWorkspaces(value);
+    setWorkstations(value);
   }, [markSavePending]);
 
   const updateTabs = useCallback((value: SetStateAction<Tab[]>) => {
@@ -200,11 +201,11 @@ export default function Dashboard() {
     if (!hydrated || saveRequestToken === 0) return;
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
-      persistWorkspaceState(saveRequestToken);
+      persistWorkstationState(saveRequestToken);
       saveTimer.current = null;
     }, 800);
     return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
-  }, [hydrated, persistWorkspaceState, saveRequestToken]);
+  }, [hydrated, persistWorkstationState, saveRequestToken]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -255,8 +256,8 @@ export default function Dashboard() {
 
   // ── Forge — the root service layer ──
   const forgeState: StateUpdater = {
-    getState: () => ({ workspaces, tabs, activeProject, blocksMap, archived, comments, activitiesMap }),
-    setWorkspaces: updateWorkspaces,
+    getState: () => ({ workstations, tabs, activeProject, blocksMap, archived, comments, activitiesMap }),
+    setWorkstations: updateWorkstations,
     setTabs: updateTabs,
     setActiveProject: updateActiveProject,
     setBlocksMap: updateBlocksMap,
@@ -267,27 +268,27 @@ export default function Dashboard() {
   const forge = createForge(forgeState);
 
   // Single click — pure expand/collapse toggle
-  const toggleWorkspace = (wid: string) => forge.workspaces.toggle(wid);
+  const toggleWorkstation = (wid: string) => forge.workstations.toggle(wid);
 
-  const restoreWorkspaceContext = () => {
-    setRailActive("workspaces");
+  const restoreWorkstationContext = () => {
+    setRailActive("workstations");
     setLaunchpadOpen(false);
     setSidebarOpen(true);
   };
 
-  // Double click — navigate to workspace home
-  const selectWorkspaceHome = (wid: string) => {
-    restoreWorkspaceContext();
-    setActiveWorkspaceId(wid);
+  // Double click — navigate to workstation home
+  const selectWorkstationHome = (wid: string) => {
+    restoreWorkstationContext();
+    setActiveWorkstationId(wid);
     updateTabs(prev => prev.map(t => ({ ...t, active: false })));
     updateActiveProject("");
-    // Ensure workspace is expanded
-    updateWorkspaces(prev => prev.map(w => w.id === wid ? { ...w, open: true } : w));
+    // Ensure workstation is expanded
+    updateWorkstations(prev => prev.map(w => w.id === wid ? { ...w, open: true } : w));
   };
 
   const selectProject = (project: Project, client: string) => {
-    restoreWorkspaceContext();
-    setActiveWorkspaceId(null);
+    restoreWorkstationContext();
+    setActiveWorkstationId(null);
     updateActiveProject(project.id);
     if (!tabs.find(t => t.id === project.id)) {
       updateTabs(prev => [...prev.map(t => ({ ...t, active: false })), { id: project.id, name: project.name, client, active: true }]);
@@ -302,15 +303,15 @@ export default function Dashboard() {
 
   // Double-click calendar event → open that exact project
   const calendarOpenProject = (projectId: string) => {
-    const ws = workspaces.find(workspace => workspace.projects.some(project => project.id === projectId));
+    const ws = workstations.find(workstation => workstation.projects.some(project => project.id === projectId));
     const project = ws?.projects.find(item => item.id === projectId);
     if (!ws || !project) return;
     selectProject(project, ws.client);
   };
 
   const handleTabClick = (id: string) => {
-    restoreWorkspaceContext();
-    setActiveWorkspaceId(null);
+    restoreWorkstationContext();
+    setActiveWorkstationId(null);
     forge.tabs.select(id);
   };
 
@@ -323,50 +324,50 @@ export default function Dashboard() {
   const togglePin = (projectId: string) => forge.projects.togglePin(projectId);
   const cycleStatus = (projectId: string) => forge.projects.cycleStatus(projectId);
 
-  const addWorkspace = (name: string) => {
+  const addWorkstation = (name: string) => {
     // Show onboarding card instead of creating immediately
     setOnboardingName(name);
   };
 
-  const TEMPLATE_LABELS: Record<WorkspaceTemplate, string> = {
+  const TEMPLATE_LABELS: Record<WorkstationTemplate, string> = {
     blank: "Blank Project", proposal: "Proposal", meeting: "Meeting Notes",
     brief: "Project Brief", retainer: "Retainer", invoice: "Invoice",
   };
 
-  const completeOnboarding = (data: { name: string; contact: string; rate: string; budget: string; color: string; template: WorkspaceTemplate }) => {
+  const completeOnboarding = (data: { name: string; contact: string; rate: string; budget: string; color: string; template: WorkstationTemplate }) => {
     setOnboardingName(null);
     setCreationAnim({ name: data.name, template: TEMPLATE_LABELS[data.template], color: data.color, pendingData: data });
   };
 
   const finishCreation = () => {
     if (!creationAnim) return;
-    forge.workspaces.create(creationAnim.pendingData);
+    forge.workstations.create(creationAnim.pendingData);
     setCreationAnim(null);
   };
 
   const skipOnboarding = () => {
     if (!onboardingName) return;
-    forge.workspaces.quickCreate(onboardingName);
+    forge.workstations.quickCreate(onboardingName);
     setOnboardingName(null);
   };
 
   const updateProjectDue = (projectId: string, due: string | null) => forge.projects.setDue(projectId, due);
 
   const archiveProject = (projectId: string) => forge.projects.archive(projectId);
-  const archiveCompletedInWorkspace = (wsId: string) => forge.workspaces.archiveCompleted(wsId);
-  const archiveWorkspace = (wsId: string) => forge.workspaces.archive(wsId);
+  const archiveCompletedInWorkstation = (wsId: string) => forge.workstations.archiveCompleted(wsId);
+  const archiveWorkstation = (wsId: string) => forge.workstations.archive(wsId);
   const restoreProject = (archivedIdx: number) => forge.projects.restore(archivedIdx);
 
   const handleNewTab = () => {
-    restoreWorkspaceContext();
-    const activeWs = workspaces.find(w => w.projects.some(p => p.id === activeProject)) || workspaces[0];
-    forge.projects.createInWorkspace(activeWs.id);
+    restoreWorkstationContext();
+    const activeWs = workstations.find(w => w.projects.some(p => p.id === activeProject)) || workstations[0];
+    forge.projects.createInWorkstation(activeWs.id);
   };
 
-  const handleNewTabInWorkspace = (wsId: string) => {
-    restoreWorkspaceContext();
-    setActiveWorkspaceId(null);
-    forge.projects.createInWorkspace(wsId);
+  const handleNewTabInWorkstation = (wsId: string) => {
+    restoreWorkstationContext();
+    setActiveWorkstationId(null);
+    forge.projects.createInWorkstation(wsId);
   };
 
   const handleBlocksChange = useCallback((projectId: string, blocks: Block[]) => {
@@ -387,14 +388,14 @@ export default function Dashboard() {
         activeItem={railActive}
         overdueCount={overdueCount}
         onItemClick={(item) => {
-          if (item === "workspaces") {
-            restoreWorkspaceContext();
+          if (item === "workstations") {
+            restoreWorkstationContext();
             return;
           }
           setLaunchpadOpen(false);
           setRailActive(item);
           if (item === "home") {
-            setActiveWorkspaceId(null);
+            setActiveWorkstationId(null);
             updateTabs(prev => prev.map(t => ({ ...t, active: false })));
             updateActiveProject("");
             setSidebarOpen(true);
@@ -403,8 +404,8 @@ export default function Dashboard() {
         zenMode={zenMode}
         onToggleZen={() => setZenMode(true)}
       />}
-      {!zenMode && <Sidebar
-        workspaces={workspaces}
+      {!zenMode && railActive !== "workspace" && <Sidebar
+        workstations={workstations}
         archived={archived}
         activeProject={activeProject}
         open={sidebarOpen}
@@ -413,18 +414,18 @@ export default function Dashboard() {
         wordCount={wordCount}
         railActive={railActive}
         onClose={() => setSidebarOpen(false)}
-        onToggleWorkspace={toggleWorkspace}
-        onSelectWorkspaceHome={selectWorkspaceHome}
+        onToggleWorkstation={toggleWorkstation}
+        onSelectWorkstationHome={selectWorkstationHome}
         onSelectProject={selectProject}
         onArchiveProject={archiveProject}
-        onArchiveCompleted={archiveCompletedInWorkspace}
-        onArchiveWorkspace={archiveWorkspace}
+        onArchiveCompleted={archiveCompletedInWorkstation}
+        onArchiveWorkstation={archiveWorkstation}
         onRestoreProject={restoreProject}
         onRenameProject={handleTabRename}
         onUpdateProjectDue={updateProjectDue}
-        onRenameWorkspace={(wsId, name) => forge.workspaces.rename(wsId, name)}
-        onReorderWorkspaces={(fromIdx, toIdx) => forge.workspaces.reorder(fromIdx, toIdx)}
-        onAddWorkspace={addWorkspace}
+        onRenameWorkstation={(wsId, name) => forge.workstations.rename(wsId, name)}
+        onReorderWorkstations={(fromIdx, toIdx) => forge.workstations.reorder(fromIdx, toIdx)}
+        onAddWorkstation={addWorkstation}
         onTogglePin={togglePin}
         onCycleStatus={cycleStatus}
         onScrollToCalendarEvent={(projectId) => setCalendarScrollTarget(projectId)}
@@ -433,7 +434,7 @@ export default function Dashboard() {
         onSaveNow={saveNow}
       />}
       {/* Resize handle */}
-      {sidebarOpen && !zenMode && (
+      {sidebarOpen && !zenMode && railActive !== "workspace" && (
         <div
           style={{
             width: 5,
@@ -491,19 +492,21 @@ export default function Dashboard() {
         />
       ) : onboardingName !== null ? (
         <div style={{ flex: 1, overflow: "auto", background: "var(--parchment)" }}>
-          <WorkspaceOnboarding
+          <WorkstationOnboarding
             initialName={onboardingName}
-            workspaces={workspaces}
+            workstations={workstations}
             onComplete={completeOnboarding}
             onSkip={skipOnboarding}
           />
         </div>
+      ) : railActive === "workspace" ? (
+        <WorkspacePage />
       ) : (
         <Editor
-          workspaces={workspaces}
+          workstations={workstations}
           tabs={tabs}
           activeProject={activeProject}
-          activeWorkspaceId={activeWorkspaceId}
+          activeWorkstationId={activeWorkstationId}
           blocks={activeBlocks}
           sidebarOpen={sidebarOpen}
           wordCount={wordCount}
@@ -517,18 +520,18 @@ export default function Dashboard() {
           onBlocksChange={handleBlocksChange}
           onWordCountChange={handleWordCountChange}
           onSelectProject={selectProject}
-          onNewWorkspace={() => setOnboardingName("New Client")}
-          onNewTabInWorkspace={handleNewTabInWorkspace}
-          onSelectWorkspaceHome={selectWorkspaceHome}
+          onNewWorkstation={() => setOnboardingName("New Client")}
+          onNewTabInWorkstation={handleNewTabInWorkstation}
+          onSelectWorkstationHome={selectWorkstationHome}
           onNavigateRail={(item) => {
-            if (item === "workspaces") {
-              restoreWorkspaceContext();
+            if (item === "workstations") {
+              restoreWorkstationContext();
               return;
             }
             setLaunchpadOpen(false);
             setRailActive(item);
             if (item === "home") {
-              setActiveWorkspaceId(null);
+              setActiveWorkstationId(null);
               updateTabs(prev => prev.map(t => ({ ...t, active: false })));
               updateActiveProject("");
               setSidebarOpen(true);
@@ -540,10 +543,10 @@ export default function Dashboard() {
           calendarScrollTarget={calendarScrollTarget}
           onCalendarScrollComplete={() => setCalendarScrollTarget(null)}
           onCalendarOpenProject={calendarOpenProject}
-          onRenameWorkspace={(wsId, name) => {
-            updateWorkspaces(prev => prev.map(w => w.id === wsId ? { ...w, client: name, avatar: name[0].toUpperCase() } : w));
+          onRenameWorkstation={(wsId, name) => {
+            updateWorkstations(prev => prev.map(w => w.id === wsId ? { ...w, client: name, avatar: name[0].toUpperCase() } : w));
             updateTabs(prev => prev.map(t => {
-              const ws = workspaces.find(w => w.id === wsId);
+              const ws = workstations.find(w => w.id === wsId);
               if (ws && ws.projects.some(p => p.id === t.id)) return { ...t, client: name };
               return t;
             }));
@@ -557,13 +560,13 @@ export default function Dashboard() {
           onToggleZen={() => setZenMode(prev => !prev)}
           splitProject={splitProject}
           splitBlocks={splitProject ? blocksMap[splitProject] || [] : undefined}
-          splitProjectName={splitProject ? (() => { for (const w of workspaces) { const p = w.projects.find(p => p.id === splitProject); if (p) return p.name; } return "Untitled"; })() : undefined}
-          splitClientName={splitProject ? (() => { for (const w of workspaces) { if (w.projects.some(p => p.id === splitProject)) return w.client; } return ""; })() : undefined}
+          splitProjectName={splitProject ? (() => { for (const w of workstations) { const p = w.projects.find(p => p.id === splitProject); if (p) return p.name; } return "Untitled"; })() : undefined}
+          splitClientName={splitProject ? (() => { for (const w of workstations) { if (w.projects.some(p => p.id === splitProject)) return w.client; } return ""; })() : undefined}
           onSplitOpen={(id) => setSplitProject(id)}
           onSplitClose={() => setSplitProject(null)}
           onSplitMakePrimary={() => {
             if (!splitProject) return;
-            const ws = workspaces.find(w => w.projects.some(p => p.id === splitProject));
+            const ws = workstations.find(w => w.projects.some(p => p.id === splitProject));
             const proj = ws?.projects.find(p => p.id === splitProject);
             if (ws && proj) {
               selectProject(proj, ws.client);
@@ -577,19 +580,19 @@ export default function Dashboard() {
     <Launchpad
       open={launchpadOpen}
       onClose={() => setLaunchpadOpen(false)}
-      workspaces={workspaces}
+      workstations={workstations}
       onNavigate={(screenId) => {
         setRailActive(screenId);
         if (screenId === "home") {
-          setActiveWorkspaceId(null);
+          setActiveWorkstationId(null);
           updateTabs(prev => prev.map(t => ({ ...t, active: false })));
           updateActiveProject("");
         }
         setSidebarOpen(true);
       }}
-      onSelectWorkspace={(wsId) => {
-        selectWorkspaceHome(wsId);
-        setRailActive("workspaces");
+      onSelectWorkstation={(wsId) => {
+        selectWorkstationHome(wsId);
+        setRailActive("workstations");
       }}
       onOpenCommandPalette={() => {
         // Editor manages command palette state internally

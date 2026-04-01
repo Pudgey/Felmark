@@ -152,7 +152,7 @@ function UserFlowDiagram() {
     { label: "Sign up", desc: "Form fields" },
     { label: "Onboarding", desc: "3-step wizard" },
     { label: "First project", desc: "Create prompt" },
-    { label: "Editor", desc: "Block workspace" },
+    { label: "Editor", desc: "Block workstation" },
   ], []);
 
   const annotations = [
