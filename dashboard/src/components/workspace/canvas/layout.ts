@@ -54,14 +54,22 @@ export function distributeWidth(
     diff--;
   }
 
-  // Shrink if over (shouldn't happen but safety)
+  // Shrink if over — try non-userSized first, then userSized
   while (diff < 0) {
     let bestIdx = -1;
     let bestW = 0;
+    // First pass: shrink non-userSized
     for (let i = result.length - 1; i >= 0; i--) {
       if (blockWidths[i].userSized) continue;
       if (result[i].w <= blockWidths[i].minW) continue;
       if (result[i].w > bestW) { bestW = result[i].w; bestIdx = i; }
+    }
+    // Second pass: shrink userSized if needed
+    if (bestIdx < 0) {
+      for (let i = result.length - 1; i >= 0; i--) {
+        if (result[i].w <= blockWidths[i].minW) continue;
+        if (result[i].w > bestW) { bestW = result[i].w; bestIdx = i; }
+      }
     }
     if (bestIdx < 0) break;
     result[bestIdx].w--;

@@ -1,3 +1,8 @@
+---
+name: "research"
+description: "Research external best practices and competitive intelligence for a given topic. Use when the user wants to know how other tools solve a problem or what the industry standard is."
+---
+
 # Research — External Best Practices & Competitive Intelligence
 
 On-demand research for when you need to know how other tools solve a problem, what the industry standard is, or what users expect. Not automatic — only when explicitly asked.

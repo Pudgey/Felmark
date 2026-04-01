@@ -1,0 +1,67 @@
+/* ── Block Chrome Bar ── */
+
+.blockChrome {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+  z-index: 6;
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+
+.blockHandle {
+  cursor: grab;
+  font-size: 10px;
+  color: var(--ink-300);
+  padding: 2px;
+}
+
+.blockType {
+  font-family: var(--mono);
+  font-size: 8px;
+  color: var(--ink-400);
+  flex: 1;
+}
+
+.blockSize {
+  font-family: var(--mono);
+  font-size: 8px;
+  color: var(--ink-300);
+  background: var(--border-light);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+.blockEditBtn {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--ink-300);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+}
+
+.blockEditBtn:hover {
+  background: var(--border-light);
+  color: var(--ink-600);
+}
+
+.blockEditBtnDanger:hover {
+  background: rgba(192, 122, 106, 0.04);
+  color: var(--rose);
+  border-color: rgba(192, 122, 106, 0.12);
+}

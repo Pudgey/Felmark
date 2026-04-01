@@ -1,0 +1,124 @@
+/* ── Library Panel ── */
+
+.library {
+  position: fixed;
+  top: 48px;
+  right: 0;
+  width: 280px;
+  height: calc(100vh - 48px);
+  background: var(--card);
+  border-left: 1px solid var(--border);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -8px 0 30px rgba(0, 0, 0, 0.03);
+  animation: libIn 0.15s ease;
+}
+
+@keyframes libIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.libraryHead {
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.libraryTitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink-900);
+}
+
+.libraryClose {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--ink-300);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.libraryClose:hover {
+  background: var(--border-light);
+}
+
+.libraryHint {
+  padding: 8px 18px;
+  font-size: 11px;
+  color: var(--ink-400);
+  background: var(--lavender-bg);
+  border-bottom: 1px solid var(--border-light);
+  line-height: 1.5;
+}
+
+.libraryList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.libraryList::-webkit-scrollbar {
+  width: 4px;
+}
+
+.libraryList::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+.libraryItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.1s;
+  margin-bottom: 2px;
+}
+
+.libraryItem:hover {
+  background: var(--lavender-bg);
+  transform: translateX(2px);
+}
+
+.libraryItemIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+  border: 1px solid;
+}
+
+.libraryItemName {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-700);
+}
+
+.libraryItemMeta {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-300);
+}

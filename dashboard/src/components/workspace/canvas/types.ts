@@ -48,3 +48,21 @@ export interface CellPosition {
   col: number;
   row: number;
 }
+
+export interface RenderBlock {
+  id: string;
+  type: string;
+  label: string;
+  color: string;
+  w: number;
+  h: number;
+  value?: string;
+  sub?: string;
+}
+
+export interface TargetRowResult {
+  rowIdx: number;
+  rowY: number;
+  rowH: number;
+  totalH: number;
+}

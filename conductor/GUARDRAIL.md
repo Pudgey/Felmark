@@ -1,19 +1,19 @@
 # Guardrail — Feature Inventory & Codebase Health
 
-> **Last synced**: 2026-03-31
+> **Last synced**: 2026-04-01
 > **Auto-update rule**: This file MUST be updated in the same commit as any feature add, delete, rename, or move. This is not optional — the AI enforces it as a mandatory post-commit check.
 
 ## Codebase Pulse
 
 | Metric | Value | Threshold | Status |
 |--------|-------|-----------|--------|
-| Total source files | 192 | <200 OK, 200–400 caution, 400+ split | ⚠️ Approaching caution |
-| Total lines of code | ~47,900 | <50K OK, 50–100K caution, 100K+ enterprise | ⚠️ Approaching caution |
-| Component directories | 21 | <30 OK, 30–50 caution, 50+ split | ✅ OK |
-| Block types registered | 55 | No limit — each lives in its own folder | ✅ OK |
+| Total source files | 254 | <200 OK, 200–400 caution, 400+ split | ⚠️ Caution |
+| Total lines of code | ~19,900 | <50K OK, 50–100K caution, 100K+ enterprise | ✅ OK |
+| Component directories | 14 | <30 OK, 30–50 caution, 50+ split | ✅ OK |
+| Block type folders | 40 | No limit — each lives in its own folder | ✅ OK |
 | Types in Block interface | 30+ fields | Verbose but flat — no tangled deps | ✅ OK |
 | Shared hotspot files | 7 | Keep minimal | ✅ OK |
-| Editor.tsx imports | 25+ | Only real bottleneck — monitor size | ⚠️ Watch |
+| Editor.tsx imports | 71 | Only real bottleneck — monitor size | ⚠️ Watch |
 
 ### Architecture note
 
@@ -69,7 +69,7 @@ This is boilerplate, not complexity. No refactor needed unless Editor.tsx itself
 | Share route | `dashboard/src/app/share/[id]/page.tsx` | Public/shared project surface |
 | AI generation API | `dashboard/src/app/api/generate/route.ts` | AI request endpoint |
 | Share API | `dashboard/src/app/api/share/route.ts` | Share lookup/create/update endpoint |
-| Forge Paper | `dashboard/src/components/forge-paper/` | Rail surface — document view for client proposals |
+| Forge Paper | `dashboard/src/components/workstation/forge-paper/` | Rail surface — document view for client proposals |
 
 ---
 
@@ -92,7 +92,7 @@ This is boilerplate, not complexity. No refactor needed unless Editor.tsx itself
 | **Pipeline** | Active | `pipeline/` | Pipeline board view |
 | **Team** | Active | `team/` | Team collaboration surface |
 | **The Wire** | Needs wiring | `wire/` | Competitive intelligence surface |
-| **Workspace** | Active | `workspace-page/` | Rail surface — task/project management, list/board/timeline views |
+| **Workspace** | Active | `workspace/` | Rail surface — task/project management, list/board/timeline views |
 | **Forge Paper** | Active | `forge-paper/` | Rail surface — owns blocks state, document view for client proposals |
 | **Terminal Welcome** | Active | `editor/TerminalWelcome.tsx` | Dead-state splash screen |
 | **History** | Active | `history/` | Version history modal |
@@ -123,10 +123,10 @@ comment-thread, mention, question, feedback, decision, poll, handoff, signoff, a
 ### AI (2)
 ai, ai-action
 
-### Unique (6)
-pricing-config, scope-boundary, asset-checklist, decision-picker, availability-picker, progress-stream
+### Unique (8)
+pricing-config, scope-boundary, asset-checklist, decision-picker, availability-picker, progress-stream, dependency-map, revision-heatmap
 
-**Total: 55 block types**
+**Total: 57 block types** (in 40 folders)
 
 ---
 

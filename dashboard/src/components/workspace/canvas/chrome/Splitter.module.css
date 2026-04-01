@@ -1,0 +1,40 @@
+/* ── Resize Splitter Handles ── */
+
+.splitter {
+  position: absolute;
+  z-index: 7;
+  opacity: 0;
+  transition: opacity 0.1s;
+  cursor: ew-resize;
+  top: 20%;
+  bottom: 20%;
+  width: 8px;
+}
+
+.splitterRight {
+  right: -4px;
+}
+
+.splitterLeft {
+  left: -4px;
+}
+
+.splitterLine {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--lavender);
+  border: 2px solid var(--card);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.splitterRight .splitterLine {
+  right: 1px;
+}
+
+.splitterLeft .splitterLine {
+  left: 1px;
+}

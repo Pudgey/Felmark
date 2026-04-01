@@ -1,0 +1,102 @@
+/* ── Row Insertion Bars ── */
+
+.insertionZone {
+  position: absolute;
+  height: 24px;
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.insertionZone:hover {
+  opacity: 1;
+}
+
+.insertionLine {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  border-top: 1px dashed var(--ink-200);
+  transition: border-color 0.15s;
+}
+
+.insertionZone:hover .insertionLine {
+  border-color: var(--lavender);
+}
+
+.insertionBtn {
+  position: relative;
+  z-index: 13;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--ink-400);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.insertionBtn:hover {
+  border-color: var(--lavender);
+  color: var(--lavender);
+  transform: scale(1.05);
+}
+
+/* ── Column Insertion (vertical between blocks) ── */
+
+.colInsertionZone {
+  position: absolute;
+  width: 24px;
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.colInsertionZone:hover {
+  opacity: 1;
+}
+
+.colInsertionLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  border-left: 1px dashed var(--ink-200);
+  transition: border-color 0.15s;
+}
+
+.colInsertionZone:hover .colInsertionLine {
+  border-color: var(--lavender);
+}
+
+/* ── Empty Row ── */
+
+.emptyRow {
+  position: absolute;
+  border: 2px dashed var(--ink-200);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.emptyRowText {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-300);
+}
