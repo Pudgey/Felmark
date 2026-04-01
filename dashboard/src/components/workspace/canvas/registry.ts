@@ -30,6 +30,7 @@ export const BLOCK_DEFS: BlockTypeDef[] = [
   { type: "rate", label: "Rate Tracker", icon: "\u2197", color: "#8b8bba", defaultW: 2, minW: 1, maxW: 8, defaultH: 2, minH: 1, expandAxis: "width" },
   { type: "goal", label: "Goal Ring", icon: "\u25C9", color: "#b07d4f", defaultW: 2, minW: 1, maxW: 8, defaultH: 2, minH: 1, expandAxis: "width" },
   { type: "note", label: "Sticky Note", icon: "\u25FB", color: "#b5b2a9", defaultW: 2, minW: 1, maxW: 4, defaultH: 2, minH: 1, expandAxis: "both" },
+  { type: "revenue-chart", label: "Revenue Chart", icon: "\u25C8", color: "#8b8bba", defaultW: 4, minW: 3, maxW: 8, defaultH: 3, minH: 2, expandAxis: "both" },
 ];
 
 /* ── Initial data (row-based) ── */

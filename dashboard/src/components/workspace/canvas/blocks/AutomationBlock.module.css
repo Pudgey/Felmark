@@ -1,0 +1,129 @@
+/* AutomationBlock styles */
+
+.wrap {
+  padding: 16px 20px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.title {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-300);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.count {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-300);
+  background: var(--border-light);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.addBtn {
+  margin-left: auto;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px dashed var(--border);
+  background: none;
+  font-size: 10px;
+  font-family: inherit;
+  color: var(--ink-400);
+  cursor: pointer;
+  transition: all 0.1s;
+}
+
+.addBtn:hover {
+  border-color: var(--ember);
+  color: var(--ember);
+}
+
+/* Rule list */
+.rules {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rules::-webkit-scrollbar {
+  width: 3px;
+}
+
+.rules::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+.rule {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-light);
+  transition: background 0.1s;
+  cursor: default;
+}
+
+.rule:last-child {
+  border-bottom: none;
+}
+
+.rule:hover {
+  background: var(--lavender-bg);
+}
+
+.ruleBadge {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.ruleInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.ruleTrigger {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-700);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ruleAction {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-400);
+  margin-top: 1px;
+}
+
+.ruleStatus {
+  font-family: var(--mono);
+  font-size: 8px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 5px;
+  flex-shrink: 0;
+  border: 1px solid;
+}
