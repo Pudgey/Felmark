@@ -681,78 +681,91 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
   const activeWs = workspaces.find(w => w.projects.some(p => p.id === activeProject));
 
   const renderBlock = (block: Block) => {
-    // Graph block — click to select, double-click to edit data
-    if (block.type === "graph" && block.graphData) {
-      const isEditing = editingGraphId === block.id;
+    // Helper: wraps any block content with standard blockRow + gutter + drag handlers
+    function wrapBlock(content: React.ReactNode, opts?: { noGutter?: boolean; gutterMarginTop?: number }) {
       return (
-        <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
-          <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
+        <div key={block.id} className={`${styles.blockRow} ${dropId === block.id ? styles.dropTarget : ""}`}
+          onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+          <div className={styles.gutter} style={{ opacity: opts?.noGutter ? 0 : (hoverBlock === block.id ? 1 : 0), ...(opts?.gutterMarginTop != null ? { marginTop: opts.gutterMarginTop } : {}) }}>
             <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
               <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
             </button>
-            <div className={`${styles.gutterBtn} ${styles.grip}`}>
+            <div className={`${styles.gutterBtn} ${styles.grip}`}
+              draggable
+              onDragStart={e => { setDragId(block.id); e.dataTransfer.effectAllowed = "move"; }}
+              onDragEnd={() => { setDragId(null); setDropId(null); }}>
               <svg width="10" height="14" viewBox="0 0 10 14"><circle cx="3" cy="2.5" r="1" fill="currentColor"/><circle cx="7" cy="2.5" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="11.5" r="1" fill="currentColor"/><circle cx="7" cy="11.5" r="1" fill="currentColor"/></svg>
             </div>
             <button className={`${styles.gutterBtn} ${styles.gutterDelete}`} onClick={() => deleteBlock(block.id)} title="Delete block">
               <svg width="10" height="10" viewBox="0 0 10 10"><path d="M3 3l4 4M7 3l-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>
             </button>
           </div>
-          <div style={{ flex: 1 }}>
-            <div
-              onClick={() => { if (!isEditing) setEditingGraphId(block.id); }}
-              style={{ cursor: isEditing ? "default" : "pointer", borderRadius: 10, outline: isEditing ? "2px solid var(--ember)" : "2px solid transparent", outlineOffset: 2, transition: "outline-color 0.12s" }}
-            >
-              <GraphBlockComponent graphData={block.graphData} />
-            </div>
-            {isEditing && (
-              <GraphDataEditor
-                graphData={block.graphData}
-                onUpdate={(updated) => {
-                  setBlocks(prev => prev.map(b => b.id === block.id ? { ...b, graphData: updated } : b));
-                }}
-                onClose={() => setEditingGraphId(null)}
-                onDelete={() => {
-                  setEditingGraphId(null);
-                  setBlocks(prev => {
-                    if (prev.length <= 1) return [{ ...prev[0], type: "paragraph" as const, content: "", checked: false, graphData: undefined }];
-                    return prev.filter(b => b.id !== block.id);
-                  });
-                }}
-              />
-            )}
+          <div style={{ flex: 1 }}
+            onDragOver={e => { e.preventDefault(); if (dragId && dragId !== block.id) setDropId(block.id); }}
+            onDrop={e => {
+              e.preventDefault();
+              if (!dragId || dragId === block.id) return;
+              setBlocks(prev => {
+                const fi = prev.findIndex(b => b.id === dragId);
+                const ti = prev.findIndex(b => b.id === block.id);
+                const n = [...prev];
+                const [m] = n.splice(fi, 1);
+                n.splice(ti, 0, m);
+                return n;
+              });
+              setDragId(null);
+              setDropId(null);
+            }}>
+            {content}
           </div>
         </div>
       );
     }
 
-    // Deliverable block
-    if (block.type === "deliverable" && block.deliverableData) {
-      return (
-        <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
-          <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
-            <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
-              <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
-            </button>
-            <div className={`${styles.gutterBtn} ${styles.grip}`}>
-              <svg width="10" height="14" viewBox="0 0 10 14"><circle cx="3" cy="2.5" r="1" fill="currentColor"/><circle cx="7" cy="2.5" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="11.5" r="1" fill="currentColor"/><circle cx="7" cy="11.5" r="1" fill="currentColor"/></svg>
-            </div>
-            <button className={`${styles.gutterBtn} ${styles.gutterDelete}`} onClick={() => deleteBlock(block.id)} title="Delete block">
-              <svg width="10" height="10" viewBox="0 0 10 10"><path d="M3 3l4 4M7 3l-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>
-            </button>
+    // Graph block — click to select, double-click to edit data
+    if (block.type === "graph" && block.graphData) {
+      const isEditing = editingGraphId === block.id;
+      return wrapBlock(
+        <>
+          <div
+            onClick={() => { if (!isEditing) setEditingGraphId(block.id); }}
+            style={{ cursor: isEditing ? "default" : "pointer", borderRadius: 10, outline: isEditing ? "2px solid var(--ember)" : "2px solid transparent", outlineOffset: 2, transition: "outline-color 0.12s" }}
+          >
+            <GraphBlockComponent graphData={block.graphData} />
           </div>
-          <div style={{ flex: 1 }}>
-            <DeliverableBlockComponent
-              data={block.deliverableData}
-              onChange={(updated) => {
-                setBlocks(prev => prev.map(b => b.id === block.id ? { ...b, deliverableData: updated } : b));
+          {isEditing && (
+            <GraphDataEditor
+              graphData={block.graphData}
+              onUpdate={(updated) => {
+                setBlocks(prev => prev.map(b => b.id === block.id ? { ...b, graphData: updated } : b));
               }}
-              onCommentAdded={(text) => {
-                const newActivity = { blockId: block.id, editedBy: "u1", editedAt: "now", comment: { user: "u1", text, time: "now" } };
-                onActivitiesChange([newActivity, ...activities]);
+              onClose={() => setEditingGraphId(null)}
+              onDelete={() => {
+                setEditingGraphId(null);
+                setBlocks(prev => {
+                  if (prev.length <= 1) return [{ ...prev[0], type: "paragraph" as const, content: "", checked: false, graphData: undefined }];
+                  return prev.filter(b => b.id !== block.id);
+                });
               }}
             />
-          </div>
-        </div>
+          )}
+        </>
+      );
+    }
+
+    // Deliverable block
+    if (block.type === "deliverable" && block.deliverableData) {
+      return wrapBlock(
+        <DeliverableBlockComponent
+          data={block.deliverableData}
+          onChange={(updated) => {
+            setBlocks(prev => prev.map(b => b.id === block.id ? { ...b, deliverableData: updated } : b));
+          }}
+          onCommentAdded={(text) => {
+            const newActivity = { blockId: block.id, editedBy: "u1", editedAt: "now", comment: { user: "u1", text, time: "now" } };
+            onActivitiesChange([newActivity, ...activities]);
+          }}
+        />
       );
     }
 
@@ -794,198 +807,101 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
     if (contentBlockMap[block.type]) {
       const rendered = contentBlockMap[block.type](block);
       if (rendered !== null) {
-        return (
-          <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
-            <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
-              <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
-                <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
-              </button>
-              <div className={`${styles.gutterBtn} ${styles.grip}`}>
-                <svg width="10" height="14" viewBox="0 0 10 14"><circle cx="3" cy="2.5" r="1" fill="currentColor"/><circle cx="7" cy="2.5" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="11.5" r="1" fill="currentColor"/><circle cx="7" cy="11.5" r="1" fill="currentColor"/></svg>
-              </div>
-            </div>
-            <div style={{ flex: 1 }}>{rendered}</div>
-          </div>
-        );
+        return wrapBlock(rendered);
       }
       // Data missing — fall through to EditableBlock with content text
     }
 
     // Graph sub-picker — shown when user selected "Graph" from slash menu
     if (graphPicker && graphPicker.blockId === block.id && block.type !== "graph") {
-      return (
-        <div key={block.id} className={styles.blockRow}>
-          <div className={styles.gutter} style={{ opacity: 0 }} />
-          <div style={{ flex: 1 }}>
-            <div className={graphStyles.gb}>
-              <div className={graphStyles.gbHead}>
-                <span className={graphStyles.gbTitle}>Choose a chart type</span>
-                <button onClick={() => setGraphPicker(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-300)", fontSize: 14 }}>&times;</button>
-              </div>
-              <div className={graphStyles.subPicker}>
-                {GRAPH_TYPE_OPTIONS.map(opt => (
-                  <button key={opt.type} className={graphStyles.subPickerItem} onClick={() => selectGraphType(opt.type)}>
-                    <span className={graphStyles.subPickerIcon}>{opt.icon}</span>
-                    <span className={graphStyles.subPickerLabel}>{opt.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
+      return wrapBlock(
+        <div className={graphStyles.gb}>
+          <div className={graphStyles.gbHead}>
+            <span className={graphStyles.gbTitle}>Choose a chart type</span>
+            <button onClick={() => setGraphPicker(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-300)", fontSize: 14 }}>&times;</button>
           </div>
-        </div>
+          <div className={graphStyles.subPicker}>
+            {GRAPH_TYPE_OPTIONS.map(opt => (
+              <button key={opt.type} className={graphStyles.subPickerItem} onClick={() => selectGraphType(opt.type)}>
+                <span className={graphStyles.subPickerIcon}>{opt.icon}</span>
+                <span className={graphStyles.subPickerLabel}>{opt.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>,
+        { noGutter: true }
       );
     }
 
     // Money block
     if (block.type === "money" && block.moneyData) {
-      return (
-        <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
-          <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
-            <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
-              <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
-            </button>
-            <div className={`${styles.gutterBtn} ${styles.grip}`}>
-              <svg width="10" height="14" viewBox="0 0 10 14"><circle cx="3" cy="2.5" r="1" fill="currentColor"/><circle cx="7" cy="2.5" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="11.5" r="1" fill="currentColor"/><circle cx="7" cy="11.5" r="1" fill="currentColor"/></svg>
-            </div>
-            <button className={`${styles.gutterBtn} ${styles.gutterDelete}`} onClick={() => deleteBlock(block.id)} title="Delete block">
-              <svg width="10" height="10" viewBox="0 0 10 10"><path d="M3 3l4 4M7 3l-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>
-            </button>
-          </div>
-          <div style={{ flex: 1 }}>
-            <MoneyBlockComponent
-              moneyData={block.moneyData}
-              onUpdate={(updated) => setBlocks(prev => prev.map(b => b.id === block.id ? { ...b, moneyData: updated } : b))}
-            />
-          </div>
-        </div>
+      return wrapBlock(
+        <MoneyBlockComponent
+          moneyData={block.moneyData}
+          onUpdate={(updated) => setBlocks(prev => prev.map(b => b.id === block.id ? { ...b, moneyData: updated } : b))}
+        />
       );
     }
 
     // Money sub-picker
     if (moneyPicker && moneyPicker.blockId === block.id && block.type !== "money") {
-      return (
-        <div key={block.id} className={styles.blockRow}>
-          <div className={styles.gutter} style={{ opacity: 0 }} />
-          <div style={{ flex: 1 }}>
-            <div className={moneyStyles.mb}>
-              <div className={moneyStyles.head}>
-                <span className={moneyStyles.label}>Choose a money block</span>
-                <button onClick={() => setMoneyPicker(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-300)", fontSize: 14 }}>&times;</button>
-              </div>
-              <div className={moneyStyles.subPicker}>
-                {MONEY_TYPE_OPTIONS.map(opt => (
-                  <button key={opt.type} className={moneyStyles.subPickerItem} onClick={() => selectMoneyType(opt.type)}>
-                    <span className={moneyStyles.subPickerIcon}>{opt.icon}</span>
-                    <span className={moneyStyles.subPickerLabel}>{opt.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
+      return wrapBlock(
+        <div className={moneyStyles.mb}>
+          <div className={moneyStyles.head}>
+            <span className={moneyStyles.label}>Choose a money block</span>
+            <button onClick={() => setMoneyPicker(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-300)", fontSize: 14 }}>&times;</button>
           </div>
-        </div>
+          <div className={moneyStyles.subPicker}>
+            {MONEY_TYPE_OPTIONS.map(opt => (
+              <button key={opt.type} className={moneyStyles.subPickerItem} onClick={() => selectMoneyType(opt.type)}>
+                <span className={moneyStyles.subPickerIcon}>{opt.icon}</span>
+                <span className={moneyStyles.subPickerLabel}>{opt.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>,
+        { noGutter: true }
       );
     }
 
     // Deadline block
     if (block.type === "deadline" && block.deadlineData) {
-      return (
-        <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
-          <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
-            <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
-              <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
-            </button>
-            <div className={`${styles.gutterBtn} ${styles.grip}`}>
-              <svg width="10" height="14" viewBox="0 0 10 14"><circle cx="3" cy="2.5" r="1" fill="currentColor"/><circle cx="7" cy="2.5" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="11.5" r="1" fill="currentColor"/><circle cx="7" cy="11.5" r="1" fill="currentColor"/></svg>
-            </div>
-            <button className={`${styles.gutterBtn} ${styles.gutterDelete}`} onClick={() => deleteBlock(block.id)} title="Delete block">
-              <svg width="10" height="10" viewBox="0 0 10 10"><path d="M3 3l4 4M7 3l-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>
-            </button>
-          </div>
-          <div style={{ flex: 1 }}>
-            <DeadlineBlockComponent
-              data={block.deadlineData}
-              onUpdate={(updated) => setBlocks(prev => prev.map(b => b.id === block.id ? { ...b, deadlineData: updated } : b))}
-            />
-          </div>
-        </div>
+      return wrapBlock(
+        <DeadlineBlockComponent
+          data={block.deadlineData}
+          onUpdate={(updated) => setBlocks(prev => prev.map(b => b.id === block.id ? { ...b, deadlineData: updated } : b))}
+        />
       );
     }
 
     if (block.type === "ai") {
-      return (
-        <div key={block.id} className={styles.blockRow}>
-          <div className={styles.gutter} style={{ opacity: 0 }} />
-          <div style={{ flex: 1 }}>
-            <AiBlock blockId={block.id} onGenerate={handleAiGenerate} />
-          </div>
-        </div>
+      return wrapBlock(
+        <AiBlock blockId={block.id} onGenerate={handleAiGenerate} />,
+        { noGutter: true }
       );
     }
 
     if (block.type === "canvas" && block.canvasData) {
-      return (
-        <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
-          <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
-            <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
-              <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
-            </button>
-            <div className={`${styles.gutterBtn} ${styles.grip}`}>
-              <svg width="10" height="14" viewBox="0 0 10 14"><circle cx="3" cy="2.5" r="1" fill="currentColor"/><circle cx="7" cy="2.5" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="11.5" r="1" fill="currentColor"/><circle cx="7" cy="11.5" r="1" fill="currentColor"/></svg>
-            </div>
-            <button className={`${styles.gutterBtn} ${styles.gutterDelete}`} onClick={() => deleteBlock(block.id)} title="Delete block">
-              <svg width="10" height="10" viewBox="0 0 10 10"><path d="M3 3l4 4M7 3l-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>
-            </button>
-          </div>
-          <div style={{ flex: 1 }}>
-            <CanvasBlock
-              data={block.canvasData}
-              onUpdate={(updated) => setBlocks(prev => prev.map(b => b.id === block.id ? { ...b, canvasData: updated } : b))}
-            />
-          </div>
-        </div>
+      return wrapBlock(
+        <CanvasBlock
+          data={block.canvasData}
+          onUpdate={(updated) => setBlocks(prev => prev.map(b => b.id === block.id ? { ...b, canvasData: updated } : b))}
+        />
       );
     }
 
     if (block.type === "audio" && block.audioData) {
-      return (
-        <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
-          <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
-            <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
-              <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
-            </button>
-            <div className={`${styles.gutterBtn} ${styles.grip}`}>
-              <svg width="10" height="14" viewBox="0 0 10 14"><circle cx="3" cy="2.5" r="1" fill="currentColor"/><circle cx="7" cy="2.5" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="11.5" r="1" fill="currentColor"/><circle cx="7" cy="11.5" r="1" fill="currentColor"/></svg>
-            </div>
-            <button className={`${styles.gutterBtn} ${styles.gutterDelete}`} onClick={() => deleteBlock(block.id)} title="Delete block">
-              <svg width="10" height="10" viewBox="0 0 10 10"><path d="M3 3l4 4M7 3l-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>
-            </button>
-          </div>
-          <div style={{ flex: 1 }}>
-            <AudioBlockComponent
-              data={block.audioData}
-              onUpdate={(updated) => setBlocks(prev => prev.map(b => b.id === block.id ? { ...b, audioData: updated } : b))}
-            />
-          </div>
-        </div>
+      return wrapBlock(
+        <AudioBlockComponent
+          data={block.audioData}
+          onUpdate={(updated) => setBlocks(prev => prev.map(b => b.id === block.id ? { ...b, audioData: updated } : b))}
+        />
       );
     }
 
     if (block.type === "divider") {
-      return (
-        <div key={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
-          <div className={styles.gutter} style={{ opacity: hoverBlock === block.id ? 1 : 0 }}>
-            <button className={styles.gutterBtn} onClick={() => addBlockAfter(block.id)}>
-              <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
-            </button>
-            <div className={`${styles.gutterBtn} ${styles.grip}`}>
-              <svg width="10" height="14" viewBox="0 0 10 14"><circle cx="3" cy="2.5" r="1" fill="currentColor"/><circle cx="7" cy="2.5" r="1" fill="currentColor"/><circle cx="3" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="3" cy="11.5" r="1" fill="currentColor"/><circle cx="7" cy="11.5" r="1" fill="currentColor"/></svg>
-            </div>
-            <button className={`${styles.gutterBtn} ${styles.gutterDelete}`} onClick={() => deleteBlock(block.id)} title="Delete block">
-              <svg width="10" height="10" viewBox="0 0 10 10"><path d="M3 3l4 4M7 3l-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>
-            </button>
-          </div>
-          <div style={{ flex: 1, padding: "6px 0" }}><div className={styles.dividerLine} /></div>
-        </div>
+      return wrapBlock(
+        <div style={{ padding: "6px 0" }}><div className={styles.dividerLine} /></div>
       );
     }
 
