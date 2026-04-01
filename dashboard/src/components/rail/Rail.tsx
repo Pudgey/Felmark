@@ -22,7 +22,7 @@ export default function Rail({ activeItem, overdueCount, onItemClick, zenMode, o
       </button>
 
       <button className={`${styles.btn} ${activeItem === "workspace" ? styles.active : ""}`} onClick={() => onItemClick("workspace")} aria-label="Workspace" title="workspace">
-        <svg width="20" height="20" viewBox="0 0 18 18" fill="none"><path d="M3 4h12M3 8h8M3 12h10" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/><path d="M14 7l2 2-2 2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        <svg width="20" height="20" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="5.5" stroke="currentColor" strokeWidth="1.2"/><ellipse cx="9" cy="9" rx="5.5" ry="2" stroke="currentColor" strokeWidth="0.8" transform="rotate(-30 9 9)"/><circle cx="13" cy="5.5" r="1" fill="currentColor"/><circle cx="5.5" cy="12" r="0.6" fill="currentColor"/></svg>
       </button>
 
       <button className={`${styles.btn} ${activeItem === "workstations" ? styles.active : ""}`} onClick={() => onItemClick("workstations")} aria-label="Workstations" title="workstations">
