@@ -136,6 +136,13 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
 
   const registerRef = useCallback((id: string, el: HTMLDivElement) => { blockElMap.current[id] = el; }, []);
 
+  // Retry-based focus helper — waits for EditableBlock to register its ref in blockElMap
+  const focusNew = useCallback((id: string, retries = 5) => {
+    const el = blockElMap.current[id];
+    if (el) { cursorTo(el, false); return; }
+    if (retries > 0) setTimeout(() => focusNew(id, retries - 1), 20);
+  }, []);
+
   // Track tabs opened with a real name (sidebar) — they skip auto-naming
   const knownTabs = useRef<Set<string>>(new Set());
   useEffect(() => {
@@ -235,10 +242,12 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       n.splice(idx + 1, 0, { id: nid, type: carry, content: aH, checked: false });
       return n;
     });
-    setTimeout(() => {
-      const el = blockElMap.current[nid];
-      if (el) { el.innerHTML = aH; cursorTo(el, false); }
-    }, 20);
+    const focusEnter = (id: string, html: string, retries = 5) => {
+      const el = blockElMap.current[id];
+      if (el) { el.innerHTML = html; cursorTo(el, false); return; }
+      if (retries > 0) setTimeout(() => focusEnter(id, html, retries - 1), 20);
+    };
+    focusEnter(nid, aH);
   }, []);
 
   const onBackspace = useCallback((id: string) => {
@@ -314,7 +323,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
         const nid = uid();
         contentCache.current[nid] = "";
         n.splice(idx + 1, 0, { id: nid, type: "paragraph", content: "", checked: false });
-        setTimeout(() => { const ne = blockElMap.current[nid]; if (ne) cursorTo(ne, false); }, 20);
+        focusNew(nid);
         return n;
       });
       setSlashMenu(null);
@@ -338,7 +347,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
         const nid = uid();
         contentCache.current[nid] = "";
         n.splice(idx + 1, 0, { id: nid, type: "paragraph", content: "", checked: false });
-        setTimeout(() => { const ne = blockElMap.current[nid]; if (ne) cursorTo(ne, false); }, 20);
+        focusNew(nid);
         return n;
       });
       setSlashMenu(null);
@@ -352,7 +361,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
         const nid = uid();
         contentCache.current[nid] = "";
         n.splice(idx + 1, 0, { id: nid, type: "paragraph", content: "", checked: false });
-        setTimeout(() => { const ne = blockElMap.current[nid]; if (ne) cursorTo(ne, false); }, 20);
+        focusNew(nid);
         return n;
       });
       setSlashMenu(null);
@@ -375,7 +384,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
         const nid = uid();
         contentCache.current[nid] = "";
         n.splice(idx + 1, 0, { id: nid, type: "paragraph", content: "", checked: false });
-        setTimeout(() => { const ne = blockElMap.current[nid]; if (ne) cursorTo(ne, false); }, 20);
+        focusNew(nid);
         return n;
       });
       setSlashMenu(null);
@@ -423,7 +432,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
         const nid = uid();
         contentCache.current[nid] = "";
         n.splice(idx + 1, 0, { id: nid, type: "paragraph", content: "", checked: false });
-        setTimeout(() => { const ne = blockElMap.current[nid]; if (ne) cursorTo(ne, false); }, 20);
+        focusNew(nid);
         return n;
       });
       setSlashMenu(null);
@@ -437,7 +446,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
         const nid = uid();
         contentCache.current[nid] = "";
         n.splice(idx + 1, 0, { id: nid, type: "paragraph", content: "", checked: false });
-        setTimeout(() => { const ne = blockElMap.current[nid]; if (ne) cursorTo(ne, false); }, 20);
+        focusNew(nid);
         return n;
       });
     } else {
@@ -458,7 +467,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       const nid = uid();
       contentCache.current[nid] = "";
       n.splice(idx + 1, 0, { id: nid, type: "paragraph", content: "", checked: false });
-      setTimeout(() => { const ne = blockElMap.current[nid]; if (ne) cursorTo(ne, false); }, 20);
+      focusNew(nid);
       return n;
     });
     setGraphPicker(null);
@@ -475,7 +484,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       const nid = uid();
       contentCache.current[nid] = "";
       n.splice(idx + 1, 0, { id: nid, type: "paragraph", content: "", checked: false });
-      setTimeout(() => { const ne = blockElMap.current[nid]; if (ne) cursorTo(ne, false); }, 20);
+      focusNew(nid);
       return n;
     });
     setMoneyPicker(null);
@@ -501,8 +510,26 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       n.splice(idx + 1, 0, { id: nid, type: "paragraph", content: "", checked: false });
       return n;
     });
-    setTimeout(() => { const el = blockElMap.current[nid]; if (el) cursorTo(el, false); }, 20);
+    focusNew(nid);
   };
+
+  const handlePageClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    // Only fire if clicking the page container itself, not a child block
+    if (e.target !== e.currentTarget) return;
+
+    const lastBlock = blocks[blocks.length - 1];
+    if (!lastBlock) return;
+
+    // If last block is an empty paragraph, just focus it
+    if (lastBlock.type === "paragraph" && !lastBlock.content) {
+      const el = blockElMap.current[lastBlock.id];
+      if (el) cursorTo(el, false);
+      return;
+    }
+
+    // Create a new empty paragraph after the last block
+    addBlockAfter(lastBlock.id);
+  }, [blocks]);
 
   const handleAiGenerate = useCallback((blockId: string, generatedBlocks: Block[]) => {
     setBlocks(prev => {
@@ -512,7 +539,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       if (generatedBlocks.length === 0) {
         // Cancelled — revert to paragraph
         n[idx] = { ...n[idx], type: "paragraph" as BlockType, content: "" };
-        setTimeout(() => { const el = blockElMap.current[blockId]; if (el) cursorTo(el, false); }, 20);
+        focusNew(blockId);
         return n;
       }
       // Replace the AI block with generated blocks + trailing paragraph
@@ -520,7 +547,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       const trailingId = uid();
       contentCache.current[trailingId] = "";
       n.splice(idx + generatedBlocks.length, 0, { id: trailingId, type: "paragraph", content: "", checked: false });
-      setTimeout(() => { const el = blockElMap.current[trailingId]; if (el) cursorTo(el, false); }, 50);
+      focusNew(trailingId);
       return n;
     });
   }, []);
@@ -1305,7 +1332,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
               />}
               {/* Editor area */}
               <div className={styles.editor} ref={editorRef} onMouseDown={() => { setConvoPanelOpen(false); setCommentPanelOpen(false); }} style={{ flex: 1 }}>
-                <div className={styles.page}>{blocks.map(renderBlock)}</div>
+                <div className={styles.page} onClick={handlePageClick}>{blocks.map(renderBlock)}</div>
                 {slashMenu && (
                   <SlashMenu
                     top={slashMenu.top}
