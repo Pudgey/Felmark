@@ -315,6 +315,53 @@ export default function Dashboard() {
     forge.tabs.select(id);
   };
 
+  const openForgeRail = () => {
+    setLaunchpadOpen(false);
+    setSidebarOpen(true);
+
+    const currentActiveTab = tabs.find(tab => tab.active);
+    if (currentActiveTab) {
+      setActiveWorkstationId(null);
+      setRailActive("forge");
+      return;
+    }
+
+    if (activeProject) {
+      setActiveWorkstationId(null);
+      forge.tabs.select(activeProject);
+      setRailActive("forge");
+      return;
+    }
+
+    const workstationContext = activeWorkstationId
+      ? workstations.find(workstation => workstation.id === activeWorkstationId)
+      : null;
+    const workstationProject = workstationContext?.projects[0];
+    if (workstationContext && workstationProject) {
+      selectProject(workstationProject, workstationContext.client);
+      setRailActive("forge");
+      return;
+    }
+
+    const fallbackTab = tabs[0];
+    if (fallbackTab) {
+      setActiveWorkstationId(null);
+      forge.tabs.select(fallbackTab.id);
+      setRailActive("forge");
+      return;
+    }
+
+    const fallbackWorkstation = workstations[0];
+    const fallbackProject = fallbackWorkstation?.projects[0];
+    if (fallbackWorkstation && fallbackProject) {
+      selectProject(fallbackProject, fallbackWorkstation.client);
+      setRailActive("forge");
+      return;
+    }
+
+    restoreWorkstationContext();
+  };
+
   const handleTabClose = (id: string) => forge.tabs.close(id);
 
   const handleTabRename = (id: string, name: string) => forge.projects.rename(id, name);
@@ -390,6 +437,10 @@ export default function Dashboard() {
         onItemClick={(item) => {
           if (item === "workstations") {
             restoreWorkstationContext();
+            return;
+          }
+          if (item === "forge") {
+            openForgeRail();
             return;
           }
           setLaunchpadOpen(false);
@@ -526,6 +577,10 @@ export default function Dashboard() {
           onNavigateRail={(item) => {
             if (item === "workstations") {
               restoreWorkstationContext();
+              return;
+            }
+            if (item === "forge") {
+              openForgeRail();
               return;
             }
             setLaunchpadOpen(false);

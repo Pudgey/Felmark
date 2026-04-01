@@ -24,8 +24,8 @@
 
 | Agent | Task | Completed |
 |-------|------|-----------|
+| codex-main | Debugged Forge rail navigation so clicking Forge restores a document context instead of switching the shell into a blank no-tab state | 2026-04-01 00:19 EDT |
 | codex-main | Added AI slash-block support to Forge Paper so /ai inserts a real generation block and resolves into document blocks on the paper surface | 2026-03-31 12:28 EDT |
 | codex-main | Debugged Forge Paper slash blocks so unsupported conversions stop failing invisibly on the paper surface | 2026-03-31 12:20 EDT |
 | codex-main | Debugged Forge Paper outline behavior so text blocks register and navigate correctly instead of disappearing from the paper outline | 2026-03-31 10:12 EDT |
 | codex-main | Promoted the editor terminal into its own dedicated top-right action so it no longer feels buried inside split view | 2026-03-31 10:04 EDT |
-| codex-main | Fixed Forge Paper so slash-created text blocks and the shared outline behave correctly on the live paper surface | 2026-03-31 09:58 EDT |

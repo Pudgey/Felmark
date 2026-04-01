@@ -52,6 +52,7 @@ import EditorMargin from "./margin/EditorMargin";
 import WorkstationHome from "../workstation/WorkstationHome";
 import DashboardHome from "../dashboard/DashboardHome";
 import TeamScreen from "../team/TeamScreen";
+import SettingsPage from "../settings/SettingsPage";
 import CalendarFull from "../calendar/CalendarFull";
 import SearchPage from "../search/SearchPage";
 import type { Project, DocumentTemplate } from "@/lib/types";
@@ -1655,7 +1656,10 @@ export default function Editor({ workstations, tabs, activeProject, blocks: bloc
             {railActive === "team" && (
               <TeamScreen />
             )}
-            {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && railActive !== "forge" && activeWorkstationId && (() => {
+            {railActive === "settings" && (
+              <SettingsPage />
+            )}
+            {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && railActive !== "settings" && railActive !== "forge" && activeWorkstationId && (() => {
               const ws = workstations.find(w => w.id === activeWorkstationId);
               return ws && onSelectProject ? (
                 <WorkstationHome workstation={ws} onSelectProject={onSelectProject} onNewTab={onNewTab} onRenameWorkstation={onRenameWorkstation} onUpdateProjectDue={onUpdateProjectDue} />
@@ -1669,7 +1673,7 @@ export default function Editor({ workstations, tabs, activeProject, blocks: bloc
                 onNewTabInWorkstation={onNewTabInWorkstation || (() => {})}
               />
             )}
-            {railActive !== "home" && railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && railActive !== "forge" && !activeWorkstationId && !tabs.some(t => t.active) && (
+            {railActive !== "home" && railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && railActive !== "settings" && railActive !== "forge" && !activeWorkstationId && !tabs.some(t => t.active) && (
               <TerminalWelcome
                 activeCount={workstations.reduce((s, w) => s + w.projects.filter(p => p.status !== "completed").length, 0)}
                 reviewCount={workstations.reduce((s, w) => s + w.projects.filter(p => p.status === "review").length, 0)}
@@ -1687,7 +1691,16 @@ export default function Editor({ workstations, tabs, activeProject, blocks: bloc
                 onSave={(newBlocks) => setBlocks(newBlocks)}
               />
             )}
-            {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && railActive !== "forge" && !activeWorkstationId && tabs.some(t => t.active) && (
+            {railActive === "forge" && !tabs.some(t => t.active) && (
+              <div className={styles.emptyState}>
+                <div className={styles.emptyTitle}>Open a project to use Forge Paper</div>
+                <div className={styles.emptySub}>Forge is a document surface, so it needs an active project context before it can render.</div>
+                <button className={styles.emptyAction} onClick={() => onNavigateRail?.("workstations")}>
+                  Go to workstations
+                </button>
+              </div>
+            )}
+            {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && railActive !== "settings" && railActive !== "forge" && !activeWorkstationId && tabs.some(t => t.active) && (
               <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
                 {/* Left margin — document spine + block gutter */}
                 {!zenMode && <EditorMargin
