@@ -54,6 +54,7 @@ import DashboardHome from "../dashboard/DashboardHome";
 import TeamScreen from "../team/TeamScreen";
 import CalendarFull from "../calendar/CalendarFull";
 import SearchPage from "../search/SearchPage";
+import SettingsPage from "../settings/SettingsPage";
 import type { Project, DocumentTemplate } from "@/lib/types";
 import type { TerminalSessionState } from "@/lib/terminal/types";
 import SplitPane from "./split-pane/SplitPane";
@@ -1662,7 +1663,10 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
             {railActive === "team" && (
               <TeamScreen />
             )}
-            {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && activeWorkspaceId && (() => {
+            {railActive === "settings" && (
+              <SettingsPage />
+            )}
+            {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && railActive !== "settings" && activeWorkspaceId && (() => {
               const ws = workspaces.find(w => w.id === activeWorkspaceId);
               return ws && onSelectProject ? (
                 <WorkspaceHome workspace={ws} onSelectProject={onSelectProject} onNewTab={onNewTab} onRenameWorkspace={onRenameWorkspace} onUpdateProjectDue={onUpdateProjectDue} />
@@ -1676,7 +1680,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
                 onNewTabInWorkspace={onNewTabInWorkspace || (() => {})}
               />
             )}
-            {railActive !== "home" && railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && !activeWorkspaceId && !tabs.some(t => t.active) && (
+            {railActive !== "home" && railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && railActive !== "settings" && !activeWorkspaceId && !tabs.some(t => t.active) && (
               <TerminalWelcome
                 activeCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status !== "completed").length, 0)}
                 reviewCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "review").length, 0)}
@@ -1685,7 +1689,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
                 onNewWorkspace={onNewWorkspace}
               />
             )}
-            {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && !activeWorkspaceId && tabs.some(t => t.active) && forgePaper && (
+            {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && railActive !== "settings" && !activeWorkspaceId && tabs.some(t => t.active) && forgePaper && (
               <ForgePaper
                 blocks={blocks}
                 workspace={activeWs}
@@ -1694,7 +1698,7 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
                 onBlocksChange={(newBlocks) => setBlocks(newBlocks)}
               />
             )}
-            {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && !activeWorkspaceId && tabs.some(t => t.active) && !forgePaper && (
+            {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && railActive !== "settings" && !activeWorkspaceId && tabs.some(t => t.active) && !forgePaper && (
               <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
                 {/* Left margin — document spine + block gutter */}
                 {!zenMode && <EditorMargin

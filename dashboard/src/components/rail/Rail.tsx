@@ -70,7 +70,7 @@ export default function Rail({ activeItem, overdueCount, onItemClick, zenMode, o
         <svg width="20" height="20" viewBox="0 0 18 18" fill="none"><path d="M9 3C5 3 2 9 2 9s3 6 7 6 7-6 7-6-3-6-7-6z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/><circle cx="9" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.2"/></svg>
       </button>
 
-      <button className={styles.btn} aria-label="Settings" title="settings">
+      <button className={`${styles.btn} ${activeItem === "settings" ? styles.active : ""}`} onClick={() => onItemClick("settings")} aria-label="Settings" title="settings">
         <svg width="20" height="20" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="3" stroke="currentColor" strokeWidth="1.2"/><path d="M9 2v2M9 14v2M2 9h2M14 9h2M4.2 4.2l1.4 1.4M12.4 12.4l1.4 1.4M4.2 13.8l1.4-1.4M12.4 5.6l1.4-1.4" stroke="currentColor" strokeWidth="1" strokeLinecap="round"/></svg>
       </button>
     </div>
