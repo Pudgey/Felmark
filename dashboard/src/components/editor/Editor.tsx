@@ -22,7 +22,7 @@ import { TableBlock, AccordionBlock, MathBlock, GalleryBlock, SwatchesBlock, Bef
 import { CommentThreadBlock, MentionBlock, QuestionBlock, FeedbackBlock, DecisionBlock, PollBlock, HandoffBlock, SignoffBlock, AnnotationBlock, getDefaultCommentThread, getDefaultMention, getDefaultQuestion, getDefaultFeedback, getDefaultDecision, getDefaultPoll, getDefaultHandoff, getDefaultSignoff, getDefaultAnnotation } from "./blocks/CollabBlocks";
 import AiActionBlock, { getDefaultAiActionData } from "./ai-action/AiActionBlock";
 import { TimelineBlock, FlowBlock, BrandBoardBlock, MoodBoardBlock, WireframeBlock, PullQuoteBlock, getDefaultTimeline, getDefaultFlow, getDefaultBrandBoard, getDefaultMoodBoard, getDefaultWireframe, getDefaultPullQuote } from "./blocks/VisualBlocks";
-import { HeroSpotlightBlock, KineticTypeBlock, NumberCascadeBlock, getDefaultHeroSpotlight, getDefaultKineticType, getDefaultNumberCascade } from "./blocks/AnimationBlocks";
+import { HeroSpotlightBlock, KineticTypeBlock, NumberCascadeBlock, StatRevealBlock, ValueCounterBlock, getDefaultHeroSpotlight, getDefaultKineticType, getDefaultNumberCascade, getDefaultStatReveal, getDefaultValueCounter } from "./blocks/AnimationBlocks";
 import { STATUS } from "@/lib/constants";
 import { uid, cursorTo } from "@/lib/utils";
 import EditableBlock from "./EditableBlock";
@@ -406,6 +406,8 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       "hero-spotlight": { heroSpotlightData: getDefaultHeroSpotlight() },
       "kinetic-type": { kineticTypeData: getDefaultKineticType() },
       "number-cascade": { numberCascadeData: getDefaultNumberCascade() },
+      "stat-reveal": { statRevealData: getDefaultStatReveal() },
+      "value-counter": { valueCounterData: getDefaultValueCounter() },
     };
     if (CONTENT_DEFAULTS[type]) {
       setBlocks(prev => {
@@ -776,6 +778,8 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
       "hero-spotlight": (b) => b.heroSpotlightData ? <HeroSpotlightBlock data={b.heroSpotlightData} onChange={d => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, heroSpotlightData: d } : bl))} /> : null,
       "kinetic-type": (b) => b.kineticTypeData ? <KineticTypeBlock data={b.kineticTypeData} onChange={d => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, kineticTypeData: d } : bl))} /> : null,
       "number-cascade": (b) => b.numberCascadeData ? <NumberCascadeBlock data={b.numberCascadeData} onChange={d => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, numberCascadeData: d } : bl))} /> : null,
+      "stat-reveal": (b) => b.statRevealData ? <StatRevealBlock data={b.statRevealData} onChange={d => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, statRevealData: d } : bl))} /> : null,
+      "value-counter": (b) => b.valueCounterData ? <ValueCounterBlock data={b.valueCounterData} onChange={d => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, valueCounterData: d } : bl))} /> : null,
     };
 
     if (contentBlockMap[block.type]) {

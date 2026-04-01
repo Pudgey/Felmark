@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import type { HeroSpotlightData, KineticTypeData, NumberCascadeData } from "@/lib/types";
+import type { HeroSpotlightData, KineticTypeData, NumberCascadeData, StatRevealData, ValueCounterData } from "@/lib/types";
 import styles from "./AnimationBlocks.module.css";
 
 /* ── Default data factories ── */

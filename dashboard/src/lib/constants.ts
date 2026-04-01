@@ -52,6 +52,8 @@ export const BLOCK_TYPES: BlockTypeInfo[] = [
   { type: "hero-spotlight", label: "Hero Spotlight", icon: "★", desc: "Dramatic name reveal animation", section: "Visual", shortcut: "/spotlight" },
   { type: "kinetic-type", label: "Kinetic Type", icon: "Aa", desc: "Staggered text reveal", section: "Visual", shortcut: "/kinetic" },
   { type: "number-cascade", label: "Number Cascade", icon: "#", desc: "Animated stat grid", section: "Visual", shortcut: "/cascade" },
+  { type: "stat-reveal", label: "Stat Reveal", icon: "◎", desc: "Animated counting stats with rings", section: "Visual", shortcut: "/stats" },
+  { type: "value-counter", label: "Value Counter", icon: "$", desc: "Dramatic ROI counter", section: "Visual", shortcut: "/value" },
 ];
 
 export interface Command {

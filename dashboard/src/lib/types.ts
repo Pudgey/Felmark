@@ -43,6 +43,8 @@ export type BlockType =
   | "hero-spotlight"
   | "kinetic-type"
   | "number-cascade"
+  | "stat-reveal"
+  | "value-counter"
   | "pricing-config"
   | "scope-boundary"
   | "asset-checklist";
@@ -425,6 +427,31 @@ export interface NumberCascadeData {
   stats: CascadeStat[];
 }
 
+export interface RevealStat {
+  value: number;
+  prefix: string;
+  suffix: string;
+  label: string;
+  sub: string;
+  color: string;
+}
+export interface StatRevealData {
+  stats: RevealStat[];
+  footer: string;
+}
+
+export interface ValueBreakdownRow {
+  label: string;
+  amount: string;
+  positive: boolean;
+}
+export interface ValueCounterData {
+  topLabel: string;
+  targetValue: number;
+  rows: ValueBreakdownRow[];
+  bottomLine: string;
+}
+
 // ── Unique blocks ──
 
 export interface PricingOption {
@@ -508,6 +535,8 @@ export interface Block {
   heroSpotlightData?: HeroSpotlightData;
   kineticTypeData?: KineticTypeData;
   numberCascadeData?: NumberCascadeData;
+  statRevealData?: StatRevealData;
+  valueCounterData?: ValueCounterData;
 }
 
 export interface BlockTypeInfo {
