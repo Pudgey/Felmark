@@ -123,7 +123,74 @@ Chrome Extension (~50 lines)          Web App (app.tryfelmark.com)
 ### 1. No Scope Creep
 - **STOP -> PROPOSE -> WAIT** before expanding scope beyond the current task.
 
-### 2. Structure Before Code
+### 2. Organization Over Speed (NON-NEGOTIABLE)
+
+**Building on disorganized code creates more disorganized code.** Before writing a single line, assess the health of the area you're about to touch. If it needs restructuring, propose that first — do NOT pile more code on top of a mess.
+
+#### Hard Thresholds
+| Metric | Green | Yellow (propose refactor) | Red (refactor before proceeding) |
+|--------|-------|---------------------------|----------------------------------|
+| File line count | < 500 | 500–800 | > 800 |
+| Folder siblings | < 10 | 10–15 | > 15 |
+| Component concerns | 1 | 2 (flag it) | 3+ (split immediately) |
+| Import depth | < 4 levels | 4 levels | > 4 levels (restructure) |
+
+#### Automatic Checks (every task)
+Before modifying any file, the AI MUST:
+1. **Check line count** — `wc -l` the target file. If yellow/red, propose refactoring to the user before adding code.
+2. **Check folder size** — `ls | wc -l` the target folder. If yellow/red, propose splitting.
+3. **Check responsibility** — Is this file doing one thing? If it's rendering, routing, AND managing state for unrelated features, it needs splitting. A component should never render views it isn't responsible for.
+4. **Ask if unclear** — "This file is at 650 lines and I'm about to add 80 more. Should I refactor first?" is always the right question.
+
+#### Canonical Folder Hierarchy
+```
+dashboard/src/
+├── app/                        ← Next.js app router (page.tsx = state + layout only)
+├── views/                      ← View routing layer (ViewRouter + per-view wrappers)
+├── components/
+│   ├── workstation/            ← Flagship product — all workstation features
+│   │   ├── editor/             ← Block editor
+│   │   │   ├── blocks/         ← ALL block types (one folder per block)
+│   │   │   ├── chrome/         ← Editor UI (command-bar, slash-menu, format-bar, etc.)
+│   │   │   └── panels/         ← Slide-out panels (conversation, cat, share-modal)
+│   │   ├── calendar/
+│   │   ├── search/
+│   │   ├── pipeline/
+│   │   ├── finance/
+│   │   ├── wire/
+│   │   ├── team/
+│   │   ├── services/
+│   │   ├── templates/
+│   │   ├── forge-paper/
+│   │   ├── dashboard/
+│   │   └── terminal-welcome/
+│   ├── workspace/              ← Separate product surface
+│   ├── rail/                   ← App shell — navigation rail
+│   ├── sidebar/                ← App shell — sidebar
+│   ├── shared/                 ← Shared primitives, hooks, utilities
+│   ├── comments/               ← Cross-cutting (shared by workstation + workspace)
+│   ├── activity/               ← Cross-cutting
+│   ├── history/                ← Cross-cutting
+│   ├── notifications/          ← Cross-cutting
+│   └── terminal/               ← Cross-cutting
+├── forge/                      ← State management / business logic
+└── lib/                        ← Types, constants, utilities
+```
+
+**New features go in the right place the first time.** If you're unsure where something belongs, ask. Moving files later is expensive and creates merge conflicts across every open worktree.
+
+#### When to Propose Refactoring
+- You're about to add a feature and the target file is yellow/red
+- A component is rendering views for 3+ unrelated concerns
+- You notice routing logic inside a non-router component
+- A folder has become a dumping ground (15+ siblings with no sub-organization)
+- Import paths are 4+ levels deep (`../../../../shared/`)
+
+**The user expects you to flag these proactively.** Don't wait to be asked. "I noticed X is at 700 lines — want me to split it before adding Y?" is the standard.
+
+See `conductor/standards/ORGANIZATION.md` for the full standard with examples.
+
+### 3. Structure Before Code
 
 **End goal**: This codebase will be handed to a developer or a team of developers. Every structural decision should make the code easier to navigate, understand, and extend as it grows. Scalable, enterprise-grade architecture is not a future milestone — it's how we build from day one.
 
@@ -201,5 +268,6 @@ All engineering standards, active missions, audit reports, and project tracking 
 | `sops/AAS_SOP.md` | Three-layer quality review (Advocate -> Adjudicate -> Suitability) |
 | `sops/MULTI_AGENT_WORKFLOW.md` | Collision prevention & coordination |
 | `sops/SESSION_HANDOFF.md` | Handoff protocol details |
+| `standards/ORGANIZATION.md` | File/folder size thresholds, canonical hierarchy, refactoring triggers — read before every task |
 | `standards/SLASH_COMMAND_CHECKLIST.md` | Required touchpoints when adding a new `/` block type (includes AI prompt sync) |
 | `standards/UI_UX_GUIDELINES.md` | Source of truth for all design tokens, components, and interaction patterns |
