@@ -52,7 +52,7 @@ function EmberParticles() {
 
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      if (Math.random() < 0.06) particles.current.push(spawn());
+      if (Math.random() < 0.08) particles.current.push(spawn());
 
       particles.current = particles.current.filter(p => {
         p.wobble += p.wobbleSpeed;
@@ -61,7 +61,7 @@ function EmberParticles() {
         p.life -= p.decay;
         if (p.life <= 0) return false;
 
-        const alpha = p.life * 0.25;
+        const alpha = p.life * 0.3;
         const r = 190 + p.heat * 60;
         const g = 130 + p.heat * 40;
         const b = 60 + p.heat * 20;
@@ -111,7 +111,7 @@ export default function TerminalWelcome({ activeCount = 4, reviewCount = 1, over
   const [cmdOutput, setCmdOutput] = useState<{ text: string; icon: string; color: string } | null>(null);
   const [expandedComment, setExpandedComment] = useState<number | null>(null);
   const [replyText, setReplyText] = useState("");
-  const [streak] = useState(14);
+
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -129,7 +129,7 @@ export default function TerminalWelcome({ activeCount = 4, reviewCount = 1, over
   useEffect(() => {
     const timers: NodeJS.Timeout[] = [];
     for (let i = 1; i <= 12; i++) {
-      timers.push(setTimeout(() => setPhase(i), i * 380));
+      timers.push(setTimeout(() => setPhase(i), i * 260));
     }
     // Let the user discover the command input themselves
     return () => timers.forEach(clearTimeout);
@@ -173,20 +173,19 @@ export default function TerminalWelcome({ activeCount = 4, reviewCount = 1, over
 
   return (
     <>
-      <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
       <style>{`
         .tw { font-family: var(--mono); font-size: 13px; color: var(--ink-600); background: var(--parchment); height: 100%; flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
         .tw-particles { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
-        .tw-scroll { flex: 1; overflow-y: auto; position: relative; z-index: 1; padding: 48px 60px; }
+        .tw-scroll { flex: 1; overflow-y: auto; position: relative; z-index: 1; padding: 48px 80px; }
         .tw-scroll::-webkit-scrollbar { width: 4px; }
         .tw-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.04); border-radius: 99px; }
-        .tw-content { max-width: 600px; width: 100%; margin: 0 auto; }
+        .tw-content { max-width: 960px; width: 100%; margin: 0 auto; }
 
-        .tw-line { min-height: 20px; opacity: 0; transform: translateY(8px); transition: opacity 0.5s cubic-bezier(0.23, 1, 0.32, 1), transform 0.5s cubic-bezier(0.23, 1, 0.32, 1); }
+        .tw-line { min-height: 20px; opacity: 0; transform: translateY(12px); transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1), transform 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
         .tw-line.visible { opacity: 1; transform: translateY(0); }
 
         .tw-greeting {
-          font-family: 'Cormorant Garamond', serif; font-size: 32px;
+          font-family: 'Cormorant Garamond', serif; font-size: 42px;
           font-weight: 500; color: var(--ink-800); line-height: 1.3;
           margin-bottom: 4px; letter-spacing: -0.01em;
         }
@@ -195,18 +194,12 @@ export default function TerminalWelcome({ activeCount = 4, reviewCount = 1, over
           display: flex; align-items: center; gap: 10px;
           font-size: 11px; color: var(--ink-300); margin-bottom: 4px;
         }
-        .tw-streak {
-          display: inline-flex; align-items: center; gap: 4px;
-          font-size: 10px; color: var(--ember); background: var(--ember-bg);
-          padding: 1px 8px; border-radius: 3px; border: 1px solid rgba(176,125,79,0.08);
-        }
-        .tw-streak-fire { font-size: 11px; }
 
         .tw-focus {
           margin: 14px 0 4px; padding: 12px 16px;
           background: rgba(176,125,79,0.03); border: 1px solid rgba(176,125,79,0.08);
           border-radius: 8px; display: flex; align-items: flex-start; gap: 12px;
-          cursor: pointer; transition: all 0.12s;
+          cursor: pointer; transition: all 0.12s, opacity 0.4s, transform 0.4s;
         }
         .tw-focus:hover { background: rgba(176,125,79,0.06); border-color: rgba(176,125,79,0.15); }
         .tw-focus-icon {
@@ -228,7 +221,7 @@ export default function TerminalWelcome({ activeCount = 4, reviewCount = 1, over
         }
         .tw-section::after { content: ''; flex: 1; height: 1px; background: var(--warm-200); }
 
-        .tw-stat { display: flex; align-items: center; gap: 0; padding: 2px 0; font-size: 12.5px; }
+        .tw-stat { display: flex; align-items: center; gap: 0; padding: 2px 0; font-size: 12.5px; transition: opacity 0.3s ease, transform 0.3s ease; }
         .tw-stat-label { color: var(--ink-400); width: 180px; flex-shrink: 0; }
         .tw-stat-val { font-weight: 500; }
         .tw-stat-badge {
@@ -250,7 +243,7 @@ export default function TerminalWelcome({ activeCount = 4, reviewCount = 1, over
           padding: 8px 12px; margin: 2px -12px; border-radius: 6px;
           transition: background 0.08s; cursor: pointer; position: relative;
         }
-        .tw-alert:hover { background: rgba(0,0,0,0.015); }
+        .tw-alert:hover { background: rgba(0,0,0,0.02); }
         .tw-alert-icon {
           width: 24px; height: 24px; border-radius: 5px;
           display: flex; align-items: center; justify-content: center;
@@ -279,7 +272,7 @@ export default function TerminalWelcome({ activeCount = 4, reviewCount = 1, over
           padding: 10px 12px; margin: 2px -12px; border-radius: 6px;
           cursor: pointer; transition: all 0.08s;
         }
-        .tw-comment:hover { background: rgba(0,0,0,0.015); }
+        .tw-comment:hover { background: rgba(0,0,0,0.02); }
         .tw-comment.expanded { background: var(--warm-50); border: 1px solid var(--warm-200); margin: 4px -12px; }
         .tw-comment-avatar {
           width: 28px; height: 28px; border-radius: 6px;
@@ -341,7 +334,7 @@ export default function TerminalWelcome({ activeCount = 4, reviewCount = 1, over
         .tw-suggestions {
           position: absolute; bottom: calc(100% + 6px); left: 0; right: 0;
           background: #fff; border: 1px solid var(--warm-200); border-radius: 10px;
-          padding: 4px; box-shadow: 0 -4px 20px rgba(0,0,0,0.06); z-index: 10;
+          padding: 4px; box-shadow: 0 -8px 32px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.02); z-index: 10;
         }
         .tw-sug {
           display: flex; align-items: center; gap: 10px;
@@ -373,7 +366,7 @@ export default function TerminalWelcome({ activeCount = 4, reviewCount = 1, over
           border: 1px solid var(--warm-200); border-radius: 10px;
           transition: all 0.15s;
         }
-        .tw-input-row.focused { border-color: var(--ember); box-shadow: 0 0 0 3px rgba(176,125,79,0.06); }
+        .tw-input-row.focused { border-color: var(--ember); box-shadow: 0 0 0 4px rgba(176,125,79,0.08), 0 2px 12px rgba(176,125,79,0.04); }
         .tw-prompt-char { color: var(--ember); font-weight: 600; font-size: 15px; flex-shrink: 0; }
         .tw-input {
           flex: 1; border: none; outline: none; font-family: var(--mono);
@@ -405,7 +398,7 @@ export default function TerminalWelcome({ activeCount = 4, reviewCount = 1, over
         @keyframes dotPulse { 0%, 60%, 100% { opacity: 0.2; } 30% { opacity: 1; } }
 
         .tw-footer {
-          padding: 8px 60px; display: flex; align-items: center;
+          padding: 10px 80px; display: flex; align-items: center;
           justify-content: space-between; font-size: 10px; color: var(--ink-300);
           border-top: 1px solid var(--warm-100); position: relative; z-index: 1;
           background: var(--parchment); flex-shrink: 0;
@@ -427,8 +420,6 @@ export default function TerminalWelcome({ activeCount = 4, reviewCount = 1, over
             <div className={`tw-line${phase >= 1 ? " visible" : ""}`} style={{ transitionDelay: "80ms" }}>
               <div className="tw-date-row">
                 <span>{dateStr}</span>
-                <span>&middot;</span>
-                <span className="tw-streak"><span className="tw-streak-fire">&#x1f525;</span> {streak}-day streak</span>
               </div>
             </div>
 
