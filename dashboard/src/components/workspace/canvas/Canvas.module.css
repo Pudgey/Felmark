@@ -16,6 +16,11 @@
   flex: 1;
   overflow: auto;
   position: relative;
+  padding: 26px 28px 40px;
+  scroll-padding: 40px;
+  background:
+    radial-gradient(circle at top, rgba(201, 147, 96, 0.08), transparent 42%),
+    linear-gradient(180deg, rgba(249, 246, 240, 0.92), rgba(243, 238, 230, 0.96));
 }
 
 .gridArea::-webkit-scrollbar {
@@ -30,8 +35,22 @@
 
 .gridContainer {
   position: relative;
-  margin: 24px auto;
-  padding: 0 24px;
+  margin: 0 auto;
+  padding: 28px 30px 34px;
+  border-radius: 30px;
+  overflow: visible;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(249, 246, 241, 0.96));
+  border: 1px solid rgba(176, 125, 79, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    0 20px 48px rgba(52, 40, 24, 0.08);
+}
+
+.gridContainerEditing {
+  border-color: rgba(139, 139, 186, 0.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.78),
+    0 24px 54px rgba(45, 37, 61, 0.09);
 }
 
 /* ── Dot Grid ── */
@@ -53,7 +72,7 @@
 
 .block {
   position: absolute;
-  border-radius: 12px;
+  border-radius: 16px;
   background: var(--card);
   border: 1px solid var(--border);
   overflow: hidden;
@@ -67,17 +86,21 @@
 }
 
 .block:hover {
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 12px 30px rgba(32, 26, 20, 0.06);
 }
 
 .blockSelected {
   border-color: var(--lavender);
-  box-shadow: 0 0 0 3px rgba(139, 139, 186, 0.06);
+  box-shadow:
+    0 0 0 4px rgba(139, 139, 186, 0.1),
+    0 16px 34px rgba(45, 37, 61, 0.1);
 }
 
 .blockEditing {
-  border: 1.5px dashed var(--ink-200);
+  border: 1.5px dashed rgba(120, 114, 103, 0.4);
   overflow: visible;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 16px 34px rgba(42, 33, 18, 0.06);
 }
 
 .blockEditing:hover {
@@ -116,9 +139,10 @@
 
 .ghost {
   position: absolute;
-  border-radius: 12px;
+  border-radius: 16px;
   border: 2px dashed var(--lavender);
   background: rgba(139, 139, 186, 0.04);
+  box-shadow: 0 12px 28px rgba(45, 37, 61, 0.1);
   z-index: 3;
   pointer-events: none;
   transition: left 0.08s, top 0.08s;
@@ -141,9 +165,10 @@
 
 .cellHighlight {
   position: absolute;
-  border-radius: 8px;
-  background: rgba(139, 139, 186, 0.03);
-  border: 1px solid rgba(139, 139, 186, 0.06);
+  border-radius: 12px;
+  background: rgba(139, 139, 186, 0.06);
+  border: 1px solid rgba(139, 139, 186, 0.14);
+  box-shadow: 0 10px 20px rgba(45, 37, 61, 0.08);
   z-index: 1;
   pointer-events: none;
   transition: left 0.06s, top 0.06s;

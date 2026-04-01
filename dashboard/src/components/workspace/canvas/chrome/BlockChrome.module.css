@@ -2,53 +2,59 @@
 
 .blockChrome {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 28px;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(6px);
-  border-bottom: 1px solid var(--border-light);
+  top: -16px;
+  left: 14px;
+  right: 14px;
+  height: 32px;
+  background: rgba(255, 252, 248, 0.92);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(176, 125, 79, 0.14);
+  border-radius: 999px;
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 0 8px;
-  z-index: 6;
+  gap: 6px;
+  padding: 0 10px;
+  z-index: 10;
   opacity: 1;
   pointer-events: none;
-  transition: opacity 0.1s;
+  box-shadow: 0 12px 26px rgba(44, 35, 22, 0.1);
+  transition: opacity 0.1s, transform 0.12s;
 }
 
 .blockHandle {
   cursor: grab;
   font-size: 10px;
-  color: var(--ink-300);
-  padding: 2px;
+  color: var(--ink-400);
+  padding: 4px 2px 4px 0;
   pointer-events: auto;
 }
 
 .blockType {
   font-family: var(--mono);
-  font-size: 8px;
-  color: var(--ink-400);
+  font-size: 9px;
+  color: var(--ink-500);
   flex: 1;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .blockSize {
   font-family: var(--mono);
   font-size: 8px;
-  color: var(--ink-300);
-  background: var(--border-light);
-  padding: 1px 5px;
-  border-radius: 3px;
+  color: var(--ink-400);
+  background: rgba(139, 139, 186, 0.08);
+  padding: 3px 7px;
+  border-radius: 999px;
 }
 
 .blockEditBtn {
-  width: 20px;
-  height: 20px;
-  border-radius: 5px;
-  border: 1px solid var(--border);
-  background: var(--card);
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(176, 125, 79, 0.14);
+  background: rgba(255, 255, 255, 0.8);
   color: var(--ink-300);
   cursor: pointer;
   display: flex;
@@ -59,7 +65,7 @@
 }
 
 .blockEditBtn:hover {
-  background: var(--border-light);
+  background: rgba(201, 147, 96, 0.1);
   color: var(--ink-600);
 }
 

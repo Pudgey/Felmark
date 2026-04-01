@@ -189,6 +189,7 @@ export default function Canvas() {
 
   const maxRow = layout.reduce((max, lb) => Math.max(max, lb.y + lb.h), 0);
   const gridRows = Math.max(maxRow + 3, 6);
+  const gridMinHeight = gridRows * CELL + Math.max(0, gridRows - 1) * GAP;
   const isEditOrPlacing = editing || !!dragPlace.placingBlock;
   const blockCount = Object.keys(blocks).length;
 
@@ -206,15 +207,18 @@ export default function Canvas() {
         className={styles.gridArea}
         ref={canvasRef}
         onMouseMove={handleCanvasMove}
-        onClick={() => { setReplaceTarget(null); }}
+        onClick={() => {
+          setReplaceTarget(null);
+          setSelectedBlock(null);
+        }}
         style={{ cursor: dragPlace.dragging ? "grabbing" : "default" }}
       >
         <div
-          className={styles.gridContainer}
+          className={`${styles.gridContainer} ${editing ? styles.gridContainerEditing : ""}`}
           ref={gridRef}
           style={{
-            width: GRID_W + 48,
-            minHeight: gridRows * (CELL + GAP) + 48,
+            width: GRID_W,
+            minHeight: gridMinHeight,
           }}
         >
           {/* Dot grid */}
