@@ -1,0 +1,91 @@
+/* Editor */
+.editor {
+  flex: 1;
+  overflow-y: auto;
+  position: relative;
+  background: var(--parchment);
+}
+
+.page {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 36px clamp(16px, 4vw, 48px) 40vh;
+  width: 100%;
+  min-height: 100%;
+  transition: max-width 0.5s cubic-bezier(0.4, 0, 0.2, 1), padding 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Breathe mode -- full width */
+.pageBreathe {
+  max-width: 100%;
+  padding-left: clamp(24px, 5vw, 64px);
+  padding-right: clamp(24px, 5vw, 64px);
+}
+
+.pageSplit {
+  max-width: 620px;
+  padding-left: clamp(32px, 5vw, 56px);
+  padding-right: clamp(20px, 3vw, 36px);
+}
+
+.pageSplit .gutter {
+  width: 88px;
+  margin-left: -90px;
+}
+
+.pageSplit .blockRowActive::after,
+.pageSplit .blockRowFresh::after {
+  left: -8px;
+}
+
+/* Project meta bar */
+.metaBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #fff;
+  border: 1px solid var(--warm-200);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+
+.metaClient {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  color: var(--ink-800);
+}
+
+.metaAvatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 600;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.metaSep { color: var(--warm-300); font-size: 10px; }
+
+.metaStatus {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  padding: 1px 8px;
+  border-radius: 3px;
+  border: 1px solid;
+}
+
+.metaBudget {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-400);
+}

@@ -1,0 +1,167 @@
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 400px;
+}
+
+/* Zen mode */
+.zenMode { background: var(--parchment); }
+.zenMode .page { max-width: 650px; padding-top: 80px; }
+
+/* Editor layout */
+.editorRow {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.editorCol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.surfaceStage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  animation: surfaceStageIn 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes surfaceStageIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Tab bar container */
+.tabbar {
+  height: 44px;
+  background: var(--warm-50);
+  border-bottom: 1px solid var(--warm-200);
+  display: flex;
+  align-items: stretch;
+  flex-shrink: 0;
+}
+
+/* Undo toast */
+.undoToast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 0 10px 0 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(176, 125, 79, 0.16);
+  background: rgba(255, 252, 247, 0.96);
+  box-shadow: 0 16px 36px rgba(33, 28, 20, 0.12);
+  z-index: 140;
+  animation: undoToastIn 0.14s ease;
+}
+
+.undoLabel {
+  font-size: 13px;
+  color: var(--ink-700);
+}
+
+.undoBtn,
+.undoDismiss {
+  border: none;
+  background: none;
+  font-family: inherit;
+}
+
+.undoBtn {
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ember);
+  background: var(--ember-bg);
+}
+
+.undoBtn:hover {
+  background: rgba(176, 125, 79, 0.16);
+}
+
+.undoDismiss {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--ink-300);
+}
+
+.undoDismiss:hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--ink-600);
+}
+
+@keyframes undoToastIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Empty state */
+.emptyState {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px;
+  background: var(--parchment);
+}
+
+.emptyTitle {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--ink-500);
+  margin-bottom: 6px;
+}
+
+.emptySub {
+  font-size: 13px;
+  color: var(--ink-400);
+  line-height: 1.5;
+  max-width: 280px;
+  margin-bottom: 20px;
+}
+
+.emptyAction {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--warm-200);
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-600);
+  transition: all 0.1s;
+}
+
+.emptyAction:hover {
+  border-color: var(--ember);
+  color: var(--ember);
+  background: var(--ember-bg);
+}

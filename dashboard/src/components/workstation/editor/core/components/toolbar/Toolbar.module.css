@@ -1,0 +1,76 @@
+/* Right-side tab bar */
+.tabBarRight {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+  flex-shrink: 0;
+}
+
+.tabBarAction {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-400);
+  transition: all 0.1s;
+  position: relative;
+}
+
+.tabBarBadge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-family: var(--font-mono), monospace;
+  font-size: 7px;
+  font-weight: 700;
+  color: #fff;
+  background: #c24b38;
+  min-width: 13px;
+  height: 13px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  pointer-events: none;
+}
+
+.tabBarAction:hover {
+  background: var(--warm-200);
+  color: var(--ink-700);
+}
+
+.tabBarActionActive {
+  color: var(--ember);
+  background: var(--ember-bg);
+}
+
+.tabBarActionActive:hover {
+  color: var(--ember);
+  background: var(--ember-bg);
+}
+
+.profileAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-md);
+  background: var(--ember);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.1s;
+  flex-shrink: 0;
+}
+
+.profileAvatar:hover { opacity: 0.85; }
