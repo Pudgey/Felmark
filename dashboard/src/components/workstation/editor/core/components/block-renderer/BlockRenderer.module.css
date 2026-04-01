@@ -1,0 +1,199 @@
+/* Block rows */
+.blockRow {
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+  width: 100%;
+  padding: 1px 0;
+  border-radius: var(--radius-sm);
+  transition: background 0.14s ease, box-shadow 0.14s ease, transform 0.14s ease;
+}
+
+.blockRowActive {
+  background: transparent;
+  box-shadow: none;
+}
+
+.blockRowFresh {
+  background: transparent;
+  box-shadow: none;
+}
+
+.blockRowActive::after,
+.blockRowFresh::after {
+  content: "";
+  position: absolute;
+  left: -8px;
+  top: 10px;
+  bottom: 10px;
+  width: 2px;
+  border-radius: 999px;
+  background: rgba(176, 125, 79, 0.78);
+  box-shadow: 0 0 0 3px rgba(176, 125, 79, 0.06);
+  pointer-events: none;
+}
+
+.blockRowActive .gutter {
+  opacity: 1 !important;
+}
+
+.blockRow:hover .blockAccent,
+.blockRowActive .blockAccent,
+.blockRowFresh .blockAccent {
+  background: rgba(176, 125, 79, 0.72);
+}
+
+.blockRowFresh::after {
+  animation: blockFreshRail 1.15s ease;
+}
+
+@keyframes blockFreshRail {
+  0% {
+    opacity: 0;
+    transform: translateX(4px) scaleY(0.65);
+  }
+  100% {
+    opacity: 0.9;
+    transform: translateX(0) scaleY(1);
+  }
+}
+
+.dropTarget::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--ember);
+  border-radius: 2px;
+}
+
+.blockAccent {
+  width: 2px;
+  border-radius: 1px;
+  align-self: stretch;
+  margin-right: 8px;
+  flex-shrink: 0;
+  background: transparent;
+  transition: background 0.15s;
+}
+
+.blockCommentBtn {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--warm-200);
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-300);
+  flex-shrink: 0;
+  margin-left: 6px;
+  align-self: flex-start;
+  margin-top: 2px;
+  transition: all 0.1s;
+  animation: commentFadeIn 0.1s ease;
+}
+
+.blockCommentBtn:hover {
+  border-color: var(--ember);
+  color: var(--ember);
+  background: var(--ember-bg);
+}
+
+.blockCommentBtnActive {
+  border-color: var(--warm-300);
+  color: var(--ember);
+  background: var(--ember-bg);
+}
+
+.blockCommentDot {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #c24b38;
+  border: 2px solid var(--parchment);
+}
+
+@keyframes commentFadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.gutter {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  transition: opacity 0.06s;
+  margin-right: 4px;
+  margin-left: -82px;
+  width: 80px;
+  justify-content: flex-end;
+  gap: 1px;
+}
+
+.gutterBtn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--warm-400);
+  background: none;
+  border: none;
+}
+
+.gutterBtn:hover { background: rgba(0, 0, 0, 0.04); color: var(--ink-500); }
+
+.grip { cursor: grab; }
+.grip:active { cursor: grabbing; }
+
+.gutterDelete:hover { background: rgba(194, 75, 56, 0.08); color: #c24b38; }
+
+.prefix {
+  color: var(--ink-300);
+  width: 22px;
+  flex-shrink: 0;
+  padding-top: 2px;
+  text-align: center;
+  font-size: 20px;
+  line-height: 1.6;
+}
+
+.prefixNum {
+  font-size: 15px;
+  width: 26px;
+  text-align: right;
+  padding-right: 4px;
+  font-family: var(--mono);
+}
+
+.todoCheck {
+  padding-top: 4px;
+  flex-shrink: 0;
+  width: 22px;
+  display: flex;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.todoCheck input {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--ember);
+  cursor: pointer;
+  margin-top: 2px;
+}
+
+.dividerLine {
+  height: 1px;
+  background: var(--warm-200);
+}

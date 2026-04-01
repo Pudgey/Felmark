@@ -1,0 +1,48 @@
+.zenHint {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-300);
+  background: var(--warm-50);
+  border: 1px solid var(--warm-200);
+  border-radius: var(--radius-full);
+  padding: 6px 14px;
+  animation: zenFadeIn 0.8s ease forwards;
+  opacity: 0;
+  z-index: 50;
+}
+
+.zenExit {
+  background: none;
+  border: 1px solid var(--warm-200);
+  border-radius: var(--radius-sm);
+  padding: 2px 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-400);
+  cursor: pointer;
+  transition: all 0.1s;
+}
+
+.zenExit:hover { background: var(--warm-100); color: var(--ink-600); }
+
+.zenKey {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-300);
+  background: var(--warm-100);
+  border: 1px solid var(--warm-200);
+  border-radius: 3px;
+  padding: 1px 5px;
+}
+
+@keyframes zenFadeIn {
+  0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+}

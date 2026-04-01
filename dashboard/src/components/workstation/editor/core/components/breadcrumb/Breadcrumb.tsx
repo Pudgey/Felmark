@@ -1,0 +1,66 @@
+"use client";
+
+import type { Tab, Workstation } from "@/lib/types";
+import { STATUS } from "@/lib/constants";
+import styles from "./Breadcrumb.module.css";
+
+interface BreadcrumbProps {
+  tabs: Tab[];
+  activeProject: string;
+  workstations: Workstation[];
+  onSelectWorkstationHome?: (wsId: string) => void;
+  breathe: boolean;
+  setBreathe: (fn: (prev: boolean) => boolean) => void;
+}
+
+export default function Breadcrumb({ tabs, activeProject, workstations, onSelectWorkstationHome, breathe, setBreathe }: BreadcrumbProps) {
+  const activeTab = tabs.find(t => t.active);
+  const activeWs = workstations.find(w => w.projects.some(p => p.id === activeProject));
+  const canGoToWorkstationHome = Boolean(activeWs?.id && onSelectWorkstationHome);
+
+  const handleClick = () => {
+    if (!activeWs?.id || !onSelectWorkstationHome) return;
+    onSelectWorkstationHome(activeWs.id);
+  };
+
+  if (!tabs.some(t => t.active)) return null;
+
+  return (
+    <div className={styles.bread}>
+      <button
+        className={styles.breadNav}
+        type="button"
+        aria-label="Back to workstation"
+        title="Back to workstation"
+        onClick={handleClick}
+        disabled={!canGoToWorkstationHome}
+      >
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M8 3L4 7l4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+      </button>
+      <span className={styles.breadChevron} aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M6 3l4 4-4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
+      <button
+        className={styles.breadLink}
+        type="button"
+        onClick={handleClick}
+        disabled={!canGoToWorkstationHome}
+      >
+        {activeWs?.client || "Workstation"}
+      </button>
+      <span style={{ color: "var(--warm-300)" }}>/</span>
+      <span style={{ color: "var(--ink-700)", margin: "0 4px", fontWeight: 500 }}>{activeTab?.name || "Untitled"}</span>
+      {(() => {
+        const pj = workstations.flatMap(w => w.projects).find(p => p.id === activeProject);
+        if (!pj) return null;
+        const st = STATUS[pj.status];
+        return <span className={styles.breadStatus} style={{ background: `${st.color}12`, color: st.color, border: `1px solid ${st.color}20` }}>{st.label}</span>;
+      })()}
+      <button className={`${styles.breatheBtn} ${breathe ? styles.breatheOn : ""}`} onClick={() => setBreathe(b => !b)} title={breathe ? "Default width" : "Full width"}>
+        {breathe ? (
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2v3h3M5 12V9H2M9 12V9h3M5 2v3H2" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" /></svg>
+        ) : (
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 5V2h3M12 5V2h-3M2 9v3h3M12 9v3h-3" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" /></svg>
+        )}
+      </button>
+    </div>
+  );
+}
