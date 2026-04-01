@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useMemo } from "react";
-import type { CanvasBlock, CanvasRow, LayoutBlock, RenderBlock, CellPosition } from "./types";
+import type { CanvasBlock, CanvasRow, RenderBlock, CellPosition } from "./types";
 import { layoutRows } from "./layout";
 import { BLOCK_DEFS, COLS, CELL, GAP, GRID_W, MAX_PER_ROW, INITIAL_BLOCK_MAP, INITIAL_ROWS, blockRect } from "./registry";
 import { useDragPlace } from "./hooks/useDragPlace";
@@ -20,6 +20,11 @@ import styles from "./Canvas.module.css";
 
 /* ── Main Canvas Component ── */
 
+type LibraryTarget =
+  | { kind: "row"; insertIdx: number }
+  | { kind: "column"; rowIdx: number; afterIdx: number }
+  | null;
+
 export default function Canvas() {
   const [blocks, setBlocks] = useState<Record<string, CanvasBlock>>(INITIAL_BLOCK_MAP);
   const [rows, setRows] = useState<CanvasRow[]>(INITIAL_ROWS);
@@ -29,6 +34,7 @@ export default function Canvas() {
   const [selectedBlock, setSelectedBlock] = useState<string | null>(null);
   const [replaceTarget, setReplaceTarget] = useState<string | null>(null);
   const [insertTarget, setInsertTarget] = useState<number | null>(null);
+  const [libraryTarget, setLibraryTarget] = useState<LibraryTarget>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
 
@@ -118,17 +124,65 @@ export default function Canvas() {
   const handleToggleEdit = () => {
     const entering = !editing;
     setEditing(entering);
-    setShowLibrary(entering);
+    setShowLibrary(false);
     setSelectedBlock(null);
     setReplaceTarget(null);
+    setLibraryTarget(null);
   };
 
-  const handleToggleLibrary = () => setShowLibrary(!showLibrary);
+  const handleToggleLibrary = () => {
+    setShowLibrary((prev) => !prev);
+    setLibraryTarget(null);
+  };
 
   const handleLibraryClose = () => {
     setShowLibrary(false);
     setInsertTarget(null);
+    setLibraryTarget(null);
     setRows(prev => prev.filter(r => r.blockIds.length > 0));
+  };
+
+  const handleLibrarySelect = (type: string) => {
+    const def = BLOCK_DEFS.find((bt) => bt.type === type);
+    if (!def) return;
+
+    const newId = `b${Date.now()}`;
+    const newBlock: CanvasBlock = {
+      id: newId,
+      type: def.type,
+      label: def.label,
+      color: def.color,
+      w: def.defaultW,
+    };
+
+    setBlocks((prev) => ({ ...prev, [newId]: newBlock }));
+    setRows((prev) => {
+      if (!libraryTarget) {
+        return [...prev, { id: `r${Date.now()}`, blockIds: [newId] }];
+      }
+
+      if (libraryTarget.kind === "row") {
+        const newRow: CanvasRow = { id: `r${Date.now()}`, blockIds: [newId] };
+        return [
+          ...prev.slice(0, libraryTarget.insertIdx),
+          newRow,
+          ...prev.slice(libraryTarget.insertIdx),
+        ];
+      }
+
+      return prev.map((row, index) => {
+        if (index !== libraryTarget.rowIdx) return row;
+        const nextIds = [...row.blockIds];
+        nextIds.splice(libraryTarget.afterIdx + 1, 0, newId);
+        return { ...row, blockIds: nextIds };
+      });
+    });
+
+    setSelectedBlock(newId);
+    setReplaceTarget(null);
+    setShowLibrary(false);
+    setLibraryTarget(null);
+    setInsertTarget(null);
   };
 
   /* ── Grid dimensions ── */
@@ -331,17 +385,8 @@ export default function Canvas() {
                 top={rowY * (CELL + GAP)}
                 height={rowH * CELL + (rowH - 1) * GAP}
                 onInsert={() => {
-                  const newId = `b${Date.now()}`;
-                  const firstDef = BLOCK_DEFS[0];
-                  const newBlock: CanvasBlock = { id: newId, type: firstDef.type, label: firstDef.label, color: firstDef.color, w: firstDef.defaultW };
-                  setBlocks(prev => ({ ...prev, [newId]: newBlock }));
-                  setRows(prev => prev.map((r, i) => {
-                    if (i !== rowIdx) return r;
-                    const newIds = [...r.blockIds];
-                    newIds.splice(pt.afterIdx + 1, 0, newId);
-                    return { ...r, blockIds: newIds };
-                  }));
-                  setReplaceTarget(newId);
+                  setLibraryTarget({ kind: "column", rowIdx, afterIdx: pt.afterIdx });
+                  setShowLibrary(true);
                 }}
               />
             ));
@@ -354,10 +399,7 @@ export default function Canvas() {
               y={bound.y * (CELL + GAP)}
               width={GRID_W}
               onInsert={() => {
-                const insertIdx = bound.afterRowIdx + 1;
-                const newRow: CanvasRow = { id: `r${Date.now()}`, blockIds: [] };
-                setRows(prev => [...prev.slice(0, insertIdx), newRow, ...prev.slice(insertIdx)]);
-                setInsertTarget(insertIdx);
+                setLibraryTarget({ kind: "row", insertIdx: bound.afterRowIdx + 1 });
                 setShowLibrary(true);
               }}
             />
@@ -400,6 +442,8 @@ export default function Canvas() {
       {showLibrary && (
         <Library
           onStartDrag={dragPlace.startDragWithListeners}
+          onSelect={handleLibrarySelect}
+          selectionMode={libraryTarget !== null}
           onClose={handleLibraryClose}
         />
       )}

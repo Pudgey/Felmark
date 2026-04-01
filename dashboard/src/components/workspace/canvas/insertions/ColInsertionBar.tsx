@@ -10,18 +10,32 @@ interface ColInsertionBarProps {
 }
 
 export default function ColInsertionBar({ left, top, height, onInsert }: ColInsertionBarProps) {
+  const handleInsert = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onInsert();
+  };
+
   return (
     <div
       className={styles.colInsertionZone}
       style={{ left, top, height }}
+      onMouseDown={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
+      onClick={handleInsert}
     >
       <div className={styles.colInsertionLine} />
       <button
+        type="button"
         className={styles.insertionBtn}
-        onClick={(e) => {
+        aria-label="Insert block"
+        onMouseDown={(e) => {
+          e.preventDefault();
           e.stopPropagation();
-          onInsert();
         }}
+        onClick={handleInsert}
       >
         +
       </button>

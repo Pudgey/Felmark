@@ -2,12 +2,15 @@
 
 .insertionZone {
   position: absolute;
+  left: 0;
   height: 24px;
   z-index: 12;
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
+  pointer-events: auto;
+  isolation: isolate;
   transition: opacity 0.15s;
 }
 
@@ -22,6 +25,7 @@
   top: 50%;
   height: 1px;
   border-top: 1px dashed var(--ink-200);
+  pointer-events: none;
   transition: border-color 0.15s;
 }
 
@@ -62,6 +66,8 @@
   align-items: center;
   justify-content: center;
   opacity: 0;
+  pointer-events: auto;
+  isolation: isolate;
   transition: opacity 0.15s;
 }
 
@@ -76,6 +82,7 @@
   left: 50%;
   width: 1px;
   border-left: 1px dashed var(--ink-200);
+  pointer-events: none;
   transition: border-color 0.15s;
 }
 

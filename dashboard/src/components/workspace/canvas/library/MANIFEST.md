@@ -3,7 +3,7 @@
 > Auto-maintained by AI. Updated on every file change in this folder.
 
 ## Exports
-- `Library` (default) -- Block type library panel with drag-to-place items
+- `Library` (default) -- Block chooser modal for drag-to-place and direct insertion picks
 
 ## Dependencies
 - `../registry` -- BLOCK_DEFS
@@ -13,5 +13,5 @@
 - `../Canvas.tsx` -- rendered when showLibrary is true
 
 ## Files
-- `Library.tsx` -- Fixed panel listing all block types with drag-to-place
-- `Library.module.css` -- Library panel styles with slide-in animation
+- `Library.tsx` -- Centered chooser modal with drag mode for toolbar and click-insert mode for + actions
+- `Library.module.css` -- Chooser modal styles with overlay, card grid, and responsive sheet behavior
