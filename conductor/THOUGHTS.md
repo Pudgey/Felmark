@@ -18,14 +18,14 @@
 
 | Agent | Task | Started | Status |
 |-------|------|---------|--------|
-| | | | |
+| codex-main | Debugging the settings page itself to isolate whether the screen fails on mount or just fails to be reached from shell state | 2026-04-01 01:02 EDT | ACTIVE |
 
 ## Recent
 
 | Agent | Task | Completed |
 |-------|------|-----------|
-| codex-main | Debugged Forge rail navigation so clicking Forge restores a document context instead of switching the shell into a blank no-tab state | 2026-04-01 00:19 EDT |
-| codex-main | Added AI slash-block support to Forge Paper so /ai inserts a real generation block and resolves into document blocks on the paper surface | 2026-03-31 12:28 EDT |
-| codex-main | Debugged Forge Paper slash blocks so unsupported conversions stop failing invisibly on the paper surface | 2026-03-31 12:20 EDT |
-| codex-main | Debugged Forge Paper outline behavior so text blocks register and navigate correctly instead of disappearing from the paper outline | 2026-03-31 10:12 EDT |
-| codex-main | Promoted the editor terminal into its own dedicated top-right action so it no longer feels buried inside split view | 2026-03-31 10:04 EDT |
+| codex-main | Routed Settings to a dedicated page-level surface so the rail opens the new settings screen outside the editor shell | 2026-04-01 00:31 EDT |
+| codex-main | Closed the session by refreshing conductor state and leaving a focused handoff for the unresolved rail settings bug | 2026-04-01 00:54 EDT |
+| codex-main | Debugged the Settings rail path so the shell recognizes settings as its own surface instead of reusing the document stage key | 2026-04-01 00:28 EDT |
+| claude-main | Built Workspace v4 — full standalone surface with context-sensitive right panel, timer, chat, invoice, command bar | 2026-04-01 00:30 EDT |
+| claude-main | Rebranded workspace→workstation across 436 code references + 33 UI strings | 2026-03-31 15:00 EDT |

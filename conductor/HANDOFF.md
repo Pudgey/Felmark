@@ -1,14 +1,16 @@
 # Session Handoff — 2026-04-01
 
 ## What happened
-- Settings page built (812 lines, 9 sections, 10 theme cards with live switching)
-- Settings wired in Editor.tsx and Rail.tsx
-- BUG: Settings page doesn't render when clicking Rail gear icon — `railActive` gets set to "settings" but the editor view still renders because active tabs take priority. Need to add settings to the full-page view priority check (same pattern as calendar/search/wire).
+- Settings page exists and is wired into the rail/editor flow, but the gear icon still does not transition cleanly into the dedicated settings surface.
+- Forge Paper behavior was narrowed correctly: shared `Block[]` infrastructure is fine, but the shared outline UI is probably the wrong abstraction for the paper surface.
+- Session ended before the settings routing bug was fixed.
 
 ## Remaining fix needed
-In Editor.tsx, the settings render condition exists at line 1659 but the guard conditions at line 1665 that show workspace/editor views don't exclude "settings" fully. The `railActive === "settings"` render fires but something else also renders on top. Debug by checking if the editor column's conditional logic properly yields to settings.
+Debug the rail-to-settings path in [page.tsx](/Users/donteennis/Felmark/dashboard/src/app/page.tsx) and [Editor.tsx](/Users/donteennis/Felmark/dashboard/src/components/editor/Editor.tsx). The settings render branch exists, but the page/editor state hierarchy still lets another surface win. Treat this as a full-page surface priority bug, not a missing settings page.
+
+If Forge Paper gets another pass, do not keep stretching the shared `DocumentOutline` abstraction. Either give Forge Paper its own outline rules/component or hide the outline when the paper lacks real section structure.
 
 ## Gotchas
-- Workspace → Workstation rename happened in several files (linter)
-- Editor.tsx is ~1700 lines — guard conditions for full-page views are getting unwieldy
-- Theme @property transitions are in globals.css — smooth 500ms color morphs between themes
+- The workstation rename touched a broad area of the dashboard, so string- or route-based assumptions about `workspace` may still be stale in some codepaths.
+- `Editor.tsx` remains a large surface router, so full-page view guards are easy to get wrong and should be tested when new rail pages are added.
+- Build verification in sandbox is still vulnerable to blocked Google Fonts fetches, so browser/manual verification remains important for UI routing fixes.
