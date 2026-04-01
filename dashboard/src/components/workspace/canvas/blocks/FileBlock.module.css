@@ -1,0 +1,249 @@
+/* FileBlock styles */
+
+.wrap {
+  padding: 16px 20px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.title {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-300);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.count {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-300);
+  background: var(--border-light);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.toggleGroup {
+  margin-left: auto;
+  display: flex;
+  gap: 2px;
+}
+
+.toggleBtn {
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--ink-300);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  transition: all 0.1s;
+}
+
+.toggleBtn:hover {
+  background: var(--lavender-bg);
+}
+
+.toggleBtnActive {
+  background: var(--lavender-bg);
+  border-color: rgba(139, 139, 186, 0.12);
+  color: var(--lavender);
+}
+
+/* Grid view */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.grid::-webkit-scrollbar {
+  width: 3px;
+}
+
+.grid::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+.gridCard {
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+  overflow: hidden;
+  cursor: default;
+  transition: all 0.1s;
+}
+
+.gridCard:hover {
+  border-color: var(--lavender);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.gridThumb {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gridBadge {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  color: #fff;
+}
+
+.gridInfo {
+  padding: 6px 8px;
+}
+
+.gridName {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-700);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gridMeta {
+  font-family: var(--mono);
+  font-size: 8px;
+  color: var(--ink-300);
+  margin-top: 1px;
+}
+
+/* List view */
+.list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.list::-webkit-scrollbar {
+  width: 3px;
+}
+
+.list::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+.listRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-light);
+  cursor: default;
+  transition: background 0.1s;
+}
+
+.listRow:last-child {
+  border-bottom: none;
+}
+
+.listRow:hover {
+  background: var(--lavender-bg);
+}
+
+.listIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 8px;
+  font-weight: 600;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.listInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.listName {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-700);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.listMeta {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-300);
+}
+
+.listDownload {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--ink-300);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: all 0.1s;
+}
+
+.listRow:hover .listDownload {
+  opacity: 1;
+}
+
+.listDownload:hover {
+  background: var(--lavender-bg);
+  border-color: var(--lavender);
+  color: var(--lavender);
+}
+
+/* Drop zone */
+.dropZone {
+  margin-top: 8px;
+  padding: 12px;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--ink-300);
+  cursor: pointer;
+  transition: all 0.1s;
+  flex-shrink: 0;
+}
+
+.dropZone:hover {
+  border-color: var(--lavender);
+  color: var(--lavender);
+  background: var(--lavender-bg);
+}
