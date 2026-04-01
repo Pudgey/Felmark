@@ -1,0 +1,124 @@
+.outline {}
+.compact {}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0 6px;
+}
+
+.label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-300);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.progress {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-300);
+}
+
+.bar {
+  height: 2px;
+  background: var(--warm-200);
+  border-radius: 1px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.barFill {
+  height: 100%;
+  background: #5a9a3c;
+  border-radius: 1px;
+  transition: width 0.3s;
+}
+
+.sections {
+  display: flex;
+  flex-direction: column;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.06s;
+  font-size: 11px;
+}
+
+.item:hover { background: var(--warm-50); }
+.itemOn { background: var(--ember-bg); }
+
+/* Indentation by heading level */
+.indent_0 {}
+.indent_1 { padding-left: 14px; }
+.indent_2 { padding-left: 24px; }
+
+.dotWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 8px;
+  flex-shrink: 0;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot_empty { background: var(--warm-300); }
+.dot_active { background: var(--ember); }
+.dot_complete { background: #5a9a3c; }
+
+.connector {
+  width: 1px;
+  height: 12px;
+  margin: 1px 0;
+}
+
+.num {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ember);
+  flex-shrink: 0;
+  min-width: 10px;
+}
+
+.name {
+  color: var(--ink-500);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.nameDone { color: var(--ink-300); text-decoration: line-through; }
+
+.check {
+  font-size: 9px;
+  color: #5a9a3c;
+  flex-shrink: 0;
+}
+
+.empty {
+  font-size: 11px;
+  color: var(--ink-300);
+  padding: 12px 0;
+  text-align: center;
+}
+
+/* Compact mode — tighter spacing for EditorMargin */
+.compact .item { padding: 2px 4px; font-size: 10px; }
+.compact .name { font-size: 10px; }
+.compact .dot { width: 5px; height: 5px; }
+.compact .connector { height: 8px; }

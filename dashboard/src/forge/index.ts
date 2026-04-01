@@ -6,6 +6,18 @@ import { createTabServices } from "./services/tabs";
 
 export type { ForgeState, ForgeContext, ForgeResult, ForgeSource, StateUpdater } from "./types";
 
+// Block operations — shared between Editor and Forge Paper
+export {
+  getBlockDefaults,
+  needsTrailingParagraph,
+  needsPicker,
+  createEmptyBlock,
+  createEmptyDocument,
+  convertBlock,
+  insertAfter,
+  removeBlock,
+} from "./services/blocks";
+
 export interface Forge {
   workspaces: ReturnType<typeof createWorkspaceServices>;
   projects: ReturnType<typeof createProjectServices>;
