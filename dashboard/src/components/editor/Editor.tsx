@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import type { Block, BlockType, GraphType, MoneyBlockType, Tab, Workspace } from "@/lib/types";
+import type { Block, BlockType, GraphType, MoneyBlockType, Tab, Workspace, Service, Invoice } from "@/lib/types";
 import GraphBlockComponent, { getDefaultGraphData, GRAPH_TYPE_OPTIONS } from "./graphs/GraphBlock";
 import GraphDataEditor from "./graphs/GraphDataEditor";
 import graphStyles from "./graphs/GraphBlock.module.css";
@@ -99,9 +99,15 @@ interface EditorProps {
   onSplitOpen?: (projectId: string) => void;
   onSplitClose?: () => void;
   onSplitMakePrimary?: () => void;
+  services?: Service[];
+  invoices?: Invoice[];
+  onAddService?: (service: Service) => void;
+  onUpdateService?: (id: string, updates: Partial<Service>) => void;
+  onDeleteService?: (id: string) => void;
+  onAddInvoice?: (invoice: Invoice) => void;
 }
 
-export default function Editor({ workspaces, tabs, activeProject, blocks: blocksProp, sidebarOpen, wordCount, charCount, onOpenSidebar, onTabClick, onTabClose, onNewTab, onTabRename, onBlocksChange, onWordCountChange, activeWorkspaceId, onSelectProject, onNewWorkspace, onNewTabInWorkspace, onSelectWorkspaceHome, onSaveAsTemplate, docTemplates, onNavigateRail, railActive, onCalendarOpenProject, calendarScrollTarget, onCalendarScrollComplete, onRenameWorkspace, onUpdateProjectDue, comments, onCommentsChange, activities, onActivitiesChange, zenMode, onToggleZen, splitProject, splitBlocks, splitProjectName, splitClientName, onSplitOpen, onSplitClose, onSplitMakePrimary }: EditorProps) {
+export default function Editor({ workspaces, tabs, activeProject, blocks: blocksProp, sidebarOpen, wordCount, charCount, onOpenSidebar, onTabClick, onTabClose, onNewTab, onTabRename, onBlocksChange, onWordCountChange, activeWorkspaceId, onSelectProject, onNewWorkspace, onNewTabInWorkspace, onSelectWorkspaceHome, onSaveAsTemplate, docTemplates, onNavigateRail, railActive, onCalendarOpenProject, calendarScrollTarget, onCalendarScrollComplete, onRenameWorkspace, onUpdateProjectDue, comments, onCommentsChange, activities, onActivitiesChange, zenMode, onToggleZen, splitProject, splitBlocks, splitProjectName, splitClientName, onSplitOpen, onSplitClose, onSplitMakePrimary, services, invoices, onAddService, onUpdateService, onDeleteService, onAddInvoice }: EditorProps) {
   const [blocks, setBlocksLocal] = useState<Block[]>(blocksProp);
   const [editingTabId, setEditingTabId] = useState<string | null>(null);
   const [editingTabName, setEditingTabName] = useState("");
@@ -1385,7 +1391,15 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
             <SearchPage workspaces={workspaces} />
           )}
           {railActive === "services" && (
-            <ServicesPage />
+            <ServicesPage
+              services={services || []}
+              invoices={invoices || []}
+              workspaces={workspaces}
+              onAddService={onAddService || (() => {})}
+              onUpdateService={onUpdateService || (() => {})}
+              onDeleteService={onDeleteService || (() => {})}
+              onAddInvoice={onAddInvoice || (() => {})}
+            />
           )}
           {railActive === "pipeline" && (
             <PipelineBoard />

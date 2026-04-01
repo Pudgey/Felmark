@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { INITIAL_WORKSPACES } from "@/lib/constants";
-import type { Block, Workspace, Project, Tab, ArchivedProject, WorkspaceTemplate } from "@/lib/types";
+import type { Block, Workspace, Project, Tab, ArchivedProject, WorkspaceTemplate, Service, Invoice } from "@/lib/types";
 import { uid, makeBlocks } from "@/lib/utils";
 import Rail from "@/components/rail/Rail";
 import Sidebar from "@/components/sidebar/Sidebar";
@@ -38,6 +38,63 @@ const INITIAL_BLOCKS: Record<string, Block[]> = {
   ],
 };
 
+const INITIAL_SERVICES: Service[] = [
+  {
+    id: "s1", name: "Brand Identity", emoji: "\u25C6", color: "#b07d4f",
+    desc: "Full brand identity system including logo, colors, typography, and guidelines",
+    category: "Design", builtIn: true,
+    tiers: [
+      { id: "t1", name: "Essential", price: 2400, unit: "flat", hours: 24, includes: ["Logo (2 concepts)", "Color palette", "Typography", "Basic guidelines PDF"] },
+      { id: "t2", name: "Complete", price: 4800, unit: "flat", hours: 48, popular: true, includes: ["Logo (4 concepts)", "Color palette", "Typography scale", "Full guidelines doc", "Social templates", "Business card design"] },
+      { id: "t3", name: "Premium", price: 8500, unit: "flat", hours: 80, includes: ["Everything in Complete", "Brand strategy workshop", "Competitor audit", "Brand voice guide", "Presentation template", "Ongoing support (30 days)"] },
+    ],
+    timesUsed: 8, totalEarned: 28600, avgRating: 4.9, lastUsed: "Mar 20",
+  },
+  {
+    id: "s2", name: "Website Design", emoji: "\u25C7", color: "#5b7fa4",
+    desc: "Custom website design from wireframes to polished mockups, ready for development",
+    category: "Design", builtIn: true,
+    tiers: [
+      { id: "t4", name: "Landing Page", price: 1800, unit: "flat", hours: 16, includes: ["1 page design", "Mobile responsive", "2 rounds of revisions"] },
+      { id: "t5", name: "Multi-page", price: 4200, unit: "flat", hours: 40, popular: true, includes: ["Up to 5 pages", "Mobile responsive", "Design system", "3 rounds of revisions"] },
+      { id: "t6", name: "Full Site", price: 7500, unit: "flat", hours: 72, includes: ["Up to 12 pages", "Design system", "Interactive prototypes", "Developer handoff", "Unlimited revisions"] },
+    ],
+    timesUsed: 5, totalEarned: 21000, avgRating: 4.8, lastUsed: "Mar 15",
+  },
+  {
+    id: "s3", name: "Content & Copy", emoji: "\u270E", color: "#5a9a3c",
+    desc: "Strategic copywriting for websites, emails, and marketing materials",
+    category: "Writing", builtIn: true,
+    tiers: [
+      { id: "t7", name: "Per page", price: 350, unit: "per page", hours: 3, includes: ["SEO-optimized copy", "1 round of revisions", "Meta descriptions"] },
+      { id: "t8", name: "Email sequence", price: 1200, unit: "flat", hours: 12, popular: true, includes: ["6-part email sequence", "Subject line variants", "A/B test suggestions"] },
+      { id: "t9", name: "Full website", price: 3500, unit: "flat", hours: 32, includes: ["All page copy", "CTAs and microcopy", "SEO strategy", "Content calendar"] },
+    ],
+    timesUsed: 12, totalEarned: 18400, avgRating: 5.0, lastUsed: "Mar 28",
+  },
+  {
+    id: "s4", name: "Strategy Session", emoji: "\u25CE", color: "#7c6b9e",
+    desc: "Deep-dive consulting on brand, marketing, or product strategy",
+    category: "Consulting", builtIn: true,
+    tiers: [
+      { id: "t10", name: "Discovery", price: 500, unit: "flat", hours: 2, includes: ["90-min call", "Summary doc", "3 action items"] },
+      { id: "t11", name: "Half-day", price: 1500, unit: "flat", hours: 4, popular: true, includes: ["4-hour workshop", "Strategic brief", "Roadmap", "Follow-up call"] },
+      { id: "t12", name: "Retainer", price: 3000, unit: "per month", hours: 12, includes: ["Weekly 1:1 calls", "Async support", "Monthly report", "Priority access"] },
+    ],
+    timesUsed: 15, totalEarned: 22500, avgRating: 4.7, lastUsed: "Mar 25",
+  },
+  {
+    id: "s5", name: "Social Media Kit", emoji: "\u2B21", color: "#8a7e63",
+    desc: "Template sets for Instagram, LinkedIn, and other platforms",
+    category: "Design", builtIn: true,
+    tiers: [
+      { id: "t13", name: "Starter", price: 600, unit: "flat", hours: 6, includes: ["5 templates", "1 platform", "Brand-matched"] },
+      { id: "t14", name: "Pro", price: 1400, unit: "flat", hours: 14, popular: true, includes: ["15 templates", "2 platforms", "Story + feed", "Canva files"] },
+    ],
+    timesUsed: 6, totalEarned: 7800, avgRating: 4.9, lastUsed: "Mar 10",
+  },
+];
+
 function makeEmptyBlocks(): Block[] {
   return [
     { id: uid(), type: "h1", content: "", checked: false },
@@ -71,6 +128,8 @@ export default function Dashboard() {
   const [archived, setArchived] = useState<ArchivedProject[]>([]);
   const [comments, setComments] = useState<Comment[]>(INITIAL_COMMENTS);
   const [activitiesMap, setActivitiesMap] = useState<Record<string, BlockActivity[]>>({ p1: INITIAL_ACTIVITIES });
+  const [services, setServices] = useState<Service[]>(INITIAL_SERVICES);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
 
   // ── Hydrate from localStorage after mount (avoids SSR mismatch) ──
   const [hydrated, setHydrated] = useState(false);
@@ -89,6 +148,10 @@ export default function Dashboard() {
     if (cm) setComments(cm);
     const am = loadFromStorage("activitiesMap", null);
     if (am) setActivitiesMap(am);
+    const sv = loadFromStorage("services", null);
+    if (sv) setServices(sv);
+    const inv = loadFromStorage("invoices", null);
+    if (inv) setInvoices(inv);
     setHydrated(true);
   }, []);
 
@@ -124,9 +187,11 @@ export default function Dashboard() {
       saveToStorage("comments", comments);
       saveToStorage("activitiesMap", activitiesMap);
       saveToStorage("activeProject", activeProject);
+      saveToStorage("services", services);
+      saveToStorage("invoices", invoices);
     }, 500);
     return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
-  }, [workspaces, blocksMap, tabs, archived, comments, activitiesMap, activeProject]);
+  }, [workspaces, blocksMap, tabs, archived, comments, activitiesMap, activeProject, services, invoices]);
 
   // Zen mode: Escape to exit
   useEffect(() => {
@@ -446,6 +511,27 @@ export default function Dashboard() {
     setCharCount(chars);
   }, []);
 
+  // ── Service handlers ──
+  const handleAddService = useCallback((service: Service) => {
+    setServices(prev => [...prev, service]);
+  }, []);
+
+  const handleUpdateService = useCallback((id: string, updates: Partial<Service>) => {
+    setServices(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
+  }, []);
+
+  const handleDeleteService = useCallback((id: string) => {
+    setServices(prev => {
+      const svc = prev.find(s => s.id === id);
+      if (svc?.builtIn) return prev; // cannot delete built-in
+      return prev.filter(s => s.id !== id);
+    });
+  }, []);
+
+  const handleAddInvoice = useCallback((invoice: Invoice) => {
+    setInvoices(prev => [...prev, invoice]);
+  }, []);
+
   const activeBlocks = blocksMap[activeProject] || makeEmptyBlocks();
 
   return (
@@ -624,6 +710,12 @@ export default function Dashboard() {
           splitClientName={splitProject ? (() => { for (const w of workspaces) { if (w.projects.some(p => p.id === splitProject)) return w.client; } return ""; })() : undefined}
           onSplitOpen={(id) => setSplitProject(id)}
           onSplitClose={() => setSplitProject(null)}
+          services={services}
+          invoices={invoices}
+          onAddService={handleAddService}
+          onUpdateService={handleUpdateService}
+          onDeleteService={handleDeleteService}
+          onAddInvoice={handleAddInvoice}
           onSplitMakePrimary={() => {
             if (!splitProject) return;
             const ws = workspaces.find(w => w.projects.some(p => p.id === splitProject));

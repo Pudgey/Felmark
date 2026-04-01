@@ -1,125 +1,59 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import type { Service, ServiceTier, Workspace, Invoice, InvoiceItem } from "@/lib/types";
+import { uid } from "@/lib/utils";
 import styles from "./ServicesPage.module.css";
+import ServiceModal from "./ServiceModal";
 
-const uid = () => Math.random().toString(36).slice(2, 10);
+const CATEGORIES = ["All", "Design", "Writing", "Consulting", "Development", "Marketing", "Other"];
 
-interface ServiceTier {
-  id: string;
-  name: string;
-  price: number;
-  unit: string;
-  hours: number;
-  popular?: boolean;
-  includes: string[];
+interface ServicesPageProps {
+  services: Service[];
+  invoices: Invoice[];
+  workspaces: Workspace[];
+  onAddService: (service: Service) => void;
+  onUpdateService: (id: string, updates: Partial<Service>) => void;
+  onDeleteService: (id: string) => void;
+  onAddInvoice: (invoice: Invoice) => void;
 }
 
-interface Service {
-  id: string;
-  name: string;
-  emoji: string;
-  color: string;
-  desc: string;
-  category: string;
-  tiers: ServiceTier[];
-  timesUsed: number;
-  totalEarned: number;
-  avgRating: number;
-  lastUsed: string;
-}
-
-interface InvoiceItem {
-  id: number;
-  service: string;
-  tier: string;
-  price: number;
-  unit: string;
-  qty: number;
-}
-
-const INITIAL_SERVICES: Service[] = [
-  {
-    id: "s1", name: "Brand Identity", emoji: "◆", color: "#b07d4f",
-    desc: "Full brand identity system including logo, colors, typography, and guidelines",
-    category: "Design",
-    tiers: [
-      { id: "t1", name: "Essential", price: 2400, unit: "flat", hours: 24, includes: ["Logo (2 concepts)", "Color palette", "Typography", "Basic guidelines PDF"] },
-      { id: "t2", name: "Complete", price: 4800, unit: "flat", hours: 48, popular: true, includes: ["Logo (4 concepts)", "Color palette", "Typography scale", "Full guidelines doc", "Social templates", "Business card design"] },
-      { id: "t3", name: "Premium", price: 8500, unit: "flat", hours: 80, includes: ["Everything in Complete", "Brand strategy workshop", "Competitor audit", "Brand voice guide", "Presentation template", "Ongoing support (30 days)"] },
-    ],
-    timesUsed: 8, totalEarned: 28600, avgRating: 4.9, lastUsed: "Mar 20",
-  },
-  {
-    id: "s2", name: "Website Design", emoji: "◇", color: "#5b7fa4",
-    desc: "Custom website design from wireframes to polished mockups, ready for development",
-    category: "Design",
-    tiers: [
-      { id: "t4", name: "Landing Page", price: 1800, unit: "flat", hours: 16, includes: ["1 page design", "Mobile responsive", "2 rounds of revisions"] },
-      { id: "t5", name: "Multi-page", price: 4200, unit: "flat", hours: 40, popular: true, includes: ["Up to 5 pages", "Mobile responsive", "Design system", "3 rounds of revisions"] },
-      { id: "t6", name: "Full Site", price: 7500, unit: "flat", hours: 72, includes: ["Up to 12 pages", "Design system", "Interactive prototypes", "Developer handoff", "Unlimited revisions"] },
-    ],
-    timesUsed: 5, totalEarned: 21000, avgRating: 4.8, lastUsed: "Mar 15",
-  },
-  {
-    id: "s3", name: "Content & Copy", emoji: "✎", color: "#5a9a3c",
-    desc: "Strategic copywriting for websites, emails, and marketing materials",
-    category: "Writing",
-    tiers: [
-      { id: "t7", name: "Per page", price: 350, unit: "per page", hours: 3, includes: ["SEO-optimized copy", "1 round of revisions", "Meta descriptions"] },
-      { id: "t8", name: "Email sequence", price: 1200, unit: "flat", hours: 12, popular: true, includes: ["6-part email sequence", "Subject line variants", "A/B test suggestions"] },
-      { id: "t9", name: "Full website", price: 3500, unit: "flat", hours: 32, includes: ["All page copy", "CTAs and microcopy", "SEO strategy", "Content calendar"] },
-    ],
-    timesUsed: 12, totalEarned: 18400, avgRating: 5.0, lastUsed: "Mar 28",
-  },
-  {
-    id: "s4", name: "Strategy Session", emoji: "◎", color: "#7c6b9e",
-    desc: "Deep-dive consulting on brand, marketing, or product strategy",
-    category: "Consulting",
-    tiers: [
-      { id: "t10", name: "Discovery", price: 500, unit: "flat", hours: 2, includes: ["90-min call", "Summary doc", "3 action items"] },
-      { id: "t11", name: "Half-day", price: 1500, unit: "flat", hours: 4, popular: true, includes: ["4-hour workshop", "Strategic brief", "Roadmap", "Follow-up call"] },
-      { id: "t12", name: "Retainer", price: 3000, unit: "per month", hours: 12, includes: ["Weekly 1:1 calls", "Async support", "Monthly report", "Priority access"] },
-    ],
-    timesUsed: 15, totalEarned: 22500, avgRating: 4.7, lastUsed: "Mar 25",
-  },
-  {
-    id: "s5", name: "Social Media Kit", emoji: "⬡", color: "#8a7e63",
-    desc: "Template sets for Instagram, LinkedIn, and other platforms",
-    category: "Design",
-    tiers: [
-      { id: "t13", name: "Starter", price: 600, unit: "flat", hours: 6, includes: ["5 templates", "1 platform", "Brand-matched"] },
-      { id: "t14", name: "Pro", price: 1400, unit: "flat", hours: 14, popular: true, includes: ["15 templates", "2 platforms", "Story + feed", "Canva files"] },
-    ],
-    timesUsed: 6, totalEarned: 7800, avgRating: 4.9, lastUsed: "Mar 10",
-  },
-];
-
-const CATEGORIES = ["All", "Design", "Writing", "Consulting"];
-
-export default function ServicesPage() {
-  const [services] = useState(INITIAL_SERVICES);
+export default function ServicesPage({ services, invoices, workspaces, onAddService, onUpdateService, onDeleteService, onAddInvoice }: ServicesPageProps) {
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedTier, setSelectedTier] = useState<string | null>(null);
   const [category, setCategory] = useState("All");
   const [sortBy, setSortBy] = useState("earned");
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [showInvoice, setShowInvoice] = useState(false);
-  const [invoiceClient, setInvoiceClient] = useState("");
+  const [invoiceWorkspaceId, setInvoiceWorkspaceId] = useState("");
+  const [invoiceSearch, setInvoiceSearch] = useState("");
+  const [invoiceDropdownOpen, setInvoiceDropdownOpen] = useState(false);
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([]);
+  const [showServiceModal, setShowServiceModal] = useState(false);
+  const [editingService, setEditingService] = useState<Service | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
-  const filtered = services
-    .filter(s => category === "All" || s.category === category)
-    .sort((a, b) => {
-      if (sortBy === "earned") return b.totalEarned - a.totalEarned;
-      if (sortBy === "used") return b.timesUsed - a.timesUsed;
-      if (sortBy === "name") return a.name.localeCompare(b.name);
-      return 0;
-    });
+  const filtered = useMemo(() =>
+    services
+      .filter(s => category === "All" || s.category === category)
+      .sort((a, b) => {
+        if (sortBy === "earned") return b.totalEarned - a.totalEarned;
+        if (sortBy === "used") return b.timesUsed - a.timesUsed;
+        if (sortBy === "name") return a.name.localeCompare(b.name);
+        return 0;
+      }),
+    [services, category, sortBy]
+  );
 
   const totalEarned = services.reduce((s, sv) => s + sv.totalEarned, 0);
   const totalUsed = services.reduce((s, sv) => s + sv.timesUsed, 0);
-  const topService = [...services].sort((a, b) => b.totalEarned - a.totalEarned)[0];
+  const topService = useMemo(() => [...services].sort((a, b) => b.totalEarned - a.totalEarned)[0], [services]);
+  // D1: guard division by zero
+  const avgDealSize = totalUsed > 0 ? Math.round(totalEarned / totalUsed) : 0;
+  // D1: compute maxEarned once before .map()
+  const maxEarned = useMemo(() => Math.max(...services.map(s => s.totalEarned), 1), [services]);
+  // D1: spread before sort for earned bar
+  const sortedForBar = useMemo(() => [...services].sort((a, b) => b.totalEarned - a.totalEarned), [services]);
 
   const addToInvoice = (service: Service, tier: ServiceTier) => {
     setInvoiceItems(prev => [...prev, { id: Date.now(), service: service.name, tier: tier.name, price: tier.price, unit: tier.unit, qty: 1 }]);
@@ -128,6 +62,83 @@ export default function ServicesPage() {
 
   const invoiceTotal = invoiceItems.reduce((s, i) => s + i.price * i.qty, 0);
   const selected = services.find(s => s.id === selectedService);
+
+  // D4: workspace picker for invoices
+  const personalWorkspaces = workspaces.filter(w => w.personal);
+  const clientWorkspaces = workspaces.filter(w => !w.personal).sort((a, b) => a.client.localeCompare(b.client));
+  const allPickerWorkspaces = [...personalWorkspaces, ...clientWorkspaces];
+  const filteredWorkspaces = invoiceSearch
+    ? allPickerWorkspaces.filter(w => w.client.toLowerCase().includes(invoiceSearch.toLowerCase()))
+    : allPickerWorkspaces;
+  const selectedWorkspace = workspaces.find(w => w.id === invoiceWorkspaceId);
+
+  // D5: send invoice
+  const handleSendInvoice = () => {
+    if (!invoiceWorkspaceId || invoiceItems.length === 0) return;
+    const invoice: Invoice = {
+      id: uid(),
+      client: selectedWorkspace?.client || "",
+      workspaceId: invoiceWorkspaceId,
+      items: invoiceItems,
+      total: invoiceTotal,
+      status: "sent",
+      createdAt: new Date().toISOString(),
+    };
+    onAddInvoice(invoice);
+    // Increment timesUsed on each service referenced
+    const serviceNames = new Set(invoiceItems.map(i => i.service));
+    services.forEach(svc => {
+      if (serviceNames.has(svc.name)) {
+        onUpdateService(svc.id, { timesUsed: svc.timesUsed + 1, totalEarned: svc.totalEarned + invoiceItems.filter(i => i.service === svc.name).reduce((s, i) => s + i.price * i.qty, 0), lastUsed: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" }) });
+      }
+    });
+    setInvoiceItems([]);
+    setShowInvoice(false);
+    setInvoiceWorkspaceId("");
+  };
+
+  // D5: save draft
+  const handleSaveDraft = () => {
+    if (invoiceItems.length === 0) return;
+    const invoice: Invoice = {
+      id: uid(),
+      client: selectedWorkspace?.client || "Draft",
+      workspaceId: invoiceWorkspaceId,
+      items: invoiceItems,
+      total: invoiceTotal,
+      status: "draft",
+      createdAt: new Date().toISOString(),
+    };
+    onAddInvoice(invoice);
+    setInvoiceItems([]);
+    setShowInvoice(false);
+    setInvoiceWorkspaceId("");
+  };
+
+  // D3: save service (create or update)
+  const handleSaveService = (service: Service) => {
+    if (editingService) {
+      onUpdateService(service.id, service);
+    } else {
+      onAddService(service);
+    }
+    setEditingService(null);
+  };
+
+  // D6: delete handler
+  const handleDeleteConfirm = (id: string) => {
+    const svc = services.find(s => s.id === id);
+    if (svc?.builtIn) return;
+    onDeleteService(id);
+    setConfirmDelete(null);
+    setSelectedService(null);
+  };
+
+  // Get active categories from services
+  const activeCategories = useMemo(() => {
+    const cats = new Set(services.map(s => s.category));
+    return CATEGORIES.filter(c => c === "All" || cats.has(c));
+  }, [services]);
 
   return (
     <div className={styles.page}>
@@ -141,7 +152,7 @@ export default function ServicesPage() {
               Invoice ({invoiceItems.length})
             </button>
           )}
-          <button className={`${styles.btn} ${styles.btnPrimary}`}>
+          <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => { setEditingService(null); setShowServiceModal(true); }}>
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
             New Service
           </button>
@@ -160,27 +171,27 @@ export default function ServicesPage() {
           <div className={styles.statLabel}>times invoiced</div>
         </div>
         <div className={styles.stat}>
-          <div className={`${styles.statVal} ${styles.statEmber}`}>${Math.round(totalEarned / totalUsed).toLocaleString()}</div>
+          <div className={`${styles.statVal} ${styles.statEmber}`}>${avgDealSize.toLocaleString()}</div>
           <div className={styles.statLabel}>avg deal size</div>
         </div>
         <div className={styles.stat}>
-          <div className={styles.statVal}>{topService?.name}</div>
+          <div className={styles.statVal}>{topService?.name || "\u2014"}</div>
           <div className={styles.statLabel}>top earner</div>
           <div className={styles.statSub}>${((topService?.totalEarned || 0) / 1000).toFixed(1)}k lifetime</div>
         </div>
       </div>
 
-      {/* Earned bar */}
+      {/* D1: Earned bar — spread before sort */}
       <div className={styles.earnedBar}>
-        {services.sort((a, b) => b.totalEarned - a.totalEarned).map(s => (
-          <div key={s.id} className={styles.earnedSeg} style={{ width: `${(s.totalEarned / totalEarned) * 100}%`, background: s.color }} />
+        {sortedForBar.map(s => (
+          <div key={s.id} className={styles.earnedSeg} style={{ width: `${totalEarned > 0 ? (s.totalEarned / totalEarned) * 100 : 0}%`, background: s.color }} />
         ))}
       </div>
 
       {/* Toolbar */}
       <div className={styles.toolbar}>
         <div className={styles.filters}>
-          {CATEGORIES.map(c => (
+          {activeCategories.map(c => (
             <button key={c} className={`${styles.filter} ${category === c ? styles.filterOn : ""}`} onClick={() => setCategory(c)}>{c}</button>
           ))}
         </div>
@@ -197,9 +208,7 @@ export default function ServicesPage() {
       {/* Grid */}
       <div className={styles.content}>
         <div className={styles.grid}>
-          {filtered.map(svc => {
-            const maxEarned = Math.max(...services.map(s => s.totalEarned));
-            return (
+          {filtered.map(svc => (
               <div key={svc.id} className={`${styles.card} ${hoveredCard === svc.id ? styles.cardHovered : ""}`}
                 onMouseEnter={() => setHoveredCard(svc.id)} onMouseLeave={() => setHoveredCard(null)}
                 onClick={() => { setSelectedService(svc.id); setSelectedTier(svc.tiers.find(t => t.popular)?.id || svc.tiers[0]?.id); }}>
@@ -234,7 +243,7 @@ export default function ServicesPage() {
                       <div className={styles.cardStatLabel}>earned</div>
                     </div>
                     <div className={styles.cardStat}>
-                      <div className={styles.cardStatVal}>{svc.timesUsed}×</div>
+                      <div className={styles.cardStatVal}>{svc.timesUsed}&times;</div>
                       <div className={styles.cardStatLabel}>used</div>
                     </div>
                     <div className={styles.cardStat}>
@@ -243,20 +252,20 @@ export default function ServicesPage() {
                     </div>
                   </div>
 
+                  {/* D1: maxEarned computed once outside loop */}
                   <div className={styles.cardEarnBar}>
                     <div className={styles.cardEarnFill} style={{ width: `${(svc.totalEarned / maxEarned) * 100}%`, background: svc.color }} />
                   </div>
                 </div>
               </div>
-            );
-          })}
+          ))}
         </div>
       </div>
 
       {/* Detail modal */}
       {selected && (
         <>
-          <div className={styles.overlay} onClick={() => setSelectedService(null)} />
+          <div className={styles.overlay} onClick={() => { setSelectedService(null); setConfirmDelete(null); }} />
           <div className={styles.detail}>
             <div className={styles.detailHead}>
               <div className={styles.detailIcon} style={{ background: selected.color + "0a", color: selected.color, border: `1px solid ${selected.color}15` }}>{selected.emoji}</div>
@@ -265,7 +274,7 @@ export default function ServicesPage() {
                 <div className={styles.detailCat}>{selected.category}</div>
                 <div className={styles.detailDesc}>{selected.desc}</div>
               </div>
-              <button className={styles.detailClose} onClick={() => setSelectedService(null)}>
+              <button className={styles.detailClose} onClick={() => { setSelectedService(null); setConfirmDelete(null); }}>
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>
               </button>
             </div>
@@ -285,7 +294,7 @@ export default function ServicesPage() {
                     <div className={styles.detailTierIncludes}>
                       {t.includes.map((inc, i) => (
                         <div key={i} className={styles.detailTierInclude}>
-                          <span className={styles.detailTierCheck}>✓</span>{inc}
+                          <span className={styles.detailTierCheck}>{"\u2713"}</span>{inc}
                         </div>
                       ))}
                     </div>
@@ -308,9 +317,36 @@ export default function ServicesPage() {
                   <div className={styles.detailStatLabel}>times invoiced</div>
                 </div>
                 <div className={styles.detailStatCard}>
-                  <div className={`${styles.detailStatVal} ${styles.statEmber}`}>${Math.round(selected.totalEarned / selected.timesUsed).toLocaleString()}</div>
+                  {/* D1: guard division by zero */}
+                  <div className={`${styles.detailStatVal} ${styles.statEmber}`}>${selected.timesUsed > 0 ? Math.round(selected.totalEarned / selected.timesUsed).toLocaleString() : "0"}</div>
                   <div className={styles.detailStatLabel}>avg per invoice</div>
                 </div>
+              </div>
+
+              {/* D3: Edit button + D6: Delete button */}
+              <div className={styles.section}>actions</div>
+              <div className={styles.detailActions}>
+                <button className={styles.detailEditBtn} onClick={() => { setEditingService(selected); setShowServiceModal(true); setSelectedService(null); }}>
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2L4 10H2V8L8.5 1.5z" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  Edit Service
+                </button>
+                {!selected.builtIn && (
+                  confirmDelete === selected.id ? (
+                    <div className={styles.deleteConfirm}>
+                      <span className={styles.deleteConfirmText}>Delete this service?</span>
+                      <button className={styles.deleteConfirmYes} onClick={() => handleDeleteConfirm(selected.id)}>Yes, delete</button>
+                      <button className={styles.deleteConfirmNo} onClick={() => setConfirmDelete(null)}>Cancel</button>
+                    </div>
+                  ) : (
+                    <button className={styles.detailDeleteBtn} onClick={() => setConfirmDelete(selected.id)}>
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 3.5h6M4.5 3.5V2.5h3v1M4.5 5v4M7.5 5v4M3.5 3.5l.5 7h4l.5-7" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                      Delete
+                    </button>
+                  )
+                )}
+                {selected.builtIn && (
+                  <span className={styles.builtInBadge}>Built-in service</span>
+                )}
               </div>
             </div>
           </div>
@@ -326,14 +362,59 @@ export default function ServicesPage() {
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
             </button>
           </div>
-          <input className={styles.invoiceClientInput} placeholder="Client name or email..." value={invoiceClient} onChange={e => setInvoiceClient(e.target.value)} />
+
+          {/* D4: workspace/client picker dropdown */}
+          <div className={styles.invoiceClientPicker}>
+            <div
+              className={styles.invoiceClientSelected}
+              onClick={() => setInvoiceDropdownOpen(!invoiceDropdownOpen)}
+            >
+              {selectedWorkspace ? (
+                <span className={styles.invoiceClientName}>
+                  <span className={styles.invoiceClientAvatar} style={{ background: selectedWorkspace.avatarBg }}>{selectedWorkspace.avatar}</span>
+                  {selectedWorkspace.client}
+                </span>
+              ) : (
+                <span className={styles.invoiceClientPlaceholder}>Select a client...</span>
+              )}
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ transform: invoiceDropdownOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}><path d="M2 4l3 3 3-3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </div>
+            {invoiceDropdownOpen && (
+              <div className={styles.invoiceDropdown}>
+                <input
+                  className={styles.invoiceSearchInput}
+                  placeholder="Search clients..."
+                  value={invoiceSearch}
+                  onChange={e => setInvoiceSearch(e.target.value)}
+                  autoFocus
+                />
+                <div className={styles.invoiceDropdownList}>
+                  {filteredWorkspaces.map(w => (
+                    <button
+                      key={w.id}
+                      className={`${styles.invoiceDropdownItem} ${invoiceWorkspaceId === w.id ? styles.invoiceDropdownItemOn : ""}`}
+                      onClick={() => { setInvoiceWorkspaceId(w.id); setInvoiceDropdownOpen(false); setInvoiceSearch(""); }}
+                    >
+                      <span className={styles.invoiceClientAvatar} style={{ background: w.avatarBg }}>{w.avatar}</span>
+                      {w.client}
+                      {w.personal && <span className={styles.invoicePersonalBadge}>Personal</span>}
+                    </button>
+                  ))}
+                  {filteredWorkspaces.length === 0 && (
+                    <div className={styles.invoiceNoResults}>No clients found</div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className={styles.invoiceItems}>
             {invoiceItems.map(item => (
               <div key={item.id} className={styles.invoiceItem}>
                 <span className={styles.invoiceItemName}>{item.service}</span>
                 <span className={styles.invoiceItemTier}>{item.tier}</span>
                 <span className={styles.invoiceItemPrice}>${item.price.toLocaleString()}</span>
-                <button className={styles.invoiceItemRemove} onClick={() => setInvoiceItems(prev => prev.filter(i => i.id !== item.id))}>×</button>
+                <button className={styles.invoiceItemRemove} onClick={() => setInvoiceItems(prev => prev.filter(i => i.id !== item.id))}>&times;</button>
               </div>
             ))}
           </div>
@@ -342,12 +423,20 @@ export default function ServicesPage() {
             <span className={styles.invoiceTotalVal}>${invoiceTotal.toLocaleString()}</span>
           </div>
           <div className={styles.invoiceActions}>
-            <button className={`${styles.invoiceBtn} ${styles.invoiceBtnSend}`}>Send Invoice</button>
-            <button className={`${styles.invoiceBtn} ${styles.invoiceBtnGhost}`}>Save Draft</button>
+            <button className={`${styles.invoiceBtn} ${styles.invoiceBtnSend}`} onClick={handleSendInvoice}>Send Invoice</button>
+            <button className={`${styles.invoiceBtn} ${styles.invoiceBtnGhost}`} onClick={handleSaveDraft}>Save Draft</button>
           </div>
-          <div className={styles.invoiceHint}>Processed via Stripe · 2.9% fee · Client receives a payment link</div>
+          <div className={styles.invoiceHint}>Processed via Stripe &middot; 2.9% fee &middot; Client receives a payment link</div>
         </div>
       )}
+
+      {/* D3: Service modal (create/edit) */}
+      <ServiceModal
+        open={showServiceModal}
+        onClose={() => { setShowServiceModal(false); setEditingService(null); }}
+        onSave={handleSaveService}
+        editService={editingService}
+      />
     </div>
   );
 }

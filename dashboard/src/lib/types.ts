@@ -720,3 +720,49 @@ export interface StatusInfo {
   color: string;
   label: string;
 }
+
+// ── Services ──
+
+export interface ServiceTier {
+  id: string;
+  name: string;
+  price: number;
+  unit: string;
+  hours: number;
+  popular?: boolean;
+  includes: string[];
+}
+
+export interface Service {
+  id: string;
+  name: string;
+  emoji: string;
+  color: string;
+  desc: string;
+  category: string;
+  tiers: ServiceTier[];
+  timesUsed: number;
+  totalEarned: number;
+  avgRating: number;
+  lastUsed: string;
+  builtIn?: boolean;
+}
+
+export interface InvoiceItem {
+  id: number;
+  service: string;
+  tier: string;
+  price: number;
+  unit: string;
+  qty: number;
+}
+
+export interface Invoice {
+  id: string;
+  client: string;
+  workspaceId: string;
+  items: InvoiceItem[];
+  total: number;
+  status: "draft" | "sent" | "paid";
+  createdAt: string;
+}
