@@ -901,6 +901,22 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
   const activeTab = tabs.find(t => t.active);
   const activeWs = workspaces.find(w => w.projects.some(p => p.id === activeProject));
   const canGoToWorkspaceHome = Boolean(activeWs?.id && onSelectWorkspaceHome);
+  const hasActiveTab = tabs.some(t => t.active);
+  const activeRail = railActive || "workspaces";
+  const surfaceKey = (() => {
+    if (activeRail === "calendar") return "calendar";
+    if (activeRail === "search") return "search";
+    if (activeRail === "services") return "services";
+    if (activeRail === "pipeline") return "pipeline";
+    if (activeRail === "templates") return "templates";
+    if (activeRail === "finance") return "finance";
+    if (activeRail === "wire") return "wire";
+    if (activeRail === "team") return "team";
+    if (activeWorkspaceId) return `workspace:${activeWorkspaceId}`;
+    if (activeRail === "home" && !hasActiveTab) return "dashboard-home";
+    if (activeRail !== "home" && !hasActiveTab) return `terminal:${activeRail}`;
+    return forgePaper ? "forge-paper" : "document";
+  })();
 
   const handleBreadcrumbParentClick = useCallback(() => {
     if (!activeWs?.id || !onSelectWorkspaceHome) return;
@@ -948,6 +964,145 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
         return false;
     }
   }, [activeProject, activeWs?.id, duplicateBlockById, hoverBlock, onNavigateRail, onNewTab, onSelectWorkspaceHome]);
+
+  const renderPrimarySurface = () => {
+    if (activeRail === "calendar") {
+      return <CalendarFull workspaces={workspaces} onOpenProject={onCalendarOpenProject} scrollToProjectId={calendarScrollTarget} onScrollComplete={onCalendarScrollComplete} />;
+    }
+    if (activeRail === "search") {
+      return <SearchPage workspaces={workspaces} />;
+    }
+    if (activeRail === "services") {
+      return <ServicesPage />;
+    }
+    if (activeRail === "pipeline") {
+      return <PipelineBoard />;
+    }
+    if (activeRail === "templates") {
+      return <TemplatesPage />;
+    }
+    if (activeRail === "finance") {
+      return <FinancePage />;
+    }
+    if (activeRail === "wire") {
+      return <WirePage workspaces={workspaces} services={WIRE_SERVICES} />;
+    }
+    if (activeRail === "team") {
+      return <TeamScreen />;
+    }
+    if (activeWorkspaceId) {
+      const ws = workspaces.find(w => w.id === activeWorkspaceId);
+      return ws && onSelectProject ? (
+        <WorkspaceHome workspace={ws} onSelectProject={onSelectProject} onNewTab={onNewTab} onRenameWorkspace={onRenameWorkspace} onUpdateProjectDue={onUpdateProjectDue} />
+      ) : null;
+    }
+    if (activeRail === "home" && !hasActiveTab) {
+      return (
+        <DashboardHome
+          workspaces={workspaces}
+          onSelectWorkspace={onSelectWorkspaceHome || (() => {})}
+          onSelectProject={onSelectProject || (() => {})}
+          onNewTabInWorkspace={onNewTabInWorkspace || (() => {})}
+        />
+      );
+    }
+    if (activeRail !== "home" && !hasActiveTab) {
+      return (
+        <TerminalWelcome
+          activeCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status !== "completed").length, 0)}
+          reviewCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "review").length, 0)}
+          overdueCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "overdue").length, 0)}
+          onOpenCmdPalette={() => {}}
+          onNewWorkspace={onNewWorkspace}
+        />
+      );
+    }
+    if (forgePaper) {
+      return (
+        <ForgePaper
+          blocks={blocks}
+          workspace={activeWs}
+          projectName={activeTab?.name || "Untitled"}
+          onClose={() => setForgePaper(false)}
+          onBlocksChange={(newBlocks) => setBlocks(newBlocks)}
+        />
+      );
+    }
+    return (
+      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+        {!zenMode && <EditorMargin
+          blocks={blocks}
+          hoveredBlock={hoverBlock}
+          onHoverBlock={setHoverBlock}
+          onScrollTo={(id) => scrollToBlock(id, "start")}
+          onReorderBlock={(fromIdx, toIdx) => {
+            setBlocks(prev => {
+              const n = [...prev];
+              const [moved] = n.splice(fromIdx, 1);
+              n.splice(toIdx, 0, moved);
+              return n;
+            });
+          }}
+          onDeleteBlocks={deleteBlocks}
+        />}
+        <div className={styles.editor} ref={editorRef} onMouseDown={() => { setConvoPanelOpen(false); setCommentPanelOpen(false); }} style={{ flex: 1 }}>
+          <div className={`${styles.page} ${breathe ? styles.pageBreathe : ""} ${splitProject ? styles.pageSplit : ""}`} onClick={handlePageClick}>
+            {activeWs && (() => {
+              const project = activeWs.projects.find(p => p.id === activeProject);
+              if (!project) return null;
+              const st = STATUS[project.status];
+              return (
+                <div className={styles.metaBar}>
+                  <div className={styles.metaClient}>
+                    <span className={styles.metaAvatar} style={{ background: activeWs.avatarBg }}>{activeWs.avatar}</span>
+                    {activeWs.client}
+                  </div>
+                  <span className={styles.metaSep}>·</span>
+                  <span className={styles.metaStatus} style={{ color: st.color, background: st.color + "08", borderColor: st.color + "15" }}>● {st.label}</span>
+                  <span className={styles.metaSep}>·</span>
+                  <DueDatePicker
+                    date={project.due}
+                    onChange={(due) => onUpdateProjectDue?.(activeProject, due)}
+                  />
+                  {project.amount !== "—" && <>
+                    <span className={styles.metaSep}>·</span>
+                    <span className={styles.metaBudget}>{project.amount}</span>
+                  </>}
+                </div>
+              );
+            })()}
+            {blocks.map(renderBlock)}
+          </div>
+          {slashMenu && (
+            <SlashMenu
+              top={slashMenu.top}
+              left={slashMenu.left}
+              filter={slashFilter}
+              selectedIndex={slashIndex}
+              onSelect={selectSlashItem}
+              onClose={() => setSlashMenu(null)}
+              onIndexChange={setSlashIndex}
+            />
+          )}
+          {formatBar && <FormatBar top={formatBar.top} left={formatBar.left} />}
+        </div>
+        {splitProject === TERMINAL_SPLIT_ID && (
+          <TerminalProvider workspaces={workspaces} activeProject={activeProject} editorBlocks={blocks}>
+            <Terminal onClose={() => onSplitClose?.()} />
+          </TerminalProvider>
+        )}
+        {splitProject && splitProject !== TERMINAL_SPLIT_ID && splitBlocks && (
+          <SplitPane
+            blocks={splitBlocks}
+            projectName={splitProjectName || "Untitled"}
+            clientName={splitClientName || ""}
+            onClose={() => onSplitClose?.()}
+            onMakePrimary={() => onSplitMakePrimary?.()}
+          />
+        )}
+      </div>
+    );
+  };
 
   const renderBlock = (block: Block) => {
     // Graph block — click to select, double-click to edit data
@@ -1581,140 +1736,9 @@ export default function Editor({ workspaces, tabs, activeProject, blocks: blocks
         <ConversationPanel open={convoPanelOpen} onClose={() => setConvoPanelOpen(false)} />
 
         <div className={styles.editorCol}>
-          {railActive === "calendar" && (
-            <CalendarFull workspaces={workspaces} onOpenProject={onCalendarOpenProject} scrollToProjectId={calendarScrollTarget} onScrollComplete={onCalendarScrollComplete} />
-          )}
-          {railActive === "search" && (
-            <SearchPage workspaces={workspaces} />
-          )}
-          {railActive === "services" && (
-            <ServicesPage />
-          )}
-          {railActive === "pipeline" && (
-            <PipelineBoard />
-          )}
-          {railActive === "templates" && (
-            <TemplatesPage />
-          )}
-          {railActive === "finance" && (
-            <FinancePage />
-          )}
-          {railActive === "wire" && (
-            <WirePage workspaces={workspaces} services={WIRE_SERVICES} />
-          )}
-          {railActive === "team" && (
-            <TeamScreen />
-          )}
-          {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && activeWorkspaceId && (() => {
-            const ws = workspaces.find(w => w.id === activeWorkspaceId);
-            return ws && onSelectProject ? (
-              <WorkspaceHome workspace={ws} onSelectProject={onSelectProject} onNewTab={onNewTab} onRenameWorkspace={onRenameWorkspace} onUpdateProjectDue={onUpdateProjectDue} />
-            ) : null;
-          })()}
-          {railActive === "home" && !activeWorkspaceId && !tabs.some(t => t.active) && (
-            <DashboardHome
-              workspaces={workspaces}
-              onSelectWorkspace={onSelectWorkspaceHome || (() => {})}
-              onSelectProject={onSelectProject || (() => {})}
-              onNewTabInWorkspace={onNewTabInWorkspace || (() => {})}
-            />
-          )}
-          {railActive !== "home" && railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && !activeWorkspaceId && !tabs.some(t => t.active) && (
-            <TerminalWelcome
-              activeCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status !== "completed").length, 0)}
-              reviewCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "review").length, 0)}
-              overdueCount={workspaces.reduce((s, w) => s + w.projects.filter(p => p.status === "overdue").length, 0)}
-              onOpenCmdPalette={() => {}}
-              onNewWorkspace={onNewWorkspace}
-            />
-          )}
-          {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && !activeWorkspaceId && tabs.some(t => t.active) && forgePaper && (
-            <ForgePaper
-              blocks={blocks}
-              workspace={activeWs}
-              projectName={activeTab?.name || "Untitled"}
-              onClose={() => setForgePaper(false)}
-              onBlocksChange={(newBlocks) => setBlocks(newBlocks)}
-            />
-          )}
-          {railActive !== "calendar" && railActive !== "search" && railActive !== "services" && railActive !== "pipeline" && railActive !== "templates" && railActive !== "finance" && railActive !== "wire" && railActive !== "team" && !activeWorkspaceId && tabs.some(t => t.active) && !forgePaper && (
-            <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-              {/* Left margin — document spine + block gutter */}
-              {!zenMode && <EditorMargin
-                blocks={blocks}
-                hoveredBlock={hoverBlock}
-                onHoverBlock={setHoverBlock}
-                onScrollTo={(id) => scrollToBlock(id, "start")}
-                onReorderBlock={(fromIdx, toIdx) => {
-                  setBlocks(prev => {
-                    const n = [...prev];
-                    const [moved] = n.splice(fromIdx, 1);
-                    n.splice(toIdx, 0, moved);
-                    return n;
-                  });
-                }}
-                onDeleteBlocks={deleteBlocks}
-              />}
-              {/* Editor area */}
-              <div className={styles.editor} ref={editorRef} onMouseDown={() => { setConvoPanelOpen(false); setCommentPanelOpen(false); }} style={{ flex: 1 }}>
-                <div className={`${styles.page} ${breathe ? styles.pageBreathe : ""} ${splitProject ? styles.pageSplit : ""}`} onClick={handlePageClick}>
-                  {/* Project meta bar with due date picker */}
-                  {activeWs && (() => {
-                    const project = activeWs.projects.find(p => p.id === activeProject);
-                    if (!project) return null;
-                    const st = STATUS[project.status];
-                    return (
-                      <div className={styles.metaBar}>
-                        <div className={styles.metaClient}>
-                          <span className={styles.metaAvatar} style={{ background: activeWs.avatarBg }}>{activeWs.avatar}</span>
-                          {activeWs.client}
-                        </div>
-                        <span className={styles.metaSep}>·</span>
-                        <span className={styles.metaStatus} style={{ color: st.color, background: st.color + "08", borderColor: st.color + "15" }}>● {st.label}</span>
-                        <span className={styles.metaSep}>·</span>
-                        <DueDatePicker
-                          date={project.due}
-                          onChange={(due) => onUpdateProjectDue?.(activeProject, due)}
-                        />
-                        {project.amount !== "—" && <>
-                          <span className={styles.metaSep}>·</span>
-                          <span className={styles.metaBudget}>{project.amount}</span>
-                        </>}
-                      </div>
-                    );
-                  })()}
-                  {blocks.map(renderBlock)}
-                </div>
-                {slashMenu && (
-                  <SlashMenu
-                    top={slashMenu.top}
-                    left={slashMenu.left}
-                    filter={slashFilter}
-                    selectedIndex={slashIndex}
-                    onSelect={selectSlashItem}
-                    onClose={() => setSlashMenu(null)}
-                    onIndexChange={setSlashIndex}
-                  />
-                )}
-                {formatBar && <FormatBar top={formatBar.top} left={formatBar.left} />}
-              </div>
-              {/* Split pane */}
-              {splitProject === TERMINAL_SPLIT_ID && (
-                <TerminalProvider workspaces={workspaces} activeProject={activeProject} editorBlocks={blocks}>
-                  <Terminal onClose={() => onSplitClose?.()} />
-                </TerminalProvider>
-              )}
-              {splitProject && splitProject !== TERMINAL_SPLIT_ID && splitBlocks && (
-                <SplitPane
-                  blocks={splitBlocks}
-                  projectName={splitProjectName || "Untitled"}
-                  clientName={splitClientName || ""}
-                  onClose={() => onSplitClose?.()}
-                  onMakePrimary={() => onSplitMakePrimary?.()}
-                />
-              )}
-            </div>
-          )}
+          <div key={surfaceKey} className={styles.surfaceStage}>
+            {renderPrimarySurface()}
+          </div>
 
           {/* Command bar — only show when not in workspace home or zen mode */}
           {!activeWorkspaceId && !zenMode && <CommandBar charCount={charCount} />}

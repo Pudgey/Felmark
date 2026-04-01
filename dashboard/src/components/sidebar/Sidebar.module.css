@@ -7,10 +7,11 @@
   overflow: hidden;
   border-right: 1px solid var(--panel-border);
   flex-shrink: 0;
+  transition: width 0.24s cubic-bezier(0.22, 1, 0.36, 1), min-width 0.24s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.18s ease;
 }
 
 .resizing { transition: none; }
-.closed { width: 0 !important; min-width: 0 !important; }
+.closed { width: 0 !important; min-width: 0 !important; border-right-color: transparent; }
 
 .inner {
   width: clamp(220px, var(--sidebar-w, 280px), 520px);
@@ -18,7 +19,17 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  transition: opacity 0.18s ease, transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: left center;
 }
+
+.closed .inner {
+  opacity: 0;
+  transform: translateX(-10px);
+  pointer-events: none;
+}
+
+.resizing .inner { transition: none; }
 
 /* Header */
 .head {
@@ -476,6 +487,25 @@
 }
 
 /* Projects */
+.projectList {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  pointer-events: none;
+  transition: grid-template-rows 0.24s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.18s ease;
+}
+
+.projectListOpen {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.projectListInner {
+  min-height: 0;
+  overflow: hidden;
+}
+
 .project {
   display: flex;
   align-items: center;
@@ -763,6 +793,25 @@
   transition: transform 0.12s;
 }
 
+.archiveList {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  pointer-events: none;
+  transition: grid-template-rows 0.24s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.18s ease;
+}
+
+.archiveListOpen {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.archiveListInner {
+  min-height: 0;
+  overflow: hidden;
+}
+
 .archiveItem {
   display: flex;
   align-items: center;
@@ -845,6 +894,7 @@
   color: inherit;
   cursor: pointer;
   transition: color 0.12s ease;
+  white-space: nowrap;
 }
 
 .savedIndicator:hover {
