@@ -23,8 +23,8 @@
 
 | Agent | Task | Completed |
 |-------|------|-----------|
+| codex-main | Fixing the sidebar runtime crash caused by a leftover totalProjects reference after the forge summary wiring | 2026-04-02 12:03 EDT |
 | codex-main | Building the first forge finance slice and sidebar projection so shell client summaries stop being surface-owned | 2026-04-02 11:53 EDT |
 | codex-main | Proposed the next forge phase so sidebar, workspace, workstation, and finance can share owned truth without surface coupling | 2026-04-02 10:36 EDT |
 | codex-main | Added the first forge domain structure manifests so shared client, finance, and surface read models can be designed without surface coupling | 2026-04-02 10:35 EDT |
 | codex-main | Added a presentation mode to the workspace edit canvas so helper UI stays hidden until hover intent or modifier reveal | 2026-04-02 09:39 EDT |
-| codex-main | Defined hard size requirements for micro and premium canvas blocks so new workspace concepts start from a shared footprint contract | 2026-04-02 09:35 EDT |
