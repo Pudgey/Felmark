@@ -18,7 +18,7 @@
 /* Breathe mode -- full width */
 .pageBreathe {
   max-width: 100%;
-  padding-left: clamp(24px, 5vw, 64px);
+  padding-left: clamp(104px, 10vw, 140px);
   padding-right: clamp(24px, 5vw, 64px);
 }
 
