@@ -36,9 +36,21 @@ function dataToSparkRows(data: unknown): SparkRow[] {
 interface AreaData { labels: string[]; series: { label: string; color?: string; values: number[] }[] }
 
 function dataToArea(data: unknown): AreaData {
+  if (typeof data !== "object" || data === null) {
+    return { labels: ["A", "B", "C"], series: [{ label: "Series 1", values: [10, 20, 30] }] };
+  }
   const d = data as Record<string, unknown>;
-  if (d && Array.isArray(d.labels) && Array.isArray(d.series)) return { labels: d.labels as string[], series: d.series as AreaData["series"] };
-  return { labels: ["A", "B", "C"], series: [{ label: "Series 1", values: [10, 20, 30] }] };
+  if (!Array.isArray(d.labels) || !Array.isArray(d.series)) {
+    return { labels: ["A", "B", "C"], series: [{ label: "Series 1", values: [10, 20, 30] }] };
+  }
+  return {
+    labels: d.labels.map(l => String(l)),
+    series: d.series.map((s: Record<string, unknown>) => ({
+      label: String(s.label ?? ""),
+      color: typeof s.color === "string" ? s.color : undefined,
+      values: Array.isArray(s.values) ? s.values.map(v => Number(v) || 0) : [],
+    })),
+  };
 }
 
 // ── Metrics: array of { label, value, prefix?, suffix?, color?, change?, sub?, sparkline? } ──
@@ -314,16 +326,20 @@ export default function GraphDataEditor({ graphData, onUpdate, onClose, onDelete
     return t; // sparkline, area, metrics each have unique shapes
   };
 
-  // Sync title/type changes — reset data when switching to incompatible shape
-  useEffect(() => {
-    if (graphType !== graphData.graphType && dataGroup(graphType) !== dataGroup(graphData.graphType)) {
-      // Incompatible shape — reset to defaults for the new type
-      const defaults = getDefaultGraphData(graphType);
+  const handleTypeChange = (newType: GraphType) => {
+    setGraphType(newType);
+    if (dataGroup(newType) !== dataGroup(graphData.graphType)) {
+      const defaults = getDefaultGraphData(newType);
       onUpdate({ ...defaults, title });
     } else {
-      onUpdate({ ...graphData, graphType, title });
+      onUpdate({ ...graphData, graphType: newType, title });
     }
-  }, [title, graphType]); // eslint-disable-line react-hooks/exhaustive-deps
+  };
+
+  const handleTitleChange = (newTitle: string) => {
+    setTitle(newTitle);
+    onUpdate({ ...graphData, graphType, title: newTitle });
+  };
 
   // Close on Escape
   useEffect(() => {
@@ -371,7 +387,7 @@ export default function GraphDataEditor({ graphData, onUpdate, onClose, onDelete
         <input
           className={styles.titleInput}
           value={title}
-          onChange={e => setTitle(e.target.value)}
+          onChange={e => handleTitleChange(e.target.value)}
           placeholder="Chart title..."
           spellCheck={false}
         />
@@ -387,7 +403,7 @@ export default function GraphDataEditor({ graphData, onUpdate, onClose, onDelete
                 {GRAPH_TYPE_OPTIONS.map(opt => (
                   <button key={opt.type}
                     className={`${styles.typeOption}${opt.type === graphType ? ` ${styles.typeOptionOn}` : ""}`}
-                    onClick={() => { setGraphType(opt.type); setShowTypePicker(false); }}>
+                    onClick={() => { handleTypeChange(opt.type); setShowTypePicker(false); }}>
                     <span>{opt.icon}</span>
                     <span>{opt.label}</span>
                   </button>
