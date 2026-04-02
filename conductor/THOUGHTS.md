@@ -24,9 +24,8 @@
 
 | Agent | Task | Completed |
 |-------|------|-----------|
-| claude-main | Refactored Editor.tsx (1,779 lines) into core/ module architecture — 8 hooks, 7 components, block registry, manifests | 2026-04-01 |
-| codex-main | Removed the remaining row and column insertion guide lines from the canvas plus hover state | 2026-04-01 17:53 EDT |
-| codex-main | Removed the blue hover treatment from the canvas insertion plus controls | 2026-04-01 17:49 EDT |
-| codex-main | Removed the edit canvas shell treatment and blue outline styling so the workstation canvas matches the workspace background | 2026-04-01 17:44 EDT |
-| codex-main | Fixed canvas edit overlays so insertion rails, chrome, and block move no longer block workstation canvas interaction | 2026-04-01 17:34 EDT |
-| codex-main | Deep polished the workspace edit canvas shell and applied the review patch onto main | 2026-04-01 17:02 EDT |
+| codex-main | Gave workstation blocks subtler edit identities so metric, chat, and utility blocks read differently without adding noise | 2026-04-02 04:49 EDT |
+| codex-main | Reduced workstation canvas border, chrome, and insertion noise so only one editing layer is visually leading at a time | 2026-04-02 04:49 EDT |
+| codex-main | Demoted the workstation gutter delete control to a secondary hover action so breathe mode keeps stable add and drag controls | 2026-04-02 04:46 EDT |
+| codex-main | Added a live placeholder and floating ghost so workstation block moves preview surrounding reflow before drop | 2026-04-02 04:40 EDT |
+| codex-main | Reworked the workstation canvas footer into a tighter status strip with precise editing states | 2026-04-02 04:32 EDT |

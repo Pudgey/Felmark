@@ -4,8 +4,8 @@
 .whisperContent {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 18px;
+  gap: 12px;
+  padding: 14px 20px;
   height: 100%;
 }
 
@@ -14,10 +14,10 @@
   font-size: 9px;
   font-weight: 500;
   color: var(--ember);
-  background: rgba(176, 125, 79, 0.04);
-  padding: 3px 8px;
-  border-radius: 5px;
-  border: 1px solid rgba(176, 125, 79, 0.04);
+  background: rgba(176, 125, 79, 0.05);
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(176, 125, 79, 0.08);
 }
 
 .whisperDot {
@@ -32,14 +32,14 @@
   font-size: 13px;
   color: var(--ink-500);
   flex: 1;
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
 .whisperAction {
-  padding: 5px 14px;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  background: #fff;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(120, 114, 103, 0.14);
+  background: rgba(255, 255, 255, 0.92);
   font-size: 11px;
   font-weight: 500;
   font-family: inherit;
@@ -49,11 +49,11 @@
 
 /* Metric block */
 .metricContent {
-  padding: 20px 22px;
+  padding: 18px 20px 16px;
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .metricLabel {
@@ -61,14 +61,14 @@
   font-size: 9px;
   color: var(--ink-300);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
 }
 
 .metricValue {
   font-family: 'Cormorant Garamond', serif;
   font-weight: 700;
   line-height: 1;
-  margin-top: 6px;
+  margin-top: 8px;
 }
 
 .metricValueLarge {
@@ -83,12 +83,12 @@
   font-family: var(--mono);
   font-size: 9px;
   color: var(--ink-300);
-  margin-top: 6px;
+  margin-top: 7px;
 }
 
 .metricProgress {
-  margin-top: 8px;
-  height: 4px;
+  margin-top: 10px;
+  height: 3px;
   background: var(--border-light);
   border-radius: 2px;
   overflow: hidden;
@@ -101,7 +101,7 @@
 
 /* Placeholder block (tasks, activity, health, etc.) */
 .placeholderContent {
-  padding: 16px 20px;
+  padding: 17px 20px 15px;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -112,15 +112,15 @@
   font-size: 9px;
   color: var(--ink-300);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: 10px;
+  letter-spacing: 0.07em;
+  margin-bottom: 12px;
 }
 
 .placeholderRows {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
 }
 
 .placeholderRow {

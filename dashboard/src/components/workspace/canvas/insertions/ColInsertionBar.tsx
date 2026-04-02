@@ -29,7 +29,7 @@ export default function ColInsertionBar({ left, top, height, onInsert }: ColInse
       <div className={styles.colInsertionLine} />
       <button
         type="button"
-        className={styles.insertionBtn}
+        className={`${styles.insertionBtn} ${styles.colInsertionBtn}`}
         aria-label="Insert block"
         onMouseDown={(e) => {
           e.preventDefault();
@@ -37,7 +37,7 @@ export default function ColInsertionBar({ left, top, height, onInsert }: ColInse
         }}
         onClick={handleInsert}
       >
-        +
+        <span className={styles.insertionPlus} aria-hidden="true">+</span>
       </button>
     </div>
   );

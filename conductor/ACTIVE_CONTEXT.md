@@ -1,16 +1,16 @@
-# Active Context — 2026-04-01
+# Active Context — 2026-04-02
 
 ## Product Snapshot
 
-Felmark is actively building the browser-native dashboard experience in `dashboard/`. The product now has a workstation shell, a standalone Workstation v4 surface, a Forge Paper rail surface, a Grid Canvas homepage with 6 interactive space blocks, a workspace sidebar with client navigation, and a views routing layer.
+Felmark is actively building the browser-native dashboard experience in `dashboard/`. The product now has a workstation shell with modular editor core, a standalone workspace surface, a Forge Paper rail surface, a Grid Canvas homepage with 6 interactive space blocks, a workspace sidebar with client navigation, a views routing layer, and a dedicated app-level home dashboard.
 
 ## Current Focus
 
-- TerminalWelcome split pane fix — verify in browser
-- FORGE_MAP.md rebuild (stale since restructure)
-- ~~Editor.tsx at ~1,750 lines — next refactor target~~ **DONE** — decomposed into `core/`
+- FORGE_MAP.md rebuild (stale — reports 174 files vs 323 actual)
+- EditorCore.tsx at 494 lines — could extract handleCommandSelect + demo data to reduce further
+- Editor.module.css — verify fully replaced by component CSS modules, delete if so
 - Settings page rebuild (component deleted, clean slate)
-- Orphaned `views/terminal-welcome.tsx` — delete
+- TerminalWelcome split pane fix — verify in browser
 
 ## Architecture Status
 
@@ -22,22 +22,21 @@ Felmark is actively building the browser-native dashboard experience in `dashboa
 | Grid Canvas | Built, 6 interactive space blocks + 10 metric/placeholder blocks |
 | Workspace Sidebar | Built — client cards, sparklines, health rings, search |
 | Forge Paper | Active, shared heading outline under review |
+| Home Dashboard | Moved to `components/home/` — app-level surface |
+| Editor Core | Refactored — `editor/core/` with 8 hooks, 7 components, block registry |
 | Settings surface | Deleted, ready for rebuild |
-| TerminalWelcome | Polished — full width, crisper animations, tab bar integration |
+| TerminalWelcome | Onboarding/empty state only (no-workstation fallback) |
 
 ## Recent Completed Work
 
-- **Editor core refactor** — 1,779-line Editor.tsx decomposed into `editor/core/` with 8 hooks, 7 components, block registry, 13 MANIFESTs. EditorCore.tsx is 494 lines. Editor.tsx is now a 2-line re-export.
-- Workspace sidebar: faithful prototype port with all visual elements
-- 6 space blocks: Pipeline, Calendar, Automation, Chat, Files, RevenueChart
-- BlockContent.tsx refactored to registry map dispatcher pattern
-- TerminalWelcome: removed streak, full width, crisper animations
-- Tab bar now stays visible when TerminalWelcome is active
-- Split pane restructured to render alongside TerminalWelcome
+- **Editor core refactor** — 1,779-line monolith → modular core/ (8 hooks, 7 components, 13 MANIFESTs)
+- **Home surface decision** — DashboardHome moved from workstation/ to components/home/
+- **Workspace toolbar** — removed redundant Felmark branding, clean "Workspace" title
+- **Deep-debug skill** — full root-cause analysis protocol added
+- **Cleanup** — deleted orphaned views/terminal-welcome.tsx, unused TerminalWelcome.module.css
 
 ## Pending Manual Actions
 
-- Verify TerminalWelcome split pane fix in browser
 - Run `/forge` to rebuild FORGE_MAP.md
-- Delete orphaned `views/terminal-welcome.tsx`
+- Verify Editor.module.css can be deleted (check for remaining references)
 - Rebuild Settings page as a view in `views/` + component in `workstation/settings/`

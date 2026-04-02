@@ -4,21 +4,18 @@ import styles from "./Toolbar.module.css";
 
 interface ToolbarProps {
   editing: boolean;
-  showLibrary: boolean;
   onToggleEdit: () => void;
   onToggleLibrary: () => void;
 }
 
-export default function Toolbar({ editing, showLibrary, onToggleEdit, onToggleLibrary }: ToolbarProps) {
+export default function Toolbar({ editing, onToggleEdit, onToggleLibrary }: ToolbarProps) {
   return (
-    <div className={styles.toolbar}>
-      <div className={styles.logo}>
-        <div className={styles.mark}>{"\u25C6"}</div>
-        <span className={styles.logoName}>Felmark</span>
-      </div>
-      <span className={styles.workspaceBadge}>WORKSPACE</span>
+    <div className={`${styles.toolbar} ${editing ? styles.toolbarEditing : ""}`}>
+      <span className={`${styles.surfaceTitle} ${editing ? styles.surfaceTitleEditing : ""}`}>
+        {editing ? "Layout Editing" : "Workspace"}
+      </span>
       <span className={styles.toolbarSep} />
-      <div className={styles.spaces}>
+      <div className={`${styles.spaces} ${editing ? styles.spacesEditing : ""}`}>
         <button className={`${styles.space} ${styles.spaceActive}`}>
           <span>{"\u25C6"}</span> Dashboard
         </button>

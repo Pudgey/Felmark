@@ -19,6 +19,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 | What | Where | NOT here |
 |------|-------|----------|
+| Home dashboard | `components/home/` | `components/workstation/` |
 | Workstation features | `components/workstation/<feature>/` | `components/<feature>/` |
 | Block types | `components/workstation/editor/blocks/<block>/` | `editor/<block>/` |
 | Editor chrome (slash menu, format bar, etc.) | `components/workstation/editor/chrome/<tool>/` | `editor/<tool>/` |

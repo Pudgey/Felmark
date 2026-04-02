@@ -25,6 +25,10 @@ type LibraryTarget =
   | { kind: "column"; rowIdx: number; afterIdx: number }
   | null;
 
+const METRIC_BLOCK_TYPES = new Set(["revenue", "outstanding", "rate", "goal"]);
+const CHAT_BLOCK_TYPES = new Set(["chat"]);
+const UTILITY_BLOCK_TYPES = new Set(["whisper", "pipeline", "calendar", "automation", "files", "revenue-chart"]);
+
 export default function Canvas() {
   const [blocks, setBlocks] = useState<Record<string, CanvasBlock>>(INITIAL_BLOCK_MAP);
   const [rows, setRows] = useState<CanvasRow[]>(INITIAL_ROWS);
@@ -80,6 +84,7 @@ export default function Canvas() {
   });
 
   const dragMove = useDragMove({
+    layoutRef,
     rowsRef,
     blocksRef,
     gridRef,
@@ -127,6 +132,21 @@ export default function Canvas() {
     setSelectedBlock(null);
   };
 
+  const moveBlockWithinRow = (blockId: string, direction: "left" | "right") => {
+    setRows((prev) => prev.map((row) => {
+      const index = row.blockIds.indexOf(blockId);
+      if (index < 0) return row;
+
+      const targetIndex = direction === "left" ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= row.blockIds.length) return row;
+
+      const nextIds = [...row.blockIds];
+      const [moved] = nextIds.splice(index, 1);
+      nextIds.splice(targetIndex, 0, moved);
+      return { ...row, blockIds: nextIds };
+    }));
+  };
+
   const handleToggleEdit = () => {
     const entering = !editing;
     setEditing(entering);
@@ -147,6 +167,32 @@ export default function Canvas() {
     setInsertTarget(null);
     setLibraryTarget(null);
     setRows(prev => prev.filter(r => r.blockIds.length > 0));
+  };
+
+  const handleContextualAdd = (blockId: string) => {
+    const rowIdx = rows.findIndex((row) => row.blockIds.includes(blockId));
+    if (rowIdx < 0) {
+      setLibraryTarget(null);
+      setShowLibrary(true);
+      return;
+    }
+
+    const row = rows[rowIdx];
+    const afterIdx = row.blockIds.indexOf(blockId);
+
+    if (afterIdx < 0) {
+      setLibraryTarget(null);
+      setShowLibrary(true);
+      return;
+    }
+
+    setReplaceTarget(null);
+    setLibraryTarget(
+      row.blockIds.length < MAX_PER_ROW
+        ? { kind: "column", rowIdx, afterIdx }
+        : { kind: "row", insertIdx: rowIdx + 1 },
+    );
+    setShowLibrary(true);
   };
 
   const handleLibrarySelect = (type: string) => {
@@ -199,12 +245,68 @@ export default function Canvas() {
   const gridMinHeight = gridRows * CELL + Math.max(0, gridRows - 1) * GAP;
   const isEditOrPlacing = editing || !!dragPlace.placingBlock;
   const blockCount = Object.keys(blocks).length;
+  const focusedBlockId = replaceTarget ?? selectedBlock;
+  const showInsertionControls = editing
+    && !dragPlace.dragging
+    && !dragMove.movingBlock
+    && !dragResize.resizing
+    && hoveredBlock === null
+    && focusedBlockId === null
+    && !showLibrary;
+  const placingBlockLabel = dragPlace.placingBlock
+    ? BLOCK_DEFS.find((bt) => bt.type === dragPlace.placingBlock)?.label ?? "Block"
+    : "Block";
+  const movingBlockLabel = dragMove.movingBlock
+    ? blocks[dragMove.movingBlock]?.label ?? "Block"
+    : "Block";
+  const selectedBlockLabel = selectedBlock
+    ? blocks[selectedBlock]?.label ?? "Block"
+    : "Block";
+  const replaceBlockLabel = replaceTarget
+    ? blocks[replaceTarget]?.label ?? "Block"
+    : "Block";
+
+  let footerStatus = "Canvas live";
+  if (editing) {
+    if (dragPlace.dragging) {
+      footerStatus = `Placing ${placingBlockLabel}`;
+    } else if (dragMove.movingBlock) {
+      footerStatus = dragMove.moveTarget?.kind === "row"
+        ? `Moving ${movingBlockLabel} to a new row`
+        : dragMove.moveTarget?.kind === "column"
+          ? `Moving ${movingBlockLabel} into place`
+          : `Moving ${movingBlockLabel}`;
+    } else if (dragResize.resizing) {
+      footerStatus = "Resizing layout";
+    } else if (showLibrary) {
+      footerStatus = libraryTarget?.kind === "row"
+        ? "Choose a block for the new row"
+        : libraryTarget?.kind === "column"
+          ? "Choose a block for this slot"
+          : "Choose a block to add";
+    } else if (replaceTarget) {
+      footerStatus = `Replacing ${replaceBlockLabel}`;
+    } else if (selectedBlock) {
+      footerStatus = `${selectedBlockLabel} active`;
+    } else {
+      footerStatus = "Layout ready";
+    }
+  }
+  const movingBlockData = dragMove.movingBlock
+    ? blocks[dragMove.movingBlock] ?? null
+    : null;
+  const movingLayoutBlock = dragMove.movingBlock
+    ? layout.find((lb) => lb.id === dragMove.movingBlock) ?? null
+    : null;
+  const movingRenderBlock = movingBlockData && movingLayoutBlock
+    ? { ...movingBlockData, w: movingLayoutBlock.w, h: movingLayoutBlock.h }
+    : null;
+  const movingBlockFrame = movingLayoutBlock ? blockRect(movingLayoutBlock) : null;
 
   return (
     <div className={styles.canvas}>
       <Toolbar
         editing={editing}
-        showLibrary={showLibrary}
         onToggleEdit={handleToggleEdit}
         onToggleLibrary={handleToggleLibrary}
       />
@@ -259,7 +361,7 @@ export default function Canvas() {
           </div>
 
           {/* Cell highlight (edit mode, not during placing) */}
-          {isEditOrPlacing && hoverCell && !dragPlace.placingBlock && (
+          {isEditOrPlacing && hoverCell && !dragPlace.placingBlock && !dragMove.movingBlock && (
             <div
               className={styles.cellHighlight}
               style={{
@@ -269,6 +371,39 @@ export default function Canvas() {
                 height: CELL,
               }}
             />
+          )}
+
+          {dragMove.previewSlot === null && dragMove.moveTarget?.kind === "row" && (
+            <div
+              className={styles.moveTargetRow}
+              style={{ top: dragMove.moveTarget.top, width: dragMove.moveTarget.width }}
+            >
+              <span className={styles.moveTargetCapsule}>New Row</span>
+            </div>
+          )}
+
+          {dragMove.previewSlot === null && dragMove.moveTarget?.kind === "column" && (
+            <div
+              className={styles.moveTargetColumn}
+              style={{
+                left: dragMove.moveTarget.left,
+                top: dragMove.moveTarget.top,
+                height: dragMove.moveTarget.height,
+              }}
+            >
+              <span className={styles.moveTargetDot} />
+            </div>
+          )}
+
+          {dragMove.previewSlot && movingBlockData && (
+            <div
+              className={styles.movePlaceholder}
+              style={blockRect(dragMove.previewSlot)}
+            >
+              <span className={styles.movePlaceholderLabel}>
+                {movingBlockData.label}
+              </span>
+            </div>
           )}
 
           {/* Ghost block during drag-to-place */}
@@ -295,16 +430,38 @@ export default function Canvas() {
           {layout.map((lb) => {
             const block = blocks[lb.id];
             if (!block) return null;
-            const renderBlock: RenderBlock = { ...block, w: lb.w, h: lb.h };
             const displayLb = activePreview?.find((p) => p.id === lb.id) ?? lb;
+            const renderBlock: RenderBlock = { ...block, w: displayLb.w, h: displayLb.h };
             const isMoved = activePreview && (displayLb.x !== lb.x || displayLb.y !== lb.y || displayLb.w !== lb.w || displayLb.h !== lb.h);
             const rect = blockRect(displayLb);
             const isSelected = selectedBlock === block.id;
-            const showEditControls = hoveredBlock === block.id || isSelected || replaceTarget === block.id;
+            const isMoveSource = dragMove.movingBlock === block.id;
+            const isFocusedEditBlock = focusedBlockId === block.id;
+            const showEditControls = !dragMove.movingBlock
+              && (hoveredBlock === block.id || isSelected || replaceTarget === block.id);
+            const quietForHoveredChrome = editing
+              && hoveredBlock !== null
+              && hoveredBlock !== block.id
+              && focusedBlockId === null
+              && !dragMove.movingBlock
+              && !dragResize.resizing;
+            const editIdentityClass = editing
+              ? METRIC_BLOCK_TYPES.has(block.type)
+                ? styles.blockMetricEdit
+                : CHAT_BLOCK_TYPES.has(block.type)
+                  ? styles.blockChatEdit
+                  : UTILITY_BLOCK_TYPES.has(block.type)
+                    ? styles.blockUtilityEdit
+                    : styles.blockFeedEdit
+              : "";
+            const row = rows.find((currentRow) => currentRow.blockIds.includes(block.id));
+            const blockIdx = row?.blockIds.indexOf(block.id) ?? -1;
+            const canMoveLeft = blockIdx > 0;
+            const canMoveRight = row !== undefined && blockIdx >= 0 && blockIdx < row.blockIds.length - 1;
             return (
               <div
                 key={block.id}
-                className={`${styles.block} ${isSelected ? styles.blockSelected : ""} ${editing ? styles.blockEditing : ""} ${isMoved ? styles.blockPreview : ""} ${dragMove.movingBlock === block.id ? styles.blockMoving : ""} ${dragResize.resizing ? styles.blockNoTransition : ""}`}
+                className={`${styles.block} ${editIdentityClass} ${isSelected ? styles.blockSelected : ""} ${editing ? styles.blockEditing : ""} ${editing && showInsertionControls ? styles.blockInsertionIdle : ""} ${showEditControls ? styles.blockChromeLead : ""} ${quietForHoveredChrome ? styles.blockLayerQuiet : ""} ${focusedBlockId !== null && !dragMove.movingBlock && !isFocusedEditBlock ? styles.blockSubdued : ""} ${isFocusedEditBlock && !dragMove.movingBlock ? styles.blockFocused : ""} ${isMoved ? styles.blockPreview : ""} ${isMoveSource ? styles.blockMoving : ""} ${isMoveSource ? styles.blockDragSource : ""} ${dragResize.resizing ? styles.blockNoTransition : ""}`}
                 style={{ ...rect, ...((replaceTarget === block.id || dragMove.movingBlock === block.id) ? { zIndex: 15 } : {}) }}
                 onMouseEnter={() => setHoveredBlock(block.id)}
                 onMouseLeave={() => setHoveredBlock((current) => (current === block.id ? null : current))}
@@ -313,13 +470,18 @@ export default function Canvas() {
                   if (!dragPlace.placingBlock) setSelectedBlock(isSelected ? null : block.id);
                 }}
               >
-                {editing && (
+                {editing && !isMoveSource && (
                   <BlockChrome
                     blockId={block.id}
                     label={block.label}
                     displayW={displayLb.w}
                     displayH={displayLb.h}
                     visible={showEditControls}
+                    onAdd={handleContextualAdd}
+                    canMoveLeft={canMoveLeft}
+                    canMoveRight={canMoveRight}
+                    onMoveLeft={(id) => moveBlockWithinRow(id, "left")}
+                    onMoveRight={(id) => moveBlockWithinRow(id, "right")}
                     onStartMove={dragMove.startMove}
                     onReplace={(id) => setReplaceTarget(replaceTarget === id ? null : id)}
                     onRemove={removeBlock}
@@ -342,9 +504,7 @@ export default function Canvas() {
 
                 {/* Splitter handles (drag-to-resize) */}
                 {editing && showEditControls && (() => {
-                  const row = rows.find(r => r.blockIds.includes(block.id));
                   if (!row) return null;
-                  const blockIdx = row.blockIds.indexOf(block.id);
                   const rightNeighborId = row.blockIds[blockIdx + 1];
                   const leftNeighborId = blockIdx > 0 ? row.blockIds[blockIdx - 1] : null;
                   return (
@@ -380,7 +540,7 @@ export default function Canvas() {
           })}
 
           {/* Column insertion zones */}
-          {editing && !dragPlace.dragging && !dragMove.movingBlock && rows.map((row, rowIdx) => {
+          {showInsertionControls && rows.map((row, rowIdx) => {
             if (row.blockIds.length >= MAX_PER_ROW || row.blockIds.length === 0) return null;
             const rowLayoutBlocks = layout.filter(lb => row.blockIds.includes(lb.id));
             if (rowLayoutBlocks.length === 0) return null;
@@ -408,7 +568,7 @@ export default function Canvas() {
           })}
 
           {/* Row insertion zones */}
-          {editing && !dragPlace.dragging && !dragMove.movingBlock && rowBoundaries.map((bound, i) => (
+          {showInsertionControls && rowBoundaries.map((bound, i) => (
             <RowInsertionBar
               key={`ins-${i}`}
               y={bound.y * (CELL + GAP)}
@@ -441,15 +601,15 @@ export default function Canvas() {
       </div>
 
       {/* ── Footer ── */}
-      <div className={styles.footer}>
+      <div className={`${styles.footer} ${editing ? styles.footerEditing : ""}`}>
         <span className={styles.footerLeft}>
-          {"\u25C6"} {blockCount} blocks &middot; {COLS}-column grid &middot;
-          Dashboard
+          <span className={styles.footerTag}>{editing ? "Editing" : "Canvas"}</span>
+          <span className={styles.footerMeta}>{blockCount} blocks</span>
+          <span className={styles.footerDivider}>&middot;</span>
+          <span className={styles.footerMeta}>{COLS}-column grid</span>
         </span>
         <span className={styles.footerRight}>
-          {editing
-            ? "\u270E Editing \u2014 drag, resize, + to add"
-            : "Powered by @felmark/forge"}
+          <span className={styles.footerStatus}>{footerStatus}</span>
         </span>
       </div>
 
@@ -461,6 +621,22 @@ export default function Canvas() {
           selectionMode={libraryTarget !== null}
           onClose={handleLibraryClose}
         />
+      )}
+
+      {dragMove.movingBlock && dragMove.moveCursor && dragMove.moveOffset && movingRenderBlock && movingBlockFrame && (
+        <div
+          className={styles.moveGhost}
+          style={{
+            left: dragMove.moveCursor.x - dragMove.moveOffset.x,
+            top: dragMove.moveCursor.y - dragMove.moveOffset.y,
+            width: movingBlockFrame.width,
+            height: movingBlockFrame.height,
+          }}
+        >
+          <div className={styles.moveGhostCard}>
+            <BlockContent block={movingRenderBlock} />
+          </div>
+        </div>
       )}
 
       {/* ── Drag cursor preview ── */}

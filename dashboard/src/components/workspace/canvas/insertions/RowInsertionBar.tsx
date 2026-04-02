@@ -28,7 +28,7 @@ export default function RowInsertionBar({ y, width, onInsert }: RowInsertionBarP
       <div className={styles.insertionLine} />
       <button
         type="button"
-        className={styles.insertionBtn}
+        className={`${styles.insertionBtn} ${styles.rowInsertionBtn}`}
         aria-label="Insert row"
         onMouseDown={(e) => {
           e.preventDefault();
@@ -36,7 +36,8 @@ export default function RowInsertionBar({ y, width, onInsert }: RowInsertionBarP
         }}
         onClick={handleInsert}
       >
-        +
+        <span className={styles.insertionPlus} aria-hidden="true">+</span>
+        <span className={styles.rowInsertionLabel}>Add block</span>
       </button>
     </div>
   );
