@@ -77,9 +77,9 @@ This is boilerplate, not complexity. No refactor needed unless Editor.tsx itself
 
 | Feature | Status | Primary Files | Notes |
 |---------|--------|---------------|-------|
-| **Workspace shell & nav** | Active | `page.tsx`, `rail/`, `sidebar/`, `dashboard/` | Core frame, workspace switching, rail icons, sidebar now consumes forge shell summary |
+| **Workspace shell & nav** | Active | `page.tsx`, `rail/`, `sidebar/`, `workstation/WorkstationSidebar*`, `dashboard/` | Core frame, workspace switching, rail icons, forge-backed shell summary, and workstation-specific rail swapping on editor/workstation screens |
 | **Editor core** | Active | `editor/Editor.tsx`, `types.ts`, `constants.ts` | Block system, slash menu, format bar, command bar |
-| **Editor margin** | Active | `editor/chrome/margin/` | Workstation control rail, outline, block map, multi-select, context menu, drag reorder |
+| **Editor margin** | Active | `editor/chrome/margin/` | Inline fallback outline/block-map margin when the shell-level workstation rail is collapsed; still owns multi-select, context menu, and drag reorder |
 | **Activity & comments** | Active | `activity/`, `comments/` | Right-side activity margin, comment panel |
 | **Calendar** | Active | `calendar/` | Full calendar view, event creation, week view |
 | **Templates** | Active | `templates/` | Template picker, save-template, starter templates |
@@ -141,8 +141,8 @@ These files have broad blast radius. Check them when features are added or delet
 | `types.ts` | Block interface, all data types | Every block type |
 | `constants.ts` | BLOCK_TYPES, BLOCK_CATEGORIES, STATUS | Every block type |
 | `Editor.tsx` | contentBlockMap, CONTENT_DEFAULTS, renderBlock | Every block type |
-| `EditorMargin.tsx` | Workstation rail composition plus block-map rendering | Every block type and editor-left-rail behavior |
-| `rail-data.ts` | Derived review/context/signal summaries and block-preview labels for the workstation rail | Editor margin data contract |
+| `EditorMargin.tsx` | Inline fallback margin with outline and block-map rendering when the shell rail is closed | Every block type and editor-left-rail behavior |
+| `rail-data.ts` | Derived review/context/signal summaries and block-preview labels for the workstation rail | Shared data contract for the shell workstation sidebar and inline editor margin |
 | `Rail.tsx` | Navigation icons | Top-level features |
 | `Sidebar.tsx` | Workspace tree, calendar, search | Navigation features |
 | `dashboard/src/forge/index.ts` | Public forge entrypoint for services and future domain/read-model wiring | Shared business logic consumers |

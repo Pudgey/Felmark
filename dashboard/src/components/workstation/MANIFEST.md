@@ -25,6 +25,8 @@ The Workstation is Felmark's flagship product surface — the full-featured free
 |------|-------------|
 | `Workstation.tsx` | Workstation home view — project grid, stats, deadline overview |
 | `Workstation.module.css` | Workstation home styles |
+| `WorkstationSidebar.tsx` | Workstation-specific shell rail for workstation/editor screens; outline-first navigation with document stack, review queue, context, signals, terminal summary, and block map |
+| `WorkstationSidebar.module.css` | Shell rail styling for the workstation sidebar |
 
 ## Imported By
 
@@ -32,7 +34,7 @@ The Workstation is Felmark's flagship product surface — the full-featured free
 |----------|------|
 | `views/ViewRouter.tsx` | Routes `railActive` to the correct feature view |
 | `views/*.tsx` | Individual view wrappers import their feature component |
-| `app/page.tsx` | Templates (SaveTemplateModal, TemplatePicker) |
+| `app/page.tsx` | Templates (SaveTemplateModal, TemplatePicker) and shell rail swapping on workstation/editor screens |
 
 ## Shared Dependencies (top-level components used by workstation features)
 
