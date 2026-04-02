@@ -9,11 +9,9 @@ interface BreadcrumbProps {
   activeProject: string;
   workstations: Workstation[];
   onSelectWorkstationHome?: (wsId: string) => void;
-  breathe: boolean;
-  setBreathe: (fn: (prev: boolean) => boolean) => void;
 }
 
-export default function Breadcrumb({ tabs, activeProject, workstations, onSelectWorkstationHome, breathe, setBreathe }: BreadcrumbProps) {
+export default function Breadcrumb({ tabs, activeProject, workstations, onSelectWorkstationHome }: BreadcrumbProps) {
   const activeTab = tabs.find(t => t.active);
   const activeWs = workstations.find(w => w.projects.some(p => p.id === activeProject));
   const canGoToWorkstationHome = Boolean(activeWs?.id && onSelectWorkstationHome);
@@ -54,13 +52,6 @@ export default function Breadcrumb({ tabs, activeProject, workstations, onSelect
         const st = STATUS[pj.status];
         return <span className={styles.breadStatus} style={{ background: `${st.color}12`, color: st.color, border: `1px solid ${st.color}20` }}>{st.label}</span>;
       })()}
-      <button className={`${styles.breatheBtn} ${breathe ? styles.breatheOn : ""}`} onClick={() => setBreathe(b => !b)} title={breathe ? "Default width" : "Full width"}>
-        {breathe ? (
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2v3h3M5 12V9H2M9 12V9h3M5 2v3H2" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" /></svg>
-        ) : (
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 5V2h3M12 5V2h-3M2 9v3h3M12 9v3h-3" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" /></svg>
-        )}
-      </button>
     </div>
   );
 }

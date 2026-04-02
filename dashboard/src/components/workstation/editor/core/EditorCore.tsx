@@ -294,6 +294,8 @@ export default function EditorCore(props: EditorProps) {
           manuallyRenamed={manuallyRenamed}
         >
           <Toolbar
+            breathe={panels.breathe}
+            setBreathe={panels.setBreathe}
             splitProject={splitProject}
             onSplitOpen={onSplitOpen}
             onSplitClose={onSplitClose}
@@ -327,8 +329,6 @@ export default function EditorCore(props: EditorProps) {
         activeProject={activeProject}
         workstations={workstations}
         onSelectWorkstationHome={onSelectWorkstationHome}
-        breathe={panels.breathe}
-        setBreathe={panels.setBreathe}
       />}
 
       {/* Editor + panels */}
