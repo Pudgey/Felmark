@@ -3,9 +3,8 @@
 import { useState, useCallback, useRef, useEffect, type SetStateAction } from "react";
 import { INITIAL_WORKSTATIONS } from "@/lib/constants";
 import type { Block, Workstation, Project, Tab, ArchivedProject, WorkstationTemplate } from "@/lib/types";
-import { uid, makeBlocks } from "@/lib/utils";
+import { uid } from "@/lib/utils";
 import Rail from "@/components/rail/Rail";
-import Sidebar from "@/components/sidebar/Sidebar";
 import WorkstationOnboarding from "@/components/onboarding/WorkstationOnboarding";
 import ErrorBoundary from "@/components/shared/ErrorBoundary";
 import { INITIAL_COMMENTS, type Comment } from "@/components/comments/CommentPanel";
@@ -18,6 +17,7 @@ import { createForge } from "@/forge";
 import type { StateUpdater } from "@/forge";
 import SaveTemplateModal from "@/components/workstation/templates/SaveTemplateModal";
 import TemplatePicker from "@/components/workstation/templates/TemplatePicker";
+import WorkstationSidebar from "@/components/workstation/WorkstationSidebar";
 import ViewRouter from "@/views/ViewRouter";
 
 const INITIAL_TABS: Tab[] = [
@@ -80,11 +80,9 @@ export default function Dashboard() {
   const [archived, setArchived] = useState<ArchivedProject[]>([]);
   const [comments, setComments] = useState<Comment[]>(INITIAL_COMMENTS);
   const [activitiesMap, setActivitiesMap] = useState<Record<string, BlockActivity[]>>({ p1: INITIAL_ACTIVITIES });
-  const [saveIndicatorState, setSaveIndicatorState] = useState<"saved" | "saving">("saved");
+  const [, setSaveIndicatorState] = useState<"saved" | "saving">("saved");
   const [saveRequestToken, setSaveRequestToken] = useState(0);
   const [lastCompletedSaveToken, setLastCompletedSaveToken] = useState<number | null>(null);
-  const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
-  const [saveStatusTick, setSaveStatusTick] = useState(0);
 
   // ── Hydrate from localStorage after mount (avoids SSR mismatch) ──
   const [hydrated, setHydrated] = useState(false);
@@ -103,11 +101,6 @@ export default function Dashboard() {
     if (cm) setComments(cm);
     const am = loadFromStorage("activitiesMap", null);
     if (am) setActivitiesMap(am);
-    const ls = loadFromStorage("lastSavedAt", null);
-    if (typeof ls === "number") {
-      setLastSavedAt(ls);
-      setSaveStatusTick(ls);
-    }
     setHydrated(true);
   }, []);
 
@@ -154,8 +147,6 @@ export default function Dashboard() {
     saveToStorage("activitiesMap", activitiesMap);
     saveToStorage("activeProject", activeProject);
     saveToStorage("lastSavedAt", savedAt);
-    setLastSavedAt(savedAt);
-    setSaveStatusTick(savedAt);
     setLastCompletedSaveToken(saveToken);
   }, [workstations, blocksMap, tabs, archived, comments, activitiesMap, activeProject]);
 
@@ -230,25 +221,6 @@ export default function Dashboard() {
     return () => window.clearTimeout(timer);
   }, [lastCompletedSaveToken, saveRequestToken]);
 
-  useEffect(() => {
-    if (!lastSavedAt) return;
-    const tick = window.setInterval(() => setSaveStatusTick(Date.now()), 30000);
-    return () => window.clearInterval(tick);
-  }, [lastSavedAt]);
-
-  const saveStatusLabel = (() => {
-    if (saveIndicatorState === "saving") return "saving...";
-    if (!lastSavedAt) return "saved";
-    const elapsed = Math.max(0, saveStatusTick - lastSavedAt);
-    const minutes = Math.floor(elapsed / 60000);
-    if (minutes <= 0) return "saved just now";
-    if (minutes === 1) return "saved 1m ago";
-    if (minutes < 60) return `saved ${minutes}m ago`;
-    const hours = Math.floor(minutes / 60);
-    if (hours === 1) return "saved 1h ago";
-    return `saved ${hours}h ago`;
-  })();
-
   // Zen mode: Escape to exit
   useEffect(() => {
     if (!zenMode) return;
@@ -272,10 +244,6 @@ export default function Dashboard() {
     setActivitiesMap: updateActivitiesMap,
   };
   const forge = createForge(forgeState);
-  const sidebarSummary = forge.readModels.sidebar.getSummary();
-
-  // Single click — pure expand/collapse toggle
-  const toggleWorkstation = (wid: string) => forge.workstations.toggle(wid);
 
   const restoreWorkstationContext = () => {
     setRailActive("workstations");
@@ -375,14 +343,6 @@ export default function Dashboard() {
 
   const handleTabReorder = (sourceId: string, targetId: string, position: "before" | "after") => forge.tabs.reorder(sourceId, targetId, position);
 
-  const togglePin = (projectId: string) => forge.projects.togglePin(projectId);
-  const cycleStatus = (projectId: string) => forge.projects.cycleStatus(projectId);
-
-  const addWorkstation = (name: string) => {
-    // Show onboarding card instead of creating immediately
-    setOnboardingName(name);
-  };
-
   const TEMPLATE_LABELS: Record<WorkstationTemplate, string> = {
     blank: "Blank Project", proposal: "Proposal", meeting: "Meeting Notes",
     brief: "Project Brief", retainer: "Retainer", invoice: "Invoice",
@@ -407,11 +367,6 @@ export default function Dashboard() {
 
   const updateProjectDue = (projectId: string, due: string | null) => forge.projects.setDue(projectId, due);
 
-  const archiveProject = (projectId: string) => forge.projects.archive(projectId);
-  const archiveCompletedInWorkstation = (wsId: string) => forge.workstations.archiveCompleted(wsId);
-  const archiveWorkstation = (wsId: string) => forge.workstations.archive(wsId);
-  const restoreProject = (archivedIdx: number) => forge.projects.restore(archivedIdx);
-
   const handleNewTab = () => {
     restoreWorkstationContext();
     const activeWs = workstations.find(w => w.projects.some(p => p.id === activeProject)) || workstations[0];
@@ -424,9 +379,9 @@ export default function Dashboard() {
     forge.projects.createInWorkstation(wsId);
   };
 
-  const handleBlocksChange = useCallback((projectId: string, blocks: Block[]) => {
+  const handleBlocksChange = (projectId: string, blocks: Block[]) => {
     forge.documents.setBlocks(projectId, blocks);
-  }, []);
+  };
 
   const handleWordCountChange = useCallback((words: number, chars: number) => {
     setWordCount(words);
@@ -434,8 +389,9 @@ export default function Dashboard() {
   }, []);
 
   const activeBlocks = blocksMap[activeProject] || HYDRATION_SAFE_EMPTY_BLOCKS;
+  const workstationSidebarBlocks = activeProject ? activeBlocks : [];
 
-  const navigateRail = useCallback((item: string) => {
+  const navigateRail = (item: string) => {
     if (item === "workstations") {
       restoreWorkstationContext();
       return;
@@ -452,7 +408,7 @@ export default function Dashboard() {
       updateActiveProject("");
       setSidebarOpen(true);
     }
-  }, [restoreWorkstationContext, openForgeRail, updateTabs, updateActiveProject]);
+  };
 
   const handleRenameWorkstation = useCallback((wsId: string, name: string) => {
     updateWorkstations(prev => prev.map(w => w.id === wsId ? { ...w, client: name, avatar: name[0].toUpperCase() } : w));
@@ -495,35 +451,23 @@ export default function Dashboard() {
         zenMode={zenMode}
         onToggleZen={() => setZenMode(true)}
       />}
-      {showWorkstationSidebar && <Sidebar
-        workstations={workstations}
-        sidebarSummary={sidebarSummary}
-        archived={archived}
-        activeProject={activeProject}
-        open={sidebarOpen}
-        width={sidebarWidth}
-        isResizing={isResizing}
-        railActive={railActive}
-        onClose={() => setSidebarOpen(false)}
-        onToggleWorkstation={toggleWorkstation}
-        onSelectWorkstationHome={selectWorkstationHome}
-        onSelectProject={selectProject}
-        onArchiveProject={archiveProject}
-        onArchiveCompleted={archiveCompletedInWorkstation}
-        onArchiveWorkstation={archiveWorkstation}
-        onRestoreProject={restoreProject}
-        onRenameProject={handleTabRename}
-        onUpdateProjectDue={updateProjectDue}
-        onRenameWorkstation={(wsId, name) => forge.workstations.rename(wsId, name)}
-        onReorderWorkstations={(fromIdx, toIdx) => forge.workstations.reorder(fromIdx, toIdx)}
-        onAddWorkstation={addWorkstation}
-        onTogglePin={togglePin}
-        onCycleStatus={cycleStatus}
-        onScrollToCalendarEvent={(projectId) => setCalendarScrollTarget(projectId)}
-        saveIndicatorState={saveIndicatorState}
-        saveStatusLabel={saveStatusLabel}
-        onSaveNow={saveNow}
-      />}
+      {showWorkstationSidebar && (
+        <WorkstationSidebar
+          blocks={workstationSidebarBlocks}
+          workstations={workstations}
+          tabs={tabs}
+          activeProject={activeProject}
+          activeWorkstationId={activeWorkstationId}
+          comments={comments}
+          activities={activitiesMap[activeProject] || []}
+          splitProject={splitProject}
+          open={sidebarOpen}
+          width={sidebarWidth}
+          onClose={() => setSidebarOpen(false)}
+          onSelectTab={handleTabClick}
+          onSelectWorkstationHome={selectWorkstationHome}
+        />
+      )}
       {/* Resize handle */}
       {sidebarOpen && showWorkstationSidebar && (
         <div
