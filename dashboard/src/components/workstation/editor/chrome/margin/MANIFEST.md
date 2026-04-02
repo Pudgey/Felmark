@@ -3,7 +3,7 @@
 > Auto-maintained by AI. Updated on every file change in this folder.
 
 ## Exports
-- `EditorMargin` -- Document outline sidebar with heading navigation and block labels
+- `EditorMargin` -- Workstation control rail with document stack, review signals, terminal state, outline navigation, and block labels
 
 ## Dependencies
 - `@/lib/types` -- Block
@@ -14,3 +14,4 @@
 ## Files
 - `EditorMargin.tsx` -- main component (421 lines)
 - `EditorMargin.module.css` -- styles
+- `rail-data.ts` -- derived workstation-rail summaries, labels, and block-preview helpers
