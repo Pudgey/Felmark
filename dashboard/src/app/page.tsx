@@ -540,6 +540,7 @@ export default function Dashboard() {
       {showEditorSidebar && (
         <EditorSidebar
           workstation={workstations.find(w => w.id === activeWorkstationId) ?? null}
+          workstations={workstations}
           activeProject={activeProject}
           activeTab={tabs.find(t => t.active) ?? null}
           blocks={activeBlocks}
@@ -554,6 +555,7 @@ export default function Dashboard() {
           onTabClick={handleTabClick}
           onNewTab={handleNewTab}
           onSelectProject={selectProject}
+          onSelectWorkstationHome={selectWorkstationHome}
           onSaveNow={saveNow}
         />
       )}

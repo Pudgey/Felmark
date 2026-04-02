@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { STATUS } from "@/lib/constants";
 import type { Workstation, Project, Tab, Block } from "@/lib/types";
 import styles from "./EditorSidebar.module.css";
 
 interface EditorSidebarProps {
   workstation: Workstation | null;
+  workstations: Workstation[];
   activeProject: string;
   activeTab: Tab | null;
   blocks: Block[];
@@ -21,6 +22,7 @@ interface EditorSidebarProps {
   onTabClick: (id: string) => void;
   onNewTab: () => void;
   onSelectProject: (project: Project, client: string) => void;
+  onSelectWorkstationHome: (wsId: string) => void;
   onSaveNow: () => void;
 }
 
@@ -66,6 +68,7 @@ function todoProgress(blocks: Block[]): { checked: number; total: number } {
 
 export default function EditorSidebar({
   workstation,
+  workstations,
   activeProject,
   activeTab,
   blocks,
@@ -80,11 +83,27 @@ export default function EditorSidebar({
   onTabClick,
   onNewTab,
   onSelectProject,
+  onSelectWorkstationHome,
   onSaveNow,
 }: EditorSidebarProps) {
   const [docsOpen, setDocsOpen] = useState(true);
   const [outlineOpen, setOutlineOpen] = useState(true);
   const [terminalOpen, setTerminalOpen] = useState(false);
+  const [switcherOpen, setSwitcherOpen] = useState(false);
+  const switcherRef = useRef<HTMLDivElement>(null);
+
+  // Close switcher on outside click
+  useEffect(() => {
+    if (!switcherOpen) return;
+    const handler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest(`.${styles.switcherDropdown}`) && !target.closest(`.${styles.clientBadge}`)) {
+        setSwitcherOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [switcherOpen]);
 
   const words = useMemo(() => countWords(blocks), [blocks]);
   const outline = useMemo(() => buildOutline(blocks), [blocks]);
@@ -102,13 +121,14 @@ export default function EditorSidebar({
       <div className={styles.inner}>
         {/* Header */}
         <div className={styles.head}>
-          <div className={styles.clientBadge}>
+          <div className={styles.clientBadge} onClick={() => setSwitcherOpen(!switcherOpen)}>
             {workstation && (
               <div className={styles.clientAvatar} style={{ background: workstation.avatarBg }}>
                 {workstation.avatar}
               </div>
             )}
             <span className={styles.clientName}>{clientName}</span>
+            <span className={styles.clientChevron} style={{ transform: switcherOpen ? "rotate(180deg)" : undefined }}>&#9662;</span>
           </div>
           <div className={styles.headActions}>
             <button className={styles.iconBtn} title="New document" aria-label="New document" onClick={onNewTab}>
@@ -118,6 +138,23 @@ export default function EditorSidebar({
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 4l6 6M10 4l-6 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
             </button>
           </div>
+          {switcherOpen && (
+            <div className={styles.switcherDropdown} ref={switcherRef}>
+              {workstations.map(ws => (
+                <div
+                  key={ws.id}
+                  className={`${styles.switcherItem} ${ws.id === workstation?.id ? styles.switcherItemActive : ""}`}
+                  onClick={() => { onSelectWorkstationHome(ws.id); setSwitcherOpen(false); }}
+                >
+                  <div className={styles.switcherAvatar} style={{ background: ws.avatarBg }}>{ws.avatar}</div>
+                  <div className={styles.switcherInfo}>
+                    <span className={styles.switcherName}>{ws.client}</span>
+                    <span className={styles.switcherMeta}>{ws.projects.length} projects</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Current document indicator */}
