@@ -6,6 +6,8 @@ import styles from "./Toolbar.module.css";
 const TERMINAL_SPLIT_ID = "__terminal__";
 
 interface ToolbarProps {
+  breathe: boolean;
+  setBreathe: (fn: (prev: boolean) => boolean) => void;
   splitProject?: string | null;
   onSplitOpen?: (projectId: string) => void;
   onSplitClose?: () => void;
@@ -25,6 +27,8 @@ interface ToolbarProps {
 }
 
 export default function Toolbar({
+  breathe,
+  setBreathe,
   splitProject,
   onSplitOpen,
   onSplitClose,
@@ -42,6 +46,22 @@ export default function Toolbar({
 }: ToolbarProps) {
   return (
     <div className={styles.tabBarRight}>
+      <button
+        className={`${styles.tabBarAction} ${breathe ? styles.tabBarActionActive : ""}`}
+        title={breathe ? "Default width" : "Full width"}
+        aria-label={breathe ? "Default width" : "Full width"}
+        onClick={() => setBreathe((prev) => !prev)}
+      >
+        {breathe ? (
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M10 2.25v3h3M6 13.75v-3H3M10 13.75v-3h3M6 2.25v3H3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        ) : (
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M3 5.75v-3h3M13 5.75v-3h-3M3 10.25v3h3M13 10.25v3h-3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        )}
+      </button>
       <button
         className={`${styles.tabBarAction} ${splitProject === TERMINAL_SPLIT_ID ? styles.tabBarActionActive : ""}`}
         title="Terminal"
