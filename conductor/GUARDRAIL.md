@@ -1,6 +1,6 @@
 # Guardrail — Feature Inventory & Codebase Health
 
-> **Last synced**: 2026-04-02
+> **Last synced**: 2026-04-01
 > **Auto-update rule**: This file MUST be updated in the same commit as any feature add, delete, rename, or move. This is not optional — the AI enforces it as a mandatory post-commit check.
 
 ## Codebase Pulse
@@ -77,9 +77,9 @@ This is boilerplate, not complexity. No refactor needed unless Editor.tsx itself
 
 | Feature | Status | Primary Files | Notes |
 |---------|--------|---------------|-------|
-| **Workspace shell & nav** | Active | `page.tsx`, `rail/`, `sidebar/`, `workstation/WorkstationSidebar*`, `dashboard/` | Core frame, workspace switching, rail icons, forge-backed shell summary, and workstation-specific rail swapping on editor/workstation screens |
+| **Workspace shell & nav** | Active | `page.tsx`, `rail/`, `sidebar/`, `dashboard/` | Core frame, workspace switching, rail icons |
 | **Editor core** | Active | `editor/Editor.tsx`, `types.ts`, `constants.ts` | Block system, slash menu, format bar, command bar |
-| **Editor margin** | Active | `editor/chrome/margin/` | Inline fallback outline/block-map margin when the shell-level workstation rail is collapsed; still owns multi-select, context menu, and drag reorder |
+| **Editor margin** | Active | `editor/margin/` | Outline, multi-select, context menu, drag reorder |
 | **Activity & comments** | Active | `activity/`, `comments/` | Right-side activity margin, comment panel |
 | **Calendar** | Active | `calendar/` | Full calendar view, event creation, week view |
 | **Templates** | Active | `templates/` | Template picker, save-template, starter templates |
@@ -88,13 +88,12 @@ This is boilerplate, not complexity. No refactor needed unless Editor.tsx itself
 | **Notifications** | Active | `notifications/` | 10 types, avatar/icon, action buttons, 6 filters |
 | **Onboarding / Launchpad** | Active | `onboarding/`, `launchpad/` | First-run, workspace creation, creation animation |
 | **Search** | Active | `search/` | Cross-workspace content search |
-| **Finance** | Active | `finance/`, `editor/money/`, `dashboard/src/forge/domains/finance/` | Finance page + money blocks; forge finance domain now owns shell finance summaries |
+| **Finance** | Active | `finance/`, `editor/money/` | Finance page + money blocks |
 | **Pipeline** | Active | `pipeline/` | Pipeline board view |
 | **Team** | Active | `team/` | Team collaboration surface |
 | **The Wire** | Needs wiring | `wire/` | Competitive intelligence surface |
 | **Workspace** | Active | `workspace/` | Rail surface — task/project management, list/board/timeline views |
 | **Forge Paper** | Active | `forge-paper/` | Rail surface — owns blocks state, document view for client proposals |
-| **Forge shared model** | Active | `dashboard/src/forge/`, `dashboard/src/forge/domains/`, `dashboard/src/forge/read-models/` | Shared business-logic seam; finance selectors and sidebar read model are now wired through the forge facade |
 | **Terminal Welcome** | Active | `editor/TerminalWelcome.tsx` | Dead-state splash screen |
 | **History** | Active | `history/` | Version history modal |
 | **Conversations** | Active | `editor/ConversationPanel.tsx` | Left-side conversation panel |
@@ -141,13 +140,9 @@ These files have broad blast radius. Check them when features are added or delet
 | `types.ts` | Block interface, all data types | Every block type |
 | `constants.ts` | BLOCK_TYPES, BLOCK_CATEGORIES, STATUS | Every block type |
 | `Editor.tsx` | contentBlockMap, CONTENT_DEFAULTS, renderBlock | Every block type |
-| `EditorMargin.tsx` | Inline fallback margin with outline and block-map rendering when the shell rail is closed | Every block type and editor-left-rail behavior |
-| `rail-data.ts` | Derived review/context/signal summaries and block-preview labels for the workstation rail | Shared data contract for the shell workstation sidebar and inline editor margin |
+| `EditorMargin.tsx` | BLOCK_LABELS, BLOCK_LABEL_COLORS | Every block type |
 | `Rail.tsx` | Navigation icons | Top-level features |
 | `Sidebar.tsx` | Workspace tree, calendar, search | Navigation features |
-| `dashboard/src/forge/index.ts` | Public forge entrypoint for services and future domain/read-model wiring | Shared business logic consumers |
-| `dashboard/src/forge/domains/finance/selectors.ts` | Canonical shell and workstation finance summaries | Sidebar, workspace, future Stripe-facing summaries |
-| `dashboard/src/forge/read-models/sidebar.ts` | Shell projection that feeds sidebar metrics and workstation revenue badges | Shell navigation and urgency cues |
 
 ---
 

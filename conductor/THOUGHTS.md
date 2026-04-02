@@ -18,13 +18,14 @@
 
 | Agent | Task | Started | Status |
 |-------|------|---------|--------|
+| — | — | — | — |
 
 ## Recent
 
 | Agent | Task | Completed |
 |-------|------|-----------|
-| codex-main | Re-scoping the workstation sidebar so it replaces the shell sidebar on workstation screens and keeps outline as the primary navigation surface | 2026-04-02 13:11 EDT |
-| codex-main | Wired the workspace canvas Done action to persist layout so rail and tab switches no longer reset the edited composition | 2026-04-02 13:05 EDT |
-| codex-main | Separated vertical row cadence from column gutters so the workspace canvas breathes more intentionally between bands | 2026-04-02 13:02 EDT |
-| codex-main | Reworking the workstation editor margin into a true workstation control rail so it reflects docs, review, signals, and terminal state instead of only outline data | 2026-04-02 12:45 EDT |
-| codex-main | Fixing the sidebar runtime crash caused by a leftover totalProjects reference after the forge summary wiring | 2026-04-02 12:03 EDT |
+| codex-main | Gave workstation blocks subtler edit identities so metric, chat, and utility blocks read differently without adding noise | 2026-04-02 04:49 EDT |
+| codex-main | Reduced workstation canvas border, chrome, and insertion noise so only one editing layer is visually leading at a time | 2026-04-02 04:49 EDT |
+| codex-main | Demoted the workstation gutter delete control to a secondary hover action so breathe mode keeps stable add and drag controls | 2026-04-02 04:46 EDT |
+| codex-main | Added a live placeholder and floating ghost so workstation block moves preview surrounding reflow before drop | 2026-04-02 04:40 EDT |
+| codex-main | Reworked the workstation canvas footer into a tighter status strip with precise editing states | 2026-04-02 04:32 EDT |

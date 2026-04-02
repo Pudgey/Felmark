@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback } from "react";
 import type { Block, Workstation, Tab } from "@/lib/types";
 import type { Project, DocumentTemplate } from "@/lib/types";
 import { cursorTo } from "@/lib/utils";
@@ -30,6 +30,7 @@ import ZenHint from "./components/zen-hint/ZenHint";
 import ShareModal from "../panels/share-modal/ShareModal";
 import CatTerminal from "../panels/cat/CatTerminal";
 import ConversationPanel from "../panels/conversation/ConversationPanel";
+import CommentPanel from "../../../comments/CommentPanel";
 import ActivityMargin from "../../../activity/ActivityMargin";
 import HistoryModal from "../../../history/HistoryModal";
 import EditorMargin from "../chrome/margin/EditorMargin";
@@ -89,7 +90,7 @@ export default function EditorCore(props: EditorProps) {
     workstations, tabs, activeProject, blocks: blocksProp, sidebarOpen, charCount,
     onOpenSidebar, onTabClick, onTabClose, onNewTab, onTabRename, onBlocksChange, onWordCountChange,
     activeWorkstationId, onSelectWorkstationHome, onNavigateRail,
-    onUpdateProjectDue, comments, activities, onActivitiesChange,
+    onUpdateProjectDue, comments, onCommentsChange, activities, onActivitiesChange,
     zenMode, onToggleZen, splitProject, splitBlocks, splitProjectName, splitClientName,
     onSplitOpen, onSplitClose, onSplitMakePrimary,
   } = props;
@@ -268,18 +269,6 @@ export default function EditorCore(props: EditorProps) {
 
   const unreadTotal = 0;
 
-  useEffect(() => {
-    const handleExternalScroll = (event: Event) => {
-      const detail = (event as CustomEvent<{ blockId?: string }>).detail;
-      const blockId = detail?.blockId;
-      if (!blockId) return;
-      focus.scrollToBlock(blockId, "start");
-    };
-
-    window.addEventListener("felmark:scroll-to-block", handleExternalScroll as EventListener);
-    return () => window.removeEventListener("felmark:scroll-to-block", handleExternalScroll as EventListener);
-  }, [focus]);
-
   return (
     <div className={`${styles.main} ${zenMode ? styles.zenMode : ""}`}>
       {/* Tab bar */}
@@ -350,18 +339,11 @@ export default function EditorCore(props: EditorProps) {
           <div className={styles.surfaceStage}>
             <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
               {/* Left margin */}
-              {!zenMode && !sidebarOpen && <EditorMargin
+              {!zenMode && <EditorMargin
                 blocks={blockOps.blocks}
-                workstations={workstations}
-                tabs={tabs}
-                activeProject={activeProject}
-                comments={comments}
-                activities={activities}
-                splitProject={splitProject}
                 hoveredBlock={hoverBlock}
                 onHoverBlock={setHoverBlock}
                 onScrollTo={(id) => focus.scrollToBlock(id, "start")}
-                onSelectTab={onTabClick}
                 onReorderBlock={(fromIdx, toIdx) => {
                   blockOps.setBlocks(prev => {
                     const n = [...prev];
