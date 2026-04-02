@@ -16,7 +16,7 @@ interface SidebarProps {
   railActive: string;
   onClose: () => void;
   onToggleWorkstation: (id: string) => void;
-  onSelectWorkstationHome: (id: string) => void;
+  onSelectWorkstation: (id: string) => void;
   onSelectProject: (project: Project, client: string) => void;
   onArchiveProject: (projectId: string) => void;
   onArchiveCompleted: (wsId: string) => void;
@@ -207,7 +207,7 @@ const REVENUE_WEEKS = [
 
 import { getDueLabel as getDueLabelFromDate, getDueColor as getDueColorFromDate } from "@/lib/due-dates";
 
-export default function Sidebar({ workstations, archived, activeProject, open, width, isResizing, wordCount, railActive, onClose, onToggleWorkstation, onSelectWorkstationHome, onSelectProject, onArchiveProject, onArchiveCompleted, onArchiveWorkstation, onRestoreProject, onReorderWorkstations, onRenameWorkstation, onRenameProject, onUpdateProjectDue, onAddWorkstation, onTogglePin, onCycleStatus, saveIndicatorState, saveStatusLabel, onSaveNow, onScrollToCalendarEvent }: SidebarProps) {
+export default function Sidebar({ workstations, archived, activeProject, open, width, isResizing, wordCount, railActive, onClose, onToggleWorkstation, onSelectWorkstation, onSelectProject, onArchiveProject, onArchiveCompleted, onArchiveWorkstation, onRestoreProject, onReorderWorkstations, onRenameWorkstation, onRenameProject, onUpdateProjectDue, onAddWorkstation, onTogglePin, onCycleStatus, saveIndicatorState, saveStatusLabel, onSaveNow, onScrollToCalendarEvent }: SidebarProps) {
   const [wsMenu, setWsMenu] = useState<string | null>(null);
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [showAddWs, setShowAddWs] = useState(false);
@@ -504,7 +504,7 @@ export default function Sidebar({ workstations, archived, activeProject, open, w
                 onDragEnd={() => { setDragWsId(null); setDropWsId(null); dragRef.current = null; }}
               >
                 <div className={styles.wsHeadClick} onClick={() => { if (editingWsId !== ws.id) onToggleWorkstation(ws.id); }}>
-                  <div className={styles.wsAvatar} style={{ background: ws.avatarBg }} onDoubleClick={e => { e.stopPropagation(); onSelectWorkstationHome(ws.id); }}>{ws.avatar}</div>
+                  <div className={styles.wsAvatar} style={{ background: ws.avatarBg }} onDoubleClick={e => { e.stopPropagation(); onSelectWorkstation(ws.id); }}>{ws.avatar}</div>
                   <div className={styles.wsInfo}>
                     {editingWsId === ws.id ? (
                       <input className={styles.wsRenameInput} value={editingWsName} autoFocus
@@ -564,7 +564,7 @@ export default function Sidebar({ workstations, archived, activeProject, open, w
                 >
                   <div className={styles.wsHead}>
                     <div className={styles.wsHeadClick} onClick={() => { if (editingWsId !== ws.id) onToggleWorkstation(ws.id); }}>
-                      <div className={styles.wsAvatar} style={{ background: ws.avatarBg }} onDoubleClick={e => { e.stopPropagation(); onSelectWorkstationHome(ws.id); }}>{ws.avatar}</div>
+                      <div className={styles.wsAvatar} style={{ background: ws.avatarBg }} onDoubleClick={e => { e.stopPropagation(); onSelectWorkstation(ws.id); }}>{ws.avatar}</div>
                       <div className={styles.wsInfo}>
                         {editingWsId === ws.id ? (
                           <input className={styles.wsRenameInput} value={editingWsName} autoFocus

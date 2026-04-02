@@ -64,7 +64,7 @@ export interface EditorProps {
   onWordCountChange: (words: number, chars: number) => void;
   activeWorkstationId?: string | null;
   onSelectProject?: (project: Project, client: string) => void;
-  onSelectWorkstationHome?: (wsId: string) => void;
+  onSelectWorkstation?: (wsId: string) => void;
   onSaveAsTemplate?: () => void;
   docTemplates?: DocumentTemplate[];
   onNavigateRail?: (item: string) => void;
@@ -89,7 +89,7 @@ export default function EditorCore(props: EditorProps) {
   const {
     workstations, tabs, activeProject, blocks: blocksProp, sidebarOpen, charCount,
     onOpenSidebar, onTabClick, onTabClose, onNewTab, onTabRename, onBlocksChange, onWordCountChange,
-    activeWorkstationId, onSelectWorkstationHome, onNavigateRail,
+    activeWorkstationId, onSelectWorkstation, onNavigateRail,
     onUpdateProjectDue, comments, onCommentsChange, activities, onActivitiesChange,
     zenMode, onToggleZen, splitProject, splitBlocks, splitProjectName, splitClientName,
     onSplitOpen, onSplitClose, onSplitMakePrimary,
@@ -240,8 +240,8 @@ export default function EditorCore(props: EditorProps) {
         onNavigateRail?.("search");
         return true;
       case "switch-ws":
-        if (activeWs?.id && onSelectWorkstationHome) {
-          onSelectWorkstationHome(activeWs.id);
+        if (activeWs?.id && onSelectWorkstation) {
+          onSelectWorkstation(activeWs.id);
           return true;
         }
         onNavigateRail?.("workstations");
@@ -328,7 +328,7 @@ export default function EditorCore(props: EditorProps) {
         tabs={tabs}
         activeProject={activeProject}
         workstations={workstations}
-        onSelectWorkstationHome={onSelectWorkstationHome}
+        onSelectWorkstation={onSelectWorkstation}
       />}
 
       {/* Editor + panels */}

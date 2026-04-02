@@ -283,23 +283,16 @@ export default function Dashboard() {
     setSidebarOpen(true);
   };
 
-  // Double click — navigate to workstation home
-  const selectWorkstationHome = (wid: string) => {
+  // Double click — open the first project in the workstation
+  const selectWorkstation = (wid: string) => {
     restoreWorkstationContext();
-    setActiveWorkstationId(wid);
-    updateTabs(prev => prev.map(t => ({ ...t, active: false })));
-    updateActiveProject("");
-    // Ensure workstation is expanded
-    updateWorkstations(prev => prev.map(w => w.id === wid ? { ...w, open: true } : w));
-  };
-
-  // Resume the most recent tab in the current workstation
-  const resumeEditor = () => {
-    const lastTab = tabs.length > 0 ? tabs[tabs.length - 1] : null;
-    if (lastTab) {
-      updateTabs(prev => prev.map(t => ({ ...t, active: t.id === lastTab.id })));
-      updateActiveProject(lastTab.id);
+    const ws = workstations.find(w => w.id === wid);
+    if (!ws) return;
+    if (ws.projects.length > 0) {
+      selectProject(ws.projects[0], ws.client);
     }
+    // Ensure workstation is expanded in sidebar
+    updateWorkstations(prev => prev.map(w => w.id === wid ? { ...w, open: true } : w));
   };
 
   const selectProject = (project: Project, client: string) => {
@@ -518,7 +511,7 @@ export default function Dashboard() {
             railActive={railActive}
             onClose={() => setSidebarOpen(false)}
             onToggleWorkstation={toggleWorkstation}
-            onSelectWorkstationHome={selectWorkstationHome}
+            onSelectWorkstation={selectWorkstation}
             onSelectProject={selectProject}
             onArchiveProject={archiveProject}
             onArchiveCompleted={archiveCompletedInWorkstation}
@@ -631,8 +624,7 @@ export default function Dashboard() {
           onBlocksChange={handleBlocksChange}
           onWordCountChange={handleWordCountChange}
           onSelectProject={selectProject}
-          onSelectWorkstationHome={selectWorkstationHome}
-          onResumeEditor={tabs.length > 0 ? resumeEditor : undefined}
+          onSelectWorkstation={selectWorkstation}
           onNavigateRail={navigateRail}
           onSaveAsTemplate={() => setShowSaveTemplate(true)}
           onRenameWorkstation={handleRenameWorkstation}
@@ -679,7 +671,7 @@ export default function Dashboard() {
         setSidebarOpen(true);
       }}
       onSelectWorkstation={(wsId) => {
-        selectWorkstationHome(wsId);
+        selectWorkstation(wsId);
         setRailActive("workstations");
       }}
       onOpenCommandPalette={() => {

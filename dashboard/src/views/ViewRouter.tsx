@@ -15,7 +15,6 @@ import WireView from "./wire";
 import TeamView from "./team";
 import HomeView from "./home";
 import ForgeView from "./forge";
-import WorkstationView from "./workstation";
 import EditorView from "./editor";
 
 export interface ViewRouterProps {
@@ -45,8 +44,7 @@ export interface ViewRouterProps {
   onBlocksChange: (projectId: string, blocks: Block[]) => void;
   onWordCountChange: (words: number, chars: number) => void;
   onSelectProject: (project: Project, client: string) => void;
-  onSelectWorkstationHome: (wsId: string) => void;
-  onResumeEditor?: () => void;
+  onSelectWorkstation: (wsId: string) => void;
   onNavigateRail: (item: string) => void;
   onSaveAsTemplate: () => void;
   onRenameWorkstation: (wsId: string, name: string) => void;
@@ -93,18 +91,14 @@ export default function ViewRouter(props: ViewRouterProps) {
     case "team":
       return wrap(<TeamView />);
     case "home":
-      return wrap(<HomeView workstations={props.workstations} overdueCount={props.overdueCount} onSelectWorkstation={props.onSelectWorkstationHome} onSelectProject={props.onSelectProject} onNewTabInWorkstation={props.onNewTabInWorkstation} onNewWorkstation={props.onNewWorkstation} />);
+      return wrap(<HomeView workstations={props.workstations} overdueCount={props.overdueCount} onSelectWorkstation={props.onSelectWorkstation} onSelectProject={props.onSelectProject} onNewTabInWorkstation={props.onNewTabInWorkstation} onNewWorkstation={props.onNewWorkstation} />);
     case "forge":
       return wrap(<ForgeView tabs={props.tabs} activeBlocks={props.activeBlocks} activeProject={props.activeProject} workstations={props.workstations} onClose={props.onForgeClose} onSave={props.onForgeSave} />);
     default:
       break;
   }
 
-  // Non-rail-name routes: workstation home, terminal welcome, or editor
-  if (activeWorkstationId && !tabs.some(t => t.active)) {
-    return wrap(<WorkstationView workstations={props.workstations} activeWorkstationId={activeWorkstationId} onSelectProject={props.onSelectProject} onNewTab={props.onNewTab} onResumeEditor={props.onResumeEditor} onRenameWorkstation={props.onRenameWorkstation} onUpdateProjectDue={props.onUpdateProjectDue} />);
-  }
-
+  // Editor view (active project or empty state)
   return (
     <EditorView
       workstations={props.workstations}
@@ -130,7 +124,7 @@ export default function ViewRouter(props: ViewRouterProps) {
       onBlocksChange={props.onBlocksChange}
       onWordCountChange={props.onWordCountChange}
       onSelectProject={props.onSelectProject}
-      onSelectWorkstationHome={props.onSelectWorkstationHome}
+      onSelectWorkstation={props.onSelectWorkstation}
       onNavigateRail={props.onNavigateRail}
       onSaveAsTemplate={props.onSaveAsTemplate}
       onRenameWorkstation={props.onRenameWorkstation}

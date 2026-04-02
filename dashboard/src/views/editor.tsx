@@ -29,7 +29,7 @@ interface EditorViewProps {
   onBlocksChange: (projectId: string, blocks: Block[]) => void;
   onWordCountChange: (words: number, chars: number) => void;
   onSelectProject: (project: Project, client: string) => void;
-  onSelectWorkstationHome: (wsId: string) => void;
+  onSelectWorkstation: (wsId: string) => void;
   onNavigateRail: (item: string) => void;
   onSaveAsTemplate: () => void;
   onRenameWorkstation: (wsId: string, name: string) => void;
@@ -47,7 +47,7 @@ export default function EditorView({
   wordCount, charCount, blocksMap, splitProject, comments, activities,
   docTemplates, zenMode, onOpenSidebar, onTabClick, onTabClose, onNewTab,
   onTabRename, onTabReorder, onBlocksChange, onWordCountChange, onSelectProject,
-  onSelectWorkstationHome, onNavigateRail, onSaveAsTemplate, onRenameWorkstation,
+  onSelectWorkstation, onNavigateRail, onSaveAsTemplate, onRenameWorkstation,
   onUpdateProjectDue, onCommentsChange, onActivitiesChange, onToggleZen,
   onSplitOpen, onSplitClose, onSplitMakePrimary,
 }: EditorViewProps) {
@@ -70,7 +70,7 @@ export default function EditorView({
       onBlocksChange={onBlocksChange}
       onWordCountChange={onWordCountChange}
       onSelectProject={onSelectProject}
-      onSelectWorkstationHome={onSelectWorkstationHome}
+      onSelectWorkstation={onSelectWorkstation}
       onNavigateRail={onNavigateRail}
       onSaveAsTemplate={onSaveAsTemplate}
       docTemplates={docTemplates}
