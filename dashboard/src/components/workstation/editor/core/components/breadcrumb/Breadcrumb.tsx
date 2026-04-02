@@ -8,17 +8,17 @@ interface BreadcrumbProps {
   tabs: Tab[];
   activeProject: string;
   workstations: Workstation[];
-  onSelectWorkstationHome?: (wsId: string) => void;
+  onSelectWorkstation?: (wsId: string) => void;
 }
 
-export default function Breadcrumb({ tabs, activeProject, workstations, onSelectWorkstationHome }: BreadcrumbProps) {
+export default function Breadcrumb({ tabs, activeProject, workstations, onSelectWorkstation }: BreadcrumbProps) {
   const activeTab = tabs.find(t => t.active);
   const activeWs = workstations.find(w => w.projects.some(p => p.id === activeProject));
-  const canGoToWorkstationHome = Boolean(activeWs?.id && onSelectWorkstationHome);
+  const canGoToWorkstation = Boolean(activeWs?.id && onSelectWorkstation);
 
   const handleClick = () => {
-    if (!activeWs?.id || !onSelectWorkstationHome) return;
-    onSelectWorkstationHome(activeWs.id);
+    if (!activeWs?.id || !onSelectWorkstation) return;
+    onSelectWorkstation(activeWs.id);
   };
 
   if (!tabs.some(t => t.active)) return null;
@@ -31,7 +31,7 @@ export default function Breadcrumb({ tabs, activeProject, workstations, onSelect
         aria-label="Back to workstation"
         title="Back to workstation"
         onClick={handleClick}
-        disabled={!canGoToWorkstationHome}
+        disabled={!canGoToWorkstation}
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M8 3L4 7l4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
       </button>
@@ -40,7 +40,7 @@ export default function Breadcrumb({ tabs, activeProject, workstations, onSelect
         className={styles.breadLink}
         type="button"
         onClick={handleClick}
-        disabled={!canGoToWorkstationHome}
+        disabled={!canGoToWorkstation}
       >
         {activeWs?.client || "Workstation"}
       </button>
