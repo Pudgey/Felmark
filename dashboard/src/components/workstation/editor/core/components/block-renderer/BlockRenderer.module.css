@@ -132,8 +132,8 @@
   flex-shrink: 0;
   transition: opacity 0.06s;
   margin-right: 4px;
-  margin-left: -82px;
-  width: 80px;
+  margin-left: -90px;
+  width: 88px;
   justify-content: flex-end;
   gap: 1px;
 }
