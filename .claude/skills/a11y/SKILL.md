@@ -1,6 +1,6 @@
 Run an accessibility audit on: $ARGUMENTS
 
-Follow `conductor/skills/a11y/SKILL.md`.
+Follow `conductor/skills/a11y/PROTOCOL.md`.
 
 **Checks:**
 - Semantic labels and ARIA attributes

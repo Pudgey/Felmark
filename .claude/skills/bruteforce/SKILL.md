@@ -1,6 +1,6 @@
 Run a 5-agent adversarial codebase audit on: $ARGUMENTS
 
-Follow `conductor/skills/bruteforce/SKILL.md`.
+Follow `conductor/skills/bruteforce/PROTOCOL.md`.
 
 **Agents:**
 1. **Schema** — Hunt data shape mismatches between layers

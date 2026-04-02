@@ -1,6 +1,6 @@
 Run the Project Grounding Protocol before making changes.
 
-Follow `conductor/skills/brain/SKILL.md`.
+Follow `conductor/skills/brain/PROTOCOL.md`.
 
 **Steps:**
 1. Load project identity — Read CLAUDE.md for ground rules and architecture

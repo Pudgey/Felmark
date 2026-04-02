@@ -1,6 +1,6 @@
 Run deep root-cause analysis on: $ARGUMENTS
 
-Follow `conductor/skills/deep-debug/SKILL.md`.
+Follow `conductor/skills/deep-debug/PROTOCOL.md`.
 
 **When to use:**
 - Intermittent, layered, device-specific, stateful, or timing-sensitive bugs

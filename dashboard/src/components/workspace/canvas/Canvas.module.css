@@ -8,6 +8,23 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  --motion-hover-duration: 110ms;
+  --motion-hover-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-soft-duration: 210ms;
+  --motion-soft-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-structural-duration: 340ms;
+  --motion-structural-ease: cubic-bezier(0.2, 0.9, 0.24, 1);
+  --motion-crisp-duration: 90ms;
+  --motion-crisp-ease: cubic-bezier(0.4, 0, 1, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .canvas {
+    --motion-hover-duration: 1ms;
+    --motion-soft-duration: 1ms;
+    --motion-structural-duration: 1ms;
+    --motion-crisp-duration: 1ms;
+  }
 }
 
 /* ── Grid Area ── */
@@ -16,8 +33,8 @@
   flex: 1;
   overflow: auto;
   position: relative;
-  padding: 26px 28px 40px;
-  scroll-padding: 40px;
+  padding: 24px 22px 52px;
+  scroll-padding: 56px;
 }
 
 .gridArea::-webkit-scrollbar {
@@ -33,8 +50,8 @@
 .gridContainer {
   position: relative;
   margin: 0 auto;
-  padding: 28px 30px 34px;
-  border-radius: 30px;
+  padding: 34px 42px 44px;
+  border-radius: 34px;
   border: 1px solid transparent;
   overflow: visible;
   background: transparent;
@@ -45,6 +62,61 @@
   background: transparent;
   border-color: transparent;
   box-shadow: none;
+}
+
+.edgeAnchor {
+  position: absolute;
+  left: 46px;
+  right: 46px;
+  height: 18px;
+  pointer-events: none;
+  z-index: 1;
+  animation: edgeAnchorIn var(--motion-soft-duration) var(--motion-soft-ease);
+}
+
+.edgeAnchor::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  transform: translateY(-50%);
+  background: linear-gradient(
+    90deg,
+    rgba(176, 125, 79, 0.03),
+    rgba(176, 125, 79, 0.16) 16%,
+    rgba(176, 125, 79, 0.1) 50%,
+    rgba(176, 125, 79, 0.16) 84%,
+    rgba(176, 125, 79, 0.03)
+  );
+}
+
+.edgeAnchor::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 46px;
+  height: 8px;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(120, 114, 103, 0.08);
+  background: rgba(255, 252, 247, 0.86);
+  box-shadow: 0 4px 10px rgba(42, 33, 18, 0.04);
+}
+
+.edgeAnchorTop {
+  top: -16px;
+}
+
+.edgeAnchorTop::after {
+  width: 38px;
+  height: 7px;
+}
+
+.edgeAnchorBottom::after {
+  width: 54px;
 }
 
 /* ── Dot Grid ── */
@@ -59,7 +131,10 @@
 .dot {
   position: absolute;
   border-radius: 50%;
-  transition: opacity 0.2s, transform 0.2s, background 0.2s;
+  transition:
+    opacity var(--motion-soft-duration) var(--motion-soft-ease),
+    transform var(--motion-soft-duration) var(--motion-soft-ease),
+    background var(--motion-soft-duration) var(--motion-soft-ease);
 }
 
 /* ── Blocks ── */
@@ -70,15 +145,16 @@
   background: var(--card);
   border: 1px solid var(--border);
   overflow: hidden;
-  transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-              top 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-              width 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-              height 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.2s,
-              border-color 0.15s,
-              opacity 0.18s,
-              filter 0.18s,
-              transform 0.18s;
+  transition:
+    left var(--motion-structural-duration) var(--motion-structural-ease),
+    top var(--motion-structural-duration) var(--motion-structural-ease),
+    width var(--motion-structural-duration) var(--motion-structural-ease),
+    height var(--motion-structural-duration) var(--motion-structural-ease),
+    box-shadow var(--motion-soft-duration) var(--motion-soft-ease),
+    border-color var(--motion-soft-duration) var(--motion-soft-ease),
+    opacity var(--motion-soft-duration) var(--motion-soft-ease),
+    filter var(--motion-soft-duration) var(--motion-soft-ease),
+    transform var(--motion-hover-duration) var(--motion-hover-ease);
   z-index: 2;
   transform: translateY(0);
 }
@@ -247,7 +323,10 @@
   box-shadow: none;
   z-index: 1;
   pointer-events: none;
-  transition: left 0.06s, top 0.06s;
+  transition:
+    left var(--motion-hover-duration) var(--motion-hover-ease),
+    top var(--motion-hover-duration) var(--motion-hover-ease),
+    opacity var(--motion-soft-duration) var(--motion-soft-ease);
 }
 
 .moveTargetRow {
@@ -309,6 +388,7 @@
     0 18px 34px rgba(42, 33, 18, 0.06);
   pointer-events: none;
   z-index: 7;
+  animation: movePlaceholderIn var(--motion-soft-duration) var(--motion-soft-ease);
 }
 
 .movePlaceholderLabel {
@@ -345,6 +425,7 @@
     0 28px 56px rgba(42, 33, 18, 0.12);
   transform: translateY(-2px) scale(0.99);
   opacity: 0.96;
+  animation: moveGhostLift var(--motion-hover-duration) var(--motion-hover-ease);
 }
 
 /* ── Footer ── */
@@ -440,7 +521,7 @@
   border: 1px solid var(--lavender);
   border-radius: 10px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 0 0 3px rgba(139, 139, 186, 0.06);
-  animation: dragIn 0.1s ease;
+  animation: dragIn var(--motion-hover-duration) var(--motion-hover-ease);
 }
 
 @keyframes dragIn {
@@ -495,7 +576,7 @@
   gap: 10px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
   z-index: 40;
-  animation: plIn 0.15s ease;
+  animation: plIn var(--motion-soft-duration) var(--motion-soft-ease);
 }
 
 @keyframes plIn {
@@ -519,4 +600,37 @@
   font-family: var(--mono);
   font-size: 10px;
   opacity: 0.3;
+}
+
+@keyframes edgeAnchorIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes movePlaceholderIn {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes moveGhostLift {
+  from {
+    opacity: 0.88;
+    transform: translateY(2px) scale(0.975);
+  }
+  to {
+    opacity: 0.96;
+    transform: translateY(-2px) scale(0.99);
+  }
 }

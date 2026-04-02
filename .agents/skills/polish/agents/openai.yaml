@@ -1,0 +1,4 @@
+interface:
+  display_name: "Polish"
+  short_description: "Help with Polish tasks and workflows"
+  default_prompt: "Use $polish for this task in the Felmark repo."

@@ -1,6 +1,6 @@
 Run systematic parallel hypothesis debugging on: $ARGUMENTS
 
-Follow `conductor/skills/debug/SKILL.md`.
+Follow `conductor/skills/debug/PROTOCOL.md`.
 
 **Steps:**
 1. **Reproduce** — Define the exact steps to trigger the bug

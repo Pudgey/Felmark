@@ -153,6 +153,7 @@ Skills are reusable protocols stored in `conductor/skills/<name>/SKILL.md`. They
 | find | Read-only codebase sweep for bugs and issues | `conductor/skills/find/SKILL.md` |
 | fix | Resolve a specific finding or bug | `conductor/skills/fix/SKILL.md` |
 | refactor | Safe incremental refactor (one concern per pass) | `conductor/skills/refactor/SKILL.md` |
+| redesign | Prototype-first redesign planning before structural UI implementation | `conductor/skills/redesign/SKILL.md` |
 | aas | Three-layer quality review (Advocate/Adjudicate/Suitability) | `conductor/skills/aas/SKILL.md` |
 | swarm | Goal-driven multi-agent decomposition | `conductor/skills/swarm/SKILL.md` |
 | sprint | Agent team sprint coordination | `conductor/skills/sprint/SKILL.md` |

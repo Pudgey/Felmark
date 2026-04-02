@@ -1,6 +1,6 @@
 Resolve a specific finding or bug: $ARGUMENTS
 
-Follow `conductor/skills/fix/SKILL.md`.
+Follow `conductor/skills/fix/PROTOCOL.md`.
 
 **Steps:**
 1. **Verify** — Reproduce and confirm the issue exists

@@ -1,6 +1,6 @@
 Launch a goal-driven multi-agent swarm for: $ARGUMENTS
 
-Follow `conductor/skills/swarm/SKILL.md`.
+Follow `conductor/skills/swarm/PROTOCOL.md`.
 
 **Pre-Swarm (Spec Writing):**
 1. Receive raw prompt or existing doc

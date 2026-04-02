@@ -1,6 +1,6 @@
 Run a read-only codebase sweep on: $ARGUMENTS
 
-Follow `conductor/skills/find/SKILL.md`.
+Follow `conductor/skills/find/PROTOCOL.md`.
 
 **Steps:**
 1. Ask user for scope if not specified (full sweep or specific area)

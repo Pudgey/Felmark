@@ -31,8 +31,15 @@
   padding: 0 10px;
   pointer-events: auto;
   box-shadow: 0 6px 12px rgba(46, 37, 21, 0.05);
-  transition: transform 0.15s, border-color 0.15s, background 0.15s, color 0.15s, box-shadow 0.15s, opacity 0.15s;
+  transition:
+    transform var(--motion-hover-duration) var(--motion-hover-ease),
+    border-color var(--motion-soft-duration) var(--motion-soft-ease),
+    background var(--motion-soft-duration) var(--motion-soft-ease),
+    color var(--motion-soft-duration) var(--motion-soft-ease),
+    box-shadow var(--motion-soft-duration) var(--motion-soft-ease),
+    opacity var(--motion-soft-duration) var(--motion-soft-ease);
   opacity: 0.6;
+  animation: insertionReveal var(--motion-soft-duration) var(--motion-soft-ease);
 }
 
 .insertionBtn:hover {
@@ -42,6 +49,11 @@
   box-shadow: 0 10px 18px rgba(46, 37, 21, 0.08);
   opacity: 1;
   transform: translateY(-1px);
+}
+
+.insertionBtn:active {
+  transform: translateY(0) scale(0.985);
+  transition-duration: var(--motion-crisp-duration);
 }
 
 .insertionPlus {
@@ -110,6 +122,7 @@
   z-index: 1;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(248, 244, 238, 0.92));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  animation: insertionReveal var(--motion-soft-duration) var(--motion-soft-ease);
 }
 
 .emptyRowText {
@@ -132,4 +145,15 @@
   justify-content: center;
   font-size: 15px;
   box-shadow: 0 8px 16px rgba(46, 37, 21, 0.08);
+}
+
+@keyframes insertionReveal {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

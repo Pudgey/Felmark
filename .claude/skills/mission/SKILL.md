@@ -1,6 +1,6 @@
 Create a new feature mission plan for: $ARGUMENTS
 
-Follow `conductor/skills/mission/SKILL.md`.
+Follow `conductor/skills/mission/PROTOCOL.md`.
 
 **Steps:**
 1. Create mission doc at `conductor/missions/MISSION_<NAME>.md` using `conductor/templates/mission_template.md`

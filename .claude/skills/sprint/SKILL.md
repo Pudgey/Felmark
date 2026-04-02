@@ -1,6 +1,6 @@
 Start or join a sprint. Target: $ARGUMENTS
 
-Follow `conductor/skills/sprint/SKILL.md` and `conductor/agent-team/agent-sprint/SPRINT_SOP.md`.
+Follow `conductor/skills/sprint/PROTOCOL.md` and `conductor/agent-team/agent-sprint/SPRINT_SOP.md`.
 
 **If no sprint board exists (you are the Planner):**
 1. Read DEVELOPMENT_BRIEF.md and the codebase

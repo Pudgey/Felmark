@@ -1,6 +1,6 @@
 Research external best practices and competitive intelligence for: $ARGUMENTS
 
-Follow `conductor/skills/research/SKILL.md`.
+Follow `conductor/skills/research/PROTOCOL.md`.
 
 **Steps:**
 1. Clarify the research question in one sentence

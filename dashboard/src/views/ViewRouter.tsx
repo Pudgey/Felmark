@@ -46,6 +46,7 @@ export interface ViewRouterProps {
   onWordCountChange: (words: number, chars: number) => void;
   onSelectProject: (project: Project, client: string) => void;
   onSelectWorkstationHome: (wsId: string) => void;
+  onResumeEditor?: () => void;
   onNavigateRail: (item: string) => void;
   onSaveAsTemplate: () => void;
   onRenameWorkstation: (wsId: string, name: string) => void;
@@ -101,7 +102,7 @@ export default function ViewRouter(props: ViewRouterProps) {
 
   // Non-rail-name routes: workstation home, terminal welcome, or editor
   if (activeWorkstationId && !tabs.some(t => t.active)) {
-    return wrap(<WorkstationView workstations={props.workstations} activeWorkstationId={activeWorkstationId} onSelectProject={props.onSelectProject} onNewTab={props.onNewTab} onRenameWorkstation={props.onRenameWorkstation} onUpdateProjectDue={props.onUpdateProjectDue} />);
+    return wrap(<WorkstationView workstations={props.workstations} activeWorkstationId={activeWorkstationId} onSelectProject={props.onSelectProject} onNewTab={props.onNewTab} onResumeEditor={props.onResumeEditor} onRenameWorkstation={props.onRenameWorkstation} onUpdateProjectDue={props.onUpdateProjectDue} />);
   }
 
   return (

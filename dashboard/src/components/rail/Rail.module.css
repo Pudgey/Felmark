@@ -80,3 +80,44 @@
 .spacer {
   margin-top: auto;
 }
+
+/* Planet orbit animation */
+.orbit {
+  transform-origin: 9px 9px;
+  transform: rotate(-30deg);
+  transition: none;
+}
+
+.btn:hover .orbit,
+.active .orbit {
+  animation: orbitSpin 3s linear infinite, orbitPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes orbitSpin {
+  from { transform: rotate(-30deg); }
+  to { transform: rotate(330deg); }
+}
+
+@keyframes orbitPulse {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 1; }
+}
+
+/* Anvil strike spark */
+.spark {
+  opacity: 0;
+  transform-origin: 9px 3px;
+}
+
+.btn:hover .spark,
+.active .spark {
+  animation: sparkFlash 1.2s ease-out infinite;
+}
+
+@keyframes sparkFlash {
+  0%   { opacity: 0; transform: scale(0.5) translateY(2px); }
+  15%  { opacity: 1; transform: scale(1.1) translateY(0); }
+  40%  { opacity: 0.6; transform: scale(1) translateY(-1px); }
+  60%  { opacity: 0; transform: scale(0.8) translateY(-2px); }
+  100% { opacity: 0; }
+}

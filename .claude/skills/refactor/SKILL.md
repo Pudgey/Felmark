@@ -1,6 +1,6 @@
 Run a safe incremental refactor on: $ARGUMENTS
 
-Follow `conductor/skills/refactor/SKILL.md`.
+Follow `conductor/skills/refactor/PROTOCOL.md`.
 
 **Protocol:**
 1. Snapshot — understand current behavior completely

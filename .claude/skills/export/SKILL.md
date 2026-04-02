@@ -1,6 +1,6 @@
 Port a prototype to production code: $ARGUMENTS
 
-Follow `conductor/skills/export/SKILL.md`.
+Follow `conductor/skills/export/PROTOCOL.md`.
 
 **Steps:**
 1. Read the prototype file completely

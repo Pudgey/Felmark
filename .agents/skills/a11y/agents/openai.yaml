@@ -1,0 +1,4 @@
+interface:
+  display_name: "A11Y"
+  short_description: "Help with A11Y tasks and workflows"
+  default_prompt: "Use $a11y for this task in the Felmark repo."

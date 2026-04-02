@@ -207,8 +207,23 @@
   border-right: 1px solid var(--warm-100);
 }
 
-.main::-webkit-scrollbar { width: 4px; }
-.main::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.04); border-radius: 99px; }
+/* Zipper scroll pull */
+.main::-webkit-scrollbar { width: 10px; }
+.main::-webkit-scrollbar-track { background: transparent; margin: 8px 0; }
+.main::-webkit-scrollbar-thumb {
+  background:
+    linear-gradient(to right, transparent 3px, var(--warm-300) 3px, var(--warm-300) 7px, transparent 7px);
+  border-radius: 0;
+  min-height: 100px;
+}
+.main::-webkit-scrollbar-thumb:hover {
+  background:
+    linear-gradient(to right, transparent 3px, var(--warm-400) 3px, var(--warm-400) 7px, transparent 7px);
+}
+.main::-webkit-scrollbar-thumb:active {
+  background:
+    linear-gradient(to right, transparent 3px, var(--ember) 3px, var(--ember) 7px, transparent 7px);
+}
 
 .sectionLabel {
   font-family: var(--mono);
@@ -408,8 +423,22 @@
   gap: 24px;
 }
 
-.side::-webkit-scrollbar { width: 4px; }
-.side::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.04); border-radius: 99px; }
+/* Zipper scroll pull */
+.side::-webkit-scrollbar { width: 10px; }
+.side::-webkit-scrollbar-track { background: transparent; margin: 8px 0; }
+.side::-webkit-scrollbar-thumb {
+  background:
+    linear-gradient(to right, transparent 3px, var(--warm-300) 3px, var(--warm-300) 7px, transparent 7px);
+  border-radius: 0;
+}
+.side::-webkit-scrollbar-thumb:hover {
+  background:
+    linear-gradient(to right, transparent 3px, var(--warm-400) 3px, var(--warm-400) 7px, transparent 7px);
+}
+.side::-webkit-scrollbar-thumb:active {
+  background:
+    linear-gradient(to right, transparent 3px, var(--ember) 3px, var(--ember) 7px, transparent 7px);
+}
 
 /* ── Activity feed ── */
 .activity {

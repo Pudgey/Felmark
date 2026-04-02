@@ -1,6 +1,6 @@
 Run an end-to-end user journey audit on: $ARGUMENTS
 
-Follow `conductor/skills/flow/SKILL.md`.
+Follow `conductor/skills/flow/PROTOCOL.md`.
 
 **Steps:**
 1. Define the journey (e.g., "signup -> browse -> hire -> review")

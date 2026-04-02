@@ -1,6 +1,6 @@
 Run a codebase cleanup sweep on: $ARGUMENTS
 
-Follow `conductor/skills/housekeeping/SKILL.md`.
+Follow `conductor/skills/housekeeping/PROTOCOL.md`.
 
 **Sweep for:**
 - Dead files (unreferenced components, unused exports)

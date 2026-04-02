@@ -1,6 +1,6 @@
 Load external engineering intelligence from top open source projects.
 
-Follow `conductor/skills/super-brain/SKILL.md`.
+Follow `conductor/skills/super-brain/PROTOCOL.md`.
 
 **Phases:**
 1. **Stack fingerprint** — Read package.json, next.config, tsconfig. Know the exact stack, not generic.

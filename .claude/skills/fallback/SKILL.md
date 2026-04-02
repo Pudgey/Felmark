@@ -1,6 +1,6 @@
 Run a resilience audit on: $ARGUMENTS
 
-Follow `conductor/skills/fallback/SKILL.md`.
+Follow `conductor/skills/fallback/PROTOCOL.md`.
 
 **For every failure point found, classify:**
 - **Tier 1** — Must handle (network down, auth expired, empty data)

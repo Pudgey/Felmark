@@ -1,6 +1,6 @@
 Scan the codebase and rebuild the dependency map.
 
-Follow `conductor/skills/forge/SKILL.md`.
+Follow `conductor/skills/forge/PROTOCOL.md`.
 
 **Phases:**
 1. **Scan** — Run file counts, import graphs, route discovery, block registry from actual disk (grep, find, wc). Never from memory.

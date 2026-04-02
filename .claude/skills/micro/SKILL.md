@@ -1,6 +1,6 @@
 Run a micro-interaction audit on: $ARGUMENTS
 
-Follow `conductor/skills/micro/SKILL.md`.
+Follow `conductor/skills/micro/PROTOCOL.md`.
 
 **Hunt silent failures in:**
 - Navigation (dead ends, missing back buttons, broken links)

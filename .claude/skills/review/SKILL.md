@@ -1,6 +1,6 @@
 Run a systematic code review on: $ARGUMENTS
 
-Follow `conductor/skills/review/SKILL.md`.
+Follow `conductor/skills/review/PROTOCOL.md`.
 
 **Checklist:**
 

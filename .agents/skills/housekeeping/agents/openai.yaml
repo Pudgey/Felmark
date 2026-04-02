@@ -1,0 +1,4 @@
+interface:
+  display_name: "Housekeeping"
+  short_description: "Help with Housekeeping tasks"
+  default_prompt: "Use $housekeeping for this task in the Felmark repo."

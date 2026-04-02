@@ -1,6 +1,6 @@
 Run the production readiness orchestrator on: $ARGUMENTS
 
-Follow `conductor/skills/sop/SKILL.md`.
+Follow `conductor/skills/sop/PROTOCOL.md`.
 
 **Audits across dimensions and delegates to specialized skills:**
 - Accessibility → /a11y

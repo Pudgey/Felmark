@@ -1,6 +1,6 @@
 Run a security audit on: $ARGUMENTS
 
-Follow `conductor/skills/secure/SKILL.md`.
+Follow `conductor/skills/secure/PROTOCOL.md`.
 
 **Checks:**
 - Authentication and session management

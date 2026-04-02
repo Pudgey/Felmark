@@ -8,11 +8,12 @@ interface WorkstationViewProps {
   activeWorkstationId: string;
   onSelectProject: (project: Project, client: string) => void;
   onNewTab: () => void;
+  onResumeEditor?: () => void;
   onRenameWorkstation: (wsId: string, name: string) => void;
   onUpdateProjectDue: (projectId: string, due: string | null) => void;
 }
 
-export default function WorkstationView({ workstations, activeWorkstationId, onSelectProject, onNewTab, onRenameWorkstation, onUpdateProjectDue }: WorkstationViewProps) {
+export default function WorkstationView({ workstations, activeWorkstationId, onSelectProject, onNewTab, onResumeEditor, onRenameWorkstation, onUpdateProjectDue }: WorkstationViewProps) {
   const ws = workstations.find(w => w.id === activeWorkstationId);
   if (!ws) return null;
 
@@ -21,6 +22,7 @@ export default function WorkstationView({ workstations, activeWorkstationId, onS
       workstation={ws}
       onSelectProject={onSelectProject}
       onNewTab={onNewTab}
+      onResumeEditor={onResumeEditor}
       onRenameWorkstation={onRenameWorkstation}
       onUpdateProjectDue={onUpdateProjectDue}
     />

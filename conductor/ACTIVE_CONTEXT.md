@@ -33,6 +33,7 @@ Felmark is actively building the browser-native dashboard experience in `dashboa
 - **Home surface decision** — DashboardHome moved from workstation/ to components/home/
 - **Workspace toolbar** — removed redundant Felmark branding, clean "Workspace" title
 - **Deep-debug skill** — full root-cause analysis protocol added
+- **Redesign skill** — prototype-first redesign planning protocol added to force spec + plan before structural UI implementation
 - **Cleanup** — deleted orphaned views/terminal-welcome.tsx, unused TerminalWelcome.module.css
 
 ## Pending Manual Actions

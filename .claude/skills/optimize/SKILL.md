@@ -1,6 +1,6 @@
 Run the multi-mode strategy engine on: $ARGUMENTS
 
-Follow `conductor/skills/optimize/SKILL.md`.
+Follow `conductor/skills/optimize/PROTOCOL.md`.
 
 **Modes** (specify one, or defaults to the most relevant):
 - **data** — Input: metrics, logs, analytics data. Output: prioritized hypothesis backlog.

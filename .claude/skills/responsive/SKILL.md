@@ -1,6 +1,6 @@
 Run a responsive layout audit on: $ARGUMENTS
 
-Follow `conductor/skills/responsive/SKILL.md`.
+Follow `conductor/skills/responsive/PROTOCOL.md`.
 
 **Hunt for:**
 - Fixed widths that break on narrow/wide viewports

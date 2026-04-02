@@ -11,6 +11,8 @@ import AutomationBlock from "./AutomationBlock";
 import ChatBlock from "./ChatBlock";
 import FileBlock from "./FileBlock";
 import RevenueChartBlock from "./RevenueChartBlock";
+import { CommandSurfaceBlock, ProjectSummaryBlock } from "./ProjectSpotlightBlock";
+import { ClientPulseBlock, InvoiceSurfaceBlock } from "./PulseInvoiceBlocks";
 
 const RENDERERS: Record<string, ComponentType<{ block: RenderBlock }>> = {
   whisper: WhisperBlock,
@@ -20,6 +22,10 @@ const RENDERERS: Record<string, ComponentType<{ block: RenderBlock }>> = {
   chat: ChatBlock,
   files: FileBlock,
   "revenue-chart": RevenueChartBlock,
+  "project-summary": ProjectSummaryBlock,
+  "command-surface": CommandSurfaceBlock,
+  "client-pulse": ClientPulseBlock,
+  "invoice-surface": InvoiceSurfaceBlock,
 };
 
 export default function BlockContent({ block }: { block: RenderBlock }) {

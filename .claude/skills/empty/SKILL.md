@@ -1,6 +1,6 @@
 Run a Loading/Empty/Error State Audit on: $ARGUMENTS
 
-Follow `conductor/skills/empty/SKILL.md`.
+Follow `conductor/skills/empty/PROTOCOL.md`.
 
 For every data-driven widget in scope, check:
 

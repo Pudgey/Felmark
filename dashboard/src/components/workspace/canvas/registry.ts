@@ -5,13 +5,16 @@ import type { TargetRowResult } from "./types";
 
 /* ── Constants ── */
 
-export const CELL = 110;
+export const CELL = 128;
 export const COLS = 8;
-export const GAP = 12;
+export const GAP = 16;
+export const ROW_GAP = 24;
+export const COL_STEP = CELL + GAP;
+export const ROW_STEP = CELL + ROW_GAP;
 export const GRID_W = COLS * CELL + (COLS - 1) * GAP;
 export const MAX_PER_ROW = 3;
 
-/* ── Block type definitions (16 types) ── */
+/* ── Block type definitions (21 types) ── */
 
 export const BLOCK_DEFS: BlockTypeDef[] = [
   { type: "revenue", label: "Revenue Counter", icon: "$", color: "#6b9a6b", defaultW: 2, minW: 1, maxW: 8, defaultH: 2, minH: 1, expandAxis: "width" },
@@ -31,6 +34,10 @@ export const BLOCK_DEFS: BlockTypeDef[] = [
   { type: "goal", label: "Goal Ring", icon: "\u25C9", color: "#b07d4f", defaultW: 2, minW: 1, maxW: 8, defaultH: 2, minH: 1, expandAxis: "width" },
   { type: "note", label: "Sticky Note", icon: "\u25FB", color: "#b5b2a9", defaultW: 2, minW: 1, maxW: 4, defaultH: 2, minH: 1, expandAxis: "both" },
   { type: "revenue-chart", label: "Revenue Chart", icon: "\u25C8", color: "#8b8bba", defaultW: 4, minW: 3, maxW: 8, defaultH: 3, minH: 2, expandAxis: "both" },
+  { type: "project-summary", label: "Project Summary", icon: "\u25C6", color: "#b07d4f", defaultW: 5, minW: 5, maxW: 8, defaultH: 5, minH: 4, expandAxis: "both" },
+  { type: "command-surface", label: "Command Surface", icon: "\u2318", color: "#7c6b9e", defaultW: 3, minW: 3, maxW: 4, defaultH: 4, minH: 3, expandAxis: "both" },
+  { type: "client-pulse", label: "Client Pulse", icon: "\u25B3", color: "#5b7fa4", defaultW: 4, minW: 4, maxW: 8, defaultH: 5, minH: 4, expandAxis: "both" },
+  { type: "invoice-surface", label: "Invoice Surface", icon: "\u25A3", color: "#b07d4f", defaultW: 4, minW: 4, maxW: 8, defaultH: 5, minH: 4, expandAxis: "both" },
 ];
 
 /* ── Initial data (row-based) ── */
@@ -75,9 +82,25 @@ export function canFitInRow(row: CanvasRow, blocks: Record<string, CanvasBlock>,
 
 export function blockRect(b: { x: number; y: number; w: number; h: number }) {
   return {
-    left: b.x * (CELL + GAP),
-    top: b.y * (CELL + GAP),
-    width: b.w * CELL + (b.w - 1) * GAP,
-    height: b.h * CELL + (b.h - 1) * GAP,
+    left: colToPx(b.x),
+    top: rowToPx(b.y),
+    width: spanWidthPx(b.w),
+    height: spanHeightPx(b.h),
   };
+}
+
+export function colToPx(col: number) {
+  return col * COL_STEP;
+}
+
+export function rowToPx(row: number) {
+  return row * ROW_STEP;
+}
+
+export function spanWidthPx(span: number) {
+  return span * CELL + (span - 1) * GAP;
+}
+
+export function spanHeightPx(span: number) {
+  return span * CELL + (span - 1) * ROW_GAP;
 }

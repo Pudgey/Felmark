@@ -293,9 +293,19 @@ export default function Dashboard() {
     updateWorkstations(prev => prev.map(w => w.id === wid ? { ...w, open: true } : w));
   };
 
+  // Resume the most recent tab in the current workstation
+  const resumeEditor = () => {
+    const lastTab = tabs.length > 0 ? tabs[tabs.length - 1] : null;
+    if (lastTab) {
+      updateTabs(prev => prev.map(t => ({ ...t, active: t.id === lastTab.id })));
+      updateActiveProject(lastTab.id);
+    }
+  };
+
   const selectProject = (project: Project, client: string) => {
     restoreWorkstationContext();
-    setActiveWorkstationId(null);
+    const ws = workstations.find(w => w.projects.some(p => p.id === project.id));
+    setActiveWorkstationId(ws?.id ?? null);
     updateActiveProject(project.id);
     if (!tabs.find(t => t.id === project.id)) {
       updateTabs(prev => [...prev.map(t => ({ ...t, active: false })), { id: project.id, name: project.name, client, active: true }]);
@@ -318,7 +328,8 @@ export default function Dashboard() {
 
   const handleTabClick = (id: string) => {
     restoreWorkstationContext();
-    setActiveWorkstationId(null);
+    const ws = workstations.find(w => w.projects.some(p => p.id === id));
+    setActiveWorkstationId(ws?.id ?? null);
     forge.tabs.select(id);
   };
 
@@ -496,13 +507,6 @@ export default function Dashboard() {
         onToggleZen={() => setZenMode(true)}
       />}
       {showWorkstationSidebar && (
-        activeWorkstationId ? (
-          <WorkstationSidebar
-            open={sidebarOpen}
-            width={sidebarWidth}
-            isResizing={isResizing}
-          />
-        ) : (
           <Sidebar
             workstations={workstations}
             archived={archived}
@@ -532,7 +536,6 @@ export default function Dashboard() {
             saveStatusLabel={saveStatusLabel}
             onSaveNow={saveNow}
           />
-        )
       )}
       {/* Resize handle */}
       {sidebarOpen && showWorkstationSidebar && (
@@ -554,7 +557,7 @@ export default function Dashboard() {
             const onMouseMove = (ev: MouseEvent) => {
               if (!resizeRef.current) return;
               const delta = ev.clientX - resizeRef.current.startX;
-              const newW = Math.min(520, Math.max(220, resizeRef.current.startW + delta));
+              const newW = Math.min(720, Math.max(220, resizeRef.current.startW + delta));
               setSidebarWidth(newW);
             };
 
@@ -629,6 +632,7 @@ export default function Dashboard() {
           onWordCountChange={handleWordCountChange}
           onSelectProject={selectProject}
           onSelectWorkstationHome={selectWorkstationHome}
+          onResumeEditor={tabs.length > 0 ? resumeEditor : undefined}
           onNavigateRail={navigateRail}
           onSaveAsTemplate={() => setShowSaveTemplate(true)}
           onRenameWorkstation={handleRenameWorkstation}

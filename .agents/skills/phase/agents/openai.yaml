@@ -1,0 +1,4 @@
+interface:
+  display_name: "Phase"
+  short_description: "Propose the next development phase for approval"
+  default_prompt: "Use $phase to propose the next development phase for approval in the Felmark repo."

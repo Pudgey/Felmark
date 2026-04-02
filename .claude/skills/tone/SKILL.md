@@ -1,6 +1,6 @@
 Run a microcopy and brand voice audit on: $ARGUMENTS
 
-Follow `conductor/skills/tone/SKILL.md`.
+Follow `conductor/skills/tone/PROTOCOL.md`.
 
 **Sweep for:**
 - Generic copy ("Something went wrong", "Error", "Success")

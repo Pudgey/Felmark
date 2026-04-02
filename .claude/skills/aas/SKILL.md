@@ -1,6 +1,6 @@
 Run a three-layer quality review on the specified target: $ARGUMENTS
 
-Follow the full protocol from `conductor/skills/aas/SKILL.md` and `conductor/sops/AAS_SOP.md`.
+Follow the full protocol from `conductor/skills/aas/PROTOCOL.md` and `conductor/sops/AAS_SOP.md`.
 
 **Layers:**
 1. **Advocate** — Read the code fresh. List what it actually does (not what it should do).

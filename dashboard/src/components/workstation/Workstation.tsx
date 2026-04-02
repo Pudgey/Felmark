@@ -10,6 +10,7 @@ interface WorkstationHomeProps {
   workstation: Workstation;
   onSelectProject: (project: Project, client: string) => void;
   onNewTab: () => void;
+  onResumeEditor?: () => void;
   onUpdateProjectDue?: (projectId: string, due: string | null) => void;
   onRenameWorkstation?: (wsId: string, name: string) => void;
 }
@@ -36,7 +37,7 @@ const STATUS_CFG: Record<string, { color: string; bg: string; label: string }> =
   paused: { color: "#9b988f", bg: "rgba(155,152,143,0.06)", label: "Paused" },
 };
 
-export default function WorkstationHome({ workstation, onSelectProject, onNewTab, onRenameWorkstation, onUpdateProjectDue }: WorkstationHomeProps) {
+export default function WorkstationHome({ workstation, onSelectProject, onNewTab, onResumeEditor, onRenameWorkstation, onUpdateProjectDue }: WorkstationHomeProps) {
   const [editingName, setEditingName] = useState(false);
   const [nameValue, setNameValue] = useState(workstation.client);
 
@@ -119,6 +120,12 @@ export default function WorkstationHome({ workstation, onSelectProject, onNewTab
           </div>
         </div>
         <div className={styles.quickActions}>
+          {onResumeEditor && (
+            <button className={styles.qa} onClick={onResumeEditor}>
+              <span className={styles.qaIcon}>←</span>
+              Back to editor
+            </button>
+          )}
           <button className={`${styles.qa} ${styles.qaPrimary}`} onClick={onNewTab}>
             <span className={styles.qaIcon}>◆</span>
             New note

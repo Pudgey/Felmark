@@ -1,4 +1,4 @@
-.page { display: flex; flex-direction: column; height: 100%; background: #e8e5de; font-family: 'Outfit', sans-serif; color: var(--ink-700); }
+.page { display: flex; flex-direction: column; height: 100%; width: 100%; background: #e8e5de; font-family: 'Outfit', sans-serif; color: var(--ink-700); }
 
 /* ═══ Top Bar ═══ */
 .topBar { padding: 8px 20px; background: #fff; border-bottom: 1px solid var(--warm-200); display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
@@ -42,7 +42,7 @@
 .outlineEmpty { font-size: 11px; color: var(--ink-300); padding: 12px 8px; text-align: center; }
 
 /* ═══ Paper scroll ═══ */
-.scroll { flex: 1; overflow-y: auto; display: flex; justify-content: center; align-items: flex-start; padding: 32px 20px 80px; padding-left: 70px; background: #e8e5de; }
+.scroll { flex: 1; overflow-y: auto; display: flex; justify-content: center; align-items: flex-start; padding: 32px 70px 80px; background: #e8e5de; }
 .scroll::-webkit-scrollbar { width: 6px; }
 .scroll::-webkit-scrollbar-thumb { background: var(--warm-400); border-radius: 3px; }
 

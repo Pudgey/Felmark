@@ -1,9 +1,24 @@
 "use client";
 
-import { useState, useRef, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { CanvasBlock, CanvasRow, RenderBlock, CellPosition } from "./types";
 import { layoutRows } from "./layout";
-import { BLOCK_DEFS, COLS, CELL, GAP, GRID_W, MAX_PER_ROW, INITIAL_BLOCK_MAP, INITIAL_ROWS, blockRect } from "./registry";
+import {
+  BLOCK_DEFS,
+  COLS,
+  CELL,
+  GAP,
+  GRID_W,
+  MAX_PER_ROW,
+  INITIAL_BLOCK_MAP,
+  INITIAL_ROWS,
+  ROW_STEP,
+  blockRect,
+  colToPx,
+  rowToPx,
+  spanHeightPx,
+  spanWidthPx,
+} from "./registry";
 import { useDragPlace } from "./hooks/useDragPlace";
 import { useDragMove } from "./hooks/useDragMove";
 import { useDragResize } from "./hooks/useDragResize";
@@ -25,9 +40,44 @@ type LibraryTarget =
   | { kind: "column"; rowIdx: number; afterIdx: number }
   | null;
 
+type StoredCanvasState = {
+  blocks: Record<string, CanvasBlock>;
+  rows: CanvasRow[];
+};
+
 const METRIC_BLOCK_TYPES = new Set(["revenue", "outstanding", "rate", "goal"]);
 const CHAT_BLOCK_TYPES = new Set(["chat"]);
 const UTILITY_BLOCK_TYPES = new Set(["whisper", "pipeline", "calendar", "automation", "files", "revenue-chart"]);
+const CANVAS_STORAGE_KEY = "felmark_workspace_canvas_v1";
+
+function loadStoredCanvasState(): StoredCanvasState | null {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const raw = window.localStorage.getItem(CANVAS_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as StoredCanvasState;
+    if (!parsed || typeof parsed !== "object") return null;
+    if (!parsed.blocks || typeof parsed.blocks !== "object") return null;
+    if (!Array.isArray(parsed.rows)) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function persistCanvasState(blocks: Record<string, CanvasBlock>, rows: CanvasRow[]) {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.localStorage.setItem(
+      CANVAS_STORAGE_KEY,
+      JSON.stringify({ blocks, rows }),
+    );
+  } catch {
+    // Ignore storage failures; the canvas should still remain usable in-memory.
+  }
+}
 
 export default function Canvas() {
   const [blocks, setBlocks] = useState<Record<string, CanvasBlock>>(INITIAL_BLOCK_MAP);
@@ -36,12 +86,22 @@ export default function Canvas() {
   const [showLibrary, setShowLibrary] = useState(false);
   const [hoverCell, setHoverCell] = useState<CellPosition | null>(null);
   const [hoveredBlock, setHoveredBlock] = useState<string | null>(null);
+  const [hoverRevealBlock, setHoverRevealBlock] = useState<string | null>(null);
   const [selectedBlock, setSelectedBlock] = useState<string | null>(null);
   const [replaceTarget, setReplaceTarget] = useState<string | null>(null);
   const [insertTarget, setInsertTarget] = useState<number | null>(null);
   const [libraryTarget, setLibraryTarget] = useState<LibraryTarget>(null);
+  const [modifierReveal, setModifierReveal] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
+  const hoverRevealTimerRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+
+  useEffect(() => {
+    const stored = loadStoredCanvasState();
+    if (!stored) return;
+    setBlocks(stored.blocks);
+    setRows(stored.rows);
+  }, []);
 
   /* ── Computed layout ── */
 
@@ -90,7 +150,37 @@ export default function Canvas() {
     gridRef,
     setRows,
   });
-  const dragResize = useDragResize(blocksRef, setBlocks, BLOCK_DEFS);
+  const dragResize = useDragResize(blocksRef, setBlocks);
+
+  useEffect(() => {
+    if (!editing) {
+      setModifierReveal(false);
+      setHoverRevealBlock(null);
+      if (hoverRevealTimerRef.current) {
+        window.clearTimeout(hoverRevealTimerRef.current);
+        hoverRevealTimerRef.current = null;
+      }
+      return;
+    }
+
+    const handleKeyChange = (event: KeyboardEvent) => {
+      setModifierReveal(event.altKey);
+    };
+
+    const handleWindowBlur = () => {
+      setModifierReveal(false);
+    };
+
+    window.addEventListener("keydown", handleKeyChange);
+    window.addEventListener("keyup", handleKeyChange);
+    window.addEventListener("blur", handleWindowBlur);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyChange);
+      window.removeEventListener("keyup", handleKeyChange);
+      window.removeEventListener("blur", handleWindowBlur);
+    };
+  }, [editing]);
 
   /* ── Preview layout merging ── */
 
@@ -105,7 +195,7 @@ export default function Canvas() {
     const y = clientY - rect.top;
     if (x < -20 || y < -20) return null;
     const col = Math.round(x / (CELL + GAP));
-    const row = Math.round(y / (CELL + GAP));
+    const row = Math.round(y / ROW_STEP);
     return { col: Math.max(0, Math.min(COLS - 1, col)), row: Math.max(0, row) };
   };
 
@@ -149,12 +239,17 @@ export default function Canvas() {
 
   const handleToggleEdit = () => {
     const entering = !editing;
+    if (!entering) {
+      persistCanvasState(blocks, rows);
+    }
     setEditing(entering);
     setShowLibrary(false);
     setHoveredBlock(null);
+    setHoverRevealBlock(null);
     setSelectedBlock(null);
     setReplaceTarget(null);
     setLibraryTarget(null);
+    setModifierReveal(false);
   };
 
   const handleToggleLibrary = () => {
@@ -241,17 +336,27 @@ export default function Canvas() {
   /* ── Grid dimensions ── */
 
   const maxRow = layout.reduce((max, lb) => Math.max(max, lb.y + lb.h), 0);
-  const gridRows = Math.max(maxRow + 3, 6);
-  const gridMinHeight = gridRows * CELL + Math.max(0, gridRows - 1) * GAP;
+  const contentHeight = maxRow > 0 ? spanHeightPx(maxRow) : 0;
+  const dotRows = Math.max(maxRow + 1, 6);
+  const minCanvasHeight = spanHeightPx(6);
+  const gridMinHeight = Math.max(contentHeight + 18, minCanvasHeight);
   const isEditOrPlacing = editing || !!dragPlace.placingBlock;
   const blockCount = Object.keys(blocks).length;
   const focusedBlockId = replaceTarget ?? selectedBlock;
+  const helperLeadBlockId = replaceTarget ?? selectedBlock ?? (modifierReveal ? hoveredBlock : hoverRevealBlock);
   const showInsertionControls = editing
+    && modifierReveal
     && !dragPlace.dragging
     && !dragMove.movingBlock
     && !dragResize.resizing
     && hoveredBlock === null
     && focusedBlockId === null
+    && !showLibrary;
+  const showEdgeAnchors = editing
+    && modifierReveal
+    && !dragPlace.dragging
+    && !dragMove.movingBlock
+    && !dragResize.resizing
     && !showLibrary;
   const placingBlockLabel = dragPlace.placingBlock
     ? BLOCK_DEFS.find((bt) => bt.type === dragPlace.placingBlock)?.label ?? "Block"
@@ -288,8 +393,10 @@ export default function Canvas() {
       footerStatus = `Replacing ${replaceBlockLabel}`;
     } else if (selectedBlock) {
       footerStatus = `${selectedBlockLabel} active`;
+    } else if (modifierReveal) {
+      footerStatus = "Helpers revealed";
     } else {
-      footerStatus = "Layout ready";
+      footerStatus = "Presentation mode · hover to reveal controls or hold Alt/Option for guides";
     }
   }
   const movingBlockData = dragMove.movingBlock
@@ -319,6 +426,7 @@ export default function Canvas() {
         onClick={() => {
           setReplaceTarget(null);
           setSelectedBlock(null);
+          setHoverRevealBlock(null);
         }}
         style={{ cursor: dragPlace.dragging ? "grabbing" : "default" }}
       >
@@ -330,9 +438,19 @@ export default function Canvas() {
             minHeight: gridMinHeight,
           }}
         >
+          {showEdgeAnchors && (
+            <>
+              <div className={`${styles.edgeAnchor} ${styles.edgeAnchorTop}`} />
+              <div
+                className={`${styles.edgeAnchor} ${styles.edgeAnchorBottom}`}
+                style={{ top: contentHeight + 16 }}
+              />
+            </>
+          )}
+
           {/* Dot grid */}
           <div className={styles.dots}>
-            {Array.from({ length: (COLS + 1) * (gridRows + 1) }).map((_, i) => {
+            {Array.from({ length: (COLS + 1) * (dotRows + 1) }).map((_, i) => {
               const col = i % (COLS + 1);
               const row = Math.floor(i / (COLS + 1));
               const isOccupied = layout.some(
@@ -344,8 +462,8 @@ export default function Canvas() {
                   key={i}
                   className={styles.dot}
                   style={{
-                    left: col * (CELL + GAP) - 1.5,
-                    top: row * (CELL + GAP) - 1.5,
+                    left: colToPx(col) - 1.5,
+                    top: rowToPx(row) - 1.5,
                     width: isEditOrPlacing ? 3 : 2,
                     height: isEditOrPlacing ? 3 : 2,
                     background: isEditOrPlacing
@@ -361,12 +479,12 @@ export default function Canvas() {
           </div>
 
           {/* Cell highlight (edit mode, not during placing) */}
-          {isEditOrPlacing && hoverCell && !dragPlace.placingBlock && !dragMove.movingBlock && (
+          {isEditOrPlacing && hoverCell && modifierReveal && !dragPlace.placingBlock && !dragMove.movingBlock && (
             <div
               className={styles.cellHighlight}
               style={{
-                left: hoverCell.col * (CELL + GAP),
-                top: hoverCell.row * (CELL + GAP),
+                left: colToPx(hoverCell.col),
+                top: rowToPx(hoverCell.row),
                 width: CELL,
                 height: CELL,
               }}
@@ -411,10 +529,10 @@ export default function Canvas() {
             <div
               className={styles.ghost}
               style={{
-                left: dragPlace.ghostPos.x * (CELL + GAP),
-                top: dragPlace.ghostPos.y * (CELL + GAP),
-                width: dragPlace.ghostPos.w * CELL + (dragPlace.ghostPos.w - 1) * GAP,
-                height: dragPlace.ghostPos.h * CELL + (dragPlace.ghostPos.h - 1) * GAP,
+                left: colToPx(dragPlace.ghostPos.x),
+                top: rowToPx(dragPlace.ghostPos.y),
+                width: spanWidthPx(dragPlace.ghostPos.w),
+                height: spanHeightPx(dragPlace.ghostPos.h),
               }}
             >
               <div className={styles.ghostLabel}>
@@ -438,10 +556,10 @@ export default function Canvas() {
             const isMoveSource = dragMove.movingBlock === block.id;
             const isFocusedEditBlock = focusedBlockId === block.id;
             const showEditControls = !dragMove.movingBlock
-              && (hoveredBlock === block.id || isSelected || replaceTarget === block.id);
+              && (hoverRevealBlock === block.id || isSelected || replaceTarget === block.id || (modifierReveal && hoveredBlock === block.id));
             const quietForHoveredChrome = editing
-              && hoveredBlock !== null
-              && hoveredBlock !== block.id
+              && helperLeadBlockId !== null
+              && helperLeadBlockId !== block.id
               && focusedBlockId === null
               && !dragMove.movingBlock
               && !dragResize.resizing;
@@ -463,8 +581,25 @@ export default function Canvas() {
                 key={block.id}
                 className={`${styles.block} ${editIdentityClass} ${isSelected ? styles.blockSelected : ""} ${editing ? styles.blockEditing : ""} ${editing && showInsertionControls ? styles.blockInsertionIdle : ""} ${showEditControls ? styles.blockChromeLead : ""} ${quietForHoveredChrome ? styles.blockLayerQuiet : ""} ${focusedBlockId !== null && !dragMove.movingBlock && !isFocusedEditBlock ? styles.blockSubdued : ""} ${isFocusedEditBlock && !dragMove.movingBlock ? styles.blockFocused : ""} ${isMoved ? styles.blockPreview : ""} ${isMoveSource ? styles.blockMoving : ""} ${isMoveSource ? styles.blockDragSource : ""} ${dragResize.resizing ? styles.blockNoTransition : ""}`}
                 style={{ ...rect, ...((replaceTarget === block.id || dragMove.movingBlock === block.id) ? { zIndex: 15 } : {}) }}
-                onMouseEnter={() => setHoveredBlock(block.id)}
-                onMouseLeave={() => setHoveredBlock((current) => (current === block.id ? null : current))}
+                onMouseEnter={() => {
+                  setHoveredBlock(block.id);
+                  if (!editing || selectedBlock !== null || replaceTarget !== null || modifierReveal) return;
+                  if (hoverRevealTimerRef.current) {
+                    window.clearTimeout(hoverRevealTimerRef.current);
+                  }
+                  hoverRevealTimerRef.current = window.setTimeout(() => {
+                    setHoverRevealBlock(block.id);
+                    hoverRevealTimerRef.current = null;
+                  }, 220);
+                }}
+                onMouseLeave={() => {
+                  setHoveredBlock((current) => (current === block.id ? null : current));
+                  setHoverRevealBlock((current) => (current === block.id ? null : current));
+                  if (hoverRevealTimerRef.current) {
+                    window.clearTimeout(hoverRevealTimerRef.current);
+                    hoverRevealTimerRef.current = null;
+                  }
+                }}
                 onClick={(e) => {
                   e.stopPropagation();
                   if (!dragPlace.placingBlock) setSelectedBlock(isSelected ? null : block.id);
@@ -556,9 +691,9 @@ export default function Canvas() {
             return points.map((pt) => (
               <ColInsertionBar
                 key={`colins-${rowIdx}-${pt.afterIdx}`}
-                left={Math.min(pt.x * (CELL + GAP) - 12, GRID_W - 12)}
-                top={rowY * (CELL + GAP)}
-                height={rowH * CELL + (rowH - 1) * GAP}
+                left={Math.min(colToPx(pt.x) - 12, GRID_W - 12)}
+                top={rowToPx(rowY)}
+                height={spanHeightPx(rowH)}
                 onInsert={() => {
                   setLibraryTarget({ kind: "column", rowIdx, afterIdx: pt.afterIdx });
                   setShowLibrary(true);
@@ -571,7 +706,7 @@ export default function Canvas() {
           {showInsertionControls && rowBoundaries.map((bound, i) => (
             <RowInsertionBar
               key={`ins-${i}`}
-              y={bound.y * (CELL + GAP)}
+              y={rowToPx(bound.y)}
               width={GRID_W}
               onInsert={() => {
                 setLibraryTarget({ kind: "row", insertIdx: bound.afterRowIdx + 1 });
@@ -591,9 +726,9 @@ export default function Canvas() {
             return (
               <EmptyRow
                 key={`empty-${row.id}`}
-                top={y * (CELL + GAP)}
+                top={rowToPx(y)}
                 width={GRID_W}
-                height={2 * CELL + GAP}
+                height={spanHeightPx(2)}
               />
             );
           })}

@@ -13,11 +13,12 @@
   box-shadow: 0 8px 24px rgba(0,0,0,0.06);
   z-index: 10;
   padding: 6px;
-  animation: popIn 0.15s ease;
+  transform-origin: top left;
+  animation: popIn var(--motion-soft-duration) var(--motion-soft-ease);
 }
 
 @keyframes popIn {
-  from { opacity: 0; transform: scale(0.95) translateY(-4px); }
+  from { opacity: 0; transform: scale(0.96) translateY(-6px); }
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
@@ -37,11 +38,14 @@
   padding: 7px 8px;
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.1s;
+  transition:
+    background var(--motion-crisp-duration) var(--motion-crisp-ease),
+    transform var(--motion-hover-duration) var(--motion-hover-ease);
 }
 
 .replacePopoverItem:hover {
   background: var(--lavender-bg);
+  transform: translateX(2px);
 }
 
 .replacePopoverActive {

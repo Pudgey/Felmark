@@ -1,11 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import type { CanvasBlock, BlockTypeDef } from "../types";
-
-const CELL = 110;
-const GAP = 12;
-const COLS = 8;
+import { useState, useEffect } from "react";
+import type { CanvasBlock } from "../types";
+import { BLOCK_DEFS, CELL, GAP, COLS } from "../registry";
 
 export interface UseDragResizeReturn {
   resizing: boolean;
@@ -15,7 +12,6 @@ export interface UseDragResizeReturn {
 export function useDragResize(
   blocksRef: React.MutableRefObject<Record<string, CanvasBlock>>,
   setBlocks: React.Dispatch<React.SetStateAction<Record<string, CanvasBlock>>>,
-  blockDefs: BlockTypeDef[],
 ): UseDragResizeReturn {
   const [resizeState, setResizeState] = useState<{
     blockId: string;
@@ -30,8 +26,8 @@ export function useDragResize(
 
     document.body.style.cursor = "col-resize";
 
-    const def = blockDefs.find(d => d.type === blocksRef.current[resizeState.blockId]?.type);
-    const neighborDef = blockDefs.find(d => d.type === blocksRef.current[resizeState.neighborId]?.type);
+    const def = BLOCK_DEFS.find(d => d.type === blocksRef.current[resizeState.blockId]?.type);
+    const neighborDef = BLOCK_DEFS.find(d => d.type === blocksRef.current[resizeState.neighborId]?.type);
     const minW = def?.minW ?? 1;
     const neighborMinW = neighborDef?.minW ?? 1;
     const maxW = def?.maxW ?? COLS;
@@ -70,7 +66,7 @@ export function useDragResize(
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseup", onUp);
     };
-  }, [resizeState]);
+  }, [blocksRef, resizeState, setBlocks]);
 
   const startResize = (blockId: string, neighborId: string, startX: number, startW: number, neighborStartW: number) => {
     setResizeState({ blockId, neighborId, startX, startW, neighborStartW });

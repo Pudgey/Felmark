@@ -45,6 +45,8 @@ Felmark/
 │   ├── BUSINESS_STRATEGY.md
 │   ├── WORKTAB_CONCEPT.md
 │   └── ...
+├── .claude/skills/                ← Claude Code skills (SKILL.md per skill, plain Markdown)
+├── .agents/skills/                ← Codex CLI skills (SKILL.md per skill, YAML frontmatter + Markdown)
 ├── conductor/                     ← Project Operations Hub
 │   ├── THOUGHTS.md
 │   ├── HANDOFF.md
@@ -53,7 +55,6 @@ Felmark/
 │   ├── DEVELOPMENT_BRIEF.md
 │   ├── journal/
 │   ├── missions/
-│   ├── skills/
 │   ├── sops/
 │   └── templates/
 ├── app/                           ← Web app (Next.js — to be created)
@@ -110,6 +111,60 @@ Chrome Extension (~50 lines)          Web App (app.tryfelmark.com)
 **WRITE RULE**: When creating or saving `.md` files for the conductor (missions, standards, reports, audits, tracks, skills, strategy, design specs), **always write them to `conductor/`** (`/Users/donteennis/Felmark/conductor/`).
 
 ### Repository: `/Users/donteennis/Felmark/`
+
+## Skills (Multi-AI Setup)
+
+This project uses multiple AI coding agents. Skills (slash commands / workflows) are maintained in parallel across all supported agents. **When creating or modifying a skill, you MUST update it for every AI tool, not just the one you're currently running in.**
+
+### Skill Locations
+
+| AI Tool | Skills Directory | File Format | Invocation |
+|---------|-----------------|-------------|------------|
+| **Claude Code** | `.claude/skills/<name>/SKILL.md` | Plain Markdown | `/skillname` |
+| **Codex CLI** | `.agents/skills/<name>/AGENT.md` | YAML frontmatter + Markdown | `$skillname` or `/skillname` |
+| **Conductor** | `conductor/skills/<name>/PROTOCOL.md` | Shared logic source | Referenced by wrappers |
+
+### Format Differences
+
+**Claude Code** (`.claude/skills/<name>/SKILL.md`):
+```markdown
+Run an accessibility audit on: $ARGUMENTS
+
+Follow `conductor/skills/a11y/PROTOCOL.md`.
+...
+```
+
+**Codex CLI** (`.agents/skills/<name>/AGENT.md`):
+```markdown
+---
+name: "a11y"
+description: "Run an accessibility audit on the specified target."
+---
+
+# A11y — Accessibility Audit
+
+Run an accessibility audit on the specified target.
+
+Follow `conductor/skills/a11y/PROTOCOL.md`.
+...
+```
+
+### Rules for Skill Changes (NON-NEGOTIABLE)
+
+1. **Every new skill** must be created in BOTH `.claude/skills/` AND `.agents/skills/` in the same pass.
+2. **Every skill edit** must be mirrored to the other AI's version in the same pass.
+3. **Skill logic lives in `conductor/skills/<name>/PROTOCOL.md`** — the per-AI files are thin wrappers that point to the conductor source. This keeps behavior identical across agents.
+4. **Deleting a skill** means removing it from both directories and from `conductor/skills/` if it exists there.
+5. After any skill change, run the conductor integrity check to verify sync.
+
+### Other AI Configuration Files
+
+| File | AI Tool | Purpose |
+|------|---------|---------|
+| `CLAUDE.md` | Claude Code | Project instructions (this file) |
+| `AGENTS.md` | Codex CLI | Project instructions (Codex equivalent) |
+| `.claude/settings.json` | Claude Code | Hooks, permissions, config |
+| `.codex/config.toml` | Codex CLI | Model, approval policies, sandbox config |
 
 ## Ground Rules
 

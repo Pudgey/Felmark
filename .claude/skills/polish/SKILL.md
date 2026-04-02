@@ -1,6 +1,6 @@
 Run a pre-release polish checklist on: $ARGUMENTS
 
-Follow `conductor/skills/polish/SKILL.md`.
+Follow `conductor/skills/polish/PROTOCOL.md`.
 
 **Apply when a feature hits ~70% completion. Checks:**
 - UI consistency (spacing, alignment, color usage)

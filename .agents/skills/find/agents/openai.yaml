@@ -1,0 +1,4 @@
+interface:
+  display_name: "Find"
+  short_description: "Help with Find tasks and workflows"
+  default_prompt: "Use $find for this task in the Felmark repo."
