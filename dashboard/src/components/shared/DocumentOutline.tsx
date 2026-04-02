@@ -26,7 +26,8 @@ function isHeading(type: Block["type"]) {
   return type === "h1" || type === "h2" || type === "h3";
 }
 
-function getPlainTextContent(content: string) {
+function getPlainTextContent(content: unknown) {
+  if (typeof content !== "string") return "";
   return content.replace(/<[^>]*>/g, " ").replace(/[\u200B\uFEFF\xA0]/g, "").trim();
 }
 
