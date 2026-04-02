@@ -1,35 +1,41 @@
 # forge/
 
-The Forge Engine — Felmark's state management and business logic layer. Provides CRUD operations for workstations, projects, documents, and tabs. All mutations flow through Forge; components never modify state directly.
+Forge is Felmark's shared model and business logic layer. Domain-owned truth lives here; surfaces consume projections from here. `Workspace`, `Workstation`, `Sidebar`, and future portals must never become sources of truth for each other.
 
 ## Architecture
 
 ```
-page.tsx → createForge(stateUpdater) → forge.workstations.create(...)
-                                      → forge.projects.rename(...)
-                                      → forge.documents.setBlocks(...)
-                                      → forge.tabs.select(...)
+app/page.tsx
+  → createForge(stateUpdater)
+    → forge.services/*      current mutation layer
+    → forge.domains/*       canonical business ownership
+    → forge.read-models/*   surface-specific summaries
 ```
 
-`page.tsx` creates a single Forge instance with a state updater. Components receive handler callbacks that call Forge methods internally.
+Current state:
+- `index.ts` and `types.ts` are still the public app-facing forge facade.
+- `services/` remains the live mutation layer for workstations, projects, documents, tabs, and block factories.
+- `domains/` and `read-models/` are introduced in this pass as the long-term structure for shared truth and surface projections.
 
-## Exports (index.ts)
+## Ownership Rules
 
-| Export | Type | Description |
-|--------|------|-------------|
-| `createForge(state)` | function | Creates a Forge instance with all services |
-| `Forge` | interface | Shape of the forge instance |
-| `getBlockDefaults` | function | Default data for any block type |
-| `convertBlock` | function | Change a block's type in-place |
-| `insertAfter` | function | Insert a new block after a given block |
-| `removeBlock` | function | Remove a block from a document |
-| `createEmptyBlock` | function | Create a new empty block |
-| `createEmptyDocument` | function | Create a new empty document (default blocks) |
-| `needsTrailingParagraph` | function | Check if document needs a trailing paragraph |
-| `needsPicker` | function | Check if a block type requires a picker UI |
-| `ForgeState`, `ForgeContext`, `ForgeResult`, `ForgeSource`, `StateUpdater` | types | Core type definitions |
+- Domains own truth by business area, not by screen.
+- Surfaces never import another surface to retrieve data.
+- Read models may compose domain data, but they never mutate it.
+- Stripe and payment state must live under the finance domain, nowhere else.
+- `Sidebar` should read a shell summary, not calculate or own client finance directly.
 
-## Services
+## Public Forge Facade
+
+| File | Role |
+|------|------|
+| `index.ts` | Public forge entrypoint used by the app today |
+| `types.ts` | Shared forge state and updater types |
+| `services/` | Current mutation services and block factories |
+| `domains/` | Canonical business-domain ownership, introduced as structure contract |
+| `read-models/` | Surface-specific summaries, introduced as structure contract |
+
+## Current Services
 
 | File | Service | Description |
 |------|---------|-------------|
@@ -39,18 +45,23 @@ page.tsx → createForge(stateUpdater) → forge.workstations.create(...)
 | `services/tabs.ts` | `createTabServices` | Select, close, reorder |
 | `services/blocks/` | Block factories | `getBlockDefaults` + block type utilities |
 
-## Block Factory Registry (services/blocks/)
+## Planned Domain Split
 
-| File | Block types covered |
-|------|-------------------|
-| `core.ts` | Master `getBlockDefaults` switch + shared utilities |
-| `basic.ts` | paragraph, h1, h2, h3, bullet, numbered, todo, quote, divider, callout, code, image, embed, toggle |
-| `content.ts` | deadline, canvas, audio, data-chips, columns |
-| `collaboration.ts` | comment-thread, mention, question, feedback, decision, poll, handoff, signoff, annotation |
-| `visual.ts` | timeline, flow, brand-board, mood-board, wireframe, pull-quote, hero-spotlight, kinetic-type, number-cascade, stat-reveal, value-counter, graph |
-| `money.ts` | money (all sub-types) |
-| `unique.ts` | pricing-config, scope-boundary, asset-checklist, decision-picker, availability-picker, progress-stream, dependency-map, revision-heatmap |
-| `ai.ts` | ai-action |
+| Domain | Owns |
+|--------|------|
+| `workstations/` | Client/workstation identity and shell-level status |
+| `projects/` | Project state, deadlines, phase, pinning, progress |
+| `documents/` | Blocks and document lifecycle |
+| `finance/` | Revenue, invoices, payments, outstanding, Stripe seams |
+
+## Planned Read Models
+
+| Read model | Purpose |
+|-----------|---------|
+| `sidebar.ts` | Identity + urgency + shell-level summary |
+| `workspace.ts` | Operational client/project projection |
+| `workstation.ts` | Document-adjacent context for focused work |
+| `finance.ts` | Full finance-facing projection and payment health |
 
 ## Imported By
 

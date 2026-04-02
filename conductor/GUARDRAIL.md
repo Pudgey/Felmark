@@ -1,6 +1,6 @@
 # Guardrail — Feature Inventory & Codebase Health
 
-> **Last synced**: 2026-04-01
+> **Last synced**: 2026-04-02
 > **Auto-update rule**: This file MUST be updated in the same commit as any feature add, delete, rename, or move. This is not optional — the AI enforces it as a mandatory post-commit check.
 
 ## Codebase Pulse
@@ -94,6 +94,7 @@ This is boilerplate, not complexity. No refactor needed unless Editor.tsx itself
 | **The Wire** | Needs wiring | `wire/` | Competitive intelligence surface |
 | **Workspace** | Active | `workspace/` | Rail surface — task/project management, list/board/timeline views |
 | **Forge Paper** | Active | `forge-paper/` | Rail surface — owns blocks state, document view for client proposals |
+| **Forge shared model** | Active | `dashboard/src/forge/`, `dashboard/src/forge/domains/`, `dashboard/src/forge/read-models/` | Shared business-logic seam; domains own truth, surfaces consume read models |
 | **Terminal Welcome** | Active | `editor/TerminalWelcome.tsx` | Dead-state splash screen |
 | **History** | Active | `history/` | Version history modal |
 | **Conversations** | Active | `editor/ConversationPanel.tsx` | Left-side conversation panel |
@@ -143,6 +144,7 @@ These files have broad blast radius. Check them when features are added or delet
 | `EditorMargin.tsx` | BLOCK_LABELS, BLOCK_LABEL_COLORS | Every block type |
 | `Rail.tsx` | Navigation icons | Top-level features |
 | `Sidebar.tsx` | Workspace tree, calendar, search | Navigation features |
+| `dashboard/src/forge/index.ts` | Public forge entrypoint for services and future domain/read-model wiring | Shared business logic consumers |
 
 ---
 
