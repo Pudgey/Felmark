@@ -12,5 +12,4 @@
 - `Editor.tsx` -- rendered when no document is open (empty state)
 
 ## Files
-- `TerminalWelcome.tsx` -- main component (683 lines)
-- `TerminalWelcome.module.css` -- styles
+- `TerminalWelcome.tsx` -- main component (683 lines, uses inline styles)

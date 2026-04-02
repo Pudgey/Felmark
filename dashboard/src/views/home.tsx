@@ -1,7 +1,7 @@
 "use client";
 
 import type { Workstation, Project } from "@/lib/types";
-import DashboardHome from "@/components/workstation/dashboard/DashboardHome";
+import DashboardHome from "@/components/home/DashboardHome";
 import TerminalWelcome from "@/components/workstation/terminal-welcome/TerminalWelcome";
 
 interface HomeViewProps {
