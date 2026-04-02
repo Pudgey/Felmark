@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { STATUS } from "@/lib/constants";
 import type { Workstation, Project, ArchivedProject } from "@/lib/types";
 import styles from "./Sidebar.module.css";
+import CalendarView from "./CalendarView";
 
 interface SidebarProps {
   workstations: Workstation[];
@@ -37,174 +38,6 @@ interface SidebarProps {
 
 const STATUSES = ["active", "review", "paused", "completed"] as const;
 
-const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-const COMPACT_CURRENCY = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  notation: "compact",
-  maximumFractionDigits: 1,
-});
-
-function CalendarView({ workstations, onSelectProject, onScrollToEvent }: { workstations: Workstation[]; onSelectProject: (project: Project, client: string) => void; onScrollToEvent?: (projectId: string) => void }) {
-  const today = new Date();
-  const [viewMonth, setViewMonth] = useState(today.getMonth());
-  const [viewYear, setViewYear] = useState(today.getFullYear());
-  const [selectedDay, setSelectedDay] = useState<number | null>(today.getDate());
-
-  // Build deadline map: day number → projects due that day
-  const deadlineMap = new Map<number, { project: Project; client: string }[]>();
-  workstations.forEach(ws => {
-    ws.projects.forEach(p => {
-      if (!p.due || p.due === "—") return;
-      // Parse "Apr 3", "Mar 20", etc.
-      const match = p.due.match(/^([A-Za-z]+)\s+(\d+)$/);
-      if (!match) return;
-      const monthIdx = MONTH_NAMES.findIndex(m => m.startsWith(match[1]));
-      const day = parseInt(match[2]);
-      if (monthIdx === viewMonth) {
-        const existing = deadlineMap.get(day) || [];
-        existing.push({ project: p, client: ws.client });
-        deadlineMap.set(day, existing);
-      }
-    });
-  });
-
-  // Calendar grid
-  const firstDay = new Date(viewYear, viewMonth, 1).getDay();
-  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
-  const cells: (number | null)[] = [];
-  for (let i = 0; i < firstDay; i++) cells.push(null);
-  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
-
-  const isToday = (d: number) => d === today.getDate() && viewMonth === today.getMonth() && viewYear === today.getFullYear();
-
-  const prevMonth = () => {
-    if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1); }
-    else setViewMonth(m => m - 1);
-    setSelectedDay(null);
-  };
-
-  const nextMonth = () => {
-    if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1); }
-    else setViewMonth(m => m + 1);
-    setSelectedDay(null);
-  };
-
-  const selectedDeadlines = selectedDay ? (deadlineMap.get(selectedDay) || []) : [];
-
-  // All deadlines for this month, sorted by day
-  const allDeadlines = Array.from(deadlineMap.entries())
-    .sort(([a], [b]) => a - b)
-    .flatMap(([day, items]) => items.map(item => ({ ...item, day })));
-
-  return (
-    <div className={styles.calendarView}>
-      {/* Month nav */}
-      <div className={styles.calNav}>
-        <button className={styles.calNavBtn} onClick={prevMonth}>
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M7 3L4 6l3 3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-        </button>
-        <span className={styles.calMonth}>{MONTH_NAMES[viewMonth]} {viewYear}</span>
-        <button className={styles.calNavBtn} onClick={nextMonth}>
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 3l3 3-3 3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-        </button>
-      </div>
-
-      {/* Day headers */}
-      <div className={styles.calGrid}>
-        {DAYS.map(d => <div key={d} className={styles.calDayHeader}>{d}</div>)}
-
-        {/* Day cells */}
-        {cells.map((day, i) => {
-          if (day === null) return <div key={`e-${i}`} className={styles.calCell} />;
-          const hasDeadline = deadlineMap.has(day);
-          const deadlines = deadlineMap.get(day) || [];
-          const isSelected = selectedDay === day;
-
-          return (
-            <div
-              key={day}
-              className={`${styles.calCell} ${styles.calCellDay} ${isToday(day) ? styles.calToday : ""} ${isSelected ? styles.calSelected : ""} ${hasDeadline ? styles.calHasDeadline : ""}`}
-              onClick={() => setSelectedDay(isSelected ? null : day)}
-            >
-              <span className={styles.calDayNum}>{day}</span>
-              {hasDeadline && (
-                <div className={styles.calDots}>
-                  {deadlines.slice(0, 3).map((d, j) => (
-                    <span key={j} className={styles.calDot} style={{ background: STATUS[d.project.status]?.color || "var(--ember)" }} />
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Selected day detail or full month list */}
-      <div className={styles.calDeadlines}>
-        {selectedDay && selectedDeadlines.length > 0 ? (
-          <>
-            <div className={styles.calDeadlineLabel}>
-              {MONTH_NAMES[viewMonth].slice(0, 3)} {selectedDay}
-              <span className={styles.calDeadlineCount}>{selectedDeadlines.length}</span>
-            </div>
-            {selectedDeadlines.map((d, i) => {
-              const st = STATUS[d.project.status];
-              return (
-                <div key={i} className={styles.calDeadlineItem} onClick={() => onScrollToEvent ? onScrollToEvent(d.project.id) : onSelectProject(d.project, d.client)}>
-                  <div className={styles.calDeadlineDot} style={{ background: st?.color || "var(--ember)" }} />
-                  <div className={styles.calDeadlineInfo}>
-                    <span className={styles.calDeadlineName}>{d.project.name}</span>
-                    <span className={styles.calDeadlineMeta}>{d.client} · {d.project.amount}</span>
-                  </div>
-                  <span className={styles.calDeadlineStatus} style={{ color: st?.color, background: `${st?.color}10` }}>{st?.label}</span>
-                </div>
-              );
-            })}
-          </>
-        ) : selectedDay && selectedDeadlines.length === 0 ? (
-          <div className={styles.calEmpty}>No deadlines on {MONTH_NAMES[viewMonth].slice(0, 3)} {selectedDay}</div>
-        ) : (
-          <>
-            <div className={styles.calDeadlineLabel}>
-              all deadlines
-              <span className={styles.calDeadlineCount}>{allDeadlines.length}</span>
-            </div>
-            {allDeadlines.length === 0 && (
-              <div className={styles.calEmpty}>No deadlines this month</div>
-            )}
-            {allDeadlines.map((d, i) => {
-              const st = STATUS[d.project.status];
-              return (
-                <div key={i} className={styles.calDeadlineItem} onClick={() => onScrollToEvent ? onScrollToEvent(d.project.id) : onSelectProject(d.project, d.client)}>
-                  <div className={styles.calDeadlineDot} style={{ background: st?.color || "var(--ember)" }} />
-                  <div className={styles.calDeadlineInfo}>
-                    <span className={styles.calDeadlineName}>{d.project.name}</span>
-                    <span className={styles.calDeadlineMeta}>{d.client} · {MONTH_NAMES[viewMonth].slice(0, 3)} {d.day}</span>
-                  </div>
-                  <span className={styles.calDeadlineStatus} style={{ color: st?.color, background: `${st?.color}10` }}>{st?.label}</span>
-                </div>
-              );
-            })}
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
-const REVENUE_WEEKS = [
-  { week: "W1", earned: 1200, pending: 800 },
-  { week: "W2", earned: 2400, pending: 1200 },
-  { week: "W3", earned: 1800, pending: 2400 },
-  { week: "W4", earned: 3200, pending: 1600 },
-  { week: "W5", earned: 2800, pending: 800 },
-  { week: "W6", earned: 4200, pending: 2000 },
-  { week: "W7", earned: 3600, pending: 1400 },
-  { week: "now", earned: 2200, pending: 3800 },
-];
-
 import { getDueLabel as getDueLabelFromDate, getDueColor as getDueColorFromDate } from "@/lib/due-dates";
 
 export default function Sidebar({ workstations, archived, activeProject, open, width, isResizing, wordCount, railActive, onClose, onToggleWorkstation, onSelectWorkstationHome, onSelectProject, onArchiveProject, onArchiveCompleted, onArchiveWorkstation, onRestoreProject, onReorderWorkstations, onRenameWorkstation, onRenameProject, onUpdateProjectDue, onAddWorkstation, onTogglePin, onCycleStatus, saveIndicatorState, saveStatusLabel, onSaveNow, onScrollToCalendarEvent }: SidebarProps) {
@@ -222,8 +55,6 @@ export default function Sidebar({ workstations, archived, activeProject, open, w
   const [pjMenuOpen, setPjMenuOpen] = useState<string | null>(null);
   const [pjMenuPos, setPjMenuPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const [search, setSearch] = useState("");
-  const [expandedStats, setExpandedStats] = useState(false);
-  const [hoveredBar, setHoveredBar] = useState<number | null>(null);
 
   // Close workspace menu on outside click
   useEffect(() => {
@@ -251,27 +82,10 @@ export default function Sidebar({ workstations, archived, activeProject, open, w
     return () => document.removeEventListener("mousedown", handler);
   }, [pjMenuOpen]);
 
-  const totalEarnings = workstations.reduce((s, w) =>
-    s + w.projects.reduce((a, p) => {
-      const m = p.amount.match(/[\d,]+/);
-      return a + (m ? parseInt(m[0].replace(",", "")) : 0);
-    }, 0), 0);
-  const activeCount = workstations.reduce((s, w) => s + w.projects.filter(p => p.status === "active").length, 0);
-  const overdueCount = workstations.reduce((s, w) => s + w.projects.filter(p => p.status === "overdue").length, 0);
   const totalProjects = workstations.reduce((s, w) => s + w.projects.length, 0);
-  const completedTotal = workstations.reduce((s, w) => s + w.projects.filter(p => p.status === "completed").length, 0);
 
   const completedCount = (wsId: string) =>
     workstations.find(w => w.id === wsId)?.projects.filter(p => p.status === "completed").length || 0;
-
-  // Revenue flow — bar chart uses sample weekly data, totals computed from real projects
-  const maxBarVal = Math.max(...REVENUE_WEEKS.map(w => w.earned + w.pending));
-  const parseAmount = (amt: string) => { const m = amt.match(/[\d,]+/); return m ? parseInt(m[0].replace(",", "")) : 0; };
-  const totalEarned = workstations.reduce((s, w) => s + w.projects.filter(p => p.status === "completed").reduce((a, p) => a + parseAmount(p.amount), 0), 0);
-  const totalPending = workstations.reduce((s, w) => s + w.projects.filter(p => p.status !== "completed").reduce((a, p) => a + parseAmount(p.amount), 0), 0);
-  const totalEarnedDisplay = COMPACT_CURRENCY.format(totalEarned);
-  const totalPendingDisplay = COMPACT_CURRENCY.format(totalPending);
-  const totalPipelineDisplay = COMPACT_CURRENCY.format(totalEarned + totalPending);
 
   // Pinned projects
   const pinnedProjects = workstations.flatMap(w =>
@@ -381,82 +195,8 @@ export default function Sidebar({ workstations, archived, activeProject, open, w
         {/* Calendar view */}
         {railActive === "calendar" && <CalendarView workstations={workstations} onSelectProject={onSelectProject} onScrollToEvent={onScrollToCalendarEvent} />}
 
-        {/* Revenue Flow */}
+        {/* Navigation content */}
         {railActive !== "calendar" && <>
-          <div className={styles.revenueArea}>
-          {/* Header */}
-          <div className={styles.rfHead}>
-            <div className={styles.rfTitleRow}>
-              <span className={styles.rfAmount}>{totalEarnedDisplay}</span>
-              <span className={styles.rfTrend}>+23%</span>
-            </div>
-            <span className={styles.rfLabel}>earned this month</span>
-          </div>
-
-          {/* Chart */}
-          <div className={styles.rfChart}>
-            {REVENUE_WEEKS.map((w, i) => {
-              const earnedH = (w.earned / maxBarVal) * 100;
-              const pendingH = (w.pending / maxBarVal) * 100;
-              const isHovered = hoveredBar === i;
-              const isNow = i === REVENUE_WEEKS.length - 1;
-              return (
-                <div key={i} className={`${styles.rfBarWrap} ${isNow ? styles.rfBarNow : ""}`}
-                  onMouseEnter={() => setHoveredBar(i)} onMouseLeave={() => setHoveredBar(null)}>
-                  <div className={styles.rfBarCol}>
-                    <div className={`${styles.rfBar} ${styles.rfBarPending}`} style={{ height: `${pendingH}%`, opacity: isHovered ? 1 : 0.5 }} />
-                    <div className={`${styles.rfBar} ${styles.rfBarEarned}`} style={{ height: `${earnedH}%`, opacity: isHovered ? 1 : 0.8 }} />
-                  </div>
-                  {isHovered && (
-                    <div className={styles.rfTooltip}>
-                      <span className={styles.rfTtEarned}>${w.earned.toLocaleString()}</span>
-                      <span className={styles.rfTtPending}>${w.pending.toLocaleString()} pending</span>
-                    </div>
-                  )}
-                  <span className={styles.rfBarLabel}>{isNow ? "→" : w.week}</span>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Breakdown */}
-          <div className={styles.rfBreakdown}>
-            <div className={styles.rfBkItem}>
-              <div className={`${styles.rfBkDot} ${styles.rfBkDotEarned}`} />
-              <span className={styles.rfBkLabel}>Earned</span>
-              <span className={styles.rfBkVal}>{totalEarnedDisplay}</span>
-            </div>
-            <div className={styles.rfBkItem}>
-              <div className={`${styles.rfBkDot} ${styles.rfBkDotPending}`} />
-              <span className={styles.rfBkLabel}>Pending</span>
-              <span className={styles.rfBkVal}>{totalPendingDisplay}</span>
-            </div>
-            <div className={styles.rfBkItem}>
-              <div className={`${styles.rfBkDot} ${styles.rfBkDotTotal}`} />
-              <span className={styles.rfBkLabel}>Pipeline</span>
-              <span className={`${styles.rfBkVal} ${styles.rfBkValStrong}`}>{totalPipelineDisplay}</span>
-            </div>
-          </div>
-
-          {/* Expandable project stats */}
-          <div className={styles.statsToggle} onClick={() => setExpandedStats(!expandedStats)}>
-            <div className={styles.statsToggleRow}>
-              <span className={styles.statsToggleLabel}>{activeCount} active · {overdueCount > 0 ? <span style={{ color: "#c24b38" }}>{overdueCount} overdue</span> : "0 overdue"}</span>
-              <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style={{ transform: expandedStats ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.15s" }}>
-                <path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </div>
-          </div>
-
-          {expandedStats && (
-            <div className={styles.statsExpanded}>
-              <div className={styles.statMini}><div className={styles.statMiniVal}>{totalProjects}</div><div className={styles.statMiniLab}>total</div></div>
-              <div className={styles.statMini}><div className={styles.statMiniVal}>{completedTotal}</div><div className={styles.statMiniLab}>done</div></div>
-              <div className={styles.statMini}><div className={styles.statMiniVal}>{totalProjects > 0 ? Math.round((completedTotal / totalProjects) * 100) : 0}%</div><div className={styles.statMiniLab}>rate</div></div>
-            </div>
-          )}
-        </div>
-
         {/* Search */}
         <div className={styles.searchWrap}>
           <svg className={styles.searchIcon} width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" strokeWidth="1.2" /><path d="M9.5 9.5l3 3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
@@ -516,12 +256,11 @@ export default function Sidebar({ workstations, archived, activeProject, open, w
                       <span className={styles.wsName} onDoubleClick={e => { e.stopPropagation(); setEditingWsId(ws.id); setEditingWsName(ws.client); }}>{ws.client}</span>
                     )}
                     <div className={styles.wsMeta}>
-                      {totalEarnings > 0 && <span className={styles.wsRevenue}>${(ws.projects.reduce((a, p) => { const m = p.amount.match(/[\d,]+/); return a + (m ? parseInt(m[0].replace(",", "")) : 0); }, 0) / 1000).toFixed(1)}k</span>}
                       <span className={styles.wsLastActive}>{ws.lastActive}</span>
                     </div>
                   </div>
                   <span className={styles.wsCount}>{ws.projects.length}</span>
-                  <span className={styles.wsArrow} style={{ transform: ws.open ? "rotate(90deg)" : "rotate(0deg)" }}>▶</span>
+                  <span className={styles.wsArrow} style={{ transform: ws.open ? "rotate(90deg)" : "rotate(0deg)" }}>&#9654;</span>
                 </div>
                 <button className={styles.wsMenuBtn} onClick={e => { e.stopPropagation(); setWsMenu(wsMenu === ws.id ? null : ws.id); }}>
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="3" cy="7" r="1" fill="currentColor" /><circle cx="7" cy="7" r="1" fill="currentColor" /><circle cx="11" cy="7" r="1" fill="currentColor" /></svg>
@@ -634,7 +373,7 @@ export default function Sidebar({ workstations, archived, activeProject, open, w
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 3.5h9M2.5 3.5v6a1 1 0 001 1h5a1 1 0 001-1v-6" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /><path d="M5 6h2" stroke="currentColor" strokeWidth="1" strokeLinecap="round" /></svg>
                 <span className={styles.archiveLabel}>archive</span>
                 <span className={styles.archiveBadge}>{archived.length}</span>
-                <span className={styles.archiveArrow} style={{ transform: archiveOpen ? "rotate(90deg)" : "rotate(0deg)" }}>▶</span>
+                <span className={styles.archiveArrow} style={{ transform: archiveOpen ? "rotate(90deg)" : "rotate(0deg)" }}>&#9654;</span>
               </div>
               <div className={`${styles.archiveList} ${archiveOpen ? styles.archiveListOpen : ""}`} aria-hidden={!archiveOpen}>
                 <div className={styles.archiveListInner}>
