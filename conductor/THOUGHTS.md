@@ -18,14 +18,15 @@
 
 | Agent | Task | Started | Status |
 |-------|------|---------|--------|
-| claude-main | Housekeeping sweep — pruning worktrees, dead blocks, stale conductor docs | 2026-04-01 | COMPLETE |
+| — | — | — | — |
 
 ## Recent
 
 | Agent | Task | Completed |
 |-------|------|-----------|
-| codex-main | Ran brain grounding protocol and prepared execution constraints for the next task | 2026-04-01 09:59 EDT |
-| codex-main | Debugged settings page — cleared stale entry from prior session | 2026-04-01 01:02 EDT |
-| codex-main | Routed Settings to a dedicated page-level surface | 2026-04-01 00:31 EDT |
-| claude-main | Major codebase restructure — views layer, workstation nesting, editor internals | 2026-04-01 |
-| claude-main | Built Workspace v4 — standalone surface with right panel, timer, chat, invoice | 2026-04-01 00:30 EDT |
+| claude-main | Refactored Editor.tsx (1,779 lines) into core/ module architecture — 8 hooks, 7 components, block registry, manifests | 2026-04-01 |
+| codex-main | Removed the remaining row and column insertion guide lines from the canvas plus hover state | 2026-04-01 17:53 EDT |
+| codex-main | Removed the blue hover treatment from the canvas insertion plus controls | 2026-04-01 17:49 EDT |
+| codex-main | Removed the edit canvas shell treatment and blue outline styling so the workstation canvas matches the workspace background | 2026-04-01 17:44 EDT |
+| codex-main | Fixed canvas edit overlays so insertion rails, chrome, and block move no longer block workstation canvas interaction | 2026-04-01 17:34 EDT |
+| codex-main | Deep polished the workspace edit canvas shell and applied the review patch onto main | 2026-04-01 17:02 EDT |

@@ -31,6 +31,7 @@ export default function Canvas() {
   const [editing, setEditing] = useState(false);
   const [showLibrary, setShowLibrary] = useState(false);
   const [hoverCell, setHoverCell] = useState<CellPosition | null>(null);
+  const [hoveredBlock, setHoveredBlock] = useState<string | null>(null);
   const [selectedBlock, setSelectedBlock] = useState<string | null>(null);
   const [replaceTarget, setReplaceTarget] = useState<string | null>(null);
   const [insertTarget, setInsertTarget] = useState<number | null>(null);
@@ -78,7 +79,12 @@ export default function Canvas() {
     setBlocks, setRows, setInsertTarget, setShowLibrary,
   });
 
-  const dragMove = useDragMove();
+  const dragMove = useDragMove({
+    rowsRef,
+    blocksRef,
+    gridRef,
+    setRows,
+  });
   const dragResize = useDragResize(blocksRef, setBlocks, BLOCK_DEFS);
 
   /* ── Preview layout merging ── */
@@ -125,6 +131,7 @@ export default function Canvas() {
     const entering = !editing;
     setEditing(entering);
     setShowLibrary(false);
+    setHoveredBlock(null);
     setSelectedBlock(null);
     setReplaceTarget(null);
     setLibraryTarget(null);
@@ -189,6 +196,7 @@ export default function Canvas() {
 
   const maxRow = layout.reduce((max, lb) => Math.max(max, lb.y + lb.h), 0);
   const gridRows = Math.max(maxRow + 3, 6);
+  const gridMinHeight = gridRows * CELL + Math.max(0, gridRows - 1) * GAP;
   const isEditOrPlacing = editing || !!dragPlace.placingBlock;
   const blockCount = Object.keys(blocks).length;
 
@@ -206,15 +214,18 @@ export default function Canvas() {
         className={styles.gridArea}
         ref={canvasRef}
         onMouseMove={handleCanvasMove}
-        onClick={() => { setReplaceTarget(null); }}
+        onClick={() => {
+          setReplaceTarget(null);
+          setSelectedBlock(null);
+        }}
         style={{ cursor: dragPlace.dragging ? "grabbing" : "default" }}
       >
         <div
-          className={styles.gridContainer}
+          className={`${styles.gridContainer} ${editing ? styles.gridContainerEditing : ""}`}
           ref={gridRef}
           style={{
-            width: GRID_W + 48,
-            minHeight: gridRows * (CELL + GAP) + 48,
+            width: GRID_W,
+            minHeight: gridMinHeight,
           }}
         >
           {/* Dot grid */}
@@ -289,11 +300,14 @@ export default function Canvas() {
             const isMoved = activePreview && (displayLb.x !== lb.x || displayLb.y !== lb.y || displayLb.w !== lb.w || displayLb.h !== lb.h);
             const rect = blockRect(displayLb);
             const isSelected = selectedBlock === block.id;
+            const showEditControls = hoveredBlock === block.id || isSelected || replaceTarget === block.id;
             return (
               <div
                 key={block.id}
                 className={`${styles.block} ${isSelected ? styles.blockSelected : ""} ${editing ? styles.blockEditing : ""} ${isMoved ? styles.blockPreview : ""} ${dragMove.movingBlock === block.id ? styles.blockMoving : ""} ${dragResize.resizing ? styles.blockNoTransition : ""}`}
-                style={{ ...rect, ...(replaceTarget === block.id ? { zIndex: 15 } : {}) }}
+                style={{ ...rect, ...((replaceTarget === block.id || dragMove.movingBlock === block.id) ? { zIndex: 15 } : {}) }}
+                onMouseEnter={() => setHoveredBlock(block.id)}
+                onMouseLeave={() => setHoveredBlock((current) => (current === block.id ? null : current))}
                 onClick={(e) => {
                   e.stopPropagation();
                   if (!dragPlace.placingBlock) setSelectedBlock(isSelected ? null : block.id);
@@ -305,6 +319,7 @@ export default function Canvas() {
                     label={block.label}
                     displayW={displayLb.w}
                     displayH={displayLb.h}
+                    visible={showEditControls}
                     onStartMove={dragMove.startMove}
                     onReplace={(id) => setReplaceTarget(replaceTarget === id ? null : id)}
                     onRemove={removeBlock}
@@ -326,7 +341,7 @@ export default function Canvas() {
                 )}
 
                 {/* Splitter handles (drag-to-resize) */}
-                {editing && (() => {
+                {editing && showEditControls && (() => {
                   const row = rows.find(r => r.blockIds.includes(block.id));
                   if (!row) return null;
                   const blockIdx = row.blockIds.indexOf(block.id);
@@ -365,7 +380,7 @@ export default function Canvas() {
           })}
 
           {/* Column insertion zones */}
-          {editing && !dragPlace.dragging && rows.map((row, rowIdx) => {
+          {editing && !dragPlace.dragging && !dragMove.movingBlock && rows.map((row, rowIdx) => {
             if (row.blockIds.length >= MAX_PER_ROW || row.blockIds.length === 0) return null;
             const rowLayoutBlocks = layout.filter(lb => row.blockIds.includes(lb.id));
             if (rowLayoutBlocks.length === 0) return null;
@@ -393,7 +408,7 @@ export default function Canvas() {
           })}
 
           {/* Row insertion zones */}
-          {editing && !dragPlace.dragging && rowBoundaries.map((bound, i) => (
+          {editing && !dragPlace.dragging && !dragMove.movingBlock && rowBoundaries.map((bound, i) => (
             <RowInsertionBar
               key={`ins-${i}`}
               y={bound.y * (CELL + GAP)}

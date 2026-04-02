@@ -7,13 +7,13 @@
 
 | Metric | Value | Threshold | Status |
 |--------|-------|-----------|--------|
-| Total source files | 254 | <200 OK, 200–400 caution, 400+ split | ⚠️ Caution |
+| Total source files | 323 | <200 OK, 200–400 caution, 400+ split | ⚠️ Caution |
 | Total lines of code | ~19,900 | <50K OK, 50–100K caution, 100K+ enterprise | ✅ OK |
-| Component directories | 14 | <30 OK, 30–50 caution, 50+ split | ✅ OK |
+| Component directories | 22 | <30 OK, 30–50 caution, 50+ split | ✅ OK |
 | Block type folders | 40 | No limit — each lives in its own folder | ✅ OK |
 | Types in Block interface | 30+ fields | Verbose but flat — no tangled deps | ✅ OK |
 | Shared hotspot files | 7 | Keep minimal | ✅ OK |
-| Editor.tsx imports | 71 | Only real bottleneck — monitor size | ⚠️ Watch |
+| EditorCore.tsx lines | 494 | Was 1,779 — now modular via core/ | ✅ Refactored |
 
 ### Architecture note
 

@@ -1,34 +1,24 @@
-# Session Handoff — 2026-04-01 (Session 2)
+# Session Handoff — 2026-04-01 (Session 5)
 
 ## What happened
-Major codebase reorganization session. No new features — pure structural cleanup.
+Workspace sidebar, 6 canvas space blocks, TerminalWelcome polish, and tab bar routing fix.
 
 ### Completed
-1. **Deleted settings component** — wiped SettingsPage, CSS, manifest, and all imports from page.tsx and Editor.tsx. Ready for fresh rebuild.
-2. **Renamed files** — `workspace-page/` → `workspace/`, `WorkspacePage` → `Workspace`, `WorkstationHome` → `Workstation` (files + CSS modules)
-3. **Extracted view routing from Editor.tsx** — moved all `railActive === "X"` branches (12 views) out of Editor into page.tsx. Editor no longer routes; it only renders documents.
-4. **Created views/ layer** — `ViewRouter.tsx` + 14 individual view wrappers. Adding a new rail view = 1 file + 1 line in ViewRouter.
-5. **Nested workstation features** — moved editor, calendar, search, pipeline, finance, wire, team, services, templates, forge-paper, dashboard, terminal-welcome under `components/workstation/`.
-6. **Reorganized editor internals** — created `blocks/` (41 individual block folders), `chrome/` (7 editor UI folders), `panels/` (3 panel folders). Unbundled 4 multi-block files into 27 individual components.
-7. **Added organization standard** — CLAUDE.md ground rule #2, AGENTS.md rules, `conductor/standards/ORGANIZATION.md` with hard thresholds.
-8. **Forge MANIFEST.md** — documented the state management engine.
-9. **Workspace icon** — changed from text lines to planet with orbital ring.
-
-### Line counts after cleanup
-- `page.tsx`: 686 lines (was 788)
-- `Editor.tsx`: 1744 lines (was 1847) — still red, needs further splitting
-- `ViewRouter.tsx`: 146 lines
-- Individual view files: 7-94 lines each
+1. **Workspace sidebar** — faithful prototype port with sparklines, health rings, client cards, search, summary strip, footer distribution bar. Lives in `workspace/sidebar/`. Composed alongside Canvas in `views/workspace.tsx`.
+2. **6 space blocks** — Pipeline, Calendar, Automation, Chat, Files, RevenueChart. Each has TSX + CSS module in `workspace/canvas/blocks/`. BlockContent.tsx refactored to registry map dispatcher pattern.
+3. **revenue-chart** added to registry.ts (17 total block types).
+4. **TerminalWelcome polish** — removed streak badge, full width (960px), 42px greeting, faster reveal (260ms), crisper animations, removed Google Fonts link.
+5. **Tab bar routing fix** — removed TerminalWelcomeView early return from ViewRouter. Editor.tsx now shows TerminalWelcome in content area when no tab is active, keeping tab bar visible.
+6. **Split pane restructure** — moved Terminal split + SplitPane outside the activeTab ternary in Editor.tsx so they render alongside TerminalWelcome.
 
 ## Remaining work
-- **Settings page rebuild** — original task, not started. Component deleted, ready for clean build. Should be a view in `views/settings.tsx` + component in `components/workstation/settings/`.
-- **Editor.tsx still at 1744 lines** — red threshold. Needs block rendering logic extracted (the massive renderBlock switch + all getDefault calls). Next refactor target.
-- **Workspace.tsx at 546 lines** — yellow threshold. Audit and split before adding features.
-- **Stale MANIFEST.md files** — workspace/MANIFEST.md still says "WorkspaceHome". Several moved folders may have stale manifests.
-- **GUARDRAIL.md and FORGE_MAP.md** — both stale after this restructure. Need rebuild next session.
-- **22 old worktrees** — all pushed to remote but most are stale. Consider pruning.
+- **Split pane fix needs browser verification** — merge created a nested ternary (TerminalWelcome rendered twice). Fixed manually but user hadn't confirmed before session end.
+- **Editor.tsx at ~1,750 lines** — red threshold. Next refactor target.
+- **blocks/ folder at 18 siblings** — red threshold. Acceptable for a block registry.
+- **FORGE_MAP.md still stale** — needs `/forge` rebuild.
+- **views/terminal-welcome.tsx** — now orphaned (no longer imported by ViewRouter). Can be deleted.
 
 ## Gotchas
-- Worktrees branched during this session may have stale paths (pre-restructure). Don't try to merge them — the main branch has all changes.
-- The `settings/` directory still exists but is empty (git doesn't track empty dirs, so it'll disappear on clone).
-- `dashboard/src/forge/services/blocks/.next/` has stale trace files that shouldn't be there — consider adding to .gitignore.
+- The `onNewWorkstation` prop on TerminalWelcome inside Editor is a no-op — Editor doesn't have that callback in its props. Wire it up when needed.
+- Workspace sidebar uses demo data (CLIENTS array). Not connected to real state yet.
+- All 6 space blocks use demo data. Not connected to real state.

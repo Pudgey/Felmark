@@ -16,6 +16,8 @@
   flex: 1;
   overflow: auto;
   position: relative;
+  padding: 26px 28px 40px;
+  scroll-padding: 40px;
 }
 
 .gridArea::-webkit-scrollbar {
@@ -30,8 +32,19 @@
 
 .gridContainer {
   position: relative;
-  margin: 24px auto;
-  padding: 0 24px;
+  margin: 0 auto;
+  padding: 28px 30px 34px;
+  border-radius: 30px;
+  border: 1px solid transparent;
+  overflow: visible;
+  background: transparent;
+  box-shadow: none;
+}
+
+.gridContainerEditing {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
 }
 
 /* ── Dot Grid ── */
@@ -53,7 +66,7 @@
 
 .block {
   position: absolute;
-  border-radius: 12px;
+  border-radius: 16px;
   background: var(--card);
   border: 1px solid var(--border);
   overflow: hidden;
@@ -67,21 +80,23 @@
 }
 
 .block:hover {
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 12px 30px rgba(32, 26, 20, 0.06);
 }
 
 .blockSelected {
-  border-color: var(--lavender);
-  box-shadow: 0 0 0 3px rgba(139, 139, 186, 0.06);
+  border-color: var(--border);
+  box-shadow: 0 16px 34px rgba(42, 33, 18, 0.08);
 }
 
 .blockEditing {
-  border: 1.5px dashed var(--ink-200);
+  border: 1.5px dashed rgba(120, 114, 103, 0.4);
   overflow: visible;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 16px 34px rgba(42, 33, 18, 0.06);
 }
 
 .blockEditing:hover {
-  border-color: var(--lavender);
+  border-color: rgba(120, 114, 103, 0.4);
 }
 
 .blockPreview {
@@ -116,9 +131,10 @@
 
 .ghost {
   position: absolute;
-  border-radius: 12px;
+  border-radius: 16px;
   border: 2px dashed var(--lavender);
   background: rgba(139, 139, 186, 0.04);
+  box-shadow: 0 12px 28px rgba(45, 37, 61, 0.1);
   z-index: 3;
   pointer-events: none;
   transition: left 0.08s, top 0.08s;
@@ -141,9 +157,10 @@
 
 .cellHighlight {
   position: absolute;
-  border-radius: 8px;
-  background: rgba(139, 139, 186, 0.03);
-  border: 1px solid rgba(139, 139, 186, 0.06);
+  border-radius: 12px;
+  background: rgba(176, 125, 79, 0.04);
+  border: 1px dashed rgba(176, 125, 79, 0.14);
+  box-shadow: none;
   z-index: 1;
   pointer-events: none;
   transition: left 0.06s, top 0.06s;

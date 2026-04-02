@@ -7,6 +7,7 @@ interface BlockChromeProps {
   label: string;
   displayW: number;
   displayH: number;
+  visible: boolean;
   onStartMove: (blockId: string, clientX: number, clientY: number) => void;
   onReplace: (blockId: string) => void;
   onRemove: (blockId: string) => void;
@@ -15,10 +16,11 @@ interface BlockChromeProps {
 
 export default function BlockChrome({
   blockId, label, displayW, displayH,
+  visible,
   onStartMove, onReplace, onRemove,
 }: BlockChromeProps) {
   return (
-    <div className={styles.blockChrome}>
+    <div className={`${styles.blockChrome} ${visible ? styles.blockChromeVisible : ""}`}>
       <span
         className={styles.blockHandle}
         onMouseDown={(e) => {

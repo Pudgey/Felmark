@@ -14,7 +14,8 @@ export default function EmptyRow({ top, width, height }: EmptyRowProps) {
       className={styles.emptyRow}
       style={{ left: 0, top, width, height }}
     >
-      <span className={styles.emptyRowText}>Drag a block here or click + to choose</span>
+      <span className={styles.emptyRowBadge}>+</span>
+      <span className={styles.emptyRowText}>Drop a block here to start a new row</span>
     </div>
   );
 }
