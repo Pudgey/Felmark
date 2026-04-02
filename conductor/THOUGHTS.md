@@ -18,14 +18,13 @@
 
 | Agent | Task | Started | Status |
 |-------|------|---------|--------|
-| — | — | — | — |
 
 ## Recent
 
 | Agent | Task | Completed |
 |-------|------|-----------|
-| codex-main | Gave workstation blocks subtler edit identities so metric, chat, and utility blocks read differently without adding noise | 2026-04-02 04:49 EDT |
-| codex-main | Reduced workstation canvas border, chrome, and insertion noise so only one editing layer is visually leading at a time | 2026-04-02 04:49 EDT |
-| codex-main | Demoted the workstation gutter delete control to a secondary hover action so breathe mode keeps stable add and drag controls | 2026-04-02 04:46 EDT |
-| codex-main | Added a live placeholder and floating ghost so workstation block moves preview surrounding reflow before drop | 2026-04-02 04:40 EDT |
-| codex-main | Reworked the workstation canvas footer into a tighter status strip with precise editing states | 2026-04-02 04:32 EDT |
+| codex-main | Building the first forge finance slice and sidebar projection so shell client summaries stop being surface-owned | 2026-04-02 11:53 EDT |
+| codex-main | Proposed the next forge phase so sidebar, workspace, workstation, and finance can share owned truth without surface coupling | 2026-04-02 10:36 EDT |
+| codex-main | Added the first forge domain structure manifests so shared client, finance, and surface read models can be designed without surface coupling | 2026-04-02 10:35 EDT |
+| codex-main | Added a presentation mode to the workspace edit canvas so helper UI stays hidden until hover intent or modifier reveal | 2026-04-02 09:39 EDT |
+| codex-main | Defined hard size requirements for micro and premium canvas blocks so new workspace concepts start from a shared footprint contract | 2026-04-02 09:35 EDT |

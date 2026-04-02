@@ -77,7 +77,7 @@ This is boilerplate, not complexity. No refactor needed unless Editor.tsx itself
 
 | Feature | Status | Primary Files | Notes |
 |---------|--------|---------------|-------|
-| **Workspace shell & nav** | Active | `page.tsx`, `rail/`, `sidebar/`, `dashboard/` | Core frame, workspace switching, rail icons |
+| **Workspace shell & nav** | Active | `page.tsx`, `rail/`, `sidebar/`, `dashboard/` | Core frame, workspace switching, rail icons, sidebar now consumes forge shell summary |
 | **Editor core** | Active | `editor/Editor.tsx`, `types.ts`, `constants.ts` | Block system, slash menu, format bar, command bar |
 | **Editor margin** | Active | `editor/margin/` | Outline, multi-select, context menu, drag reorder |
 | **Activity & comments** | Active | `activity/`, `comments/` | Right-side activity margin, comment panel |
@@ -88,13 +88,13 @@ This is boilerplate, not complexity. No refactor needed unless Editor.tsx itself
 | **Notifications** | Active | `notifications/` | 10 types, avatar/icon, action buttons, 6 filters |
 | **Onboarding / Launchpad** | Active | `onboarding/`, `launchpad/` | First-run, workspace creation, creation animation |
 | **Search** | Active | `search/` | Cross-workspace content search |
-| **Finance** | Active | `finance/`, `editor/money/` | Finance page + money blocks |
+| **Finance** | Active | `finance/`, `editor/money/`, `dashboard/src/forge/domains/finance/` | Finance page + money blocks; forge finance domain now owns shell finance summaries |
 | **Pipeline** | Active | `pipeline/` | Pipeline board view |
 | **Team** | Active | `team/` | Team collaboration surface |
 | **The Wire** | Needs wiring | `wire/` | Competitive intelligence surface |
 | **Workspace** | Active | `workspace/` | Rail surface — task/project management, list/board/timeline views |
 | **Forge Paper** | Active | `forge-paper/` | Rail surface — owns blocks state, document view for client proposals |
-| **Forge shared model** | Active | `dashboard/src/forge/`, `dashboard/src/forge/domains/`, `dashboard/src/forge/read-models/` | Shared business-logic seam; domains own truth, surfaces consume read models |
+| **Forge shared model** | Active | `dashboard/src/forge/`, `dashboard/src/forge/domains/`, `dashboard/src/forge/read-models/` | Shared business-logic seam; finance selectors and sidebar read model are now wired through the forge facade |
 | **Terminal Welcome** | Active | `editor/TerminalWelcome.tsx` | Dead-state splash screen |
 | **History** | Active | `history/` | Version history modal |
 | **Conversations** | Active | `editor/ConversationPanel.tsx` | Left-side conversation panel |
@@ -145,6 +145,8 @@ These files have broad blast radius. Check them when features are added or delet
 | `Rail.tsx` | Navigation icons | Top-level features |
 | `Sidebar.tsx` | Workspace tree, calendar, search | Navigation features |
 | `dashboard/src/forge/index.ts` | Public forge entrypoint for services and future domain/read-model wiring | Shared business logic consumers |
+| `dashboard/src/forge/domains/finance/selectors.ts` | Canonical shell and workstation finance summaries | Sidebar, workspace, future Stripe-facing summaries |
+| `dashboard/src/forge/read-models/sidebar.ts` | Shell projection that feeds sidebar metrics and workstation revenue badges | Shell navigation and urgency cues |
 
 ---
 
