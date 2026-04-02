@@ -6,7 +6,7 @@ import type { Block, Workstation, Project, Tab, ArchivedProject, WorkstationTemp
 import { uid, makeBlocks } from "@/lib/utils";
 import Rail from "@/components/rail/Rail";
 import Sidebar from "@/components/sidebar/Sidebar";
-import WorkstationSidebar from "@/components/sidebar/WorkstationSidebar";
+import EditorSidebar from "@/components/sidebar/EditorSidebar";
 import WorkstationOnboarding from "@/components/onboarding/WorkstationOnboarding";
 import ErrorBoundary from "@/components/shared/ErrorBoundary";
 import { INITIAL_COMMENTS, type Comment } from "@/components/comments/CommentPanel";
@@ -474,10 +474,10 @@ export default function Dashboard() {
     }));
   }, [updateWorkstations, updateTabs, workstations]);
 
-  const showWorkstationSidebar = !zenMode
-    && railActive === "workstations"
-    && !creationAnim
-    && onboardingName === null;
+  const showSidebar = !zenMode && !creationAnim && onboardingName === null;
+  const hasActiveTab = tabs.some(t => t.active);
+  const showNavigationSidebar = showSidebar && railActive === "workstations" && !hasActiveTab;
+  const showEditorSidebar = showSidebar && railActive === "workstations" && hasActiveTab;
 
   return (
     <ErrorBoundary>
@@ -506,7 +506,7 @@ export default function Dashboard() {
         zenMode={zenMode}
         onToggleZen={() => setZenMode(true)}
       />}
-      {showWorkstationSidebar && (
+      {showNavigationSidebar && (
           <Sidebar
             workstations={workstations}
             archived={archived}
@@ -537,8 +537,28 @@ export default function Dashboard() {
             onSaveNow={saveNow}
           />
       )}
+      {showEditorSidebar && (
+        <EditorSidebar
+          workstation={workstations.find(w => w.id === activeWorkstationId) ?? null}
+          activeProject={activeProject}
+          activeTab={tabs.find(t => t.active) ?? null}
+          blocks={activeBlocks}
+          tabs={tabs}
+          blocksMap={blocksMap}
+          open={sidebarOpen}
+          width={sidebarWidth}
+          isResizing={isResizing}
+          saveIndicatorState={saveIndicatorState}
+          saveStatusLabel={saveStatusLabel}
+          onClose={() => setSidebarOpen(false)}
+          onTabClick={handleTabClick}
+          onNewTab={handleNewTab}
+          onSelectProject={selectProject}
+          onSaveNow={saveNow}
+        />
+      )}
       {/* Resize handle */}
-      {sidebarOpen && showWorkstationSidebar && (
+      {sidebarOpen && (showNavigationSidebar || showEditorSidebar) && (
         <div
           style={{
             width: 5,
