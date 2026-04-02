@@ -1,4 +1,0 @@
-interface:
-  display_name: "Research"
-  short_description: "External best practices and competitive intelligence"
-  default_prompt: "Use $research for this task in the Felmark repo."

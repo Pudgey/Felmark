@@ -1,4 +1,0 @@
-interface:
-  display_name: "Sprint"
-  short_description: "Help with Sprint tasks and workflows"
-  default_prompt: "Use $sprint for this task in the Felmark repo."

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Optimize"
-  short_description: "Help with Optimize tasks and workflows"
-  default_prompt: "Use $optimize for this task in the Felmark repo."

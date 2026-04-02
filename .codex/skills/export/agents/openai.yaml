@@ -1,4 +1,0 @@
-interface:
-  display_name: "Export"
-  short_description: "Help with Export tasks and workflows"
-  default_prompt: "Use $export for this task in the Felmark repo."

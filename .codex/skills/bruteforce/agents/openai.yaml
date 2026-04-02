@@ -1,4 +1,0 @@
-interface:
-  display_name: "Bruteforce"
-  short_description: "Help with Bruteforce tasks"
-  default_prompt: "Use $bruteforce for this task in the Felmark repo."

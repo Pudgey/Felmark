@@ -1,4 +1,0 @@
-interface:
-  display_name: "SOP"
-  short_description: "Help with SOP tasks and workflows"
-  default_prompt: "Use $sop for this task in the Felmark repo."

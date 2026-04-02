@@ -1,4 +1,0 @@
-interface:
-  display_name: "Tone"
-  short_description: "Help with Tone tasks and workflows"
-  default_prompt: "Use $tone for this task in the Felmark repo."

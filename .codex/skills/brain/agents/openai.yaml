@@ -1,4 +1,0 @@
-interface:
-  display_name: "Brain"
-  short_description: "Help with Brain tasks and workflows"
-  default_prompt: "Use $brain for this task in the Felmark repo."

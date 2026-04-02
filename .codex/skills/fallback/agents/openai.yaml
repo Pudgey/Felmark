@@ -1,4 +1,0 @@
-interface:
-  display_name: "Fallback"
-  short_description: "Help with Fallback tasks and workflows"
-  default_prompt: "Use $fallback for this task in the Felmark repo."

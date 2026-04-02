@@ -1,4 +1,0 @@
-interface:
-  display_name: "Responsive"
-  short_description: "Help with Responsive tasks"
-  default_prompt: "Use $responsive for this task in the Felmark repo."

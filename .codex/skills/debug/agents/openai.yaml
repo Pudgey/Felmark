@@ -1,4 +1,0 @@
-interface:
-  display_name: "Debug"
-  short_description: "Help with Debug tasks and workflows"
-  default_prompt: "Use $debug for this task in the Felmark repo."

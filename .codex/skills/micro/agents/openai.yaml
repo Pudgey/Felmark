@@ -1,4 +1,0 @@
-interface:
-  display_name: "Micro"
-  short_description: "Help with Micro tasks and workflows"
-  default_prompt: "Use $micro for this task in the Felmark repo."

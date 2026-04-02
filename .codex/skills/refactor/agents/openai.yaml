@@ -1,4 +1,0 @@
-interface:
-  display_name: "Refactor"
-  short_description: "Help with Refactor tasks and workflows"
-  default_prompt: "Use $refactor for this task in the Felmark repo."
