@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect, type SetStateAction } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { INITIAL_WORKSTATIONS } from "@/lib/constants";
 import type { Block, Workstation, Project, Tab, ArchivedProject, WorkstationTemplate } from "@/lib/types";
 import { uid } from "@/lib/utils";
@@ -20,6 +20,8 @@ import type { StateUpdater } from "@/forge";
 import SaveTemplateModal from "@/components/workstation/templates/SaveTemplateModal";
 import TemplatePicker from "@/components/workstation/templates/TemplatePicker";
 import ViewRouter from "@/views/ViewRouter";
+import { usePersistence, loadFromStorage } from "@/forge/hooks/usePersistence";
+import { useShellLayout } from "@/forge/hooks/useShellLayout";
 
 const INITIAL_TABS: Tab[] = [
   { id: "p1", name: "Brand Guidelines v2", client: "Meridian Studio", active: true },
@@ -55,24 +57,6 @@ function makeEmptyBlocks(): Block[] {
   ];
 }
 
-// ── localStorage persistence ──
-const STORAGE_KEY = "felmark_workspace";
-
-function loadFromStorage<T>(key: string, fallback: T): T {
-  if (typeof window === "undefined") return fallback;
-  try {
-    const raw = localStorage.getItem(`${STORAGE_KEY}_${key}`);
-    if (raw) return JSON.parse(raw);
-  } catch { /* corrupted data — use fallback */ }
-  return fallback;
-}
-
-function saveToStorage(key: string, data: unknown) {
-  try {
-    localStorage.setItem(`${STORAGE_KEY}_${key}`, JSON.stringify(data));
-  } catch { /* storage full — silent fail */ }
-}
-
 export default function Dashboard() {
   const [workstations, setWorkstations] = useState<Workstation[]>(() => loadFromStorage("workstations", null) ?? INITIAL_WORKSTATIONS);
   const [tabs, setTabs] = useState<Tab[]>(() => loadFromStorage("tabs", null) ?? INITIAL_TABS.map(t => ({ ...t, active: false })));
@@ -81,146 +65,38 @@ export default function Dashboard() {
   const [archived, setArchived] = useState<ArchivedProject[]>(() => loadFromStorage("archived", null) ?? []);
   const [comments, setComments] = useState<Comment[]>(() => loadFromStorage("comments", null) ?? INITIAL_COMMENTS);
   const [activitiesMap, setActivitiesMap] = useState<Record<string, BlockActivity[]>>(() => loadFromStorage("activitiesMap", null) ?? { p1: INITIAL_ACTIVITIES });
-  const [saveIndicatorState, setSaveIndicatorState] = useState<"saved" | "saving">("saved");
-  const [saveRequestToken, setSaveRequestToken] = useState(0);
-  const [lastCompletedSaveToken, setLastCompletedSaveToken] = useState<number | null>(null);
-  const [lastSavedAt, setLastSavedAt] = useState<number | null>(() => {
-    const ls = loadFromStorage("lastSavedAt", null);
-    return typeof ls === "number" ? ls : null;
-  });
-  const [saveStatusTick, setSaveStatusTick] = useState(() => {
-    const ls = loadFromStorage("lastSavedAt", null);
-    return typeof ls === "number" ? ls : 0;
+  const {
+    updateWorkstations, updateTabs, updateActiveProject, updateBlocksMap,
+    updateArchived, updateComments, updateActivitiesMap,
+    saveIndicatorState, saveStatusLabel, saveNow,
+  } = usePersistence({
+    state: { workstations, tabs, activeProject, blocksMap, archived, comments, activitiesMap },
+    setters: { setWorkstations, setTabs, setActiveProject, setBlocksMap, setArchived, setComments, setActivitiesMap },
   });
 
-  // Hydrated flag — now always true since we use lazy initializers
-  const [hydrated] = useState(true);
+  const {
+    sidebarOpen, setSidebarOpen,
+    railActive, setRailActive,
+    sidebarWidth, setSidebarWidth,
+    isResizing, setIsResizing,
+    calendarScrollTarget, setCalendarScrollTarget,
+    launchpadOpen, setLaunchpadOpen,
+    zenMode, setZenMode,
+    splitProject, setSplitProject,
+    resizeRef,
+    restoreWorkstationContext,
+  } = useShellLayout();
 
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [railActive, setRailActive] = useState("workstations");
   const [wordCount, setWordCount] = useState(0);
   const [charCount, setCharCount] = useState(0);
   const [onboardingName, setOnboardingName] = useState<string | null>(null);
   const [creationAnim, setCreationAnim] = useState<{ name: string; template: string; color: string; pendingData: { name: string; contact: string; rate: string; budget: string; color: string; template: WorkstationTemplate } } | null>(null);
-  const [sidebarWidth, setSidebarWidth] = useState(260);
-  const [isResizing, setIsResizing] = useState(false);
   const [activeWorkstationId, setActiveWorkstationId] = useState<string | null>(null);
-  const [calendarScrollTarget, setCalendarScrollTarget] = useState<string | null>(null);
-  const [launchpadOpen, setLaunchpadOpen] = useState(false);
   const [docTemplates, setDocTemplates] = useState<DocumentTemplate[]>(STARTER_TEMPLATES);
   const [showSaveTemplate, setShowSaveTemplate] = useState(false);
   const [showTemplatePicker, setShowTemplatePicker] = useState(false);
-  const [zenMode, setZenMode] = useState(false);
-  const [splitProject, setSplitProject] = useState<string | null>(null);
-  const resizeRef = useRef<{ startX: number; startW: number } | null>(null);
 
   const overdueCount = workstations.reduce((s, w) => s + w.projects.filter(p => p.status === "overdue").length, 0);
-
-  // ── Auto-save to localStorage (debounced 500ms) ──
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const markSavePending = useCallback(() => {
-    if (!hydrated) return;
-    let nextToken = 0;
-    setSaveRequestToken(prev => {
-      nextToken = prev + 1;
-      return nextToken;
-    });
-    setSaveIndicatorState("saving");
-    return nextToken;
-  }, [hydrated]);
-
-  /** Wrap a setter so every call marks a save as pending. */
-  const tracked = <T,>(setter: React.Dispatch<SetStateAction<T>>) =>
-    (value: SetStateAction<T>) => { markSavePending(); setter(value); };
-
-  const persistWorkstationState = useCallback((saveToken: number) => {
-    const savedAt = Date.now();
-    saveToStorage("workstations", workstations);
-    saveToStorage("blocksMap", blocksMap);
-    saveToStorage("tabs", tabs);
-    saveToStorage("archived", archived);
-    saveToStorage("comments", comments);
-    saveToStorage("activitiesMap", activitiesMap);
-    saveToStorage("activeProject", activeProject);
-    saveToStorage("lastSavedAt", savedAt);
-    setLastSavedAt(savedAt);
-    setSaveStatusTick(savedAt);
-    setLastCompletedSaveToken(saveToken);
-  }, [workstations, blocksMap, tabs, archived, comments, activitiesMap, activeProject]);
-
-  const saveNow = useCallback(() => {
-    if (saveTimer.current) {
-      clearTimeout(saveTimer.current);
-      saveTimer.current = null;
-    }
-    const saveToken = markSavePending();
-    if (saveToken) persistWorkstationState(saveToken);
-  }, [markSavePending, persistWorkstationState]);
-
-  const updateWorkstations = tracked(setWorkstations);
-  const updateTabs = tracked(setTabs);
-  const updateActiveProject = tracked(setActiveProject);
-  const updateBlocksMap = tracked(setBlocksMap);
-  const updateArchived = tracked(setArchived);
-  const updateComments = tracked(setComments);
-  const updateActivitiesMap = tracked(setActivitiesMap);
-
-  useEffect(() => {
-    if (!hydrated || saveRequestToken === 0) return;
-    if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => {
-      persistWorkstationState(saveRequestToken);
-      saveTimer.current = null;
-    }, 800);
-    return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
-  }, [hydrated, persistWorkstationState, saveRequestToken]);
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s") {
-        e.preventDefault();
-        saveNow();
-      }
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [saveNow]);
-
-  useEffect(() => {
-    if (lastCompletedSaveToken === null || lastCompletedSaveToken !== saveRequestToken) return;
-    const timer = window.setTimeout(() => setSaveIndicatorState("saved"), 450);
-    return () => window.clearTimeout(timer);
-  }, [lastCompletedSaveToken, saveRequestToken]);
-
-  useEffect(() => {
-    if (!lastSavedAt) return;
-    const tick = window.setInterval(() => setSaveStatusTick(Date.now()), 30000);
-    return () => window.clearInterval(tick);
-  }, [lastSavedAt]);
-
-  const saveStatusLabel = (() => {
-    if (saveIndicatorState === "saving") return "saving...";
-    if (!lastSavedAt) return "saved";
-    const elapsed = Math.max(0, saveStatusTick - lastSavedAt);
-    const minutes = Math.floor(elapsed / 60000);
-    if (minutes <= 0) return "saved just now";
-    if (minutes === 1) return "saved 1m ago";
-    if (minutes < 60) return `saved ${minutes}m ago`;
-    const hours = Math.floor(minutes / 60);
-    if (hours === 1) return "saved 1h ago";
-    return `saved ${hours}h ago`;
-  })();
-
-  // Zen mode: Escape to exit
-  useEffect(() => {
-    if (!zenMode) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setZenMode(false);
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [zenMode]);
-
 
   // ── Forge — the root service layer ──
   const forgeState: StateUpdater = {
@@ -237,12 +113,6 @@ export default function Dashboard() {
 
   // Single click — pure expand/collapse toggle
   const toggleWorkstation = (wid: string) => forge.workstations.toggle(wid);
-
-  const restoreWorkstationContext = useCallback(() => {
-    setRailActive("workstations");
-    setLaunchpadOpen(false);
-    setSidebarOpen(true);
-  }, []);
 
   // Double click — open the first project in the workstation
   const selectWorkstation = (wid: string) => {
@@ -422,7 +292,7 @@ export default function Dashboard() {
       updateActiveProject("");
       setSidebarOpen(true);
     }
-  }, [restoreWorkstationContext, openForgeRail, updateTabs, updateActiveProject]);
+  }, [restoreWorkstationContext, openForgeRail, updateTabs, updateActiveProject, setLaunchpadOpen, setRailActive, setSidebarOpen]);
 
   const handleRenameWorkstation = useCallback((wsId: string, name: string) => {
     updateWorkstations(prev => prev.map(w => w.id === wsId ? { ...w, client: name, avatar: name[0].toUpperCase() } : w));
