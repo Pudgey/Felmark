@@ -34,14 +34,14 @@ interface UseBlockOperationsOptions {
 export function useBlockOperations({
   blocksProp,
   activeProject,
-  contentCache,
-  blockElMap,
+  contentCache: contentCacheRef,
+  blockElMap: blockElMapRef,
   restoreContentCache,
   mergeCachedContent,
   commitBlocks,
   settleSaveState,
   setSaveState,
-  typingSaveTimer,
+  typingSaveTimer: typingSaveTimerRef,
   emitWordCounts,
   flushCachedContent,
   focusNew,
@@ -50,7 +50,7 @@ export function useBlockOperations({
   setUndoAction,
   tabs,
   onTabRename,
-  manuallyRenamed,
+  manuallyRenamed: manuallyRenamedRef,
   onBlocksChange,
   editingGraphId,
   setEditingGraphId,
@@ -68,18 +68,24 @@ export function useBlockOperations({
 
   // Sync blocks only when switching tabs (activeProject changes)
   const prevProjectRef = useRef(activeProject);
-  useEffect(() => {
-    if (prevProjectRef.current !== activeProject) {
-      setBlocksLocal(blocksProp);
-      restoreContentCache(blocksProp);
-      blockElMap.current = {};
+  const resetProjectState = useCallback((nextBlocks: Block[]) => {
+    queueMicrotask(() => {
+      setBlocksLocal(nextBlocks);
       setActiveBlockId(null);
       setFreshBlockId(null);
       setUndoAction(null);
       setSaveState("saved");
+    });
+  }, [setFreshBlockId, setSaveState, setUndoAction]);
+
+  useEffect(() => {
+    if (prevProjectRef.current !== activeProject) {
+      restoreContentCache(blocksProp);
+      blockElMapRef.current = {};
       prevProjectRef.current = activeProject;
+      resetProjectState(blocksProp);
     }
-  }, [activeProject, blocksProp, restoreContentCache, blockElMap, setFreshBlockId, setUndoAction, setSaveState]);
+  }, [activeProject, blocksProp, restoreContentCache, blockElMapRef, resetProjectState]);
 
   useEffect(() => {
     restoreContentCache(blocksProp);
@@ -87,9 +93,9 @@ export function useBlockOperations({
 
   // Propagate block changes to parent (deferred to avoid setState-during-render)
   const setBlocks = useCallback((updater: Block[] | ((prev: Block[]) => Block[])) => {
-    if (typingSaveTimer.current) {
-      clearTimeout(typingSaveTimer.current);
-      typingSaveTimer.current = null;
+    if (typingSaveTimerRef.current) {
+      clearTimeout(typingSaveTimerRef.current);
+      typingSaveTimerRef.current = null;
     }
     setSaveState("saving");
     setBlocksLocal(prev => {
@@ -100,7 +106,7 @@ export function useBlockOperations({
       return next;
     });
     settleSaveState();
-  }, [commitBlocks, mergeCachedContent, settleSaveState, setSaveState, typingSaveTimer]);
+  }, [commitBlocks, mergeCachedContent, settleSaveState, setSaveState, typingSaveTimerRef]);
 
   useEffect(() => {
     emitWordCounts(blocks);
@@ -109,14 +115,14 @@ export function useBlockOperations({
   const snapshotCurrentBlocks = useCallback(() => structuredClone(mergeCachedContent(blocks)), [blocks, mergeCachedContent]);
 
   const onContentChange = useCallback((id: string, html: string, text: string) => {
-    contentCache.current[id] = html;
+    contentCacheRef.current[id] = html;
     emitWordCounts(blocks);
     setSaveState("saving");
-    if (typingSaveTimer.current) clearTimeout(typingSaveTimer.current);
-    typingSaveTimer.current = setTimeout(() => flushCachedContent(setBlocksLocal), 550);
+    if (typingSaveTimerRef.current) clearTimeout(typingSaveTimerRef.current);
+    typingSaveTimerRef.current = setTimeout(() => flushCachedContent(setBlocksLocal), 550);
 
     // Auto-name: mirror first h1 text as tab name, unless user manually renamed via tab UI
-    if (manuallyRenamed.current.has(activeProject)) return;
+    if (manuallyRenamedRef.current.has(activeProject)) return;
     const firstH1 = blocks.find(b => b.type === "h1");
     if (!firstH1 || firstH1.id !== id) return;
     const trimmed = text.trim();
@@ -124,12 +130,12 @@ export function useBlockOperations({
     if (!currentTab) return;
     const newName = trimmed || "Untitled";
     if (currentTab.name !== newName) onTabRename(activeProject, newName);
-  }, [activeProject, blocks, emitWordCounts, flushCachedContent, tabs, onTabRename, contentCache, setSaveState, typingSaveTimer, manuallyRenamed]);
+  }, [activeProject, blocks, emitWordCounts, flushCachedContent, tabs, onTabRename, contentCacheRef, setSaveState, typingSaveTimerRef, manuallyRenamedRef]);
 
   const onEnter = useCallback((id: string, bH: string, aH: string) => {
-    contentCache.current[id] = bH;
+    contentCacheRef.current[id] = bH;
     const nid = uid();
-    contentCache.current[nid] = aH;
+    contentCacheRef.current[nid] = aH;
     setBlocks(prev => {
       const idx = prev.findIndex(b => b.id === id);
       const bl = prev[idx];
@@ -140,12 +146,12 @@ export function useBlockOperations({
       return n;
     });
     const focusEnter = (id: string, html: string, retries = 5) => {
-      const el = blockElMap.current[id];
+      const el = blockElMapRef.current[id];
       if (el) { el.innerHTML = html; cursorTo(el, false); return; }
       if (retries > 0) setTimeout(() => focusEnter(id, html, retries - 1), 20);
     };
     focusEnter(nid, aH);
-  }, [blockElMap, contentCache, setBlocks]);
+  }, [blockElMapRef, contentCacheRef, setBlocks]);
 
   const onBackspace = useCallback((id: string) => {
     setBlocks(prev => {
@@ -155,9 +161,9 @@ export function useBlockOperations({
       // Last block -- reset to empty paragraph, don't delete
       if (prev.length <= 1) {
         if (block.type !== "paragraph") {
-          contentCache.current[id] = "";
+          contentCacheRef.current[id] = "";
           setTimeout(() => {
-            const el = blockElMap.current[id];
+            const el = blockElMapRef.current[id];
             if (el) { el.textContent = ""; cursorTo(el, false); }
           }, 20);
           return [{ ...block, type: "paragraph" as const, content: "", checked: false }];
@@ -167,9 +173,9 @@ export function useBlockOperations({
 
       // Non-paragraph empty block -- convert to paragraph first, don't delete
       if (block.type !== "paragraph" && block.type !== "divider") {
-        contentCache.current[id] = "";
+        contentCacheRef.current[id] = "";
         setTimeout(() => {
-          const el = blockElMap.current[id];
+          const el = blockElMapRef.current[id];
           if (el) { el.textContent = ""; cursorTo(el, false); }
         }, 20);
         return prev.map(b => b.id === id ? { ...b, type: "paragraph" as const, content: "", checked: false } : b);
@@ -177,18 +183,18 @@ export function useBlockOperations({
 
       // Paragraph or divider -- delete and focus previous
       const n = prev.filter(b => b.id !== id);
-      delete contentCache.current[id];
+      delete contentCacheRef.current[id];
       setTimeout(() => {
-        const el = blockElMap.current[n[Math.max(0, idx - 1)].id];
+        const el = blockElMapRef.current[n[Math.max(0, idx - 1)].id];
         if (el) cursorTo(el, true);
       }, 20);
       return n;
     });
-  }, [blockElMap, contentCache, setBlocks]);
+  }, [blockElMapRef, contentCacheRef, setBlocks]);
 
   const addBlockAfter = useCallback((afterId: string) => {
     const nid = uid();
-    contentCache.current[nid] = "";
+    contentCacheRef.current[nid] = "";
     setBlocks(prev => {
       const idx = prev.findIndex(b => b.id === afterId);
       const n = [...prev];
@@ -196,39 +202,39 @@ export function useBlockOperations({
       return n;
     });
     focusNewAndActivate(nid);
-  }, [contentCache, focusNewAndActivate, setBlocks]);
+  }, [contentCacheRef, focusNewAndActivate, setBlocks]);
 
   const deleteBlock = useCallback((blockId: string) => {
     pushUndoAction("Deleted block", snapshotCurrentBlocks(), blockId);
     setBlocks(prev => {
       // Last block -- reset to empty paragraph instead of removing
       if (prev.length <= 1) {
-        delete contentCache.current[blockId];
-        const el = blockElMap.current[blockId];
+        delete contentCacheRef.current[blockId];
+        const el = blockElMapRef.current[blockId];
         if (el) { el.textContent = ""; }
         return [{ id: prev[0].id, type: "paragraph" as const, content: "", checked: false }];
       }
       const idx = prev.findIndex(b => b.id === blockId);
       const n = prev.filter(b => b.id !== blockId);
-      delete contentCache.current[blockId];
+      delete contentCacheRef.current[blockId];
       // Focus the previous block (or next if deleting first)
       const focusIdx = Math.max(0, idx - 1);
       setTimeout(() => {
-        const el = blockElMap.current[n[focusIdx]?.id];
+        const el = blockElMapRef.current[n[focusIdx]?.id];
         if (el) cursorTo(el, true);
       }, 20);
       return n;
     });
     // Clear editing states if the deleted block was being edited
     if (editingGraphId === blockId) setEditingGraphId(null);
-  }, [blockElMap, contentCache, editingGraphId, pushUndoAction, setBlocks, setEditingGraphId, snapshotCurrentBlocks]);
+  }, [blockElMapRef, contentCacheRef, editingGraphId, pushUndoAction, setBlocks, setEditingGraphId, snapshotCurrentBlocks]);
 
   const deleteBlocks = useCallback((ids: string[]) => {
     pushUndoAction(ids.length === 1 ? "Deleted block" : `Deleted ${ids.length} blocks`, snapshotCurrentBlocks(), ids[0]);
     setBlocks(prev => {
       const idSet = new Set(ids);
       const remaining = prev.filter(b => !idSet.has(b.id));
-      ids.forEach(id => { delete contentCache.current[id]; });
+      ids.forEach(id => { delete contentCacheRef.current[id]; });
       // If all blocks deleted, keep one empty paragraph
       if (remaining.length === 0) {
         return [{ id: prev[0].id, type: "paragraph" as const, content: "", checked: false }];
@@ -236,7 +242,7 @@ export function useBlockOperations({
       return remaining;
     });
     if (editingGraphId && ids.includes(editingGraphId)) setEditingGraphId(null);
-  }, [contentCache, editingGraphId, pushUndoAction, setBlocks, setEditingGraphId, snapshotCurrentBlocks]);
+  }, [contentCacheRef, editingGraphId, pushUndoAction, setBlocks, setEditingGraphId, snapshotCurrentBlocks]);
 
   const duplicateBlockById = useCallback((sourceId: string) => {
     const source = blocks.find(block => block.id === sourceId);
@@ -264,14 +270,14 @@ export function useBlockOperations({
 
     // If last block is an empty paragraph, just focus it
     if (lastBlock.type === "paragraph" && !lastBlock.content) {
-      const el = blockElMap.current[lastBlock.id];
+      const el = blockElMapRef.current[lastBlock.id];
       if (el) cursorTo(el, false);
       return;
     }
 
     // Create a new empty paragraph after the last block
     addBlockAfter(lastBlock.id);
-  }, [blocks, blockElMap, addBlockAfter]);
+  }, [blocks, blockElMapRef, addBlockAfter]);
 
   const handleAiGenerate = useCallback((blockId: string, generatedBlocks: Block[]) => {
     pushUndoAction(generatedBlocks.length === 0 ? "Removed AI block" : "Inserted AI content", snapshotCurrentBlocks(), blockId);
@@ -288,18 +294,18 @@ export function useBlockOperations({
       // Replace the AI block with generated blocks + trailing paragraph
       n.splice(idx, 1, ...generatedBlocks);
       const trailingId = uid();
-      contentCache.current[trailingId] = "";
+      contentCacheRef.current[trailingId] = "";
       n.splice(idx + generatedBlocks.length, 0, { id: trailingId, type: "paragraph", content: "", checked: false });
       focusNewAndActivate(trailingId);
       return n;
     });
-  }, [contentCache, focusNewAndActivate, pushUndoAction, setBlocks, snapshotCurrentBlocks]);
+  }, [contentCacheRef, focusNewAndActivate, pushUndoAction, setBlocks, snapshotCurrentBlocks]);
 
   const restoreUndoSnapshot = useCallback((undoAction: { label: string; snapshot: Block[]; focusId?: string }) => {
     const restored = structuredClone(undoAction.snapshot);
-    if (typingSaveTimer.current) {
-      clearTimeout(typingSaveTimer.current);
-      typingSaveTimer.current = null;
+    if (typingSaveTimerRef.current) {
+      clearTimeout(typingSaveTimerRef.current);
+      typingSaveTimerRef.current = null;
     }
     restoreContentCache(restored);
     setBlocksLocal(restored);
@@ -309,7 +315,7 @@ export function useBlockOperations({
     setSaveState("saving");
     settleSaveState();
     if (undoAction.focusId) setTimeout(() => focusNewAndActivate(undoAction.focusId!), 20);
-  }, [activeProject, emitWordCounts, focusNewAndActivate, onBlocksChange, restoreContentCache, settleSaveState, setSaveState, setUndoAction, typingSaveTimer]);
+  }, [activeProject, emitWordCounts, focusNewAndActivate, onBlocksChange, restoreContentCache, settleSaveState, setSaveState, setUndoAction, typingSaveTimerRef]);
 
   const getNum = useCallback((bid: string) => {
     let c = 0;

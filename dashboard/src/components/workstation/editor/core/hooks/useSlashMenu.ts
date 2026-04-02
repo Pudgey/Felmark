@@ -20,8 +20,8 @@ interface UseSlashMenuOptions {
 }
 
 export function useSlashMenu({
-  blockElMap,
-  contentCache,
+  blockElMap: blockElMapRef,
+  contentCache: contentCacheRef,
   setBlocks,
   focusNew,
   pushUndoAction,
@@ -35,7 +35,7 @@ export function useSlashMenu({
   const [editingGraphId, setEditingGraphId] = useState<string | null>(null);
 
   const onSlash = useCallback((blockId: string, filter?: string) => {
-    const el = blockElMap.current[blockId];
+    const el = blockElMapRef.current[blockId];
     if (!el) return;
     const rect = el.getBoundingClientRect();
     const menuH = 440;
@@ -45,14 +45,14 @@ export function useSlashMenu({
     setSlashMenu({ blockId, top, left: rect.left });
     setSlashFilter(filter || "");
     setSlashIndex(0);
-  }, [blockElMap]);
+  }, [blockElMapRef]);
 
   const selectSlashItem = useCallback((type: BlockType) => {
     if (!slashMenu) return;
     const { blockId } = slashMenu;
-    const el = blockElMap.current[blockId];
+    const el = blockElMapRef.current[blockId];
     if (el) el.textContent = "";
-    contentCache.current[blockId] = "";
+    contentCacheRef.current[blockId] = "";
     const slashSnapshot = snapshotCurrentBlocks();
     const pushSlashUndo = (label: string, focusId?: string) => pushUndoAction(label, slashSnapshot, focusId ?? blockId);
     if (type === "graph") {
@@ -72,7 +72,7 @@ export function useSlashMenu({
         const n = [...prev];
         n[idx] = { ...n[idx], type: "deadline" as BlockType, content: "", deadlineData: getDefaultDeadlineData() };
         const nid = uid();
-        contentCache.current[nid] = "";
+        contentCacheRef.current[nid] = "";
         n.splice(idx + 1, 0, { id: nid, type: "paragraph", content: "", checked: false });
         focusNew(nid);
         return n;
@@ -98,7 +98,7 @@ export function useSlashMenu({
         const n = [...prev];
         n[idx] = { ...n[idx], type: "canvas" as BlockType, content: "", canvasData: getDefaultCanvasData() };
         const nid = uid();
-        contentCache.current[nid] = "";
+        contentCacheRef.current[nid] = "";
         n.splice(idx + 1, 0, { id: nid, type: "paragraph", content: "", checked: false });
         focusNew(nid);
         return n;
@@ -113,7 +113,7 @@ export function useSlashMenu({
         const n = [...prev];
         n[idx] = { ...n[idx], type: "audio" as BlockType, content: "", audioData: getDefaultAudioData() };
         const nid = uid();
-        contentCache.current[nid] = "";
+        contentCacheRef.current[nid] = "";
         n.splice(idx + 1, 0, { id: nid, type: "paragraph", content: "", checked: false });
         focusNew(nid);
         return n;
@@ -137,7 +137,7 @@ export function useSlashMenu({
           },
         };
         const nid = uid();
-        contentCache.current[nid] = "";
+        contentCacheRef.current[nid] = "";
         n.splice(idx + 1, 0, { id: nid, type: "paragraph", content: "", checked: false });
         focusNew(nid);
         return n;
@@ -153,7 +153,7 @@ export function useSlashMenu({
         const n = [...prev];
         n[idx] = { ...n[idx], type: type as import("@/lib/types").BlockType, content: "", ...CONTENT_DEFAULTS[type] };
         const nid = uid();
-        contentCache.current[nid] = "";
+        contentCacheRef.current[nid] = "";
         n.splice(idx + 1, 0, { id: nid, type: "paragraph", content: "", checked: false });
         focusNew(nid);
         return n;
@@ -168,7 +168,7 @@ export function useSlashMenu({
         const n = [...prev];
         n[idx] = { ...n[idx], type: "divider", content: "" };
         const nid = uid();
-        contentCache.current[nid] = "";
+        contentCacheRef.current[nid] = "";
         n.splice(idx + 1, 0, { id: nid, type: "paragraph", content: "", checked: false });
         focusNew(nid);
         return n;
@@ -179,7 +179,7 @@ export function useSlashMenu({
       setTimeout(() => { if (el) cursorTo(el, false); }, 20);
     }
     setSlashMenu(null);
-  }, [blockElMap, contentCache, focusNew, pushUndoAction, setBlocks, slashMenu, snapshotCurrentBlocks]);
+  }, [blockElMapRef, contentCacheRef, focusNew, pushUndoAction, setBlocks, slashMenu, snapshotCurrentBlocks]);
 
   const selectGraphType = useCallback((graphType: GraphType) => {
     if (!graphPicker) return;
@@ -190,13 +190,13 @@ export function useSlashMenu({
       const n = [...prev];
       n[idx] = { ...n[idx], type: "graph" as BlockType, content: "", graphData };
       const nid = uid();
-      contentCache.current[nid] = "";
+      contentCacheRef.current[nid] = "";
       n.splice(idx + 1, 0, { id: nid, type: "paragraph", content: "", checked: false });
       focusNew(nid);
       return n;
     });
     setGraphPicker(null);
-  }, [contentCache, focusNew, graphPicker, setBlocks]);
+  }, [contentCacheRef, focusNew, graphPicker, setBlocks]);
 
   const selectMoneyType = useCallback((moneyType: MoneyBlockType) => {
     if (!moneyPicker) return;
@@ -207,13 +207,13 @@ export function useSlashMenu({
       const n = [...prev];
       n[idx] = { ...n[idx], type: "money" as BlockType, content: "", moneyData };
       const nid = uid();
-      contentCache.current[nid] = "";
+      contentCacheRef.current[nid] = "";
       n.splice(idx + 1, 0, { id: nid, type: "paragraph", content: "", checked: false });
       focusNew(nid);
       return n;
     });
     setMoneyPicker(null);
-  }, [contentCache, focusNew, moneyPicker, setBlocks]);
+  }, [contentCacheRef, focusNew, moneyPicker, setBlocks]);
 
   return {
     slashMenu,

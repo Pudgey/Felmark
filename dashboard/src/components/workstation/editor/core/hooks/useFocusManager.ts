@@ -36,9 +36,17 @@ export function useFocusManager() {
     setFreshBlockId(id);
     if (freshBlockTimer.current) clearTimeout(freshBlockTimer.current);
     freshBlockTimer.current = setTimeout(() => setFreshBlockId(current => current === id ? null : current), 1400);
-    const el = blockElMap.current[id];
-    if (el) { cursorTo(el, false); return; }
-    if (retries > 0) setTimeout(() => focusNew(id, retries - 1), 20);
+
+    const attemptFocus = (remainingRetries: number) => {
+      const el = blockElMap.current[id];
+      if (el) {
+        cursorTo(el, false);
+        return;
+      }
+      if (remainingRetries > 0) setTimeout(() => attemptFocus(remainingRetries - 1), 20);
+    };
+
+    attemptFocus(retries);
   }, []);
 
   return {

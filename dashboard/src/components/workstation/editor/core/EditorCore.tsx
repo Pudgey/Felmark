@@ -225,7 +225,7 @@ export default function EditorCore(props: EditorProps) {
   const activeWs = workstations.find(w => w.projects.some(p => p.id === activeProject));
   const activeTab = tabs.find(t => t.active);
 
-  const handleCommandSelect = useCallback((commandId: string) => {
+  const handleCommandSelect = (commandId: string) => {
     switch (commandId) {
       case "new-project":
         onNewTab();
@@ -265,7 +265,7 @@ export default function EditorCore(props: EditorProps) {
       default:
         return false;
     }
-  }, [activeProject, activeWs?.id, blockOps, hoverBlock, onNavigateRail, onNewTab, onSelectWorkstationHome, panels]);
+  };
 
   const unreadTotal = 0;
 

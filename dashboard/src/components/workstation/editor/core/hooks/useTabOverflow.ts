@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import type { Tab } from "@/lib/types";
 
 interface UseTabOverflowOptions {
@@ -12,7 +12,7 @@ interface UseTabOverflowOptions {
 
 export function useTabOverflow({ tabs, manuallyRenamed, overflowPillClass, overflowDropdownClass }: UseTabOverflowOptions) {
   const tabZoneRef = useRef<HTMLDivElement>(null);
-  const [overflowCount, setOverflowCount] = useState(0);
+  const [zoneWidth, setZoneWidth] = useState(0);
   const [overflowOpen, setOverflowOpen] = useState(false);
   const [editingTabId, setEditingTabId] = useState<string | null>(null);
   const [editingTabName, setEditingTabName] = useState("");
@@ -28,20 +28,14 @@ export function useTabOverflow({ tabs, manuallyRenamed, overflowPillClass, overf
     }
   }, [tabs, manuallyRenamed]);
 
-  // Measure which tabs fit in the zone
-  const measureOverflow = useCallback(() => {
-    const zone = tabZoneRef.current;
-    if (!zone) return;
-    const children = Array.from(zone.querySelectorAll('[data-tab]')) as HTMLElement[];
-    if (children.length === 0) { setOverflowCount(0); return; }
-
-    const zoneWidth = zone.clientWidth;
+  const overflowCount = useMemo(() => {
+    if (zoneWidth <= 0 || tabs.length === 0) return 0;
     const newTabWidth = 36;
     let usedWidth = newTabWidth;
     let fittingCount = 0;
 
-    for (const child of children) {
-      const minW = child.dataset.active === "true" ? 140 : 100;
+    for (const tab of tabs) {
+      const minW = tab.active ? 140 : 100;
       if (usedWidth + minW <= zoneWidth) {
         usedWidth += minW;
         fittingCount++;
@@ -51,12 +45,12 @@ export function useTabOverflow({ tabs, manuallyRenamed, overflowPillClass, overf
     }
 
     // If not all fit, account for overflow pill width
-    if (fittingCount < children.length) {
+    if (fittingCount < tabs.length) {
       const pillWidth = 50;
       usedWidth = newTabWidth + pillWidth;
       fittingCount = 0;
-      for (const child of children) {
-        const minW = child.dataset.active === "true" ? 140 : 100;
+      for (const tab of tabs) {
+        const minW = tab.active ? 140 : 100;
         if (usedWidth + minW <= zoneWidth) {
           usedWidth += minW;
           fittingCount++;
@@ -66,21 +60,21 @@ export function useTabOverflow({ tabs, manuallyRenamed, overflowPillClass, overf
       }
     }
 
-    const hidden = Math.max(0, children.length - fittingCount);
-    setOverflowCount(hidden);
-  }, []);
-
-  useEffect(() => {
-    measureOverflow();
-  }, [tabs, measureOverflow]);
+    return Math.max(0, tabs.length - fittingCount);
+  }, [tabs, zoneWidth]);
 
   useEffect(() => {
     const zone = tabZoneRef.current;
     if (!zone) return;
-    const ro = new ResizeObserver(() => measureOverflow());
+    const syncWidth = () => setZoneWidth(zone.clientWidth);
+    const frameId = requestAnimationFrame(syncWidth);
+    const ro = new ResizeObserver(syncWidth);
     ro.observe(zone);
-    return () => ro.disconnect();
-  }, [measureOverflow]);
+    return () => {
+      cancelAnimationFrame(frameId);
+      ro.disconnect();
+    };
+  }, []);
 
   // Close overflow dropdown on outside click
   useEffect(() => {
@@ -96,7 +90,7 @@ export function useTabOverflow({ tabs, manuallyRenamed, overflowPillClass, overf
   }, [overflowOpen, overflowPillClass, overflowDropdownClass]);
 
   // Compute visible vs. overflowed tabs
-  const computeVisibleTabs = useCallback(() => {
+  const visibleTabs = useMemo(() => {
     if (overflowCount === 0) return { visible: tabs, overflow: [] as Tab[] };
     const visibleCount = tabs.length - overflowCount;
 
@@ -111,8 +105,6 @@ export function useTabOverflow({ tabs, manuallyRenamed, overflowPillClass, overf
       overflow: ordered.slice(visibleCount),
     };
   }, [overflowCount, tabs]);
-
-  const visibleTabs = computeVisibleTabs();
 
   return {
     tabZoneRef,
