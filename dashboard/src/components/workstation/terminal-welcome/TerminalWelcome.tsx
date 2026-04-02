@@ -16,9 +16,11 @@ const SUGGESTIONS = [
   { cmd: "new workstation", desc: "Onboard a new client", icon: "⊞", hot: false },
 ];
 
+interface EmberParticle { x: number; y: number; vx: number; vy: number; size: number; life: number; decay: number; heat: number; wobble: number; wobbleSpeed: number }
+
 function EmberParticles() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const particles = useRef<any[]>([]);
+  const particles = useRef<EmberParticle[]>([]);
 
   useEffect(() => {
     const canvas = canvasRef.current;

@@ -1,12 +1,12 @@
 "use client";
 
 import type { MoneyBlockData, MoneyBlockType } from "@/lib/types";
-import RateCalc from "./RateCalc";
-import PaySchedule from "./PaySchedule";
-import ExpenseTracker from "./ExpenseTracker";
-import MilestonePayment from "./MilestonePayment";
-import TaxEstimate from "./TaxEstimate";
-import PaymentButton from "./PaymentButton";
+import RateCalc, { type RateCalcData } from "./RateCalc";
+import PaySchedule, { type PayScheduleData } from "./PaySchedule";
+import ExpenseTracker, { type ExpenseData } from "./ExpenseTracker";
+import MilestonePayment, { type MilestoneData } from "./MilestonePayment";
+import TaxEstimate, { type TaxData } from "./TaxEstimate";
+import PaymentButton, { type PaymentData } from "./PaymentButton";
 
 interface MoneyBlockProps {
   moneyData: MoneyBlockData;
@@ -26,17 +26,17 @@ export default function MoneyBlock({ moneyData, onUpdate }: MoneyBlockProps) {
 
   switch (moneyType) {
     case "rate-calc":
-      return <RateCalc data={data as any} onUpdate={handleDataUpdate} />;
+      return <RateCalc data={data as RateCalcData} onUpdate={handleDataUpdate} />;
     case "pay-schedule":
-      return <PaySchedule data={data as any} />;
+      return <PaySchedule data={data as PayScheduleData} />;
     case "expense":
-      return <ExpenseTracker data={data as any} onUpdate={handleDataUpdate} />;
+      return <ExpenseTracker data={data as ExpenseData} onUpdate={handleDataUpdate} />;
     case "milestone":
-      return <MilestonePayment data={data as any} onUpdate={handleDataUpdate} />;
+      return <MilestonePayment data={data as MilestoneData} onUpdate={handleDataUpdate} />;
     case "tax":
-      return <TaxEstimate data={data as any} />;
+      return <TaxEstimate data={data as TaxData} />;
     case "payment":
-      return <PaymentButton data={data as any} />;
+      return <PaymentButton data={data as PaymentData} />;
     default:
       return <div style={{ padding: 16, color: "var(--ink-400)" }}>Unknown money block type</div>;
   }

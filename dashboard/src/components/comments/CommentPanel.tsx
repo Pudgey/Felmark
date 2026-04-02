@@ -149,7 +149,7 @@ export default function CommentPanel({ open, onClose, pendingHighlight, onHighli
         <p className={styles.text}>{c.text}</p>
 
         {c.highlight && (
-          <span className={styles.ref}>"{c.highlight}"</span>
+          <span className={styles.ref}>&ldquo;{c.highlight}&rdquo;</span>
         )}
 
         {/* Replies */}
@@ -223,7 +223,7 @@ export default function CommentPanel({ open, onClose, pendingHighlight, onHighli
           {activeHighlight && (
             <div className={styles.newHighlight}>
               <span className={styles.newHighlightLabel}>commenting on</span>
-              <p className={styles.newHighlightText}>"{activeHighlight}"</p>
+              <p className={styles.newHighlightText}>&ldquo;{activeHighlight}&rdquo;</p>
               <button className={styles.newHighlightClear} onClick={() => setActiveHighlight(null)}>
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 2.5l5 5M7.5 2.5l-5 5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" /></svg>
               </button>

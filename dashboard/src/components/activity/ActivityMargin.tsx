@@ -157,7 +157,7 @@ export default function ActivityMargin({ open, onClose, blocks: _blocks, activit
           {activeHighlight && (
             <div className={styles.newHighlight}>
               <span className={styles.newHighlightLabel}>on</span>
-              <span className={styles.newHighlightText}>"{activeHighlight}"</span>
+              <span className={styles.newHighlightText}>&ldquo;{activeHighlight}&rdquo;</span>
             </div>
           )}
           <div className={styles.newInputRow}>
