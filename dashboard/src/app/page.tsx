@@ -24,21 +24,28 @@ const INITIAL_TABS: Tab[] = [
   { id: "p1", name: "Brand Guidelines v2", client: "Meridian Studio", active: true },
 ];
 
-const INITIAL_BLOCKS: Record<string, Block[]> = {
-  p1: [
-    { id: uid(), type: "h1", content: "Brand Guidelines v2", checked: false },
-    { id: uid(), type: "callout", content: "Client: Meridian Studio — Due Apr 3 — Budget: $2,400", checked: false },
-    { id: uid(), type: "h2", content: "Deliverables", checked: false },
-    { id: uid(), type: "todo", content: "Primary & secondary logo usage rules", checked: true },
-    { id: uid(), type: "todo", content: "Color palette with hex/RGB/CMYK values", checked: true },
-    { id: uid(), type: "todo", content: "Typography scale & font pairings", checked: false },
-    { id: uid(), type: "todo", content: "Imagery & photography direction", checked: false },
-    { id: uid(), type: "todo", content: "Social media templates (IG, LinkedIn)", checked: false },
-    { id: uid(), type: "divider", content: "", checked: false },
-    { id: uid(), type: "h2", content: "Notes", checked: false },
-    { id: uid(), type: "paragraph", content: "", checked: false },
-  ],
-};
+function getInitialBlocks(): Record<string, Block[]> {
+  return {
+    p1: [
+      { id: "seed-p1-title", type: "h1", content: "Brand Guidelines v2", checked: false },
+      { id: "seed-p1-meta", type: "callout", content: "Client: Meridian Studio — Due Apr 3 — Budget: $2,400", checked: false },
+      { id: "seed-p1-deliverables", type: "h2", content: "Deliverables", checked: false },
+      { id: "seed-p1-todo-logo", type: "todo", content: "Primary & secondary logo usage rules", checked: true },
+      { id: "seed-p1-todo-colors", type: "todo", content: "Color palette with hex/RGB/CMYK values", checked: true },
+      { id: "seed-p1-todo-typography", type: "todo", content: "Typography scale & font pairings", checked: false },
+      { id: "seed-p1-todo-imagery", type: "todo", content: "Imagery & photography direction", checked: false },
+      { id: "seed-p1-todo-social", type: "todo", content: "Social media templates (IG, LinkedIn)", checked: false },
+      { id: "seed-p1-divider", type: "divider", content: "", checked: false },
+      { id: "seed-p1-notes-heading", type: "h2", content: "Notes", checked: false },
+      { id: "seed-p1-notes-body", type: "paragraph", content: "", checked: false },
+    ],
+  };
+}
+
+const HYDRATION_SAFE_EMPTY_BLOCKS: Block[] = [
+  { id: "seed-empty-title", type: "h1", content: "", checked: false },
+  { id: "seed-empty-body", type: "paragraph", content: "", checked: false },
+];
 
 function makeEmptyBlocks(): Block[] {
   return [
@@ -69,7 +76,7 @@ export default function Dashboard() {
   const [workstations, setWorkstations] = useState<Workstation[]>(INITIAL_WORKSTATIONS);
   const [tabs, setTabs] = useState<Tab[]>(INITIAL_TABS.map(t => ({ ...t, active: false })));
   const [activeProject, setActiveProject] = useState("");
-  const [blocksMap, setBlocksMap] = useState<Record<string, Block[]>>(INITIAL_BLOCKS);
+  const [blocksMap, setBlocksMap] = useState<Record<string, Block[]>>(() => getInitialBlocks());
   const [archived, setArchived] = useState<ArchivedProject[]>([]);
   const [comments, setComments] = useState<Comment[]>(INITIAL_COMMENTS);
   const [activitiesMap, setActivitiesMap] = useState<Record<string, BlockActivity[]>>({ p1: INITIAL_ACTIVITIES });
@@ -425,7 +432,7 @@ export default function Dashboard() {
     setCharCount(chars);
   }, []);
 
-  const activeBlocks = blocksMap[activeProject] || makeEmptyBlocks();
+  const activeBlocks = blocksMap[activeProject] || HYDRATION_SAFE_EMPTY_BLOCKS;
 
   const navigateRail = useCallback((item: string) => {
     if (item === "workstations") {
