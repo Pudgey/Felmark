@@ -128,14 +128,15 @@
 
 .gutter {
   display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: flex-start;
   flex-shrink: 0;
   transition: opacity 0.06s;
   margin-right: 4px;
-  margin-left: -90px;
-  width: 88px;
-  justify-content: flex-end;
-  gap: 1px;
+  margin-left: -40px;
+  width: 32px;
+  gap: 3px;
 }
 
 .gutterBtn {

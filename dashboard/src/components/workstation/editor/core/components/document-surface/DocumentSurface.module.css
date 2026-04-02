@@ -18,19 +18,19 @@
 /* Breathe mode -- full width */
 .pageBreathe {
   max-width: 100%;
-  padding-left: clamp(104px, 10vw, 140px);
+  padding-left: clamp(56px, 6vw, 88px);
   padding-right: clamp(24px, 5vw, 64px);
 }
 
 .pageSplit {
   max-width: 620px;
-  padding-left: clamp(32px, 5vw, 56px);
+  padding-left: clamp(44px, 5vw, 60px);
   padding-right: clamp(20px, 3vw, 36px);
 }
 
 .pageSplit .gutter {
-  width: 88px;
-  margin-left: -90px;
+  width: 32px;
+  margin-left: -40px;
 }
 
 .pageSplit .blockRowActive::after,
