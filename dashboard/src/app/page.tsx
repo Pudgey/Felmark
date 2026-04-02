@@ -514,7 +514,11 @@ export default function Dashboard() {
           onTabClick={handleTabClick}
           onNewTab={handleNewTab}
           onSelectProject={selectProject}
-          onSelectWorkstationHome={selectWorkstation}
+          onSelectWorkstation={selectWorkstation}
+          onDuplicateProject={(id: string) => forge.projects.duplicate(id)}
+          onArchiveProject={archiveProject}
+          archived={archived}
+          onRestoreProject={restoreProject}
           onSaveNow={saveNow}
         />
       )}

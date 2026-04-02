@@ -80,6 +80,35 @@ export function createProjectServices(state: StateUpdater) {
       })));
     },
 
+    /** Duplicate a project (with its blocks) */
+    duplicate(projectId: string) {
+      const { workstations, blocksMap } = state.getState();
+      const ws = workstations.find(w => w.projects.some(p => p.id === projectId));
+      const project = ws?.projects.find(p => p.id === projectId);
+      if (!ws || !project) return;
+
+      const newId = uid();
+      const newProject: Project = {
+        ...project,
+        id: newId,
+        name: `${project.name} (copy)`,
+        pinned: false,
+      };
+      const sourceBlocks = blocksMap[projectId] ?? [];
+      const newBlocks = sourceBlocks.map(b => ({ ...b, id: uid() }));
+
+      state.setWorkstations(prev => prev.map(w =>
+        w.id === ws.id
+          ? { ...w, projects: [...w.projects.slice(0, w.projects.findIndex(p => p.id === projectId) + 1), newProject, ...w.projects.slice(w.projects.findIndex(p => p.id === projectId) + 1)] }
+          : w
+      ));
+      state.setBlocksMap(prev => ({ ...prev, [newId]: newBlocks }));
+      state.setTabs(prev => [...prev.map(t => ({ ...t, active: false })), {
+        id: newId, name: newProject.name, client: ws.client, active: true,
+      }]);
+      state.setActiveProject(newId);
+    },
+
     /** Archive a single project */
     archive(projectId: string) {
       const { workstations } = state.getState();

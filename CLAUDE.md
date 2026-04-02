@@ -175,6 +175,12 @@ Follow `conductor/skills/a11y/PROTOCOL.md`.
 - **This applies to**: sprints, missions, bug fixes, feature builds, refactors — any task that modifies `dashboard/src/` files.
 - **Exceptions**: Conductor-only edits (THOUGHTS.md, HANDOFF.md, mission docs) can run in the main worktree since they're not watched by linters.
 
+### 0.5 Read Before You Write (NON-NEGOTIABLE)
+- **Before modifying ANY file, read its current contents.** Do not regenerate a file from memory or context — the file on disk is the source of truth.
+- **Never overwrite functionality you didn't add.** If a file has features, props, sections, or logic you don't recognize, those were added by another session. Preserve them. If your task conflicts with existing work, STOP and ask the user.
+- **Refactors must preserve, not replace.** If you're restructuring a file (renaming, extracting, reorganizing), diff your output against the original. Every prop, handler, section, and import in the original must appear in the result unless explicitly removed by the user.
+- **This exists because**: multiple AI agents work on this codebase. A broad refactor by one agent has silently reverted days of work by another. This rule prevents that.
+
 ### 1. No Scope Creep
 - **STOP -> PROPOSE -> WAIT** before expanding scope beyond the current task.
 

@@ -36,7 +36,7 @@ const STYLES: Record<string, React.CSSProperties> = {
   paragraph: { lineHeight: 1.65, color: "var(--ink-700)" },
   bullet: { lineHeight: 1.65, color: "var(--ink-700)" },
   numbered: { lineHeight: 1.65, color: "var(--ink-700)" },
-  todo: { lineHeight: 1.65, color: "var(--ink-700)" },
+  todo: { lineHeight: 1.3, color: "var(--ink-700)" },
   quote: { lineHeight: 1.65, color: "var(--ink-500)" },
   callout: { lineHeight: 1.65, color: "var(--ink-700)" },
   code: { fontFamily: "var(--font-mono), 'JetBrains Mono', monospace", fontSize: "0.84em", background: "var(--warm-100)", border: "1px solid var(--warm-200)", borderRadius: 5, padding: "14px 16px", lineHeight: 1.65, whiteSpace: "pre-wrap", tabSize: 2, color: "var(--ink-700)" },

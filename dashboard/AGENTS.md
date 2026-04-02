@@ -8,6 +8,13 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 **Organization and scale are more important than shipping fast.** Every agent — whether running a sprint, fixing a bug, or building a feature — must follow these rules. No exceptions.
 
+## Read Before You Write (NON-NEGOTIABLE)
+
+- **Before modifying ANY file, read its current contents from disk.** Do not regenerate a file from memory or context — the file on disk is the source of truth.
+- **Never overwrite functionality you didn't add.** If a file has features, props, sections, or logic you don't recognize, those were added by another session. Preserve them. If your task conflicts with existing work, STOP and ask the user.
+- **Refactors must preserve, not replace.** If you're restructuring a file, diff your output against the original. Every prop, handler, section, and import in the original must appear in the result unless explicitly removed by the user.
+- **This exists because**: multiple AI agents work on this codebase. A broad refactor by one agent has silently reverted days of work by another. This rule prevents that.
+
 ## Before Writing Any Code
 
 1. **Check the target file's line count.** If > 500 lines, flag it to the user and propose splitting before adding code. If > 800, do NOT add code — refactor first.

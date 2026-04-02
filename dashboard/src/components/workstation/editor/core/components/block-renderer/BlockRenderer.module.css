@@ -187,7 +187,7 @@
 }
 
 .todoCheck {
-  padding-top: 4px;
+  padding-top: 1px;
   flex-shrink: 0;
   width: 22px;
   display: flex;
@@ -200,7 +200,7 @@
   height: 17px;
   accent-color: var(--ember);
   cursor: pointer;
-  margin-top: 2px;
+  margin-top: 0;
 }
 
 .dividerLine {

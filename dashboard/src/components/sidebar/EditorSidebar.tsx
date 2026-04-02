@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo } from "react";
 import { STATUS } from "@/lib/constants";
-import type { Workstation, Project, Tab, Block } from "@/lib/types";
+import type { Workstation, Project, Tab, Block, ArchivedProject } from "@/lib/types";
 import styles from "./EditorSidebar.module.css";
 
 interface EditorSidebarProps {
@@ -22,17 +22,15 @@ interface EditorSidebarProps {
   onTabClick: (id: string) => void;
   onNewTab: () => void;
   onSelectProject: (project: Project, client: string) => void;
-  onSelectWorkstationHome: (wsId: string) => void;
+  onSelectWorkstation: (wsId: string) => void;
+  onDuplicateProject: (projectId: string) => void;
+  onArchiveProject: (projectId: string) => void;
+  archived: ArchivedProject[];
+  onRestoreProject: (archivedIdx: number) => void;
   onSaveNow: () => void;
 }
 
 /* ── Helpers ── */
-
-interface OutlineItem {
-  id: string;
-  text: string;
-  depth: number; // 0 = h1, 1 = h2, 2 = h3
-}
 
 function countWords(blocks: Block[]): number {
   return blocks.reduce((total, b) => {
@@ -40,28 +38,6 @@ function countWords(blocks: Block[]): number {
     const words = b.content.trim().split(/\s+/).filter(Boolean);
     return total + words.length;
   }, 0);
-}
-
-function buildOutline(blocks: Block[]): OutlineItem[] {
-  const items: OutlineItem[] = [];
-  for (const b of blocks) {
-    if (b.type === "h1") items.push({ id: b.id, text: b.content || "Untitled", depth: 0 });
-    else if (b.type === "h2") items.push({ id: b.id, text: b.content || "Untitled", depth: 1 });
-    else if (b.type === "h3") items.push({ id: b.id, text: b.content || "Untitled", depth: 2 });
-  }
-  return items;
-}
-
-function todoProgress(blocks: Block[]): { checked: number; total: number } {
-  let checked = 0;
-  let total = 0;
-  for (const b of blocks) {
-    if (b.type === "todo") {
-      total++;
-      if (b.checked) checked++;
-    }
-  }
-  return { checked, total };
 }
 
 /* ── Component ── */
@@ -72,23 +48,23 @@ export default function EditorSidebar({
   activeProject,
   activeTab,
   blocks,
-  tabs: _tabs,
-  blocksMap: _blocksMap,
   open,
   width,
   isResizing,
   saveIndicatorState,
   saveStatusLabel,
   onClose,
-  onTabClick: _onTabClick,
   onNewTab,
   onSelectProject,
-  onSelectWorkstationHome,
+  onSelectWorkstation,
+  onDuplicateProject,
+  onArchiveProject,
+  archived,
+  onRestoreProject,
   onSaveNow,
 }: EditorSidebarProps) {
   const [docsOpen, setDocsOpen] = useState(true);
-  const [outlineOpen, setOutlineOpen] = useState(true);
-  const [terminalOpen, setTerminalOpen] = useState(false);
+  const [archiveOpen, setArchiveOpen] = useState(false);
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const switcherRef = useRef<HTMLDivElement>(null);
 
@@ -106,12 +82,12 @@ export default function EditorSidebar({
   }, [switcherOpen]);
 
   const words = useMemo(() => countWords(blocks), [blocks]);
-  const outline = useMemo(() => buildOutline(blocks), [blocks]);
-  const todos = useMemo(() => todoProgress(blocks), [blocks]);
-  const todoPercent = todos.total > 0 ? Math.round((todos.checked / todos.total) * 100) : 0;
 
   const projects = workstation?.projects ?? [];
   const clientName = workstation?.client ?? "Workspace";
+  const wsArchived = workstation
+    ? archived.map((a, idx) => ({ ...a, globalIdx: idx })).filter(a => a.workstationId === workstation.id)
+    : [];
 
   return (
     <div
@@ -144,7 +120,7 @@ export default function EditorSidebar({
                 <div
                   key={ws.id}
                   className={`${styles.switcherItem} ${ws.id === workstation?.id ? styles.switcherItemActive : ""}`}
-                  onClick={() => { onSelectWorkstationHome(ws.id); setSwitcherOpen(false); }}
+                  onClick={() => { onSelectWorkstation(ws.id); setSwitcherOpen(false); }}
                 >
                   <div className={styles.switcherAvatar} style={{ background: ws.avatarBg }}>{ws.avatar}</div>
                   <div className={styles.switcherInfo}>
@@ -218,6 +194,22 @@ export default function EditorSidebar({
                           {project.progress > 0 && ` · ${project.progress}%`}
                         </span>
                       </div>
+                      <div className={styles.docActions}>
+                        <button
+                          className={styles.docActionBtn}
+                          title="Duplicate"
+                          onClick={e => { e.stopPropagation(); onDuplicateProject(project.id); }}
+                        >
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4 1.5h4.5a1 1 0 011 1V7" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" /><rect x="1.5" y="3.5" width="6" height="7" rx="1" stroke="currentColor" strokeWidth="1.1" /><path d="M3.5 7h3M4.5 6v2" stroke="currentColor" strokeWidth="1" strokeLinecap="round" /></svg>
+                        </button>
+                        <button
+                          className={`${styles.docActionBtn} ${styles.docActionDanger}`}
+                          title="Archive"
+                          onClick={e => { e.stopPropagation(); onArchiveProject(project.id); }}
+                        >
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 3.5h9M2.5 3.5v6a1 1 0 001 1h5a1 1 0 001-1v-6" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" /><path d="M4.5 5.5h3" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" /></svg>
+                        </button>
+                      </div>
                     </div>
                   );
                 })}
@@ -229,64 +221,33 @@ export default function EditorSidebar({
             )}
           </div>
 
-          {/* Outline section */}
-          <div className={styles.section}>
-            <div className={styles.sectionHead} onClick={() => setOutlineOpen(!outlineOpen)}>
-              <span className={styles.sectionArrow} style={{ transform: outlineOpen ? "rotate(90deg)" : "rotate(0deg)" }}>&#9654;</span>
-              <span className={styles.sectionLabel}>outline</span>
-              <span className={styles.sectionCount}>{outline.length}</span>
-            </div>
-            {outlineOpen && outline.length > 0 && (
-              <div className={styles.outline}>
-                {outline.map(item => (
-                  <div
-                    key={item.id}
-                    className={`${styles.outlineItem} ${item.depth === 1 ? styles.outlineDepth1 : ""} ${item.depth === 2 ? styles.outlineDepth2 : ""}`}
-                  >
-                    <div className={styles.outlineCb}>
-                      {item.depth === 0 && (
-                        <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><circle cx="4" cy="4" r="2.5" fill="var(--ink-400)" /></svg>
-                      )}
-                    </div>
-                    <span className={styles.outlineText}>{item.text}</span>
+          {/* Archive section — only when this workstation has archived items */}
+          {wsArchived.length > 0 && (
+            <div className={styles.section}>
+              <div className={styles.sectionHead} onClick={() => setArchiveOpen(!archiveOpen)}>
+                <span className={styles.sectionArrow} style={{ transform: archiveOpen ? "rotate(90deg)" : "rotate(0deg)" }}>&#9654;</span>
+                <span className={styles.sectionLabel}>archive</span>
+                <span className={styles.sectionCount}>{wsArchived.length}</span>
+              </div>
+              {archiveOpen && wsArchived.map(item => (
+                <div key={`${item.project.id}-${item.globalIdx}`} className={styles.archiveItem}>
+                  <div className={styles.archiveDot} />
+                  <div className={styles.archiveInfo}>
+                    <span className={styles.archiveName}>{item.project.name}</span>
+                    <span className={styles.archiveMeta}>{item.archivedAt}</span>
                   </div>
-                ))}
-              </div>
-            )}
-            {outlineOpen && outline.length === 0 && (
-              <div className={styles.outline}>
-                <span className={styles.docRowMeta} style={{ padding: "2px 0" }}>Add headings to see an outline</span>
-              </div>
-            )}
-          </div>
-
-          {/* Document progress */}
-          {todos.total > 0 && (
-            <div className={styles.progress}>
-              <div className={styles.progressTop}>
-                <span className={styles.progressLabel}>progress</span>
-                <span className={styles.progressVal}>{todos.checked}/{todos.total}</span>
-              </div>
-              <div className={styles.progressBar}>
-                <div className={styles.progressFill} style={{ width: `${todoPercent}%` }} />
-              </div>
-              <div className={styles.progressMeta}>
-                <span>{words} words</span>
-                <span>{outline.length} sections</span>
-                <span>{todoPercent}% complete</span>
-              </div>
+                  <button
+                    className={styles.archiveRestore}
+                    title="Restore"
+                    onClick={() => onRestoreProject(item.globalIdx)}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6.5a4 4 0 017.5-1.5M10 2v3H7" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" /><path d="M10 5.5a4 4 0 01-7.5 1.5M2 10V7h3" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  </button>
+                </div>
+              ))}
             </div>
           )}
 
-          {/* Terminal strip */}
-          <div
-            className={`${styles.terminal} ${terminalOpen ? styles.terminalOpen : ""}`}
-            onClick={() => setTerminalOpen(!terminalOpen)}
-          >
-            <div className={styles.terminalDot} />
-            <span className={styles.terminalText}>terminal</span>
-            <span className={styles.terminalKey}>&#8984;`</span>
-          </div>
         </div>
 
         {/* Footer */}
