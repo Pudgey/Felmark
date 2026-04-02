@@ -121,7 +121,7 @@ This project uses multiple AI coding agents. Skills (slash commands / workflows)
 | AI Tool | Skills Directory | File Format | Invocation |
 |---------|-----------------|-------------|------------|
 | **Claude Code** | `.claude/skills/<name>/SKILL.md` | Plain Markdown | `/skillname` |
-| **Codex CLI** | `.agents/skills/<name>/AGENT.md` | YAML frontmatter + Markdown | `$skillname` or `/skillname` |
+| **Codex CLI** | `.agents/skills/<name>/SKILL.md` | YAML frontmatter + Markdown | `$skillname` or `/skillname` |
 | **Conductor** | `conductor/skills/<name>/PROTOCOL.md` | Shared logic source | Referenced by wrappers |
 
 ### Format Differences
