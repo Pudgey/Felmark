@@ -7,21 +7,23 @@ import {
   BLOCK_DEFS,
   COLS,
   CELL,
-  GAP,
   GRID_W,
   MAX_PER_ROW,
   INITIAL_BLOCK_MAP,
   INITIAL_ROWS,
-  ROW_STEP,
   blockRect,
   colToPx,
   rowToPx,
   spanHeightPx,
   spanWidthPx,
 } from "./registry";
+import { loadStoredCanvasState, persistCanvasState } from "./storage";
 import { useDragPlace } from "./hooks/useDragPlace";
 import { useDragMove } from "./hooks/useDragMove";
 import { useDragResize } from "./hooks/useDragResize";
+import { useCanvasGrid } from "./hooks/useCanvasGrid";
+import { useCanvasLabels } from "./hooks/useCanvasLabels";
+import { useCanvasFooter } from "./hooks/useCanvasFooter";
 import Toolbar from "./toolbar/Toolbar";
 import BlockChrome from "./chrome/BlockChrome";
 import ReplacePopover from "./chrome/ReplacePopover";
@@ -40,44 +42,9 @@ type LibraryTarget =
   | { kind: "column"; rowIdx: number; afterIdx: number }
   | null;
 
-type StoredCanvasState = {
-  blocks: Record<string, CanvasBlock>;
-  rows: CanvasRow[];
-};
-
 const METRIC_BLOCK_TYPES = new Set(["revenue", "outstanding", "rate", "goal"]);
 const CHAT_BLOCK_TYPES = new Set(["chat"]);
 const UTILITY_BLOCK_TYPES = new Set(["whisper", "pipeline", "calendar", "automation", "files", "revenue-chart"]);
-const CANVAS_STORAGE_KEY = "felmark_workspace_canvas_v1";
-
-function loadStoredCanvasState(): StoredCanvasState | null {
-  if (typeof window === "undefined") return null;
-
-  try {
-    const raw = window.localStorage.getItem(CANVAS_STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as StoredCanvasState;
-    if (!parsed || typeof parsed !== "object") return null;
-    if (!parsed.blocks || typeof parsed.blocks !== "object") return null;
-    if (!Array.isArray(parsed.rows)) return null;
-    return parsed;
-  } catch {
-    return null;
-  }
-}
-
-function persistCanvasState(blocks: Record<string, CanvasBlock>, rows: CanvasRow[]) {
-  if (typeof window === "undefined") return;
-
-  try {
-    window.localStorage.setItem(
-      CANVAS_STORAGE_KEY,
-      JSON.stringify({ blocks, rows }),
-    );
-  } catch {
-    // Ignore storage failures; the canvas should still remain usable in-memory.
-  }
-}
 
 export default function Canvas() {
   const [blocks, setBlocks] = useState<Record<string, CanvasBlock>>(INITIAL_BLOCK_MAP);
@@ -188,16 +155,7 @@ export default function Canvas() {
 
   /* ── Grid math ── */
 
-  const canvasToGrid = (clientX: number, clientY: number): CellPosition | null => {
-    if (!gridRef.current) return null;
-    const rect = gridRef.current.getBoundingClientRect();
-    const x = clientX - rect.left;
-    const y = clientY - rect.top;
-    if (x < -20 || y < -20) return null;
-    const col = Math.round(x / (CELL + GAP));
-    const row = Math.round(y / ROW_STEP);
-    return { col: Math.max(0, Math.min(COLS - 1, col)), row: Math.max(0, row) };
-  };
+  const { canvasToGrid } = useCanvasGrid(gridRef);
 
   /* ── Handlers ── */
 
@@ -333,72 +291,25 @@ export default function Canvas() {
     setInsertTarget(null);
   };
 
-  /* ── Grid dimensions ── */
+  /* ── Grid dimensions & derived labels ── */
 
-  const maxRow = layout.reduce((max, lb) => Math.max(max, lb.y + lb.h), 0);
-  const contentHeight = maxRow > 0 ? spanHeightPx(maxRow) : 0;
-  const dotRows = Math.max(maxRow + 1, 6);
-  const minCanvasHeight = spanHeightPx(6);
-  const gridMinHeight = Math.max(contentHeight + 18, minCanvasHeight);
-  const isEditOrPlacing = editing || !!dragPlace.placingBlock;
-  const blockCount = Object.keys(blocks).length;
-  const focusedBlockId = replaceTarget ?? selectedBlock;
-  const helperLeadBlockId = replaceTarget ?? selectedBlock ?? (modifierReveal ? hoveredBlock : hoverRevealBlock);
-  const showInsertionControls = editing
-    && modifierReveal
-    && !dragPlace.dragging
-    && !dragMove.movingBlock
-    && !dragResize.resizing
-    && hoveredBlock === null
-    && focusedBlockId === null
-    && !showLibrary;
-  const showEdgeAnchors = editing
-    && modifierReveal
-    && !dragPlace.dragging
-    && !dragMove.movingBlock
-    && !dragResize.resizing
-    && !showLibrary;
-  const placingBlockLabel = dragPlace.placingBlock
-    ? BLOCK_DEFS.find((bt) => bt.type === dragPlace.placingBlock)?.label ?? "Block"
-    : "Block";
-  const movingBlockLabel = dragMove.movingBlock
-    ? blocks[dragMove.movingBlock]?.label ?? "Block"
-    : "Block";
-  const selectedBlockLabel = selectedBlock
-    ? blocks[selectedBlock]?.label ?? "Block"
-    : "Block";
-  const replaceBlockLabel = replaceTarget
-    ? blocks[replaceTarget]?.label ?? "Block"
-    : "Block";
+  const {
+    contentHeight, dotRows, gridMinHeight,
+    isEditOrPlacing, blockCount, focusedBlockId, helperLeadBlockId,
+    showInsertionControls, showEdgeAnchors,
+    placingBlockLabel, movingBlockLabel, selectedBlockLabel, replaceBlockLabel,
+  } = useCanvasLabels({
+    blocks, layout, editing, modifierReveal,
+    hoveredBlock, hoverRevealBlock, selectedBlock, replaceTarget,
+    showLibrary, dragPlace, dragMove, dragResize,
+  });
 
-  let footerStatus = "Canvas live";
-  if (editing) {
-    if (dragPlace.dragging) {
-      footerStatus = `Placing ${placingBlockLabel}`;
-    } else if (dragMove.movingBlock) {
-      footerStatus = dragMove.moveTarget?.kind === "row"
-        ? `Moving ${movingBlockLabel} to a new row`
-        : dragMove.moveTarget?.kind === "column"
-          ? `Moving ${movingBlockLabel} into place`
-          : `Moving ${movingBlockLabel}`;
-    } else if (dragResize.resizing) {
-      footerStatus = "Resizing layout";
-    } else if (showLibrary) {
-      footerStatus = libraryTarget?.kind === "row"
-        ? "Choose a block for the new row"
-        : libraryTarget?.kind === "column"
-          ? "Choose a block for this slot"
-          : "Choose a block to add";
-    } else if (replaceTarget) {
-      footerStatus = `Replacing ${replaceBlockLabel}`;
-    } else if (selectedBlock) {
-      footerStatus = `${selectedBlockLabel} active`;
-    } else if (modifierReveal) {
-      footerStatus = "Helpers revealed";
-    } else {
-      footerStatus = "Presentation mode · hover to reveal controls or hold Alt/Option for guides";
-    }
-  }
+  const footerStatus = useCanvasFooter({
+    editing, dragPlace, dragMove, dragResize,
+    showLibrary, libraryTarget, replaceTarget, selectedBlock,
+    modifierReveal, placingBlockLabel, movingBlockLabel,
+    selectedBlockLabel, replaceBlockLabel,
+  });
   const movingBlockData = dragMove.movingBlock
     ? blocks[dragMove.movingBlock] ?? null
     : null;
