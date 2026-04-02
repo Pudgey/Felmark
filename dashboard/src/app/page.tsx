@@ -145,6 +145,10 @@ export default function Dashboard() {
     return nextToken;
   }, [hydrated]);
 
+  /** Wrap a setter so every call marks a save as pending. */
+  const tracked = <T,>(setter: React.Dispatch<SetStateAction<T>>) =>
+    (value: SetStateAction<T>) => { markSavePending(); setter(value); };
+
   const persistWorkstationState = useCallback((saveToken: number) => {
     const savedAt = Date.now();
     saveToStorage("workstations", workstations);
@@ -169,40 +173,13 @@ export default function Dashboard() {
     if (saveToken) persistWorkstationState(saveToken);
   }, [markSavePending, persistWorkstationState]);
 
-  const updateWorkstations = useCallback((value: SetStateAction<Workstation[]>) => {
-    markSavePending();
-    setWorkstations(value);
-  }, [markSavePending]);
-
-  const updateTabs = useCallback((value: SetStateAction<Tab[]>) => {
-    markSavePending();
-    setTabs(value);
-  }, [markSavePending]);
-
-  const updateActiveProject = useCallback((value: SetStateAction<string>) => {
-    markSavePending();
-    setActiveProject(value);
-  }, [markSavePending]);
-
-  const updateBlocksMap = useCallback((value: SetStateAction<Record<string, Block[]>>) => {
-    markSavePending();
-    setBlocksMap(value);
-  }, [markSavePending]);
-
-  const updateArchived = useCallback((value: SetStateAction<ArchivedProject[]>) => {
-    markSavePending();
-    setArchived(value);
-  }, [markSavePending]);
-
-  const updateComments = useCallback((value: SetStateAction<Comment[]>) => {
-    markSavePending();
-    setComments(value);
-  }, [markSavePending]);
-
-  const updateActivitiesMap = useCallback((value: SetStateAction<Record<string, BlockActivity[]>>) => {
-    markSavePending();
-    setActivitiesMap(value);
-  }, [markSavePending]);
+  const updateWorkstations = tracked(setWorkstations);
+  const updateTabs = tracked(setTabs);
+  const updateActiveProject = tracked(setActiveProject);
+  const updateBlocksMap = tracked(setBlocksMap);
+  const updateArchived = tracked(setArchived);
+  const updateComments = tracked(setComments);
+  const updateActivitiesMap = tracked(setActivitiesMap);
 
   useEffect(() => {
     if (!hydrated || saveRequestToken === 0) return;
