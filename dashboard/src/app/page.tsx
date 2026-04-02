@@ -272,6 +272,7 @@ export default function Dashboard() {
     setActivitiesMap: updateActivitiesMap,
   };
   const forge = createForge(forgeState);
+  const sidebarSummary = forge.readModels.sidebar.getSummary();
 
   // Single click — pure expand/collapse toggle
   const toggleWorkstation = (wid: string) => forge.workstations.toggle(wid);
@@ -496,12 +497,12 @@ export default function Dashboard() {
       />}
       {showWorkstationSidebar && <Sidebar
         workstations={workstations}
+        sidebarSummary={sidebarSummary}
         archived={archived}
         activeProject={activeProject}
         open={sidebarOpen}
         width={sidebarWidth}
         isResizing={isResizing}
-        wordCount={wordCount}
         railActive={railActive}
         onClose={() => setSidebarOpen(false)}
         onToggleWorkstation={toggleWorkstation}

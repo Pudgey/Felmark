@@ -1,18 +1,19 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import type { SidebarShellSummary } from "@/forge";
 import { STATUS } from "@/lib/constants";
 import type { Workstation, Project, ArchivedProject } from "@/lib/types";
 import styles from "./Sidebar.module.css";
 
 interface SidebarProps {
   workstations: Workstation[];
+  sidebarSummary: SidebarShellSummary;
   archived: ArchivedProject[];
   activeProject: string;
   open: boolean;
   width: number;
   isResizing: boolean;
-  wordCount: number;
   railActive: string;
   onClose: () => void;
   onToggleWorkstation: (id: string) => void;
@@ -35,16 +36,8 @@ interface SidebarProps {
   onScrollToCalendarEvent?: (projectId: string) => void;
 }
 
-const STATUSES = ["active", "review", "paused", "completed"] as const;
-
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-const COMPACT_CURRENCY = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  notation: "compact",
-  maximumFractionDigits: 1,
-});
 
 function CalendarView({ workstations, onSelectProject, onScrollToEvent }: { workstations: Workstation[]; onSelectProject: (project: Project, client: string) => void; onScrollToEvent?: (projectId: string) => void }) {
   const today = new Date();
@@ -207,7 +200,7 @@ const REVENUE_WEEKS = [
 
 import { getDueLabel as getDueLabelFromDate, getDueColor as getDueColorFromDate } from "@/lib/due-dates";
 
-export default function Sidebar({ workstations, archived, activeProject, open, width, isResizing, wordCount, railActive, onClose, onToggleWorkstation, onSelectWorkstationHome, onSelectProject, onArchiveProject, onArchiveCompleted, onArchiveWorkstation, onRestoreProject, onReorderWorkstations, onRenameWorkstation, onRenameProject, onUpdateProjectDue, onAddWorkstation, onTogglePin, onCycleStatus, saveIndicatorState, saveStatusLabel, onSaveNow, onScrollToCalendarEvent }: SidebarProps) {
+export default function Sidebar({ workstations, sidebarSummary, archived, activeProject, open, width, isResizing, railActive, onClose, onToggleWorkstation, onSelectWorkstationHome, onSelectProject, onArchiveProject, onArchiveCompleted, onArchiveWorkstation, onRestoreProject, onReorderWorkstations, onRenameWorkstation, onRenameProject, onUpdateProjectDue, onAddWorkstation, onTogglePin, onCycleStatus, saveIndicatorState, saveStatusLabel, onSaveNow, onScrollToCalendarEvent }: SidebarProps) {
   const [wsMenu, setWsMenu] = useState<string | null>(null);
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [showAddWs, setShowAddWs] = useState(false);
@@ -251,27 +244,11 @@ export default function Sidebar({ workstations, archived, activeProject, open, w
     return () => document.removeEventListener("mousedown", handler);
   }, [pjMenuOpen]);
 
-  const totalEarnings = workstations.reduce((s, w) =>
-    s + w.projects.reduce((a, p) => {
-      const m = p.amount.match(/[\d,]+/);
-      return a + (m ? parseInt(m[0].replace(",", "")) : 0);
-    }, 0), 0);
-  const activeCount = workstations.reduce((s, w) => s + w.projects.filter(p => p.status === "active").length, 0);
-  const overdueCount = workstations.reduce((s, w) => s + w.projects.filter(p => p.status === "overdue").length, 0);
-  const totalProjects = workstations.reduce((s, w) => s + w.projects.length, 0);
-  const completedTotal = workstations.reduce((s, w) => s + w.projects.filter(p => p.status === "completed").length, 0);
-
   const completedCount = (wsId: string) =>
-    workstations.find(w => w.id === wsId)?.projects.filter(p => p.status === "completed").length || 0;
+    sidebarSummary.workstations[wsId]?.completedProjects || 0;
 
-  // Revenue flow — bar chart uses sample weekly data, totals computed from real projects
+  // Revenue flow — bar chart uses sample weekly data, header totals come from the shared shell summary
   const maxBarVal = Math.max(...REVENUE_WEEKS.map(w => w.earned + w.pending));
-  const parseAmount = (amt: string) => { const m = amt.match(/[\d,]+/); return m ? parseInt(m[0].replace(",", "")) : 0; };
-  const totalEarned = workstations.reduce((s, w) => s + w.projects.filter(p => p.status === "completed").reduce((a, p) => a + parseAmount(p.amount), 0), 0);
-  const totalPending = workstations.reduce((s, w) => s + w.projects.filter(p => p.status !== "completed").reduce((a, p) => a + parseAmount(p.amount), 0), 0);
-  const totalEarnedDisplay = COMPACT_CURRENCY.format(totalEarned);
-  const totalPendingDisplay = COMPACT_CURRENCY.format(totalPending);
-  const totalPipelineDisplay = COMPACT_CURRENCY.format(totalEarned + totalPending);
 
   // Pinned projects
   const pinnedProjects = workstations.flatMap(w =>
@@ -387,7 +364,7 @@ export default function Sidebar({ workstations, archived, activeProject, open, w
           {/* Header */}
           <div className={styles.rfHead}>
             <div className={styles.rfTitleRow}>
-              <span className={styles.rfAmount}>{totalEarnedDisplay}</span>
+              <span className={styles.rfAmount}>{sidebarSummary.finance.collected.display}</span>
               <span className={styles.rfTrend}>+23%</span>
             </div>
             <span className={styles.rfLabel}>earned this month</span>
@@ -424,24 +401,24 @@ export default function Sidebar({ workstations, archived, activeProject, open, w
             <div className={styles.rfBkItem}>
               <div className={`${styles.rfBkDot} ${styles.rfBkDotEarned}`} />
               <span className={styles.rfBkLabel}>Earned</span>
-              <span className={styles.rfBkVal}>{totalEarnedDisplay}</span>
+              <span className={styles.rfBkVal}>{sidebarSummary.finance.collected.display}</span>
             </div>
             <div className={styles.rfBkItem}>
               <div className={`${styles.rfBkDot} ${styles.rfBkDotPending}`} />
               <span className={styles.rfBkLabel}>Pending</span>
-              <span className={styles.rfBkVal}>{totalPendingDisplay}</span>
+              <span className={styles.rfBkVal}>{sidebarSummary.finance.outstanding.display}</span>
             </div>
             <div className={styles.rfBkItem}>
               <div className={`${styles.rfBkDot} ${styles.rfBkDotTotal}`} />
               <span className={styles.rfBkLabel}>Pipeline</span>
-              <span className={`${styles.rfBkVal} ${styles.rfBkValStrong}`}>{totalPipelineDisplay}</span>
+              <span className={`${styles.rfBkVal} ${styles.rfBkValStrong}`}>{sidebarSummary.finance.pipeline.display}</span>
             </div>
           </div>
 
           {/* Expandable project stats */}
           <div className={styles.statsToggle} onClick={() => setExpandedStats(!expandedStats)}>
             <div className={styles.statsToggleRow}>
-              <span className={styles.statsToggleLabel}>{activeCount} active · {overdueCount > 0 ? <span style={{ color: "#c24b38" }}>{overdueCount} overdue</span> : "0 overdue"}</span>
+              <span className={styles.statsToggleLabel}>{sidebarSummary.activeProjects} active · {sidebarSummary.overdueProjects > 0 ? <span style={{ color: "#c24b38" }}>{sidebarSummary.overdueProjects} overdue</span> : "0 overdue"}</span>
               <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style={{ transform: expandedStats ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.15s" }}>
                 <path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
@@ -450,9 +427,9 @@ export default function Sidebar({ workstations, archived, activeProject, open, w
 
           {expandedStats && (
             <div className={styles.statsExpanded}>
-              <div className={styles.statMini}><div className={styles.statMiniVal}>{totalProjects}</div><div className={styles.statMiniLab}>total</div></div>
-              <div className={styles.statMini}><div className={styles.statMiniVal}>{completedTotal}</div><div className={styles.statMiniLab}>done</div></div>
-              <div className={styles.statMini}><div className={styles.statMiniVal}>{totalProjects > 0 ? Math.round((completedTotal / totalProjects) * 100) : 0}%</div><div className={styles.statMiniLab}>rate</div></div>
+              <div className={styles.statMini}><div className={styles.statMiniVal}>{sidebarSummary.totalProjects}</div><div className={styles.statMiniLab}>total</div></div>
+              <div className={styles.statMini}><div className={styles.statMiniVal}>{sidebarSummary.completedProjects}</div><div className={styles.statMiniLab}>done</div></div>
+              <div className={styles.statMini}><div className={styles.statMiniVal}>{sidebarSummary.completionRate}%</div><div className={styles.statMiniLab}>rate</div></div>
             </div>
           )}
         </div>
@@ -516,7 +493,7 @@ export default function Sidebar({ workstations, archived, activeProject, open, w
                       <span className={styles.wsName} onDoubleClick={e => { e.stopPropagation(); setEditingWsId(ws.id); setEditingWsName(ws.client); }}>{ws.client}</span>
                     )}
                     <div className={styles.wsMeta}>
-                      {totalEarnings > 0 && <span className={styles.wsRevenue}>${(ws.projects.reduce((a, p) => { const m = p.amount.match(/[\d,]+/); return a + (m ? parseInt(m[0].replace(",", "")) : 0); }, 0) / 1000).toFixed(1)}k</span>}
+                      {sidebarSummary.workstations[ws.id]?.revenueDisplay && <span className={styles.wsRevenue}>{sidebarSummary.workstations[ws.id].revenueDisplay}</span>}
                       <span className={styles.wsLastActive}>{ws.lastActive}</span>
                     </div>
                   </div>
@@ -557,7 +534,7 @@ export default function Sidebar({ workstations, archived, activeProject, open, w
           {personalWorkstations.length > 0 && (
             <>
               {!search && <div className={styles.sectionLabel} style={{ marginTop: 12 }}>personal</div>}
-              {personalWorkstations.map((ws, wsIdx) => (
+              {personalWorkstations.map((ws) => (
                 <div
                   key={ws.id}
                   className={`${styles.wsBlock} ${dropWsId === ws.id ? styles.wsDropTarget : ""} ${dragWsId === ws.id ? styles.wsDragging : ""}`}
