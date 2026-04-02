@@ -18,13 +18,14 @@
 
 | Agent | Task | Started | Status |
 |-------|------|---------|--------|
+| codex-main | Separating vertical row cadence from column gutters so the workspace canvas reads with more intentional rhythm between bands | 2026-04-02 12:37 EDT | ACTIVE |
 
 ## Recent
 
 | Agent | Task | Completed |
 |-------|------|-----------|
+| codex-main | Reworking the workstation editor margin into a true workstation control rail so it reflects docs, review, signals, and terminal state instead of only outline data | 2026-04-02 12:45 EDT |
 | codex-main | Fixing the sidebar runtime crash caused by a leftover totalProjects reference after the forge summary wiring | 2026-04-02 12:03 EDT |
 | codex-main | Building the first forge finance slice and sidebar projection so shell client summaries stop being surface-owned | 2026-04-02 11:53 EDT |
 | codex-main | Proposed the next forge phase so sidebar, workspace, workstation, and finance can share owned truth without surface coupling | 2026-04-02 10:36 EDT |
 | codex-main | Added the first forge domain structure manifests so shared client, finance, and surface read models can be designed without surface coupling | 2026-04-02 10:35 EDT |
-| codex-main | Added a presentation mode to the workspace edit canvas so helper UI stays hidden until hover intent or modifier reveal | 2026-04-02 09:39 EDT |
