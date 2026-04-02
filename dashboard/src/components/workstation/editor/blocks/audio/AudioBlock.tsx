@@ -56,7 +56,8 @@ export default function AudioBlock({ data, onUpdate }: AudioBlockProps) {
     }
   }, [state, transcript]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const sampleWaveform = useCallback(() => {
+  const sampleWaveformRef = useRef<() => void>();
+  sampleWaveformRef.current = () => {
     if (!analyser.current) return;
     const buf = new Uint8Array(analyser.current.fftSize);
     analyser.current.getByteTimeDomainData(buf);
@@ -78,8 +79,9 @@ export default function AudioBlock({ data, onUpdate }: AudioBlockProps) {
       return next;
     });
 
-    animRef.current = requestAnimationFrame(sampleWaveform);
-  }, []);
+    animRef.current = requestAnimationFrame(() => sampleWaveformRef.current?.());
+  };
+  const sampleWaveform = useCallback(() => sampleWaveformRef.current?.(), []);
 
   const startRecording = async () => {
     try {
@@ -189,12 +191,14 @@ export default function AudioBlock({ data, onUpdate }: AudioBlockProps) {
     setPlayProgress(0);
   };
 
-  // Cleanup
+  // Cleanup — use ref to capture latest audioUrl without re-running effect
+  const audioUrlRef = useRef(audioUrl);
+  audioUrlRef.current = audioUrl;
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
       if (animRef.current) cancelAnimationFrame(animRef.current);
-      if (audioUrl) URL.revokeObjectURL(audioUrl);
+      if (audioUrlRef.current) URL.revokeObjectURL(audioUrlRef.current);
     };
   }, []);
 

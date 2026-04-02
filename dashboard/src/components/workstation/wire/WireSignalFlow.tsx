@@ -210,7 +210,7 @@ export default function WireSignalFlow({ onComplete, onClose }: WireSignalFlowPr
   const toggleSource = (name: string) => {
     setEnabledSources(prev => {
       const next = new Set(prev);
-      next.has(name) ? next.delete(name) : next.add(name);
+      if (next.has(name)) { next.delete(name); } else { next.add(name); }
       return next;
     });
   };

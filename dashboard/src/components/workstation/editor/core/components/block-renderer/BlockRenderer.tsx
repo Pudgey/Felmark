@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import type { Block, GraphType, MoneyBlockType } from "@/lib/types";
 import GraphBlockComponent, { GRAPH_TYPE_OPTIONS } from "../../../blocks/graphs/GraphBlock";
 import GraphDataEditor from "../../../blocks/graphs/GraphDataEditor";
@@ -62,8 +62,8 @@ export default function BlockRenderer({
   setBlocks,
   hoverBlock,
   setHoverBlock,
-  activeBlockId,
-  freshBlockId,
+  activeBlockId: _activeBlockId,
+  freshBlockId: _freshBlockId,
   dropId,
   setDropId,
   dragId,
