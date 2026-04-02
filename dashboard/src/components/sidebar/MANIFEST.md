@@ -3,15 +3,17 @@
 > Auto-maintained by AI. Updated on every file change in this folder.
 
 ## Exports
-- `Sidebar` -- Main navigation sidebar with workspace/project tree, tabs, and project management
+- `Sidebar` -- default export from `Sidebar.tsx` (client/project navigation tree)
+- `WorkstationSidebar` -- default export from `WorkstationSidebar.tsx` (active workstation command center)
 
 ## Dependencies
 - `@/lib/constants` -- STATUS
-- `@/lib/types` -- Workspace, Project, ArchivedProject
+- `@/lib/types` -- Workstation, Project, ArchivedProject, Tab
 
 ## Imported By
-- `page.tsx` -- composed in main app layout
+- `app/page.tsx` -- conditionally renders Sidebar or WorkstationSidebar based on activeWorkstationId
 
 ## Files
-- `Sidebar.tsx` -- main component (710 lines)
-- `Sidebar.module.css` -- styles
+- `Sidebar.tsx` + `Sidebar.module.css` -- original sidebar (workstation/project tree)
+- `WorkstationSidebar.tsx` + `WorkstationSidebar.module.css` -- V2 workstation sidebar (command center)
+- `MANIFEST.md` -- this file
