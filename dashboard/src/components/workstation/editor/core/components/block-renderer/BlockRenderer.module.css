@@ -157,6 +157,15 @@
 .grip { cursor: grab; }
 .grip:active { cursor: grabbing; }
 
+.gutterDelete {
+  display: none;
+}
+
+.gutter:hover .gutterDelete,
+.gutter:focus-within .gutterDelete {
+  display: flex;
+}
+
 .gutterDelete:hover { background: rgba(194, 75, 56, 0.08); color: #c24b38; }
 
 .prefix {
