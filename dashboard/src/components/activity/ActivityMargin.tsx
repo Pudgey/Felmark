@@ -72,7 +72,7 @@ interface ActivityMarginProps {
   onScrollToBlock?: (blockId: string) => void;
 }
 
-export default function ActivityMargin({ open, onClose, blocks, activities, onActivitiesChange, hoveredBlock, onHoverBlock, pendingHighlight, onHighlightConsumed, onScrollToBlock }: ActivityMarginProps) {
+export default function ActivityMargin({ open, onClose, blocks: _blocks, activities, onActivitiesChange, hoveredBlock, onHoverBlock, pendingHighlight, onHighlightConsumed, onScrollToBlock }: ActivityMarginProps) {
   const [filter, setFilter] = useState<"all" | "comments" | "edits" | "active">("all");
   const [expandedComment, setExpandedComment] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
@@ -82,11 +82,13 @@ export default function ActivityMargin({ open, onClose, blocks, activities, onAc
 
   // Handle incoming highlight from block comment button
   useEffect(() => {
-    if (pendingHighlight && open) {
+    if (!pendingHighlight || !open) return;
+    const frame = requestAnimationFrame(() => {
       setActiveHighlight(pendingHighlight);
       setShowNew(true);
       onHighlightConsumed?.();
-    }
+    });
+    return () => cancelAnimationFrame(frame);
   }, [pendingHighlight, open, onHighlightConsumed]);
 
   const activeBlockCount = activities.filter(a => a.typing || a.hot).length;
@@ -157,7 +159,7 @@ export default function ActivityMargin({ open, onClose, blocks, activities, onAc
           {activeHighlight && (
             <div className={styles.newHighlight}>
               <span className={styles.newHighlightLabel}>on</span>
-              <span className={styles.newHighlightText}>"{activeHighlight}"</span>
+              <span className={styles.newHighlightText}>&ldquo;{activeHighlight}&rdquo;</span>
             </div>
           )}
           <div className={styles.newInputRow}>

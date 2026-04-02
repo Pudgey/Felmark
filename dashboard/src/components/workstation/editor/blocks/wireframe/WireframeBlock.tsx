@@ -18,7 +18,7 @@ export function getDefaultWireframe(): WireframeBlockData {
   };
 }
 
-export default function WireframeBlock({ data, onChange }: { data: WireframeBlockData; onChange: (d: WireframeBlockData) => void }) {
+export default function WireframeBlock({ data, onChange: _onChange }: { data: WireframeBlockData; onChange: (d: WireframeBlockData) => void }) {
   return (
     <div className={styles.wire}>
       <div className={styles.wireHeader}>

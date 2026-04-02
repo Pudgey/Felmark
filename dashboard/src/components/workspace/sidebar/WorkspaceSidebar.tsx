@@ -177,7 +177,7 @@ export default function WorkspaceSidebar() {
   const [active, setActive] = useState("meridian");
   const [expanded, setExpanded] = useState<Set<string>>(new Set(["meridian"]));
   const [search, setSearch] = useState("");
-  const [hovered, setHovered] = useState<string | null>(null);
+  const [, setHovered] = useState<string | null>(null);
 
   const toggleExpand = (id: string) =>
     setExpanded((prev) => {

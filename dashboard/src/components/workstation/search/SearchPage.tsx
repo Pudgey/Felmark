@@ -80,7 +80,7 @@ interface SearchPageProps {
   workstations: Workstation[];
 }
 
-export default function SearchPage({ workstations }: SearchPageProps) {
+export default function SearchPage({ workstations: _workstations }: SearchPageProps) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("all");
   const [selectedIdx, setSelectedIdx] = useState(0);

@@ -18,13 +18,6 @@ export default function SharePage({ params }: { params: Promise<{ id: string }> 
   const [loading, setLoading] = useState(true);
   const [shareId, setShareId] = useState<string>("");
 
-  useEffect(() => {
-    params.then(p => {
-      setShareId(p.id);
-      fetchShare(p.id);
-    });
-  }, [params]);
-
   const fetchShare = async (id: string, pinCode?: string) => {
     setLoading(true);
     try {
@@ -65,6 +58,13 @@ export default function SharePage({ params }: { params: Promise<{ id: string }> 
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    params.then(p => {
+      setShareId(p.id);
+      fetchShare(p.id);
+    });
+  }, [params]);
 
   if (loading) {
     return (

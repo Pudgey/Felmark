@@ -25,7 +25,7 @@ export function getDefaultBrandBoard(): BrandBoardData {
   };
 }
 
-export default function BrandBoardBlock({ data, onChange }: { data: BrandBoardData; onChange: (d: BrandBoardData) => void }) {
+export default function BrandBoardBlock({ data, onChange: _onChange }: { data: BrandBoardData; onChange: (d: BrandBoardData) => void }) {
   return (
     <div className={styles.brand}>
       <div className={styles.brandHeader}>

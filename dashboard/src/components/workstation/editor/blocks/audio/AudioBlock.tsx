@@ -56,30 +56,30 @@ export default function AudioBlock({ data, onUpdate }: AudioBlockProps) {
     }
   }, [state, transcript]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const sampleWaveform = useCallback(() => {
-    if (!analyser.current) return;
-    const buf = new Uint8Array(analyser.current.fftSize);
-    analyser.current.getByteTimeDomainData(buf);
-    // RMS level
-    let sum = 0;
-    for (let i = 0; i < buf.length; i++) {
-      const v = (buf[i] - 128) / 128;
-      sum += v * v;
-    }
-    const rms = Math.sqrt(sum / buf.length);
-    const db = 20 * Math.log10(Math.max(rms, 0.0001));
-    setDbLevel(Math.max(-60, Math.min(0, db)));
-
-    // Amplitude sample for waveform (0-1)
-    const amplitude = Math.min(1, rms * 4);
-    setWaveform(prev => {
-      const next = [...prev, amplitude];
-      if (next.length > 200) return next.slice(-200);
-      return next;
-    });
-
-    animRef.current = requestAnimationFrame(sampleWaveform);
-  }, []);
+  const sampleWaveformRef = useRef<() => void>(undefined);
+  useEffect(() => {
+    sampleWaveformRef.current = () => {
+      if (!analyser.current) return;
+      const buf = new Uint8Array(analyser.current.fftSize);
+      analyser.current.getByteTimeDomainData(buf);
+      let sum = 0;
+      for (let i = 0; i < buf.length; i++) {
+        const v = (buf[i] - 128) / 128;
+        sum += v * v;
+      }
+      const rms = Math.sqrt(sum / buf.length);
+      const db = 20 * Math.log10(Math.max(rms, 0.0001));
+      setDbLevel(Math.max(-60, Math.min(0, db)));
+      const amplitude = Math.min(1, rms * 4);
+      setWaveform(prev => {
+        const next = [...prev, amplitude];
+        if (next.length > 200) return next.slice(-200);
+        return next;
+      });
+      animRef.current = requestAnimationFrame(() => sampleWaveformRef.current?.());
+    };
+  });
+  const sampleWaveform = useCallback(() => sampleWaveformRef.current?.(), []);
 
   const startRecording = async () => {
     try {
@@ -189,12 +189,14 @@ export default function AudioBlock({ data, onUpdate }: AudioBlockProps) {
     setPlayProgress(0);
   };
 
-  // Cleanup
+  // Cleanup — use ref to capture latest audioUrl without re-running effect
+  const audioUrlRef = useRef(audioUrl);
+  useEffect(() => { audioUrlRef.current = audioUrl; }, [audioUrl]);
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
       if (animRef.current) cancelAnimationFrame(animRef.current);
-      if (audioUrl) URL.revokeObjectURL(audioUrl);
+      if (audioUrlRef.current) URL.revokeObjectURL(audioUrlRef.current);
     };
   }, []);
 

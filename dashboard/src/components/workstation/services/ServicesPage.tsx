@@ -3,8 +3,6 @@
 import { useState } from "react";
 import styles from "./ServicesPage.module.css";
 
-const uid = () => Math.random().toString(36).slice(2, 10);
-
 interface ServiceTier {
   id: string;
   name: string;

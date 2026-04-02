@@ -60,31 +60,33 @@ export default function CatTerminal({ open, onClose }: CatTerminalProps) {
     if (open) {
       setTimeout(() => inputRef.current?.focus(), 100);
       if (lines.length === 0) {
-        setLines([
-          { id: 1, content: "  Felmark Terminal v1.0", type: "system" },
-          { id: 2, content: "", type: "spacer" },
-          { id: 3, content: "  /\\_/\\", type: "cat-ascii-line" },
-          { id: 4, content: " ( o.o )  meow. you found the easter egg.", type: "cat-ascii-line" },
-          { id: 5, content: "  > ^ <", type: "cat-ascii-line" },
-          { id: 6, content: "", type: "spacer" },
-          { id: 7, content: "  Commands:", type: "help-label" },
-          { id: 8, content: "    /cat walk       Walk across your document, drop wisdom", type: "help-item" },
-          { id: 9, content: "    /cat knock      Knock your proposal off the desk", type: "help-item" },
-          { id: 10, content: "    /cat nap        Fall asleep on your work", type: "help-item" },
-          { id: 11, content: "    /cat hunt       Hunt your cursor", type: "help-item" },
-          { id: 12, content: "    /cat fortune    Freelancer oracle wisdom", type: "help-item" },
-          { id: 13, content: "    /cat pet        Pet the cat", type: "help-item" },
-          { id: 14, content: "    /cat mood       Check the cat's mood", type: "help-item" },
-          { id: 15, content: "    clear           Reset terminal", type: "help-item" },
-          { id: 16, content: "    exit            Close", type: "help-item" },
-          { id: 17, content: "", type: "spacer" },
-          { id: 18, content: "  The cat does not answer to you. The cat answers to no one.", type: "help-footer" },
-          { id: 19, content: "", type: "spacer" },
-        ]);
+        requestAnimationFrame(() => {
+          setLines([
+            { id: 1, content: "  Felmark Terminal v1.0", type: "system" },
+            { id: 2, content: "", type: "spacer" },
+            { id: 3, content: "  /\\_/\\", type: "cat-ascii-line" },
+            { id: 4, content: " ( o.o )  meow. you found the easter egg.", type: "cat-ascii-line" },
+            { id: 5, content: "  > ^ <", type: "cat-ascii-line" },
+            { id: 6, content: "", type: "spacer" },
+            { id: 7, content: "  Commands:", type: "help-label" },
+            { id: 8, content: "    /cat walk       Walk across your document, drop wisdom", type: "help-item" },
+            { id: 9, content: "    /cat knock      Knock your proposal off the desk", type: "help-item" },
+            { id: 10, content: "    /cat nap        Fall asleep on your work", type: "help-item" },
+            { id: 11, content: "    /cat hunt       Hunt your cursor", type: "help-item" },
+            { id: 12, content: "    /cat fortune    Freelancer oracle wisdom", type: "help-item" },
+            { id: 13, content: "    /cat pet        Pet the cat", type: "help-item" },
+            { id: 14, content: "    /cat mood       Check the cat's mood", type: "help-item" },
+            { id: 15, content: "    clear           Reset terminal", type: "help-item" },
+            { id: 16, content: "    exit            Close", type: "help-item" },
+            { id: 17, content: "", type: "spacer" },
+            { id: 18, content: "  The cat does not answer to you. The cat answers to no one.", type: "help-footer" },
+            { id: 19, content: "", type: "spacer" },
+          ]);
+        });
       }
     }
     return () => { if (animRef.current) cancelAnimationFrame(animRef.current); };
-  }, [open]);
+  }, [open, lines.length]);
 
   const addLine = useCallback((content: string, type = "output") => {
     setLines(prev => [...prev, { id: Date.now() + Math.random(), content, type }]);

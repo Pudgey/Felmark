@@ -20,15 +20,17 @@ export default function FormatBar({ top, left }: FormatBarProps) {
 
   // Focus input when link mode opens
   useEffect(() => {
-    if (showLinkInput) {
-      // Pre-fill with existing link if selection is inside one
+    if (!showLinkInput) return;
+    // Pre-fill with existing link if selection is inside one — deferred to avoid synchronous setState
+    const frame = requestAnimationFrame(() => {
       const sel = window.getSelection();
       if (sel && sel.rangeCount > 0) {
         const anchor = sel.anchorNode?.parentElement?.closest("a");
         if (anchor) setLinkUrl(anchor.getAttribute("href") || "");
       }
-      setTimeout(() => linkInputRef.current?.focus(), 50);
-    }
+    });
+    setTimeout(() => linkInputRef.current?.focus(), 50);
+    return () => cancelAnimationFrame(frame);
   }, [showLinkInput]);
 
   const insertLink = () => {

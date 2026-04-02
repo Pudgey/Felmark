@@ -1,13 +1,13 @@
 "use client";
 
 import type { GraphBlockData, GraphType } from "@/lib/types";
-import BarChart from "./BarChart";
+import BarChart, { type BarDataPoint } from "./BarChart";
 import LineChart from "./LineChart";
-import DonutChart from "./DonutChart";
-import HorizontalBar from "./HorizontalBar";
-import SparklineRow from "./SparklineRow";
-import StackedArea from "./StackedArea";
-import MetricCards from "./MetricCards";
+import DonutChart, { type DonutDataPoint } from "./DonutChart";
+import HorizontalBar, { type HBarDataPoint } from "./HorizontalBar";
+import SparklineRow, { type SparklineData } from "./SparklineRow";
+import StackedArea, { type AreaSeries } from "./StackedArea";
+import MetricCards, { type MetricData } from "./MetricCards";
 
 interface GraphBlockProps {
   graphData: GraphBlockData;
@@ -23,21 +23,21 @@ export default function GraphBlock({ graphData }: GraphBlockProps) {
 
   switch (graphType) {
     case "bar":
-      return <BarChart title={title} data={safeArray as any} height={height} />;
+      return <BarChart title={title} data={safeArray as BarDataPoint[]} height={height} />;
     case "line":
-      return <LineChart title={title} data={safeArray as any} height={height} />;
+      return <LineChart title={title} data={safeArray as BarDataPoint[]} height={height} />;
     case "donut":
-      return <DonutChart title={title} data={safeArray as any} />;
+      return <DonutChart title={title} data={safeArray as DonutDataPoint[]} />;
     case "hbar":
-      return <HorizontalBar title={title} data={safeArray as any} />;
+      return <HorizontalBar title={title} data={safeArray as HBarDataPoint[]} />;
     case "sparkline":
-      return <SparklineRow title={title} data={safeArray as any} />;
+      return <SparklineRow title={title} data={safeArray as SparklineData[]} />;
     case "area": {
-      const d = data as { labels?: string[]; series?: any[] };
+      const d = data as { labels?: string[]; series?: AreaSeries[] };
       return <StackedArea title={title} labels={d?.labels || []} series={d?.series || []} height={height} />;
     }
     case "metrics":
-      return <MetricCards metrics={safeArray as any} />;
+      return <MetricCards metrics={safeArray as MetricData[]} />;
     default:
       return <div style={{ padding: 16, color: "var(--ink-400)", fontStyle: "italic" }}>Unknown graph type: {graphType}</div>;
   }

@@ -64,7 +64,7 @@ export interface ViewRouterProps {
 }
 
 export default function ViewRouter(props: ViewRouterProps) {
-  const { railActive, activeWorkstationId, tabs } = props;
+  const { railActive, activeWorkstationId: _activeWorkstationId, tabs: _tabs } = props;
   const wrap = (child: React.ReactNode) => (
     <div style={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex" }}>
       {child}

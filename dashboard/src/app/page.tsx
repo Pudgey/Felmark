@@ -3,7 +3,7 @@
 import { useState, useCallback, useRef, useEffect, type SetStateAction } from "react";
 import { INITIAL_WORKSTATIONS } from "@/lib/constants";
 import type { Block, Workstation, Project, Tab, ArchivedProject, WorkstationTemplate } from "@/lib/types";
-import { uid, makeBlocks } from "@/lib/utils";
+import { uid } from "@/lib/utils";
 import Rail from "@/components/rail/Rail";
 import Sidebar from "@/components/sidebar/Sidebar";
 import EditorSidebar from "@/components/sidebar/EditorSidebar";
@@ -74,43 +74,27 @@ function saveToStorage(key: string, data: unknown) {
 }
 
 export default function Dashboard() {
-  const [workstations, setWorkstations] = useState<Workstation[]>(INITIAL_WORKSTATIONS);
-  const [tabs, setTabs] = useState<Tab[]>(INITIAL_TABS.map(t => ({ ...t, active: false })));
-  const [activeProject, setActiveProject] = useState("");
-  const [blocksMap, setBlocksMap] = useState<Record<string, Block[]>>(() => getInitialBlocks());
-  const [archived, setArchived] = useState<ArchivedProject[]>([]);
-  const [comments, setComments] = useState<Comment[]>(INITIAL_COMMENTS);
-  const [activitiesMap, setActivitiesMap] = useState<Record<string, BlockActivity[]>>({ p1: INITIAL_ACTIVITIES });
+  const [workstations, setWorkstations] = useState<Workstation[]>(() => loadFromStorage("workstations", null) ?? INITIAL_WORKSTATIONS);
+  const [tabs, setTabs] = useState<Tab[]>(() => loadFromStorage("tabs", null) ?? INITIAL_TABS.map(t => ({ ...t, active: false })));
+  const [activeProject, setActiveProject] = useState(() => loadFromStorage("activeProject", null) ?? "");
+  const [blocksMap, setBlocksMap] = useState<Record<string, Block[]>>(() => loadFromStorage("blocksMap", null) ?? getInitialBlocks());
+  const [archived, setArchived] = useState<ArchivedProject[]>(() => loadFromStorage("archived", null) ?? []);
+  const [comments, setComments] = useState<Comment[]>(() => loadFromStorage("comments", null) ?? INITIAL_COMMENTS);
+  const [activitiesMap, setActivitiesMap] = useState<Record<string, BlockActivity[]>>(() => loadFromStorage("activitiesMap", null) ?? { p1: INITIAL_ACTIVITIES });
   const [saveIndicatorState, setSaveIndicatorState] = useState<"saved" | "saving">("saved");
   const [saveRequestToken, setSaveRequestToken] = useState(0);
   const [lastCompletedSaveToken, setLastCompletedSaveToken] = useState<number | null>(null);
-  const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
-  const [saveStatusTick, setSaveStatusTick] = useState(0);
-
-  // ── Hydrate from localStorage after mount (avoids SSR mismatch) ──
-  const [hydrated, setHydrated] = useState(false);
-  useEffect(() => {
-    const ws = loadFromStorage("workstations", null);
-    if (ws) setWorkstations(ws);
-    const t = loadFromStorage("tabs", null);
-    if (t) setTabs(t);
-    const ap = loadFromStorage("activeProject", null);
-    if (ap !== null) setActiveProject(ap);
-    const bm = loadFromStorage("blocksMap", null);
-    if (bm) setBlocksMap(bm);
-    const ar = loadFromStorage("archived", null);
-    if (ar) setArchived(ar);
-    const cm = loadFromStorage("comments", null);
-    if (cm) setComments(cm);
-    const am = loadFromStorage("activitiesMap", null);
-    if (am) setActivitiesMap(am);
+  const [lastSavedAt, setLastSavedAt] = useState<number | null>(() => {
     const ls = loadFromStorage("lastSavedAt", null);
-    if (typeof ls === "number") {
-      setLastSavedAt(ls);
-      setSaveStatusTick(ls);
-    }
-    setHydrated(true);
-  }, []);
+    return typeof ls === "number" ? ls : null;
+  });
+  const [saveStatusTick, setSaveStatusTick] = useState(() => {
+    const ls = loadFromStorage("lastSavedAt", null);
+    return typeof ls === "number" ? ls : 0;
+  });
+
+  // Hydrated flag — now always true since we use lazy initializers
+  const [hydrated] = useState(true);
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [railActive, setRailActive] = useState("workstations");
@@ -254,11 +238,11 @@ export default function Dashboard() {
   // Single click — pure expand/collapse toggle
   const toggleWorkstation = (wid: string) => forge.workstations.toggle(wid);
 
-  const restoreWorkstationContext = () => {
+  const restoreWorkstationContext = useCallback(() => {
     setRailActive("workstations");
     setLaunchpadOpen(false);
     setSidebarOpen(true);
-  };
+  }, []);
 
   // Double click — open the first project in the workstation
   const selectWorkstation = (wid: string) => {
@@ -303,7 +287,8 @@ export default function Dashboard() {
     forge.tabs.select(id);
   };
 
-  const openForgeRail = () => {
+  const openForgeRailRef = useRef<() => void>(undefined);
+  const openForgeRailImpl = () => {
     setLaunchpadOpen(false);
     setSidebarOpen(true);
 
@@ -349,6 +334,8 @@ export default function Dashboard() {
 
     restoreWorkstationContext();
   };
+  useEffect(() => { openForgeRailRef.current = openForgeRailImpl; });
+  const openForgeRail = useCallback(() => openForgeRailRef.current?.(), []);
 
   const handleTabClose = (id: string) => forge.tabs.close(id);
 
@@ -405,8 +392,10 @@ export default function Dashboard() {
     forge.projects.createInWorkstation(wsId);
   };
 
+  const forgeRef = useRef(forge);
+  useEffect(() => { forgeRef.current = forge; });
   const handleBlocksChange = useCallback((projectId: string, blocks: Block[]) => {
-    forge.documents.setBlocks(projectId, blocks);
+    forgeRef.current.documents.setBlocks(projectId, blocks);
   }, []);
 
   const handleWordCountChange = useCallback((words: number, chars: number) => {
@@ -525,7 +514,7 @@ export default function Dashboard() {
           onTabClick={handleTabClick}
           onNewTab={handleNewTab}
           onSelectProject={selectProject}
-          onSelectWorkstationHome={selectWorkstationHome}
+          onSelectWorkstationHome={selectWorkstation}
           onSaveNow={saveNow}
         />
       )}

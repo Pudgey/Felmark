@@ -19,7 +19,7 @@ interface SimpleRow { label: string; value: number; color?: string; unit?: strin
 
 function dataToSimpleRows(data: unknown): SimpleRow[] {
   if (!Array.isArray(data)) return [];
-  return data.map((d: any) => ({ label: d.label || "", value: d.value || 0, color: d.color, unit: d.unit, current: d.current }));
+  return data.map((d: Record<string, unknown>) => ({ label: (d.label as string) || "", value: (d.value as number) || 0, color: d.color as string | undefined, unit: d.unit as string | undefined, current: d.current as boolean | undefined }));
 }
 
 // ── Sparkline: array of { label, values[], current, change, color? } ──
@@ -28,7 +28,7 @@ interface SparkRow { label: string; values: number[]; current: string; change: n
 
 function dataToSparkRows(data: unknown): SparkRow[] {
   if (!Array.isArray(data)) return [];
-  return data.map((d: any) => ({ label: d.label || "", values: d.values || [], current: d.current || "", change: d.change || 0, color: d.color }));
+  return data.map((d: Record<string, unknown>) => ({ label: (d.label as string) || "", values: (d.values as number[]) || [], current: (d.current as string) || "", change: (d.change as number) || 0, color: d.color as string | undefined }));
 }
 
 // ── Stacked area: { labels[], series[{ label, color?, values[] }] } ──
@@ -36,8 +36,8 @@ function dataToSparkRows(data: unknown): SparkRow[] {
 interface AreaData { labels: string[]; series: { label: string; color?: string; values: number[] }[] }
 
 function dataToArea(data: unknown): AreaData {
-  const d = data as any;
-  if (d && d.labels && d.series) return { labels: d.labels, series: d.series };
+  const d = data as Record<string, unknown>;
+  if (d && Array.isArray(d.labels) && Array.isArray(d.series)) return { labels: d.labels as string[], series: d.series as AreaData["series"] };
   return { labels: ["A", "B", "C"], series: [{ label: "Series 1", values: [10, 20, 30] }] };
 }
 
@@ -47,7 +47,7 @@ interface MetricRow { label: string; value: number; prefix?: string; suffix?: st
 
 function dataToMetrics(data: unknown): MetricRow[] {
   if (!Array.isArray(data)) return [];
-  return data.map((d: any) => ({ label: d.label || "", value: d.value || 0, prefix: d.prefix, suffix: d.suffix, color: d.color, change: d.change, sub: d.sub }));
+  return data.map((d: Record<string, unknown>) => ({ label: (d.label as string) || "", value: (d.value as number) || 0, prefix: d.prefix as string | undefined, suffix: d.suffix as string | undefined, color: d.color as string | undefined, change: d.change as number | undefined, sub: d.sub as string | undefined }));
 }
 
 // ═════════════════════════════════════
@@ -188,15 +188,6 @@ function AreaEditor({ data, onChange }: { data: unknown; onChange: (d: unknown) 
     const next = {
       labels: [...areaData.labels, `P${areaData.labels.length + 1}`],
       series: areaData.series.map(s => ({ ...s, values: [...s.values, 0] })),
-    };
-    commit(next);
-  };
-
-  const removeLabel = (idx: number) => {
-    if (areaData.labels.length <= 2) return;
-    const next = {
-      labels: areaData.labels.filter((_, i) => i !== idx),
-      series: areaData.series.map(s => ({ ...s, values: s.values.filter((_, i) => i !== idx) })),
     };
     commit(next);
   };

@@ -33,10 +33,9 @@ export default function TemplatePicker({ open, onClose, templates, onSelectBlank
   const searchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (open) {
-      setSearch("");
-      setTimeout(() => searchRef.current?.focus(), 100);
-    }
+    if (!open) return;
+    requestAnimationFrame(() => setSearch(""));
+    setTimeout(() => searchRef.current?.focus(), 100);
   }, [open]);
 
   // Close on Escape

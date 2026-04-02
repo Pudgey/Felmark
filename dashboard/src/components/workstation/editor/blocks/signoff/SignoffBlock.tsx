@@ -250,6 +250,7 @@ export default function SignoffBlock({ data, onChange }: { data: SignoffData; on
             {party.signed && party.sigData && (
               <div className={styles.esSigArea}>
                 {party.sigData.startsWith("data:") ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- base64 signature data URL
                   <img src={party.sigData} alt="Signature" className={styles.esSigImg} />
                 ) : (
                   <div className={styles.esSigTyped}>{party.sigData}</div>
@@ -267,6 +268,7 @@ export default function SignoffBlock({ data, onChange }: { data: SignoffData; on
                   <div className={styles.esSavedSig}>
                     <div className={styles.esSavedSigPreview}>
                       {savedSig.sigData.startsWith("data:") ? (
+                        // eslint-disable-next-line @next/next/no-img-element -- base64 signature data URL
                         <img src={savedSig.sigData} alt="Saved signature" className={styles.esSavedSigImg} />
                       ) : (
                         <span className={styles.esSavedSigText}>{savedSig.sigData}</span>

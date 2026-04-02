@@ -17,7 +17,7 @@ export function getDefaultFlow(): FlowBlockData {
   };
 }
 
-export default function FlowBlock({ data, onChange }: { data: FlowBlockData; onChange: (d: FlowBlockData) => void }) {
+export default function FlowBlock({ data, onChange: _onChange }: { data: FlowBlockData; onChange: (d: FlowBlockData) => void }) {
   const [activeNode, setActiveNode] = useState<string | null>(null);
   const activeDetail = data.nodes.find(n => n.id === activeNode);
 

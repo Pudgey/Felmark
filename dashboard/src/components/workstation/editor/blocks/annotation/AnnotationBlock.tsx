@@ -49,6 +49,7 @@ export default function AnnotationBlock({ data, onChange }: { data: AnnotationDa
       </div>
       <div className={styles.annotationCanvas} onClick={handleCanvasClick}>
         {data.imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element -- user-provided dynamic URL
           <img className={styles.annotationImg} src={data.imageUrl} alt="Annotated" />
         ) : (
           <div className={styles.annotationPlaceholder}>

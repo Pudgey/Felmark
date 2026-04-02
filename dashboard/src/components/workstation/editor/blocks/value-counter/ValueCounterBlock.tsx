@@ -35,8 +35,8 @@ export default function ValueCounterBlock({ data, onChange }: ValueCounterProps)
 
   useEffect(() => {
     if (!visible) return;
-    // Phase 1: top label (immediate)
-    setPhase(1);
+    // Phase 1: top label (via timeout to avoid synchronous setState in effect)
+    const t1 = setTimeout(() => setPhase(1), 0);
     // Phase 2: amount area prepares
     const t2 = setTimeout(() => setPhase(2), 800);
     // Phase 3: counter starts + rows
@@ -60,7 +60,7 @@ export default function ValueCounterBlock({ data, onChange }: ValueCounterProps)
       // Cleanup RAF on unmount handled below
       return () => { running = false; };
     }, 1600);
-    timerRefs.current = [t2, t3];
+    timerRefs.current = [t1, t2, t3];
 
     return () => {
       timerRefs.current.forEach(t => clearTimeout(t));

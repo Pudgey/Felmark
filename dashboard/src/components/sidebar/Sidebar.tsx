@@ -36,11 +36,10 @@ interface SidebarProps {
   onScrollToCalendarEvent?: (projectId: string) => void;
 }
 
-const STATUSES = ["active", "review", "paused", "completed"] as const;
 
 import { getDueLabel as getDueLabelFromDate, getDueColor as getDueColorFromDate } from "@/lib/due-dates";
 
-export default function Sidebar({ workstations, archived, activeProject, open, width, isResizing, wordCount, railActive, onClose, onToggleWorkstation, onSelectWorkstation, onSelectProject, onArchiveProject, onArchiveCompleted, onArchiveWorkstation, onRestoreProject, onReorderWorkstations, onRenameWorkstation, onRenameProject, onUpdateProjectDue, onAddWorkstation, onTogglePin, onCycleStatus, saveIndicatorState, saveStatusLabel, onSaveNow, onScrollToCalendarEvent }: SidebarProps) {
+export default function Sidebar({ workstations, archived, activeProject, open, width, isResizing, wordCount: _wordCount, railActive, onClose, onToggleWorkstation, onSelectWorkstation, onSelectProject, onArchiveProject, onArchiveCompleted, onArchiveWorkstation, onRestoreProject, onReorderWorkstations, onRenameWorkstation, onRenameProject, onUpdateProjectDue, onAddWorkstation, onTogglePin, onCycleStatus, saveIndicatorState, saveStatusLabel, onSaveNow, onScrollToCalendarEvent }: SidebarProps) {
   const [wsMenu, setWsMenu] = useState<string | null>(null);
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [showAddWs, setShowAddWs] = useState(false);
@@ -296,7 +295,7 @@ export default function Sidebar({ workstations, archived, activeProject, open, w
           {personalWorkstations.length > 0 && (
             <>
               {!search && <div className={styles.sectionLabel} style={{ marginTop: 12 }}>personal</div>}
-              {personalWorkstations.map((ws, wsIdx) => (
+              {personalWorkstations.map((ws) => (
                 <div
                   key={ws.id}
                   className={`${styles.wsBlock} ${dropWsId === ws.id ? styles.wsDropTarget : ""} ${dragWsId === ws.id ? styles.wsDragging : ""}`}

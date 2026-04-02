@@ -3,7 +3,7 @@
 import type { RenderBlock } from "../types";
 import styles from "./BlockContent.module.css";
 
-export default function WhisperBlock({ block }: { block: RenderBlock }) {
+export default function WhisperBlock({ block: _block }: { block: RenderBlock }) {
   return (
     <div className={styles.whisperContent}>
       <span className={styles.whisperBadge}>{"\u2726"} AI</span>

@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import styles from "./MoneyBlock.module.css";
 
 export interface MilestoneItem { id: string; deliverable: string; amount: number; status: "paid" | "invoiced" | "ready" | "pending"; completedDate: string | null; invoiceNum: string | null }

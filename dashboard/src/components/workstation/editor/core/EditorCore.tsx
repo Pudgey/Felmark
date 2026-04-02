@@ -30,7 +30,6 @@ import ZenHint from "./components/zen-hint/ZenHint";
 import ShareModal from "../panels/share-modal/ShareModal";
 import CatTerminal from "../panels/cat/CatTerminal";
 import ConversationPanel from "../panels/conversation/ConversationPanel";
-import CommentPanel from "../../../comments/CommentPanel";
 import ActivityMargin from "../../../activity/ActivityMargin";
 import HistoryModal from "../../../history/HistoryModal";
 import EditorMargin from "../chrome/margin/EditorMargin";
@@ -90,7 +89,7 @@ export default function EditorCore(props: EditorProps) {
     workstations, tabs, activeProject, blocks: blocksProp, sidebarOpen, charCount,
     onOpenSidebar, onTabClick, onTabClose, onNewTab, onTabRename, onBlocksChange, onWordCountChange,
     activeWorkstationId, onSelectWorkstation, onNavigateRail,
-    onUpdateProjectDue, comments, onCommentsChange, activities, onActivitiesChange,
+    onUpdateProjectDue, comments: _comments, onCommentsChange: _onCommentsChange, activities, onActivitiesChange,
     zenMode, onToggleZen, splitProject, splitBlocks, splitProjectName, splitClientName,
     onSplitOpen, onSplitClose, onSplitMakePrimary,
   } = props;

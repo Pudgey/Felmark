@@ -162,9 +162,13 @@ export default function WorkspacePage() {
   useEffect(() => { if (showCmdBar) cmdRef.current?.focus(); }, [showCmdBar]);
 
   // Auto-switch to task panel when selecting a task
-  useEffect(() => { if (selectedTask) setRightPanel("task"); }, [selectedTask]);
+  useEffect(() => {
+    if (!selectedTask) return;
+    const frame = requestAnimationFrame(() => setRightPanel("task"));
+    return () => cancelAnimationFrame(frame);
+  }, [selectedTask]);
 
-  const toggleExpand = (id: string) => { setExpanded(p => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; }); };
+  const toggleExpand = (id: string) => { setExpanded(p => { const n = new Set(p); if (n.has(id)) { n.delete(id); } else { n.add(id); } return n; }); };
 
   const startTimer = useCallback((taskId: string) => { setTimerTaskId(taskId); setTimerSecs(0); setTimerRunning(true); }, []);
   const stopAndLogTimer = useCallback(() => {

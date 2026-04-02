@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { VisualBlockData, VisualVariant, VisualStep, VisualPhase, VisualMoodItem } from "@/lib/types";
+import type { VisualBlockData, VisualVariant, VisualStep } from "@/lib/types";
 import styles from "./VisualBlock.module.css";
 
 interface VisualBlockProps {

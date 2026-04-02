@@ -18,7 +18,7 @@ export function getDefaultMoodBoard(): MoodBoardData {
   };
 }
 
-export default function MoodBoardBlock({ data, onChange }: { data: MoodBoardData; onChange: (d: MoodBoardData) => void }) {
+export default function MoodBoardBlock({ data, onChange: _onChange }: { data: MoodBoardData; onChange: (d: MoodBoardData) => void }) {
   return (
     <div className={styles.mood}>
       <div className={styles.moodHeader}>

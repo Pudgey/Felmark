@@ -100,6 +100,8 @@ export default function FinancePage() {
 
   // Donut
   const donutR = 30, donutCirc = 2 * Math.PI * donutR;
+  const clientOffsets: number[] = [];
+  { let cur = donutCirc * 0.25; CLIENTS.forEach(c => { clientOffsets.push(cur); cur -= donutCirc * (c.pct / 100); }); }
 
   return (
     <div className={styles.page}>
@@ -168,7 +170,7 @@ export default function FinancePage() {
           <div className={styles.panelBody}>
             <div style={{ display: "flex", gap: 20, alignItems: "center", marginBottom: 14 }}>
               <svg width="80" height="80" viewBox="0 0 80 80">
-                {(() => { let offset = donutCirc * 0.25; return CLIENTS.map((c, i) => { const dash = donutCirc * (c.pct / 100); const gap = donutCirc - dash; const thisOffset = offset; offset -= dash; return <circle key={i} cx="40" cy="40" r={donutR} fill="none" stroke={c.color} strokeWidth={hoveredClient === i ? 10 : 7} strokeDasharray={`${dash - 1.5} ${gap + 1.5}`} strokeDashoffset={-thisOffset} opacity={hoveredClient !== null && hoveredClient !== i ? 0.2 : 0.7} style={{ transition: "all 0.2s", cursor: "pointer" }} onMouseEnter={() => setHoveredClient(i)} onMouseLeave={() => setHoveredClient(null)} />; }); })()}
+                {CLIENTS.map((c, i) => { const dash = donutCirc * (c.pct / 100); const gap = donutCirc - dash; return <circle key={i} cx="40" cy="40" r={donutR} fill="none" stroke={c.color} strokeWidth={hoveredClient === i ? 10 : 7} strokeDasharray={`${dash - 1.5} ${gap + 1.5}`} strokeDashoffset={-clientOffsets[i]} opacity={hoveredClient !== null && hoveredClient !== i ? 0.2 : 0.7} style={{ transition: "all 0.2s", cursor: "pointer" }} onMouseEnter={() => setHoveredClient(i)} onMouseLeave={() => setHoveredClient(null)} />; })}
                 <text x="40" y="38" textAnchor="middle" fill="var(--ink-800)" fontSize="14" fontWeight="600" fontFamily="'JetBrains Mono', monospace">${(totalRev / 1000).toFixed(0)}k</text>
                 <text x="40" y="50" textAnchor="middle" fill="var(--ink-300)" fontSize="8" fontFamily="'JetBrains Mono', monospace">TOTAL</text>
               </svg>

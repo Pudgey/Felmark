@@ -16,9 +16,11 @@ const SUGGESTIONS = [
   { cmd: "new workstation", desc: "Onboard a new client", icon: "⊞", hot: false },
 ];
 
+interface EmberParticle { x: number; y: number; vx: number; vy: number; size: number; life: number; decay: number; heat: number; wobble: number; wobbleSpeed: number }
+
 function EmberParticles() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const particles = useRef<any[]>([]);
+  const particles = useRef<EmberParticle[]>([]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -101,7 +103,7 @@ interface TerminalWelcomeProps {
   onNewWorkstation?: () => void;
 }
 
-export default function TerminalWelcome({ activeCount = 4, reviewCount = 1, overdueCount = 1, totalEarned = 14800, totalPending = 7200, pipeline = 22000, onOpenCmdPalette, onNewWorkstation }: TerminalWelcomeProps) {
+export default function TerminalWelcome({ activeCount = 4, reviewCount = 1, overdueCount = 1, totalEarned = 14800, totalPending = 7200, pipeline = 22000, onOpenCmdPalette: _onOpenCmdPalette, onNewWorkstation }: TerminalWelcomeProps) {
   const [phase, setPhase] = useState(0);
   const [inputValue, setInputValue] = useState("");
   const [inputFocused, setInputFocused] = useState(false);

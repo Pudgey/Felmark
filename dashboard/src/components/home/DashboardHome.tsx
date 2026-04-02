@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import type { Workstation, Project } from "@/lib/types";
-import { STATUS } from "@/lib/constants";
 import { getDaysLeft as daysLeft, getDueLabel as getDueLabelFromDate, getDueColor as getDueColorFromDate } from "@/lib/due-dates";
 import styles from "./DashboardHome.module.css";
 
@@ -82,14 +81,13 @@ interface DashboardHomeProps {
 }
 
 export default function DashboardHome({ workstations, onSelectWorkstation, onSelectProject, onNewTabInWorkstation }: DashboardHomeProps) {
-  const [now, setNow] = useState<Date | null>(null);
+  const [now, setNow] = useState(() => new Date());
   const [showWsPicker, setShowWsPicker] = useState(false);
   const [wsSearch, setWsSearch] = useState("");
   const pickerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setNow(new Date());
     const i = setInterval(() => setNow(new Date()), 60000);
     return () => clearInterval(i);
   }, []);

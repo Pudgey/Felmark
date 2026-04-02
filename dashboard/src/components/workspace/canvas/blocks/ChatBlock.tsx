@@ -19,7 +19,7 @@ const INITIAL_MESSAGES: Message[] = [
   { sender: "Sarah", text: "Perfect, thank you!", time: "2:19 PM", sent: false, isNew: true },
 ];
 
-export default function ChatBlock({ block }: { block: RenderBlock }) {
+export default function ChatBlock({ block: _block }: { block: RenderBlock }) {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
 

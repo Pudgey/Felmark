@@ -49,7 +49,7 @@ const DAYS: DayData[] = [
   { name: "Sun", num: 6, items: [] },
 ];
 
-export default function CalendarBlock({ block }: { block: RenderBlock }) {
+export default function CalendarBlock({ block: _block }: { block: RenderBlock }) {
   const todayIdx = DAYS.findIndex((d) => d.today);
   const [selected, setSelected] = useState(todayIdx >= 0 ? todayIdx : 0);
   const day = DAYS[selected];
