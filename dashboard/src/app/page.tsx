@@ -6,6 +6,7 @@ import type { Block, Workstation, Project, Tab, ArchivedProject, WorkstationTemp
 import { uid, makeBlocks } from "@/lib/utils";
 import Rail from "@/components/rail/Rail";
 import Sidebar from "@/components/sidebar/Sidebar";
+import WorkstationSidebar from "@/components/sidebar/WorkstationSidebar";
 import WorkstationOnboarding from "@/components/onboarding/WorkstationOnboarding";
 import ErrorBoundary from "@/components/shared/ErrorBoundary";
 import { INITIAL_COMMENTS, type Comment } from "@/components/comments/CommentPanel";
@@ -494,35 +495,45 @@ export default function Dashboard() {
         zenMode={zenMode}
         onToggleZen={() => setZenMode(true)}
       />}
-      {showWorkstationSidebar && <Sidebar
-        workstations={workstations}
-        archived={archived}
-        activeProject={activeProject}
-        open={sidebarOpen}
-        width={sidebarWidth}
-        isResizing={isResizing}
-        wordCount={wordCount}
-        railActive={railActive}
-        onClose={() => setSidebarOpen(false)}
-        onToggleWorkstation={toggleWorkstation}
-        onSelectWorkstationHome={selectWorkstationHome}
-        onSelectProject={selectProject}
-        onArchiveProject={archiveProject}
-        onArchiveCompleted={archiveCompletedInWorkstation}
-        onArchiveWorkstation={archiveWorkstation}
-        onRestoreProject={restoreProject}
-        onRenameProject={handleTabRename}
-        onUpdateProjectDue={updateProjectDue}
-        onRenameWorkstation={(wsId, name) => forge.workstations.rename(wsId, name)}
-        onReorderWorkstations={(fromIdx, toIdx) => forge.workstations.reorder(fromIdx, toIdx)}
-        onAddWorkstation={addWorkstation}
-        onTogglePin={togglePin}
-        onCycleStatus={cycleStatus}
-        onScrollToCalendarEvent={(projectId) => setCalendarScrollTarget(projectId)}
-        saveIndicatorState={saveIndicatorState}
-        saveStatusLabel={saveStatusLabel}
-        onSaveNow={saveNow}
-      />}
+      {showWorkstationSidebar && (
+        activeWorkstationId ? (
+          <WorkstationSidebar
+            open={sidebarOpen}
+            width={sidebarWidth}
+            isResizing={isResizing}
+          />
+        ) : (
+          <Sidebar
+            workstations={workstations}
+            archived={archived}
+            activeProject={activeProject}
+            open={sidebarOpen}
+            width={sidebarWidth}
+            isResizing={isResizing}
+            wordCount={wordCount}
+            railActive={railActive}
+            onClose={() => setSidebarOpen(false)}
+            onToggleWorkstation={toggleWorkstation}
+            onSelectWorkstationHome={selectWorkstationHome}
+            onSelectProject={selectProject}
+            onArchiveProject={archiveProject}
+            onArchiveCompleted={archiveCompletedInWorkstation}
+            onArchiveWorkstation={archiveWorkstation}
+            onRestoreProject={restoreProject}
+            onRenameProject={handleTabRename}
+            onUpdateProjectDue={updateProjectDue}
+            onRenameWorkstation={(wsId, name) => forge.workstations.rename(wsId, name)}
+            onReorderWorkstations={(fromIdx, toIdx) => forge.workstations.reorder(fromIdx, toIdx)}
+            onAddWorkstation={addWorkstation}
+            onTogglePin={togglePin}
+            onCycleStatus={cycleStatus}
+            onScrollToCalendarEvent={(projectId) => setCalendarScrollTarget(projectId)}
+            saveIndicatorState={saveIndicatorState}
+            saveStatusLabel={saveStatusLabel}
+            onSaveNow={saveNow}
+          />
+        )
+      )}
       {/* Resize handle */}
       {sidebarOpen && showWorkstationSidebar && (
         <div
