@@ -38,3 +38,10 @@
 - `toolbar/` -- Toolbar
 - `insertions/` -- RowInsertionBar, ColInsertionBar, EmptyRow
 - `library/` -- Library panel
+
+## Size Contracts
+- `Micro blocks` live in the `1x1` to `2x2` band. Preferred target is `2x2`, but the concept must still read cleanly at `1x1`.
+- `Premium blocks` start at `4x4`. Preferred target is `4x5` or `5x4` so the design has room for hierarchy, atmosphere, and an action layer.
+- Anything that needs more than `2x2` is not a micro block.
+- Anything that cannot stay coherent at `4x4` is not a premium block.
+- Anything that needs more than the full `8` columns should stop being a block and become a full workspace surface.

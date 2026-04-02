@@ -45,3 +45,16 @@
 - `ChatBlock.module.css` -- Chat block styles
 - `FileBlock.module.css` -- File block styles
 - `RevenueChartBlock.module.css` -- Revenue chart block styles
+
+## Size Requirements
+- `Micro block`: design for `2x2`, survive at `1x1`, never assume more than one primary message plus one supporting cue.
+- `Micro block`: allowed payload is one headline or value, one short support line, and at most one micro-visual such as a spark, ring, or badge.
+- `Micro block`: no nested panels, no tabs, no secondary rails, no dense control clusters.
+- `Premium block`: minimum footprint is `4x4`; preferred footprint is `4x5` or `5x4`.
+- `Premium block`: must justify that size with at least three zones of information, usually hero signal, supporting detail, and action or navigation.
+- `Premium block`: if the concept cannot feel complete at `4x4`, it belongs in a full surface instead of the canvas.
+
+## Working Rule
+- When inventing a new block, classify it as `micro`, `standard`, or `premium` before designing the internals.
+- If the block starts with a cinematic or dashboard-hero idea, default to `premium`.
+- If the block starts with a number, status, or single signal, default to `micro`.
