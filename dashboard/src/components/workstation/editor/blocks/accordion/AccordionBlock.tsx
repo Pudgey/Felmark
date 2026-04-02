@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { AccordionBlockData } from "@/lib/types";
 import styles from "./AccordionBlock.module.css";
 
-export default function AccordionBlock({ data, onChange }: { data: AccordionBlockData; onChange: (d: AccordionBlockData) => void }) {
+export default function AccordionBlock({ data, onChange: _onChange }: { data: AccordionBlockData; onChange: (d: AccordionBlockData) => void }) {
   const [openIdx, setOpenIdx] = useState(0);
   return (
     <div className={styles.accordion}>

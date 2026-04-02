@@ -1,6 +1,6 @@
 "use client";
 
-import type { ScopeBoundaryData, ScopeItem } from "@/lib/types";
+import type { ScopeBoundaryData } from "@/lib/types";
 import styles from "./UniqueBlocks.module.css";
 
 interface Props {

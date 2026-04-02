@@ -365,16 +365,7 @@ function SitemapTree() {
       for (const child of node.children) {
         const cw = Math.max(child.label.length * 7 + 16, 60);
         elements.push(...renderNode(child, cx, y + 52, depth + 1, x + w / 2, y + h));
-        // Render grandchildren
-        if (child.children) {
-          const gcTotal = child.children.reduce((acc, gc) => acc + Math.max(gc.label.length * 7 + 16, 60) + 12, -12);
-          let gcx = cx + cw / 2 - gcTotal / 2;
-          for (const gc of child.children) {
-            const gcw = Math.max(gc.label.length * 7 + 16, 60);
-            // already rendered recursively above
-            gcx += gcw + 12;
-          }
-        }
+        // Grandchildren are already rendered recursively above
         cx += cw + 16;
       }
     }

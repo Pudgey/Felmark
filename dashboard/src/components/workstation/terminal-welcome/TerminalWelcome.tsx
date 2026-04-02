@@ -101,7 +101,7 @@ interface TerminalWelcomeProps {
   onNewWorkstation?: () => void;
 }
 
-export default function TerminalWelcome({ activeCount = 4, reviewCount = 1, overdueCount = 1, totalEarned = 14800, totalPending = 7200, pipeline = 22000, onOpenCmdPalette, onNewWorkstation }: TerminalWelcomeProps) {
+export default function TerminalWelcome({ activeCount = 4, reviewCount = 1, overdueCount = 1, totalEarned = 14800, totalPending = 7200, pipeline = 22000, onOpenCmdPalette: _onOpenCmdPalette, onNewWorkstation }: TerminalWelcomeProps) {
   const [phase, setPhase] = useState(0);
   const [inputValue, setInputValue] = useState("");
   const [inputFocused, setInputFocused] = useState(false);

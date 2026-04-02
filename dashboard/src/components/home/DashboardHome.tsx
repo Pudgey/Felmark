@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import type { Workstation, Project } from "@/lib/types";
-import { STATUS } from "@/lib/constants";
 import { getDaysLeft as daysLeft, getDueLabel as getDueLabelFromDate, getDueColor as getDueColorFromDate } from "@/lib/due-dates";
 import styles from "./DashboardHome.module.css";
 

@@ -1,4 +1,4 @@
-import type { Workstation, Project, WorkstationTemplate } from "@/lib/types";
+import type { Project, WorkstationTemplate } from "@/lib/types";
 import type { StateUpdater, ForgeResult } from "../types";
 import { uid, makeBlocks } from "@/lib/utils";
 

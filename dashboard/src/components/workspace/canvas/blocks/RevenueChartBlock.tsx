@@ -42,7 +42,7 @@ function buildPath(closed: boolean): string {
   return `M${points.join(" L")}`;
 }
 
-export default function RevenueChartBlock({ block }: { block: RenderBlock }) {
+export default function RevenueChartBlock({ block: _block }: { block: RenderBlock }) {
   const step = (W - PX * 2) / (MONTHS.length - 1);
 
   return (

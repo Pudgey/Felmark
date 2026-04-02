@@ -72,7 +72,7 @@ interface ActivityMarginProps {
   onScrollToBlock?: (blockId: string) => void;
 }
 
-export default function ActivityMargin({ open, onClose, blocks, activities, onActivitiesChange, hoveredBlock, onHoverBlock, pendingHighlight, onHighlightConsumed, onScrollToBlock }: ActivityMarginProps) {
+export default function ActivityMargin({ open, onClose, blocks: _blocks, activities, onActivitiesChange, hoveredBlock, onHoverBlock, pendingHighlight, onHighlightConsumed, onScrollToBlock }: ActivityMarginProps) {
   const [filter, setFilter] = useState<"all" | "comments" | "edits" | "active">("all");
   const [expandedComment, setExpandedComment] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");

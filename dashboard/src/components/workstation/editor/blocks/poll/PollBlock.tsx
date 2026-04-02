@@ -10,7 +10,7 @@ export function getDefaultPoll(): PollData {
 
 export default function PollBlock({ data, onChange }: { data: PollData; onChange: (d: PollData) => void }) {
   const [voted, setVoted] = useState<string | null>(null);
-  const maxVotes = Math.max(...data.options.map(o => o.votes), 1);
+  const _maxVotes = Math.max(...data.options.map(o => o.votes), 1);
 
   const vote = (id: string) => {
     if (data.closed || voted) return;

@@ -18,8 +18,6 @@ export function distributeWidth(
 ): { id: string; w: number }[] {
   if (blockWidths.length === 0) return [];
 
-  const n = blockWidths.length;
-
   // Start from equal shares, clamped to min/max
   const userSizedTotal = blockWidths
     .filter((b) => b.userSized)

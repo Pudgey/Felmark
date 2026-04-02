@@ -42,7 +42,7 @@ const RULES = [
   },
 ];
 
-export default function AutomationBlock({ block }: { block: RenderBlock }) {
+export default function AutomationBlock({ block: _block }: { block: RenderBlock }) {
   return (
     <div className={styles.wrap}>
       <div className={styles.header}>

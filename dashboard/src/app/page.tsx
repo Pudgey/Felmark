@@ -3,10 +3,9 @@
 import { useState, useCallback, useRef, useEffect, type SetStateAction } from "react";
 import { INITIAL_WORKSTATIONS } from "@/lib/constants";
 import type { Block, Workstation, Project, Tab, ArchivedProject, WorkstationTemplate } from "@/lib/types";
-import { uid, makeBlocks } from "@/lib/utils";
+import { uid } from "@/lib/utils";
 import Rail from "@/components/rail/Rail";
 import Sidebar from "@/components/sidebar/Sidebar";
-import WorkstationSidebar from "@/components/sidebar/WorkstationSidebar";
 import WorkstationOnboarding from "@/components/onboarding/WorkstationOnboarding";
 import ErrorBoundary from "@/components/shared/ErrorBoundary";
 import { INITIAL_COMMENTS, type Comment } from "@/components/comments/CommentPanel";

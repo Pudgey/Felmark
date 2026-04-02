@@ -14,7 +14,7 @@ export function getDefaultPullQuote(): PullQuoteData {
   };
 }
 
-export default function PullQuoteBlock({ data, onChange }: { data: PullQuoteData; onChange: (d: PullQuoteData) => void }) {
+export default function PullQuoteBlock({ data, onChange: _onChange }: { data: PullQuoteData; onChange: (d: PullQuoteData) => void }) {
   return (
     <div className={styles.pq}>
       <div className={styles.pqHeader}>

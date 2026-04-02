@@ -27,7 +27,7 @@ const STAGE_VALUES: Record<string, number> = {
 
 const TOTAL = Object.values(STAGE_VALUES).reduce((s, v) => s + v, 0);
 
-export default function PipelineBlock({ block }: { block: RenderBlock }) {
+export default function PipelineBlock({ block: _block }: { block: RenderBlock }) {
   return (
     <div className={styles.wrap}>
       <div className={styles.header}>

@@ -192,15 +192,6 @@ function AreaEditor({ data, onChange }: { data: unknown; onChange: (d: unknown) 
     commit(next);
   };
 
-  const removeLabel = (idx: number) => {
-    if (areaData.labels.length <= 2) return;
-    const next = {
-      labels: areaData.labels.filter((_, i) => i !== idx),
-      series: areaData.series.map(s => ({ ...s, values: s.values.filter((_, i) => i !== idx) })),
-    };
-    commit(next);
-  };
-
   const addSeries = () => {
     const next = {
       ...areaData,

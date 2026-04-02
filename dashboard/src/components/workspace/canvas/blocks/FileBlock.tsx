@@ -21,7 +21,7 @@ const FILES: FileItem[] = [
   { name: "Moodboard_v3", ext: "PNG", color: "#8b8bba", size: "6.1 MB", date: "Mar 18" },
 ];
 
-export default function FileBlock({ block }: { block: RenderBlock }) {
+export default function FileBlock({ block: _block }: { block: RenderBlock }) {
   const [view, setView] = useState<"grid" | "list">("grid");
 
   return (

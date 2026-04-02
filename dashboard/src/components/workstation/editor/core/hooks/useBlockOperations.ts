@@ -54,8 +54,8 @@ export function useBlockOperations({
   onBlocksChange,
   editingGraphId,
   setEditingGraphId,
-  onActivitiesChange,
-  activities,
+  onActivitiesChange: _onActivitiesChange,
+  activities: _activities,
 }: UseBlockOperationsOptions) {
   const [blocks, setBlocksLocal] = useState<Block[]>(blocksProp);
   const [activeBlockId, setActiveBlockId] = useState<string | null>(null);

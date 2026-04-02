@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
-import type { Block, BlockType, GraphType, MoneyBlockType } from "@/lib/types";
-import { cursorTo } from "@/lib/utils";
+import { useCallback, useMemo } from "react";
+import type { Block, GraphType, MoneyBlockType } from "@/lib/types";
 import GraphBlockComponent, { GRAPH_TYPE_OPTIONS } from "../../../blocks/graphs/GraphBlock";
 import GraphDataEditor from "../../../blocks/graphs/GraphDataEditor";
 import graphStyles from "../../../blocks/graphs/GraphBlock.module.css";
@@ -98,16 +97,6 @@ export default function BlockRenderer({
   activities,
 }: BlockRendererProps) {
   const contentBlockMap = useMemo(() => getContentBlockMap(setBlocks), [setBlocks]);
-
-  const getBlockRowClass = useCallback((blockId: string, extra?: string) => (
-    [
-      styles.blockRow,
-      dropId === blockId ? styles.dropTarget : "",
-      activeBlockId === blockId ? styles.blockRowActive : "",
-      freshBlockId === blockId ? styles.blockRowFresh : "",
-      extra || "",
-    ].filter(Boolean).join(" ")
-  ), [activeBlockId, dropId, freshBlockId]);
 
   const renderGutter = (blockId: string, extraStyle?: React.CSSProperties) => (
     <div className={styles.gutter} style={{ opacity: hoverBlock === blockId ? 1 : 0, ...extraStyle }}>

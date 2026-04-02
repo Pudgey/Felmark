@@ -1,4 +1,4 @@
-import type { Workstation, Project, Block, Tab, ArchivedProject } from "@/lib/types";
+import type { Workstation, Block, Tab, ArchivedProject } from "@/lib/types";
 import type { Comment } from "@/components/comments/CommentPanel";
 import type { BlockActivity } from "@/components/activity/ActivityMargin";
 
