@@ -636,7 +636,7 @@ export default function Sidebar({ workstations, sidebarSummary, archived, active
 
         {/* Footer */}
         <div className={styles.footer}>
-          <span className={styles.footerMeta}>{railActive === "calendar" ? `${workstations.flatMap(w => w.projects).filter(p => p.due != null).length} deadlines` : `${totalProjects} projects · ${workstations.length} clients`}</span>
+          <span className={styles.footerMeta}>{railActive === "calendar" ? `${workstations.flatMap(w => w.projects).filter(p => p.due != null).length} deadlines` : `${sidebarSummary.totalProjects} projects · ${workstations.length} clients`}</span>
           <button
             type="button"
             className={`${styles.savedIndicator} ${saveIndicatorState === "saving" ? styles.savedIndicatorSaving : ""}`}
