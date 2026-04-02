@@ -172,6 +172,10 @@ Skills are reusable protocols stored in `conductor/skills/<name>/SKILL.md`. They
 | housekeeping | Codebase cleanup sweep | `conductor/skills/housekeeping/SKILL.md` |
 | sop | Production readiness orchestrator | `conductor/skills/sop/SKILL.md` |
 | research | External best practices & competitive intelligence | `conductor/skills/research/SKILL.md` |
+| superbrain | Load external engineering intelligence from top open source projects | `conductor/skills/super-brain/PROTOCOL.md` |
+| deep-debug | Deep root-cause analysis (when basic debugging stalls) | `conductor/skills/deep-debug/PROTOCOL.md` |
+| diagnose | Systematic parallel hypothesis debugging (alias for debug) | `conductor/skills/debug/PROTOCOL.md` |
+| forge | Scan codebase and rebuild dependency map (FORGE_MAP.md) | `conductor/skills/forge/PROTOCOL.md` |
 
 ### Invoking a Skill
 
