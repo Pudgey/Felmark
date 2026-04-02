@@ -145,7 +145,14 @@ export default function HistoryModal({ open, onClose }: HistoryModalProps) {
 
   const isExpanded = (fileId: string) => expandedFiles.has("all") || expandedFiles.has(fileId);
 
-  let lastDate = "";
+  // Precompute which revisions start a new date group
+  const showDateAtIndex = new Set<number>();
+  {
+    let prevDate = "";
+    REVISIONS.forEach((rev, i) => {
+      if (rev.date !== prevDate) { showDateAtIndex.add(i); prevDate = rev.date; }
+    });
+  }
 
   return (
     <div className={styles.overlay} onClick={onClose} ref={trapRef}>
@@ -173,8 +180,7 @@ export default function HistoryModal({ open, onClose }: HistoryModalProps) {
             </div>
             <div className={styles.revScroll}>
               {REVISIONS.map((rev, i) => {
-                const showDate = rev.date !== lastDate;
-                lastDate = rev.date;
+                const showDate = showDateAtIndex.has(i);
                 const st = STATUS_MAP[rev.status];
                 const isLast = i === REVISIONS.length - 1;
                 return (

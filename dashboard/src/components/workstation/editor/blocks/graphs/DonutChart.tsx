@@ -18,7 +18,16 @@ export default function DonutChart({ title, data, size = 140 }: { title: string;
   const r = size * 0.38;
   const strokeW = size * 0.12;
   const circ = 2 * Math.PI * r;
-  let offset = circ * 0.25;
+
+  // Precompute offsets for each segment to avoid mutation during render
+  const segmentOffsets: number[] = [];
+  {
+    let cur = circ * 0.25;
+    data.forEach(d => {
+      segmentOffsets.push(cur);
+      cur -= circ * ((d.value || 0) / total);
+    });
+  }
 
   return (
     <div className={styles.gb}>
@@ -34,8 +43,7 @@ export default function DonutChart({ title, data, size = 140 }: { title: string;
               const pct = (d.value || 0) / total;
               const dash = circ * pct;
               const gap = circ - dash;
-              const thisOffset = offset;
-              offset -= dash;
+              const thisOffset = segmentOffsets[i];
               return (
                 <circle key={i} cx={cx} cy={cy} r={r} fill="none"
                   stroke={d.color || PALETTE[i]}

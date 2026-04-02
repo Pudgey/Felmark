@@ -81,11 +81,13 @@ export default function CommentPanel({ open, onClose, pendingHighlight, onHighli
 
   // Auto-open new comment form when a block highlight arrives
   useEffect(() => {
-    if (pendingHighlight && open) {
+    if (!pendingHighlight || !open) return;
+    const frame = requestAnimationFrame(() => {
       setActiveHighlight(pendingHighlight);
       setShowNew(true);
       onHighlightConsumed?.();
-    }
+    });
+    return () => cancelAnimationFrame(frame);
   }, [pendingHighlight, open, onHighlightConsumed]);
 
   const resolve = (id: string) => {

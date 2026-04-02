@@ -40,6 +40,14 @@ interface WorkstationOnboardingProps {
   onSkip: () => void;
 }
 
+const AI_PLACEHOLDERS = [
+  "What are you working on?",
+  "Brand identity for a yoga studio",
+  "Monthly retainer, $2k/mo",
+  "Proposal for website redesign",
+  "Quick invoice for logo project",
+];
+
 export default function WorkstationOnboarding({ initialName, workstations, onComplete, onSkip }: WorkstationOnboardingProps) {
   const [name, setName] = useState(initialName);
   const [contact, setContact] = useState("");
@@ -60,14 +68,6 @@ export default function WorkstationOnboarding({ initialName, workstations, onCom
   } | null>(null);
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
   const nameRef = useRef<HTMLInputElement>(null);
-
-  const AI_PLACEHOLDERS = [
-    "What are you working on?",
-    "Brand identity for a yoga studio",
-    "Monthly retainer, $2k/mo",
-    "Proposal for website redesign",
-    "Quick invoice for logo project",
-  ];
 
   // Rotate placeholder every 3s
   useEffect(() => {

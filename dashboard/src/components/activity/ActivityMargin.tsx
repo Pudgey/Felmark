@@ -82,11 +82,13 @@ export default function ActivityMargin({ open, onClose, blocks: _blocks, activit
 
   // Handle incoming highlight from block comment button
   useEffect(() => {
-    if (pendingHighlight && open) {
+    if (!pendingHighlight || !open) return;
+    const frame = requestAnimationFrame(() => {
       setActiveHighlight(pendingHighlight);
       setShowNew(true);
       onHighlightConsumed?.();
-    }
+    });
+    return () => cancelAnimationFrame(frame);
   }, [pendingHighlight, open, onHighlightConsumed]);
 
   const activeBlockCount = activities.filter(a => a.typing || a.hot).length;

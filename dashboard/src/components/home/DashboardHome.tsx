@@ -81,14 +81,13 @@ interface DashboardHomeProps {
 }
 
 export default function DashboardHome({ workstations, onSelectWorkstation, onSelectProject, onNewTabInWorkstation }: DashboardHomeProps) {
-  const [now, setNow] = useState<Date | null>(null);
+  const [now, setNow] = useState(() => new Date());
   const [showWsPicker, setShowWsPicker] = useState(false);
   const [wsSearch, setWsSearch] = useState("");
   const pickerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setNow(new Date());
     const i = setInterval(() => setNow(new Date()), 60000);
     return () => clearInterval(i);
   }, []);

@@ -94,7 +94,7 @@ export default function Canvas() {
   const [modifierReveal, setModifierReveal] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
-  const hoverRevealTimerRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+  const hoverRevealTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     const stored = loadStoredCanvasState();

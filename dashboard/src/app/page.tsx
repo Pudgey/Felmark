@@ -316,7 +316,7 @@ export default function Dashboard() {
     forge.tabs.select(id);
   };
 
-  const openForgeRailRef = useRef<() => void>();
+  const openForgeRailRef = useRef<() => void>(undefined);
   const openForgeRailImpl = () => {
     setLaunchpadOpen(false);
     setSidebarOpen(true);

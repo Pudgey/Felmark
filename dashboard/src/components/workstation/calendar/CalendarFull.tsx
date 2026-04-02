@@ -152,7 +152,11 @@ export default function CalendarFull({ workstations, onOpenProject, scrollToProj
 
     // Navigate to the week containing this date
     const targetWeekStart = getWeekStart(targetDate);
-    setWeekStart(targetWeekStart);
+
+    // Defer state update and scroll to avoid synchronous setState in effect
+    requestAnimationFrame(() => {
+      setWeekStart(targetWeekStart);
+    });
 
     // After state updates and re-render, scroll to the event element
     requestAnimationFrame(() => {
