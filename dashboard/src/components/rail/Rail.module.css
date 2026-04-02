@@ -1,6 +1,8 @@
 .rail {
   width: 56px;
+  height: 100dvh;
   background: var(--rail-bg);
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
