@@ -383,7 +383,6 @@ export default function Dashboard() {
       ) : (
         <ViewRouter
           railActive={railActive}
-          onNavigateHome={() => navigateRail("home")}
           workstationProps={{
             workstations,
             tabs,

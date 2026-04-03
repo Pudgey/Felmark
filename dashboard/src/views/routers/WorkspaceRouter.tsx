@@ -1,15 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import WorkspaceSidebar from "@/components/workspace/sidebar/WorkspaceSidebar";
+import SplitPanes from "@/components/workspace/panes/SplitPanes";
 
-interface WorkspaceRouterProps {
-  onNavigateHome: () => void;
-}
-
-export default function WorkspaceRouter({ onNavigateHome }: WorkspaceRouterProps) {
-  useEffect(() => {
-    onNavigateHome();
-  }, [onNavigateHome]);
-
-  return null;
+export default function WorkspaceRouter() {
+  return (
+    <div style={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex" }}>
+      <WorkspaceSidebar />
+      <SplitPanes />
+    </div>
+  );
 }
