@@ -282,7 +282,7 @@ export function useWorkstationActions(config: UseWorkstationActionsConfig): UseW
 
   const handleNewTabInWorkstation = (wsId: string) => {
     restoreWorkstationContext();
-    setActiveWorkstationId(null);
+    setActiveWorkstationId(wsId);
     forge.projects.createInWorkstation(wsId);
   };
 

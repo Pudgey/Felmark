@@ -222,6 +222,16 @@ export default function Dashboard() {
 
   const overdueCount = workstations.reduce((s, w) => s + w.projects.filter(p => p.status === "overdue").length, 0);
 
+  useEffect(() => {
+    if (railActive !== "workstations" || !activeProject) return;
+    const owningWs = workstations.find((workstation) =>
+      workstation.projects.some((project) => project.id === activeProject)
+    );
+    if (owningWs && activeWorkstationId !== owningWs.id) {
+      queueMicrotask(() => setActiveWorkstationId(owningWs.id));
+    }
+  }, [railActive, activeProject, activeWorkstationId, workstations]);
+
   // ── All workstation handlers via extracted hook ──
   const actions = useWorkstationActions({
     workstations, tabs, activeProject, activeWorkstationId,

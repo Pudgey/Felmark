@@ -42,6 +42,7 @@ export function createProjectServices(state: StateUpdater) {
         id: newId, name: "Untitled", client: ws.client, active: true,
       }]);
       state.setActiveProject(newId);
+      state.setActiveWorkstationId(wsId);
       return newId;
     },
 
@@ -108,6 +109,7 @@ export function createProjectServices(state: StateUpdater) {
         id: newId, name: newProject.name, client: ws.client, active: true,
       }]);
       state.setActiveProject(newId);
+      state.setActiveWorkstationId(ws.id);
     },
 
     /** Archive a single project */
