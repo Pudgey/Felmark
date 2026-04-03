@@ -176,7 +176,7 @@ export default function EditorCore(props: EditorProps) {
 
   const panels = usePanelState({ splitPickerRef });
 
-  // Scope displayed tabs to the active workstation's projects
+  // Filter tabs by active client — switching workstations shows only that client's tabs
   const workstationTabs = useMemo(() => {
     if (!activeWorkstationId) return tabs;
     const ws = workstations.find(w => w.id === activeWorkstationId);
