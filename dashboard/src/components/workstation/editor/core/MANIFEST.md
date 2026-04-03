@@ -11,7 +11,7 @@ Modular architecture for the block editor. Breaks the 1,779-line Editor.tsx mono
 - `@/lib/types` (Block, Tab, Workstation, Project, etc.)
 - `@/lib/utils` (uid, cursorTo)
 - `@/lib/constants` (STATUS)
-- `@/lib/terminal/types` (TerminalSessionState)
+- `../../../terminal/mounts/WorkstationTerminalMount`
 - `@/components/shared/DueDatePicker`
 - `../blocks/*` (all block type components)
 - `../chrome/*` (editable-block, slash-menu, format-bar, command-bar, command-palette, margin, split-pane)
@@ -19,7 +19,6 @@ Modular architecture for the block editor. Breaks the 1,779-line Editor.tsx mono
 - `../../../comments/CommentPanel`
 - `../../../activity/ActivityMargin`
 - `../../../history/HistoryModal`
-- `../../../terminal/Terminal`, `../../../terminal/TerminalProvider`
 - `../../../notifications/NotificationPanel`
 
 ## Imported By

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import WorkspaceTerminalMount from "@/components/terminal/mounts/WorkspaceTerminalMount";
 import styles from "./SplitPanes.module.css";
 
 /* ── Surface definitions ── */
@@ -256,118 +257,10 @@ function TimePane() {
 }
 
 function TerminalPane() {
-  const [expanded, setExpanded] = useState<string | null>("tb2");
-  return (
-    <div className={styles.termSession}>
-      {/* Tab strip */}
-      <div className={styles.termTabs}>
-        <span className={`${styles.termTab} ${styles.termTabOn}`}>forge</span>
-        <span className={styles.termTab}>logs</span>
-        <span className={styles.termTab}>ai</span>
-      </div>
-
-      {/* Output stream */}
-      <div className={styles.termStream}>
-        {/* Notification */}
-        <div className={`${styles.termNotif} ${styles.termNotifSuccess}`}>
-          <span className={styles.termNotifIcon}>{"\u2713"}</span>
-          <div className={styles.termNotifBody}>
-            <span className={styles.termNotifTitle}>Payment: $2,200 from Nora Kim</span>
-          </div>
-          <span className={styles.termNotifTime}>14:30</span>
-        </div>
-
-        {/* Status block */}
-        <div className={`${styles.termBlock} ${expanded === "tb1" ? styles.termBlockExp : ""}`}>
-          <div className={styles.termBlockHd} onClick={() => setExpanded(expanded === "tb1" ? null : "tb1")}>
-            <div className={`${styles.termBlockDot} ${styles.termBlockDotOk}`} />
-            <span className={styles.termBlockCmd}><span className={styles.termCmdName}>status</span></span>
-            <span className={styles.termBlockTime}>14:32</span>
-            <span className={styles.termBlockDur}>42ms</span>
-            <span className={styles.termBlockChev}>{expanded === "tb1" ? "\u25be" : "\u203a"}</span>
-          </div>
-          {expanded === "tb1" && (
-            <div className={styles.termBlockBody}>
-              <div className={styles.termOut}>
-                <span className={styles.termOutOk}>{"\u25cf"} Connected</span> {"\u00b7"} 4 clients {"\u00b7"} 7 tasks {"\u00b7"} <span className={styles.termOutErr}>1 overdue</span>
-              </div>
-              <div className={styles.termSummary}>
-                <span className={styles.termSummaryItem}><span className={styles.termSummaryDot} style={{ background: "#26a69a" }} /><span style={{ color: "#26a69a", fontWeight: 600 }}>$14.8k</span> earned</span>
-                <span className={styles.termSummaryItem}><span className={styles.termSummaryDot} style={{ background: "#ef5350" }} /><span style={{ color: "#ef5350", fontWeight: 600 }}>$9.6k</span> owed</span>
-                <span className={styles.termSummaryItem}><span className={styles.termSummaryDot} style={{ background: "#ff9800" }} /><span style={{ color: "#ff9800", fontWeight: 600 }}>74%</span> goal</span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Invoice block */}
-        <div className={`${styles.termBlock} ${expanded === "tb2" ? styles.termBlockExp : ""}`}>
-          <div className={styles.termBlockHd} onClick={() => setExpanded(expanded === "tb2" ? null : "tb2")}>
-            <div className={`${styles.termBlockDot} ${styles.termBlockDotOk}`} />
-            <span className={styles.termBlockCmd}><span className={styles.termCmdName}>invoice</span> <span className={styles.termCmdArg}>list</span> <span className={styles.termCmdFlag}>--overdue</span></span>
-            <span className={styles.termBlockTime}>14:31</span>
-            <span className={styles.termBlockDur}>128ms</span>
-            <span className={styles.termBlockChev}>{expanded === "tb2" ? "\u25be" : "\u203a"}</span>
-          </div>
-          {expanded === "tb2" && (
-            <div className={styles.termBlockBody}>
-              <div className={styles.termOut}>
-                <span className={styles.termOutErr}>1 invoice overdue</span> {"\u00b7"} total outstanding: <span className={styles.termOutWarn}>$9,600</span>
-              </div>
-              <div className={styles.termTable}>
-                <div className={styles.termTableRow}>
-                  <span className={styles.termTableCell}>#047</span>
-                  <span className={styles.termTableCell}>Bolt Fitness</span>
-                  <span className={`${styles.termTableCell} ${styles.termOutErr}`}>$4,000</span>
-                  <span className={`${styles.termTableCell} ${styles.termOutErr}`}>4d late</span>
-                  <span className={`${styles.termTableCell} ${styles.termOutErr}`}>overdue</span>
-                </div>
-              </div>
-              <div className={styles.termActions}>
-                <button className={`${styles.termBtn} ${styles.termBtnDanger}`}>invoice remind bolt</button>
-                <button className={styles.termBtn}>invoice list --all</button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* AI suggestion */}
-        <div className={styles.termAi}>
-          <div className={styles.termAiHd}>
-            <span className={styles.termAiIcon}>{"\u25c6"}</span>
-            <span className={styles.termAiLabel}>Forge AI</span>
-          </div>
-          <div className={styles.termAiBody}>
-            <span className={styles.termAiText}><strong>Bolt Fitness</strong> is 4 days overdue on $4,000. Draft a reminder?</span>
-            <div className={styles.termAiActions}>
-              <button className={`${styles.termBtn} ${styles.termBtnPrimary}`}>{"\u2713"} Draft</button>
-              <button className={styles.termBtn}>Skip</button>
-            </div>
-          </div>
-        </div>
-
-        {/* Running timer */}
-        <div className={styles.termBlock}>
-          <div className={styles.termBlockHd}>
-            <div className={`${styles.termBlockDot} ${styles.termBlockDotRun}`} />
-            <span className={styles.termBlockCmd}><span className={styles.termCmdName}>timer</span> <span className={styles.termCmdArg}>start</span> <span className={styles.termCmdFlag}>&quot;Color palette&quot;</span></span>
-            <span className={styles.termBlockDur} style={{ color: "#26a69a" }}>{"\u25cf"} 1:22:14</span>
-          </div>
-        </div>
-
-        {/* Input prompt */}
-        <div className={styles.termPrompt}>
-          <span className={styles.termPromptUser}>alex</span>
-          <span className={styles.termPromptSep}>{"\u203a"}</span>
-          <span className={styles.termPromptPath}>forge</span>
-          <span className={styles.termPromptCursor} />
-        </div>
-      </div>
-    </div>
-  );
+  return <WorkspaceTerminalMount />;
 }
 
-const PANE_MAP: Record<SurfaceId, () => React.ReactNode> = {
+const PANE_MAP: Record<SurfaceId, React.ComponentType> = {
   money: MoneyPane,
   work: WorkPane,
   signals: SignalsPane,
@@ -407,7 +300,7 @@ function Pane({ surface, onSurfaceChange, focused, onFocus, zoomed, onZoom, onSp
   const [splitOpen, setSplitOpen] = useState(false);
   const [splitPos, setSplitPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const [dropPos, setDropPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
-  const Content = PANE_MAP[surface] ?? (() => <EmptyPane surfaceId={surface} />);
+  const Content = PANE_MAP[surface];
   const surf = SURFACES.find(s => s.id === surface)!;
 
   return (
@@ -529,7 +422,7 @@ function Pane({ surface, onSurfaceChange, focused, onFocus, zoomed, onZoom, onSp
           {canClose && <span className={`${styles.paneHdAction} ${styles.paneHdActionClose}`} onClick={e => { e.stopPropagation(); onClose?.(); }} title="Close pane">{"\u00d7"}</span>}
         </div>
       </div>
-      <div className={styles.paneBody}><Content /></div>
+      <div className={styles.paneBody}>{Content ? <Content /> : <EmptyPane surfaceId={surface} />}</div>
     </div>
   );
 }

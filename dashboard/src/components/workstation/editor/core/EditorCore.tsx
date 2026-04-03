@@ -6,7 +6,6 @@ import type { Project, DocumentTemplate } from "@/lib/types";
 import { cursorTo } from "@/lib/utils";
 import type { Comment as CommentType } from "../../../comments/CommentPanel";
 import type { BlockActivity } from "../../../activity/ActivityMargin";
-import type { TerminalSessionState } from "@/lib/terminal/types";
 
 // Hooks
 import { useFocusManager } from "./hooks/useFocusManager";
@@ -36,9 +35,8 @@ import EditorMargin from "../chrome/margin/EditorMargin";
 import CommandBar from "../chrome/command-bar/CommandBar";
 import CommandPalette from "../chrome/command-palette/CommandPalette";
 import SplitPane from "../chrome/split-pane/SplitPane";
-import Terminal from "../../../terminal/Terminal";
-import TerminalProvider from "../../../terminal/TerminalProvider";
 import NotificationPanel from "../../../notifications/NotificationPanel";
+import WorkstationTerminalMount from "../../../terminal/mounts/WorkstationTerminalMount";
 
 import tabBarStyles from "./components/tab-bar/TabBar.module.css";
 import styles from "./EditorCore.module.css";
@@ -99,7 +97,6 @@ export default function EditorCore(props: EditorProps) {
   const [formatBar, setFormatBar] = useState<{ top: number; left: number } | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
   const [dropId, setDropId] = useState<string | null>(null);
-  const [terminalSessions, setTerminalSessions] = useState<Record<string, TerminalSessionState>>({});
   const splitPickerRef = useRef<HTMLDivElement>(null);
   const manuallyRenamed = useRef<Set<string>>(new Set());
 
@@ -199,23 +196,6 @@ export default function EditorCore(props: EditorProps) {
     deleteBlock,
     blockElMap: focus.blockElMap,
   });
-
-  // Terminal session management
-  const terminalSessionKey = activeProject || TERMINAL_SPLIT_ID;
-  const handleTerminalSessionChange = useCallback((session: TerminalSessionState) => {
-    setTerminalSessions(prev => {
-      const current = prev[terminalSessionKey];
-      if (
-        current &&
-        current.blocks === session.blocks &&
-        current.inputHistory === session.inputHistory &&
-        current.dismissedInsightKeys === session.dismissedInsightKeys
-      ) {
-        return prev;
-      }
-      return { ...prev, [terminalSessionKey]: session };
-    });
-  }, [terminalSessionKey]);
 
   // Format bar
   const handleSelect = () => {
@@ -421,16 +401,10 @@ export default function EditorCore(props: EditorProps) {
 
               {/* Split pane */}
               {splitProject === TERMINAL_SPLIT_ID && (
-                <TerminalProvider
-                  key={terminalSessionKey}
-                  workstations={workstations}
-                  activeProject={activeProject}
+                <WorkstationTerminalMount
                   editorBlocks={blockOps.blocks}
-                  sessionState={terminalSessions[terminalSessionKey]}
-                  onSessionStateChange={handleTerminalSessionChange}
-                >
-                  <Terminal onClose={() => onSplitClose?.()} />
-                </TerminalProvider>
+                  onClose={() => onSplitClose?.()}
+                />
               )}
               {splitProject && splitProject !== TERMINAL_SPLIT_ID && splitBlocks && (
                 <SplitPane
