@@ -174,7 +174,7 @@ export default function EditorCore(props: EditorProps) {
   }, [blockOps, cache.contentCache, focus.blockElMap, slash, undo]);
 
   const panels = usePanelState({ splitPickerRef });
-  const rightPanelOpen = panels.commentPanelOpen || panels.notifPanelOpen;
+  const rightPanelOpen = panels.commentPanelOpen || panels.notifPanelOpen || !!splitProject;
 
   // Filter tabs by active client — switching workstations shows only that client's tabs
   const workstationTabs = useMemo(() => {
