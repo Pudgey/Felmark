@@ -157,7 +157,11 @@ export function useWorkstationActions(config: UseWorkstationActionsConfig): UseW
     restoreWorkstationContext();
     const ws = workstations.find(w => w.id === wid);
     if (!ws) return;
-    if (ws.projects.length > 0) {
+    setActiveWorkstationId(wid);
+    if (ws.projects.length === 0) {
+      updateTabs(prev => prev.map(t => ({ ...t, active: false })));
+      updateActiveProject("");
+    } else {
       selectProject(ws.projects[0], ws.client);
     }
     // Ensure workstation is expanded in sidebar
@@ -268,7 +272,11 @@ export function useWorkstationActions(config: UseWorkstationActionsConfig): UseW
 
   const handleNewTab = () => {
     restoreWorkstationContext();
-    const activeWs = workstations.find(w => w.projects.some(p => p.id === activeProject)) || workstations[0];
+    const activeWs =
+      (activeWorkstationId ? workstations.find(w => w.id === activeWorkstationId) : undefined) ||
+      workstations.find(w => w.projects.some(p => p.id === activeProject)) ||
+      workstations[0];
+    if (!activeWs) return;
     forge.projects.createInWorkstation(activeWs.id);
   };
 

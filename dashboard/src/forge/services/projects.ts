@@ -1,6 +1,7 @@
 import type { Project } from "@/lib/types";
 import type { StateUpdater } from "../types";
 import { uid } from "@/lib/utils";
+import { resolveDefaultTab } from "./tabs";
 
 export function createProjectServices(state: StateUpdater) {
   const makeEmptyBlocks = () => [
@@ -115,30 +116,29 @@ export function createProjectServices(state: StateUpdater) {
       const ws = workstations.find((w: { id: string; projects: { id: string }[] }) => w.projects.some((p: { id: string }) => p.id === projectId));
       const project = ws?.projects.find(p => p.id === projectId);
       if (!ws || !project) return;
+      const nextWorkstations = workstations.map(w =>
+        w.id === ws.id ? { ...w, projects: w.projects.filter(p => p.id !== projectId) } : w
+      );
 
       state.setArchived(prev => [...prev, {
         project, workstationId: ws.id, workstationName: ws.client,
         archivedAt: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" }),
       }]);
-      state.setWorkstations(prev => prev.map(w =>
-        w.id === ws.id ? { ...w, projects: w.projects.filter(p => p.id !== projectId) } : w
-      ));
+      state.setWorkstations(() => nextWorkstations);
       state.setTabs(prev => {
         const n = prev.filter(t => t.id !== projectId);
         if (n.length > 0 && !n.some(t => t.active)) {
           n[n.length - 1].active = true;
           state.setActiveProject(n[n.length - 1].id);
-          const owner = state.getState().workstations.find(w => w.projects.some(p => p.id === n[n.length - 1].id));
+          const owner = nextWorkstations.find(w => w.projects.some(p => p.id === n[n.length - 1].id));
           state.setActiveWorkstationId(owner?.id ?? null);
         }
         if (n.length === 0) {
-          // Fall back to personal workstation
-          const personal = state.getState().workstations.find(w => w.personal);
-          const fallback = personal?.projects[0];
-          if (personal && fallback) {
-            n.push({ id: fallback.id, name: fallback.name, client: personal.client, active: true });
-            state.setActiveProject(fallback.id);
-            state.setActiveWorkstationId(personal.id);
+          const fallback = resolveDefaultTab(nextWorkstations);
+          if (fallback) {
+            n.push(fallback.tab);
+            state.setActiveProject(fallback.tab.id);
+            state.setActiveWorkstationId(fallback.workstationId);
           } else {
             state.setActiveProject("");
             state.setActiveWorkstationId(null);

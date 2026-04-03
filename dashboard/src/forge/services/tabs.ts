@@ -1,20 +1,39 @@
+import type { Tab, Workstation } from "@/lib/types";
 import type { StateUpdater } from "../types";
+
+export function resolveDefaultTab(workstations: Workstation[]): { tab: Tab; workstationId: string } | null {
+  const fallbackWorkstation = workstations.find((workstation) => workstation.projects.length > 0);
+  const fallbackProject = fallbackWorkstation?.projects[0];
+
+  if (!fallbackWorkstation || !fallbackProject) {
+    return null;
+  }
+
+  return {
+    tab: {
+      id: fallbackProject.id,
+      name: fallbackProject.name,
+      client: fallbackWorkstation.client,
+      active: true,
+    },
+    workstationId: fallbackWorkstation.id,
+  };
+}
 
 export function createTabServices(state: StateUpdater) {
   /** Find the workstation that owns a project */
   const findOwner = (projectId: string) =>
     state.getState().workstations.find(w => w.projects.some(p => p.id === projectId));
 
-  /** Fall back to personal workstation's first project */
-  const fallbackToPersonal = () => {
-    const { workstations } = state.getState();
-    const personal = workstations.find(w => w.personal);
-    const fallback = personal?.projects[0];
-    if (personal && fallback) {
-      state.setActiveProject(fallback.id);
-      state.setActiveWorkstationId(personal.id);
-      return { id: fallback.id, name: fallback.name, client: personal.client, active: true as const };
+  /** Fall back to the first real project that still exists. */
+  const fallbackToDefaultProject = () => {
+    const fallback = resolveDefaultTab(state.getState().workstations);
+    if (fallback) {
+      state.setActiveProject(fallback.tab.id);
+      state.setActiveWorkstationId(fallback.workstationId);
+      return fallback.tab;
     }
+
     state.setActiveProject("");
     state.setActiveWorkstationId(null);
     return null;
@@ -32,7 +51,7 @@ export function createTabServices(state: StateUpdater) {
     /** Close a tab */
     close(tabId: string) {
       state.setTabs(prev => {
-        const n = prev.filter(t => t.id !== tabId);
+        const n = prev.filter((tab) => tab.id !== tabId && Boolean(findOwner(tab.id)));
         if (n.length > 0 && !n.some(t => t.active)) {
           n[n.length - 1].active = true;
           state.setActiveProject(n[n.length - 1].id);
@@ -40,7 +59,7 @@ export function createTabServices(state: StateUpdater) {
           if (ws) state.setActiveWorkstationId(ws.id);
         }
         if (n.length === 0) {
-          const tab = fallbackToPersonal();
+          const tab = fallbackToDefaultProject();
           if (tab) n.push(tab);
         }
         return n;
@@ -68,10 +87,10 @@ export function createTabServices(state: StateUpdater) {
       });
     },
 
-    /** Deactivate all tabs — falls back to personal */
+    /** Deactivate all tabs — falls back to the default project. */
     deactivateAll() {
       state.setTabs(prev => prev.map(t => ({ ...t, active: false })));
-      fallbackToPersonal();
+      fallbackToDefaultProject();
     },
   };
 }
