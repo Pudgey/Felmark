@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { BLOCK_TYPES, INITIAL_WORKSTATIONS } from "@/lib/constants";
 import type { Block, Workstation, Tab, ArchivedProject } from "@/lib/types";
 import Rail from "@/components/rail/Rail";
@@ -258,6 +258,24 @@ export default function Dashboard() {
   } = actions;
 
   const activeBlocks = blocksMap[activeProject] || EMPTY_BLOCKS;
+
+  const splitProjectName = useMemo(() => {
+    if (!splitProject) return undefined;
+    for (const w of workstations) {
+      const p = w.projects.find((p) => p.id === splitProject);
+      if (p) return p.name;
+    }
+    return "Untitled";
+  }, [splitProject, workstations]);
+
+  const splitClientName = useMemo(() => {
+    if (!splitProject) return undefined;
+    for (const w of workstations) {
+      if (w.projects.some((p) => p.id === splitProject)) return w.client;
+    }
+    return "";
+  }, [splitProject, workstations]);
+
   const handleOpenWorkstationFromTerminal = (workstationId: string) => {
     navigateToWorkstations();
     selectWorkstation(workstationId);
@@ -404,6 +422,8 @@ export default function Dashboard() {
               wordCount,
               charCount,
               splitProject,
+              splitProjectName,
+              splitClientName,
               comments,
               activities: activitiesMap[activeProject] || [],
               docTemplates,

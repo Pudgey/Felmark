@@ -40,6 +40,8 @@ interface EditorViewProps {
   onSplitOpen: (id: string) => void;
   onSplitClose: () => void;
   onSplitMakePrimary: () => void;
+  splitProjectName?: string;
+  splitClientName?: string;
 }
 
 export default function EditorView({
@@ -50,6 +52,7 @@ export default function EditorView({
   onSelectWorkstation, onNavigateRail, onSaveAsTemplate, onRenameWorkstation,
   onUpdateProjectDue, onCommentsChange, onActivitiesChange, onToggleZen,
   onSplitOpen, onSplitClose, onSplitMakePrimary,
+  splitProjectName, splitClientName,
 }: EditorViewProps) {
   return (
     <Editor
@@ -84,8 +87,8 @@ export default function EditorView({
       onToggleZen={onToggleZen}
       splitProject={splitProject}
       splitBlocks={splitProject ? blocksMap[splitProject] || [] : undefined}
-      splitProjectName={splitProject ? (() => { for (const w of workstations) { const p = w.projects.find(p => p.id === splitProject); if (p) return p.name; } return "Untitled"; })() : undefined}
-      splitClientName={splitProject ? (() => { for (const w of workstations) { if (w.projects.some(p => p.id === splitProject)) return w.client; } return ""; })() : undefined}
+      splitProjectName={splitProjectName}
+      splitClientName={splitClientName}
       onSplitOpen={onSplitOpen}
       onSplitClose={onSplitClose}
       onSplitMakePrimary={onSplitMakePrimary}
