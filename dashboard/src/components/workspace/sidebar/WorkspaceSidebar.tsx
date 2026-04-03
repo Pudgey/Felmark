@@ -46,41 +46,124 @@ export default function WorkspaceSidebar() {
         <div className={styles.sbIco}>{"\u2699"}</div>
       </div>
 
-      {/* Stats with sparklines */}
+      {/* Stats */}
       <div className={styles.sbStats}>
-        {[
-          { label: "Earned this month", val: "$14,800", dot: "var(--pos)", color: styles.valPos, spark: [3200, 5800, 4100, 7600, 9400, 11400, 13200, 14800], sparkColor: "#2d8a4e" },
-          { label: "Outstanding", val: "$9,600", dot: "var(--ov)", color: styles.valOv, spark: [12000, 11200, 10800, 9600, 10200, 9800, 9600], sparkColor: "#d9453a" },
-          { label: "Active tasks", val: "5", dot: "var(--ink-900, #1a1918)", color: "" },
-          { label: "Overdue", val: "1", dot: "var(--ov)", color: styles.valOv },
-        ].map((s, i) => (
-          <div key={i} className={styles.sbStat}>
-            <div className={styles.sbStatLeft}>
-              <div className={styles.sbStatDot} style={{ background: s.dot }} />
-              <span className={styles.sbStatLabel}>{s.label}</span>
+        {/* Earned — rich sparkline card */}
+        <div className={styles.earnedCard}>
+          <div className={styles.earnedRow}>
+            <div>
+              <div className={styles.earnedLabel}>Earned this month</div>
+              <div className={styles.earnedVal}>$14,800</div>
             </div>
-            <div className={styles.sbStatRight}>
-              {s.spark && (
-                <svg className={styles.sbSpark} viewBox="0 0 48 16" preserveAspectRatio="none">
-                  <polyline
-                    points={s.spark.map((v, vi) => {
-                      const max = Math.max(...s.spark);
-                      const min = Math.min(...s.spark);
-                      const range = max - min || 1;
-                      return `${(vi / (s.spark.length - 1)) * 48},${14 - ((v - min) / range) * 12 - 1}`;
-                    }).join(" ")}
-                    fill="none"
-                    stroke={s.sparkColor}
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              )}
-              <span className={`${styles.sbStatVal} ${s.color}`}>{s.val}</span>
+            <div className={styles.earnedRight}>
+              <span className={styles.earnedPct}>74%</span>
+              <span className={styles.earnedGoal}>of $20k goal</span>
             </div>
           </div>
-        ))}
+          <svg className={styles.earnedChart} viewBox="0 0 252 40" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="earnGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#26a69a" stopOpacity="0.15" />
+                <stop offset="100%" stopColor="#26a69a" stopOpacity="0.01" />
+              </linearGradient>
+            </defs>
+            {(() => {
+              const data = [0,0,450,450,1650,1650,1650,2450,2450,2450,4850,4850,5450,5450,5450,7250,7250,7250,8200,8200,8200,10400,10400,10400,12000,12000,12000,12000,13800,14800];
+              const goal = 20000;
+              const pts = data.map((v, i) => `${(i / 29) * 252},${38 - (v / goal) * 36}`);
+              const line = pts.map((p, i) => `${i === 0 ? "M" : "L"}${p}`).join(" ");
+              const area = `M0,40 ${pts.map((p, i) => `L${p}`).join(" ")} L252,40 Z`;
+              const lastY = 38 - (14800 / goal) * 36;
+              return (
+                <>
+                  <line x1="0" y1={38 - (goal / goal) * 36} x2="252" y2={38 - (goal / goal) * 36} stroke="var(--warm-200, #e0dfdb)" strokeWidth="0.5" strokeDasharray="3 2" />
+                  <path d={area} fill="url(#earnGrad)" />
+                  <path d={line} fill="none" stroke="#26a69a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <circle cx={252} cy={lastY} r="2.5" fill="#fff" stroke="#26a69a" strokeWidth="1.5" />
+                </>
+              );
+            })()}
+          </svg>
+          <div className={styles.earnedFt}>
+            <span>Apr 1</span>
+            <span style={{ color: "#26a69a" }}>+12% vs last month</span>
+            <span>Apr 30</span>
+          </div>
+        </div>
+
+        {/* Outstanding — compact client blocks */}
+        <div className={styles.outstandingCard}>
+          <div className={styles.outstandingRow}>
+            <div className={styles.outstandingLabel}>Outstanding</div>
+            <span className={styles.outstandingVal}>$9,600</span>
+          </div>
+          <div className={styles.outstandingClients}>
+            {[
+              { av: "BF", name: "Bolt Fitness", amount: "$4,000", days: "4d late", status: "overdue" as const },
+              { av: "NK", name: "Nora Kim", amount: "$3,200", days: "7d left", status: "pending" as const },
+              { av: "MS", name: "Meridian", amount: "$2,400", days: "8d left", status: "pending" as const },
+            ].map((c, i) => (
+              <div key={i} className={`${styles.outClient} ${c.status === "overdue" ? styles.outClientOv : ""}`}>
+                <div className={`${styles.outClientAv} ${c.status === "overdue" ? styles.outClientAvOv : ""}`}>{c.av}</div>
+                <span className={styles.outClientName}>{c.name}</span>
+                <span className={styles.outClientAmount} style={{ color: c.status === "overdue" ? "#ef5350" : "var(--ink-800, #2a2926)" }}>{c.amount}</span>
+                <span className={styles.outClientDays} style={{ color: c.status === "overdue" ? "#ef5350" : "var(--ink-400, #a5a49f)" }}>{c.days}</span>
+              </div>
+            ))}
+          </div>
+          <div className={styles.outstandingBar}>
+            <div style={{ flex: 4000, background: "#ef5350", borderRadius: "2px 0 0 2px" }} />
+            <div style={{ flex: 3200, background: "rgba(255, 152, 0, .4)" }} />
+            <div style={{ flex: 2400, background: "rgba(255, 152, 0, .25)", borderRadius: "0 2px 2px 0" }} />
+          </div>
+        </div>
+
+        {/* Tasks — dense tracker */}
+        <div className={styles.tasksCard}>
+          <div className={styles.tasksRow}>
+            <div>
+              <span className={styles.tasksCount}>7</span>
+              <span className={styles.tasksLabel}> tasks</span>
+            </div>
+            <span className={styles.tasksHours}>16.5h logged</span>
+          </div>
+          {/* Status bar */}
+          <div className={styles.tasksBar}>
+            <div style={{ flex: 1, background: "#ef5350", borderRadius: "2px 0 0 2px" }} />
+            <div style={{ flex: 3, background: "#26a69a" }} />
+            <div style={{ flex: 3, background: "var(--warm-200, #e0dfdb)", borderRadius: "0 2px 2px 0" }} />
+          </div>
+          {/* Overdue */}
+          <div className={styles.tasksOv}>
+            <div className={styles.tasksOvHd}>
+              <div className={styles.tasksOvDot} />
+              <span className={styles.tasksOvLabel}>Overdue</span>
+              <span className={styles.tasksOvCount}>1</span>
+            </div>
+            <div className={styles.taskItem}>
+              <div className={`${styles.taskPri} ${styles.taskPriUrgent}`} />
+              <span className={`${styles.taskName} ${styles.taskNameOv}`}>Client review &amp; revisions</span>
+              <span className={`${styles.taskDue} ${styles.taskDueOv}`}>Apr 1</span>
+            </div>
+          </div>
+          {/* Active */}
+          <div className={styles.tasksList}>
+            {[
+              { title: "Color palette & typography", pri: "high", pct: 50, due: "Apr 2", timer: true },
+              { title: "Blog post #1 draft", pri: "medium", pct: 33, due: "Apr 3" },
+              { title: "Onboarding UX revisions", pri: "high", pct: 67, due: "Apr 5" },
+            ].map((t, i) => (
+              <div key={i} className={styles.taskItem}>
+                <div className={`${styles.taskPri} ${t.pri === "high" ? styles.taskPriHigh : styles.taskPriMed}`} />
+                <span className={styles.taskName}>{t.title}</span>
+                {"timer" in t && t.timer && <span className={styles.taskTimer}>{"\u25cf"}</span>}
+                <div className={styles.taskBar}><div className={styles.taskBarFill} style={{ width: `${t.pct}%` }} /></div>
+                <span className={styles.taskDue}>{t.due}</span>
+              </div>
+            ))}
+          </div>
+          <div className={styles.tasksFt}>+ 3 upcoming</div>
+        </div>
       </div>
 
       {/* Search */}

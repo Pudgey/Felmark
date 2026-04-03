@@ -89,6 +89,341 @@
   flex-shrink: 0;
 }
 
+/* Earned — rich sparkline card */
+.earnedCard {
+  margin-bottom: 6px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--warm-100, #f0f0ee);
+}
+
+.earnedRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.earnedLabel {
+  font-family: var(--mono, 'IBM Plex Mono', monospace);
+  font-size: 8px;
+  color: var(--ink-400, #a5a49f);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.earnedVal {
+  font-family: 'JetBrains Mono', var(--mono, monospace);
+  font-size: 20px;
+  font-weight: 700;
+  color: #26a69a;
+  letter-spacing: -.03em;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.earnedRight {
+  text-align: right;
+}
+
+.earnedPct {
+  font-family: 'JetBrains Mono', var(--mono, monospace);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-800, #2a2926);
+  display: block;
+  line-height: 1;
+}
+
+.earnedGoal {
+  font-family: var(--mono, 'IBM Plex Mono', monospace);
+  font-size: 8px;
+  color: var(--ink-400, #a5a49f);
+  display: block;
+  margin-top: 2px;
+}
+
+.earnedChart {
+  width: calc(100% + 32px);
+  margin-left: -16px;
+  height: 40px;
+  display: block;
+  margin-top: 6px;
+}
+
+.earnedFt {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'JetBrains Mono', var(--mono, monospace);
+  font-size: 8px;
+  color: var(--ink-300, #cccbc7);
+  margin-top: 2px;
+}
+
+/* Outstanding — compact client blocks */
+.outstandingCard {
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--warm-100, #f0f0ee);
+}
+
+.outstandingRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.outstandingLabel {
+  font-family: var(--mono, 'IBM Plex Mono', monospace);
+  font-size: 8px;
+  color: var(--ink-400, #a5a49f);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.outstandingVal {
+  font-family: 'JetBrains Mono', var(--mono, monospace);
+  font-size: 16px;
+  font-weight: 700;
+  color: #ef5350;
+  letter-spacing: -.02em;
+}
+
+.outstandingClients {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.outClient {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border-radius: 5px;
+  transition: background .04s;
+}
+
+.outClient:hover { background: rgba(0, 0, 0, .025); }
+
+.outClientOv {
+  background: rgba(239, 83, 80, .03);
+}
+
+.outClientOv:hover { background: rgba(239, 83, 80, .06); }
+
+.outClientAv {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, .04);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', var(--mono, monospace);
+  font-size: 7px;
+  font-weight: 600;
+  color: var(--ink-500, #7c7b77);
+  flex-shrink: 0;
+}
+
+.outClientAvOv {
+  background: rgba(239, 83, 80, .08);
+  color: #ef5350;
+}
+
+.outClientName {
+  font-size: 11px;
+  color: var(--ink-600, #5c5b57);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.outClientAmount {
+  font-family: 'JetBrains Mono', var(--mono, monospace);
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.outClientDays {
+  font-family: 'JetBrains Mono', var(--mono, monospace);
+  font-size: 9px;
+  flex-shrink: 0;
+  width: 36px;
+  text-align: right;
+}
+
+.outstandingBar {
+  display: flex;
+  height: 3px;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 6px;
+  gap: 1px;
+}
+
+/* Tasks — dense tracker */
+.tasksCard {}
+
+.tasksRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.tasksCount {
+  font-family: 'JetBrains Mono', var(--mono, monospace);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink-800, #2a2926);
+}
+
+.tasksLabel {
+  font-family: var(--mono, 'IBM Plex Mono', monospace);
+  font-size: 10px;
+  color: var(--ink-400, #a5a49f);
+}
+
+.tasksHours {
+  font-family: 'JetBrains Mono', var(--mono, monospace);
+  font-size: 9px;
+  color: var(--ink-400, #a5a49f);
+}
+
+.tasksBar {
+  display: flex;
+  height: 3px;
+  border-radius: 2px;
+  overflow: hidden;
+  gap: 1px;
+  margin-bottom: 6px;
+}
+
+/* Overdue box */
+.tasksOv {
+  padding: 5px 6px;
+  border-radius: 5px;
+  background: rgba(239, 83, 80, .04);
+  border: 1px solid rgba(239, 83, 80, .08);
+  margin-bottom: 4px;
+}
+
+.tasksOvHd {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 3px;
+}
+
+.tasksOvDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ef5350;
+  animation: ovPulse 2s ease infinite;
+}
+
+@keyframes ovPulse {
+  0%, 100% { opacity: .5; }
+  50% { opacity: 1; }
+}
+
+.tasksOvLabel {
+  font-family: var(--mono, 'IBM Plex Mono', monospace);
+  font-size: 8px;
+  color: #ef5350;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  flex: 1;
+}
+
+.tasksOvCount {
+  font-family: 'JetBrains Mono', var(--mono, monospace);
+  font-size: 9px;
+  color: rgba(239, 83, 80, .4);
+}
+
+/* Task items */
+.tasksList {
+  display: flex;
+  flex-direction: column;
+}
+
+.taskItem {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 0;
+}
+
+.taskPri {
+  width: 2px;
+  height: 12px;
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+
+.taskPriUrgent { background: #ef5350; }
+.taskPriHigh { background: #ff9800; }
+.taskPriMed { background: #2962ff; }
+
+.taskName {
+  font-size: 11px;
+  color: var(--ink-600, #5c5b57);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.taskNameOv { color: #ef5350; }
+
+.taskTimer {
+  font-family: 'JetBrains Mono', var(--mono, monospace);
+  font-size: 8px;
+  color: #26a69a;
+  flex-shrink: 0;
+  animation: taskTimerPulse 2s ease infinite;
+}
+
+@keyframes taskTimerPulse { 0%, 60%, 100% { opacity: .4; } 20% { opacity: 1; } }
+
+.taskBar {
+  width: 28px;
+  height: 3px;
+  border-radius: 1.5px;
+  background: var(--warm-200, #e0dfdb);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.taskBarFill {
+  height: 100%;
+  border-radius: 1.5px;
+  background: #26a69a;
+}
+
+.taskDue {
+  font-family: 'JetBrains Mono', var(--mono, monospace);
+  font-size: 9px;
+  color: var(--ink-400, #a5a49f);
+  flex-shrink: 0;
+  width: 28px;
+  text-align: right;
+}
+
+.taskDueOv { color: #ef5350; }
+
+.tasksFt {
+  font-family: 'JetBrains Mono', var(--mono, monospace);
+  font-size: 9px;
+  color: var(--ink-300, #cccbc7);
+  margin-top: 4px;
+}
+
 .sbStat {
   display: flex;
   align-items: center;
