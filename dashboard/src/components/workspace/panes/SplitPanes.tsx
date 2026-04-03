@@ -556,7 +556,7 @@ const HEADER_TABS = [
   { id: "workbench", icon: "\u2699", label: "Workbench" },
 ] as const;
 
-function HybridHeader({ activeTab, topSurface, bottomSurface }: { activeTab: string; topSurface: string; bottomSurface: string }) {
+export function HybridHeader({ activeTab, topSurface, bottomSurface }: { activeTab: string; topSurface: string; bottomSurface: string }) {
   const topLabel = SURFACES.find(s => s.id === topSurface)?.label ?? topSurface;
   const bottomLabel = SURFACES.find(s => s.id === bottomSurface)?.label ?? bottomSurface;
   const nav = useWorkspaceNav();
@@ -836,7 +836,6 @@ export default function SplitPanes() {
       onMouseUp={() => setDragging(false)}
       onMouseLeave={() => setDragging(false)}
     >
-      <HybridHeader activeTab="workspace" topSurface={topSurface} bottomSurface={bottomSurface} />
       {(() => {
         // When zoomed, find where the zoomed pane lives and render only that
         if (zoomedId) {
