@@ -67,6 +67,7 @@ export function createWorkstationServices(state: StateUpdater) {
         id: projectId, name: projectName, client: data.name, active: true,
       }]);
       state.setActiveProject(projectId);
+      state.setActiveWorkstationId(wsId);
 
       return { wsId, projectId, projectName };
     },
@@ -95,6 +96,7 @@ export function createWorkstationServices(state: StateUpdater) {
         id: projectId, name: "Untitled", client: name, active: true,
       }]);
       state.setActiveProject(projectId);
+      state.setActiveWorkstationId(wsId);
 
       return { wsId, projectId };
     },
