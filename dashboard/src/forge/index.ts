@@ -5,6 +5,29 @@ import { createDocumentServices } from "./services/documents";
 import { createTabServices } from "./services/tabs";
 
 export type { ForgeState, ForgeContext, ForgeResult, ForgeSource, StateUpdater } from "./types";
+export {
+  loadEditorMemory,
+  saveEditorMemory,
+  createEditorMemorySnapshot,
+  normalizeEditorMemoryBlocks,
+  createLocalStorageAdapter,
+  getEditorMemoryStorageSlot,
+  buildEditorMemoryDebugReport,
+  EDITOR_MEMORY_NAMESPACE,
+  EDITOR_MEMORY_SCHEMA_VERSION,
+  EDITOR_MEMORY_STORAGE_KEY,
+  LEGACY_BLOCKS_STORAGE_KEY,
+  LEGACY_SAVED_AT_STORAGE_KEY,
+} from "./memory";
+export type {
+  EditorMemoryConfig,
+  EditorMemoryDebugReport,
+  EditorMemoryFallbackConversion,
+  EditorMemoryLoadResult,
+  EditorMemoryMigrationResult,
+  EditorMemorySnapshot,
+  EditorMemoryStorageAdapter,
+} from "./memory";
 
 // Block operations — shared between Editor and Forge Paper
 export {
