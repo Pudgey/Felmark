@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useMemo } from "react";
 import type { Block, Workstation, Tab } from "@/lib/types";
 import type { Project, DocumentTemplate } from "@/lib/types";
 import { cursorTo } from "@/lib/utils";
@@ -176,8 +176,17 @@ export default function EditorCore(props: EditorProps) {
 
   const panels = usePanelState({ splitPickerRef });
 
+  // Scope displayed tabs to the active workstation's projects
+  const workstationTabs = useMemo(() => {
+    if (!activeWorkstationId) return tabs;
+    const ws = workstations.find(w => w.id === activeWorkstationId);
+    if (!ws) return tabs;
+    const projectIds = new Set(ws.projects.map(p => p.id));
+    return tabs.filter(t => projectIds.has(t.id));
+  }, [tabs, activeWorkstationId, workstations]);
+
   const tabOverflow = useTabOverflow({
-    tabs,
+    tabs: workstationTabs,
     manuallyRenamed,
     overflowPillClass: tabBarStyles.overflowPill,
     overflowDropdownClass: tabBarStyles.overflowDropdown,
