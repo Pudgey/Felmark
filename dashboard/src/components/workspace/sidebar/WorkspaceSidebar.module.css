@@ -18,7 +18,7 @@
   display: flex;
   flex-direction: column;
   background: #fff;
-  border-right: none;
+  border-right: 1px solid var(--warm-200, #e0dfdb);
   overflow: hidden;
   flex-shrink: 0;
   font-family: 'Inter', -apple-system, sans-serif;
@@ -27,53 +27,48 @@
 
 /* ── Header ── */
 .sbHd {
-  height: 34px;
+  height: 40px;
   padding: 0 14px;
   background: var(--ink-900, #1a1918);
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
 }
 
-.sbMark {
+.sbAvatar {
   width: 22px;
   height: 22px;
   border-radius: 6px;
-  background: rgba(255, 255, 255, .08);
+  background: rgba(255, 255, 255, .1);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #c89360;
-  font-size: 11px;
+  font-family: 'JetBrains Mono', var(--mono, monospace);
+  font-size: 9px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, .6);
   flex-shrink: 0;
 }
 
-.sbHdInfo { flex: 1; min-width: 0; }
-
-.sbHdLabel {
-  font-family: var(--mono, 'IBM Plex Mono', monospace);
-  font-size: 8px;
-  color: rgba(255, 255, 255, .35);
-  text-transform: uppercase;
-  letter-spacing: .1em;
-}
-
 .sbHdName {
-  font-size: 13px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, .9);
+  font-family: 'JetBrains Mono', var(--mono, monospace);
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, .7);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-
-.sbHdActions { display: flex; gap: 3px; flex-shrink: 0; }
 
 .sbIco {
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, .08);
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  border: none;
   background: transparent;
-  color: rgba(255, 255, 255, .35);
+  color: rgba(255, 255, 255, .3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -83,7 +78,7 @@
 }
 
 .sbIco:hover {
-  border-color: rgba(255, 255, 255, .15);
+  background: rgba(255, 255, 255, .06);
   color: rgba(255, 255, 255, .6);
 }
 
@@ -180,7 +175,7 @@
   padding: 0 4px;
   border-radius: 4px;
   border: 1px solid var(--warm-200, #e2e1dd);
-  background: var(--warm-50, #fafaf8);
+  background: rgba(0, 0, 0, .025);
   color: var(--ink-400, #a5a49f);
   display: flex;
   align-items: center;
@@ -208,7 +203,7 @@
   margin-top: 2px;
 }
 
-.sbSec:hover { background: var(--warm-50, #fafaf8); }
+.sbSec:hover { background: rgba(0, 0, 0, .025); }
 
 .sbSecArrow {
   font-size: 8px;
@@ -245,8 +240,8 @@
   transition: background .04s;
 }
 
-.clMain:hover { background: var(--warm-50, #fafaf8); }
-.clOn .clMain { background: var(--warm-50, #fafaf8); }
+.clMain:hover { background: rgba(0, 0, 0, .025); }
+.clOn .clMain { background: rgba(0, 0, 0, .025); }
 
 .clAv {
   width: 32px;
@@ -310,7 +305,7 @@
   align-items: center;
   justify-content: center;
   padding: 0 5px;
-  background: var(--warm-50, #fafaf8);
+  background: rgba(0, 0, 0, .025);
   border: 1px solid var(--warm-100, #f0f0ee);
   color: var(--ink-500, #7c7b77);
 }
@@ -340,7 +335,7 @@
   transition: background .04s;
 }
 
-.clTask:hover { background: var(--warm-50, #fafaf8); }
+.clTask:hover { background: rgba(0, 0, 0, .025); }
 
 .clTaskDot { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; }
 
@@ -394,7 +389,7 @@
   background: #fff;
 }
 
-.clBtnInvoice:hover { background: var(--warm-50, #fafaf8); border-color: var(--warm-300, #d0cfcb); }
+.clBtnInvoice:hover { background: rgba(0, 0, 0, .025); border-color: var(--warm-300, #d0cfcb); }
 
 .clBtnRemind {
   color: var(--ov);
@@ -431,7 +426,7 @@
 .clAdd:hover {
   border-color: var(--ink-900, #1a1918);
   color: var(--ink-900, #1a1918);
-  background: var(--warm-50, #fafaf8);
+  background: rgba(0, 0, 0, .025);
 }
 
 .clAddIcon { font-size: 13px; font-weight: 300; }
@@ -445,7 +440,7 @@
   transition: background .04s;
 }
 
-.sig:hover { background: var(--warm-50, #fafaf8); }
+.sig:hover { background: rgba(0, 0, 0, .025); }
 
 .sigDot {
   width: 5px;
@@ -502,7 +497,7 @@
 }
 
 .sbQaBtn:hover {
-  background: var(--warm-50, #fafaf8);
+  background: rgba(0, 0, 0, .025);
   border-color: var(--warm-300, #d0cfcb);
 }
 

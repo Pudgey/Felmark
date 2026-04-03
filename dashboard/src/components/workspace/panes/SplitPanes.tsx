@@ -5,12 +5,12 @@ import styles from "./SplitPanes.module.css";
 
 /* ── Surface definitions ── */
 const SURFACES = [
-  { id: "money", label: "Money", icon: "$" },
-  { id: "work", label: "Work", icon: "\u25c6" },
-  { id: "signals", label: "Signals", icon: "\u25ce" },
-  { id: "pipeline", label: "Pipeline", icon: "\u2192" },
-  { id: "clients", label: "Clients", icon: "\u25c7" },
-  { id: "time", label: "Time", icon: "\u25b6" },
+  { id: "money", label: "Money", icon: "$", desc: "Invoices, revenue, payments", action: "+ New Invoice", shortcut: "N", stateVal: "$14.8k", stateLb: "earned", color: "#26a69a" },
+  { id: "work", label: "Work", icon: "\u25c6", desc: "Tasks, timers, subtasks", action: "+ New Task", shortcut: "\u21e7N", stateVal: "5", stateLb: "active", color: "#2962ff" },
+  { id: "signals", label: "Signals", icon: "\u25ce", desc: "Client activity feed", action: "View Signals", shortcut: "S", stateVal: "3", stateLb: "new", color: "#ff9800" },
+  { id: "pipeline", label: "Pipeline", icon: "\u2192", desc: "Deals, proposals, contracts", action: "+ New Deal", shortcut: "P", stateVal: "4", stateLb: "deals", color: "#26a69a" },
+  { id: "clients", label: "Clients", icon: "\u25c7", desc: "Client records & contacts", action: "+ Add Client", shortcut: "C", stateVal: "4", stateLb: "total", color: "#2962ff" },
+  { id: "time", label: "Time", icon: "\u25b6", desc: "Time entries & tracking", action: "\u25b6 Start Timer", shortcut: "T", stateVal: "7.2h", stateLb: "today", color: "#ff9800" },
 ] as const;
 
 type SurfaceId = (typeof SURFACES)[number]["id"];
@@ -59,6 +59,22 @@ const TIME_ENTRIES = [
   { task: "Client call \u2014 scope", client: "Meridian", hours: 0.75, rate: 120 },
   { task: "Onboarding revisions", client: "Bolt Fitness", hours: 3.5, rate: 95 },
 ];
+
+/* ── Empty pane state ── */
+function EmptyPane({ surfaceId }: { surfaceId: SurfaceId }) {
+  const surf = SURFACES.find(s => s.id === surfaceId)!;
+  return (
+    <div className={styles.emptyPane}>
+      <div className={styles.emptyInner}>
+        <div className={styles.emptyGlyph}>{surf.icon}</div>
+        <div className={styles.emptyTitle}>{surf.label}</div>
+        <div className={styles.emptySub}>{surf.desc}</div>
+        <button className={styles.emptyAction}>{surf.action}</button>
+        <div className={styles.emptyShortcut}>Press {surf.shortcut}</div>
+      </div>
+    </div>
+  );
+}
 
 /* ── Pane content components ── */
 
@@ -129,7 +145,7 @@ function WorkPane() {
             {on && (
               <div className={styles.rowExp}>
                 <div className={styles.expRow}>
-                  <div className={styles.expKv}><span className={styles.expL}>Priority</span><span className={styles.expV} style={{ textTransform: "capitalize", color: t.pri === "urgent" ? "var(--ov)" : t.pri === "high" ? "var(--wtc, #c07a1e)" : undefined }}>{t.pri}</span></div>
+                  <div className={styles.expKv}><span className={styles.expL}>Priority</span><span className={styles.expV} style={{ textTransform: "capitalize", color: t.pri === "urgent" ? "#ef5350" : t.pri === "high" ? "#ff9800" : undefined }}>{t.pri}</span></div>
                   <div className={styles.expKv}><span className={styles.expL}>Time</span><span className={styles.expV}>{t.logged} / {t.est}</span></div>
                   {t.subs > 0 && <div className={styles.expKv}><span className={styles.expL}>Subtasks</span><span className={styles.expV}>{t.subsDone}/{t.subs}</span></div>}
                 </div>
@@ -183,7 +199,7 @@ function PipelinePane() {
       </div>
       {PIPELINE_DEALS.map((d, i) => (
         <div key={i} className={styles.row}><div className={styles.rowMain}>
-          <div className={styles.dots}>{[0, 1, 2, 3].map(n => <div key={n} className={`${styles.dot} ${n < d.dots ? styles.dotOn : ""}`} style={n < d.dots ? { background: d.stage === "paid" ? "var(--pos)" : d.stage === "invoice" ? "var(--rdy, #2d7dd2)" : d.stage === "contract" ? "var(--wtc, #c07a1e)" : "var(--ink-400)" } : undefined} />)}</div>
+          <div className={styles.dots}>{[0, 1, 2, 3].map(n => <div key={n} className={`${styles.dot} ${n < d.dots ? styles.dotOn : ""}`} style={n < d.dots ? { background: d.stage === "paid" ? "#26a69a" : d.stage === "invoice" ? "#2962ff" : d.stage === "contract" ? "#ff9800" : "#9598a1" } : undefined} />)}</div>
           <div className={styles.rowInfo}><span className={styles.rowName}>{d.client}</span><span className={styles.rowMeta}>{d.project}</span></div>
           <span className={styles.rowMono}>${d.value.toLocaleString()}</span>
           <span className={`${styles.pill} ${d.stage === "paid" ? styles.paid : d.stage === "invoice" ? styles.pending : styles.neutral}`}>{stageLabels[d.stage]}</span>
@@ -247,35 +263,61 @@ const PANE_MAP: Record<SurfaceId, () => React.ReactNode> = {
   time: TimePane,
 };
 
+/* ── Context hints per surface ── */
+const SURFACE_CONTEXT: Record<SurfaceId, string> = {
+  money: "4 invoices \u00b7 $14,800 earned",
+  work: "5 tasks \u00b7 2 active",
+  signals: "5 signals \u00b7 2 urgent",
+  pipeline: "4 deals \u00b7 $18,500 pipeline",
+  clients: "4 clients \u00b7 1 overdue",
+  time: "7.1h today \u00b7 $833 value",
+};
+
 /* ── Single Pane ── */
-function Pane({ surface, onSurfaceChange }: { surface: SurfaceId; onSurfaceChange: (id: SurfaceId) => void }) {
+function Pane({ surface, onSurfaceChange, focused, onFocus, zoomed, onZoom }: { surface: SurfaceId; onSurfaceChange: (id: SurfaceId) => void; focused?: boolean; onFocus?: () => void; zoomed?: boolean; onZoom?: () => void }) {
   const [dropOpen, setDropOpen] = useState(false);
-  const Content = PANE_MAP[surface];
+  const Content = PANE_MAP[surface] ?? (() => <EmptyPane surfaceId={surface} />);
   const surf = SURFACES.find(s => s.id === surface)!;
 
   return (
-    <div className={styles.pane}>
+    <div className={`${styles.pane} ${focused ? styles.paneFocused : styles.paneInactive}`} onClick={onFocus}>
       <div className={styles.paneHd}>
         <div className={styles.paneHdLeft} onClick={() => setDropOpen(!dropOpen)}>
           <span className={styles.paneIcon}>{surf.icon}</span>
           <span className={styles.paneLabel}>{surf.label}</span>
-          <span className={styles.paneChevron}>&blacktriangledown;</span>
+          <span className={styles.paneChevron}>{"\u25be"}</span>
         </div>
+        <div className={styles.paneHdSep} />
+        <span className={styles.paneHdContext}>{SURFACE_CONTEXT[surface]}</span>
         {dropOpen && (
           <div className={styles.paneDrop}>
-            {SURFACES.map(s => (
+            {SURFACES.map((s, i) => (
               <div key={s.id} className={`${styles.paneDropOpt} ${s.id === surface ? styles.paneDropOn : ""}`}
                 onClick={() => { onSurfaceChange(s.id); setDropOpen(false); }}>
-                <span className={styles.paneDropIcon}>{s.icon}</span>
-                <span>{s.label}</span>
-                {s.id === surface && <span className={styles.paneDropCheck}>&check;</span>}
+                <div className={`${styles.paneDropIconBox} ${s.id === surface ? styles.paneDropIconBoxOn : ""}`}>{s.icon}</div>
+                <div className={styles.paneDropInfo}>
+                  <span className={styles.paneDropName}>{s.label}</span>
+                  <span className={styles.paneDropDesc}>{s.desc}</span>
+                </div>
+                <div className={styles.paneDropState}>
+                  <span className={styles.paneDropStateVal} style={{ color: s.color }}>{s.stateVal}</span>
+                  <span className={styles.paneDropStateLb}>{s.stateLb}</span>
+                </div>
+                <span className={styles.paneDropKey}>{i + 1}</span>
               </div>
             ))}
           </div>
         )}
         <div className={styles.paneHdRight}>
-          <span className={styles.paneHdAction}>&nesear;</span>
-          <span className={styles.paneHdAction}>&times;</span>
+          <div className={styles.paneBeacon}>
+            <span className={`${styles.paneBeaconLabel} ${focused ? styles.paneBeaconLabelOn : styles.paneBeaconLabelOff}`}>
+              {focused ? "active" : "idle"}
+            </span>
+            <div className={`${styles.paneBeaconDot} ${focused ? styles.paneBeaconDotOn : styles.paneBeaconDotOff}`} />
+          </div>
+          <span className={`${styles.paneHdAction} ${zoomed ? styles.paneHdActionActive : ""}`} onClick={e => { e.stopPropagation(); onZoom?.(); }} title={zoomed ? "Restore" : "Maximize"}>{zoomed ? "\u2923" : "\u2922"}</span>
+          <span className={styles.paneHdAction}>{"\u2295"}</span>
+          <span className={styles.paneHdAction}>{"\u00d7"}</span>
         </div>
       </div>
       <div className={styles.paneBody}><Content /></div>
@@ -327,13 +369,42 @@ function HybridHeader({ activeTab, topSurface, bottomSurface }: { activeTab: str
   );
 }
 
+/* ── Layout Presets ── */
+interface LayoutPreset {
+  id: string;
+  label: string;
+  top: SurfaceId;
+  bottom: SurfaceId;
+  ratio: number;
+  key: string;
+}
+
+const PRESETS: LayoutPreset[] = [
+  { id: "daily", label: "Daily", top: "money", bottom: "work", ratio: 50, key: "1" },
+  { id: "finance", label: "Finance", top: "money", bottom: "pipeline", ratio: 55, key: "2" },
+  { id: "hustle", label: "Hustle", top: "work", bottom: "time", ratio: 60, key: "3" },
+  { id: "signals", label: "Signals", top: "signals", bottom: "clients", ratio: 50, key: "4" },
+  { id: "focus", label: "Focus", top: "work", bottom: "work", ratio: 100, key: "5" },
+];
+
 /* ── Split Panes Shell ── */
 export default function SplitPanes() {
   const [topSurface, setTopSurface] = useState<SurfaceId>("money");
   const [bottomSurface, setBottomSurface] = useState<SurfaceId>("work");
   const [splitRatio, setSplitRatio] = useState(50);
   const [dragging, setDragging] = useState(false);
+  const [activePane, setActivePane] = useState<"top" | "bottom">("top");
+  const [zoomedPane, setZoomedPane] = useState<"top" | "bottom" | null>(null);
+  const [activePreset, setActivePreset] = useState<string>("daily");
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const applyPreset = (preset: LayoutPreset) => {
+    setTopSurface(preset.top);
+    setBottomSurface(preset.bottom);
+    setSplitRatio(preset.ratio);
+    setZoomedPane(preset.ratio === 100 ? "top" : null);
+    setActivePreset(preset.id);
+  };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!dragging || !containerRef.current) return;
@@ -352,16 +423,42 @@ export default function SplitPanes() {
     >
       <HybridHeader activeTab="workspace" topSurface={topSurface} bottomSurface={bottomSurface} />
       <div className={styles.panesInner}>
-        <div style={{ flex: `0 0 ${splitRatio}%`, display: "flex", flexDirection: "column", minHeight: 0 }}>
-          <Pane surface={topSurface} onSurfaceChange={setTopSurface} />
+        <div className={styles.paneSlot} style={{
+          flex: zoomedPane === "top" ? "1" : zoomedPane === "bottom" ? "0" : `0 0 ${splitRatio}%`,
+          opacity: zoomedPane === "bottom" ? 0 : 1,
+          overflow: zoomedPane === "bottom" ? "hidden" : undefined,
+          minHeight: zoomedPane === "bottom" ? 0 : undefined,
+        }}>
+          <Pane
+            surface={topSurface}
+            onSurfaceChange={setTopSurface}
+            focused={activePane === "top"}
+            onFocus={() => setActivePane("top")}
+            zoomed={zoomedPane === "top"}
+            onZoom={() => setZoomedPane(zoomedPane === "top" ? null : "top")}
+          />
         </div>
 
-        <div className={styles.splitHandle} onMouseDown={() => setDragging(true)}>
-          <div className={styles.splitHandleBar} />
-        </div>
+        {!zoomedPane && (
+          <div className={`${styles.splitHandle} ${dragging ? styles.splitHandleDragging : ""}`} onMouseDown={() => setDragging(true)}>
+            <div className={styles.splitHandleLine} />
+          </div>
+        )}
 
-        <div style={{ flex: `0 0 ${100 - splitRatio}%`, display: "flex", flexDirection: "column", minHeight: 0 }}>
-          <Pane surface={bottomSurface} onSurfaceChange={setBottomSurface} />
+        <div className={styles.paneSlot} style={{
+          flex: zoomedPane === "bottom" ? "1" : zoomedPane === "top" ? "0" : `0 0 ${100 - splitRatio}%`,
+          opacity: zoomedPane === "top" ? 0 : 1,
+          overflow: zoomedPane === "top" ? "hidden" : undefined,
+          minHeight: zoomedPane === "top" ? 0 : undefined,
+        }}>
+          <Pane
+            surface={bottomSurface}
+            onSurfaceChange={setBottomSurface}
+            focused={activePane === "bottom"}
+            onFocus={() => setActivePane("bottom")}
+            zoomed={zoomedPane === "bottom"}
+            onZoom={() => setZoomedPane(zoomedPane === "bottom" ? null : "bottom")}
+          />
         </div>
       </div>
 
@@ -369,13 +466,22 @@ export default function SplitPanes() {
         <div className={styles.statusLeft}>
           <span className={styles.statusDot} />
           <span className={styles.statusActive}>Connected</span>
-          <span>4 clients</span>
-          <span>7 tasks</span>
-          <span style={{ color: "rgba(217,69,58,.6)" }}>1 overdue</span>
+          <span className={styles.statusSep}>{"\u00b7"}</span>
+          {PRESETS.map(p => (
+            <span
+              key={p.id}
+              className={`${styles.presetPill} ${activePreset === p.id ? styles.presetPillOn : ""}`}
+              onClick={() => applyPreset(p)}
+            >
+              {p.label}
+              <span className={styles.presetKey}>{p.key}</span>
+            </span>
+          ))}
         </div>
         <div className={styles.statusRight}>
-          <span>Workspace v3</span>
-          <span>@felmark/forge</span>
+          <span style={{ color: "rgba(239,83,80,.6)" }}>1 overdue</span>
+          <span>4 clients</span>
+          <span>7 tasks</span>
         </div>
       </div>
     </div>

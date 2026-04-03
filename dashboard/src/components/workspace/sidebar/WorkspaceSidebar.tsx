@@ -41,15 +41,9 @@ export default function WorkspaceSidebar() {
     <div className={styles.sb}>
       {/* Header */}
       <div className={styles.sbHd}>
-        <div className={styles.sbMark}>&#9670;</div>
-        <div className={styles.sbHdInfo}>
-          <div className={styles.sbHdLabel}>Workspace</div>
-          <div className={styles.sbHdName}>Alex Mercer</div>
-        </div>
-        <div className={styles.sbHdActions}>
-          <div className={styles.sbIco}>+</div>
-          <div className={styles.sbIco}>&times;</div>
-        </div>
+        <div className={styles.sbAvatar}>AM</div>
+        <span className={styles.sbHdName}>Alex Mercer</span>
+        <div className={styles.sbIco}>{"\u2699"}</div>
       </div>
 
       {/* Stats with sparklines */}
