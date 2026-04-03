@@ -38,20 +38,8 @@ export default function Rail({ activeItem, overdueCount, onItemClick, zenMode, o
         <svg width="20" height="20" viewBox="0 0 18 18" fill="none"><rect x="2.5" y="3" width="13" height="12" rx="2" stroke="currentColor" strokeWidth="1.2"/><path d="M2.5 7h13M6 1.5v3M12 1.5v3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
       </button>
 
-      <button className={`${styles.btn} ${activeItem === "pipeline" ? styles.active : ""}`} onClick={() => onItemClick("pipeline")} aria-label="Pipeline" title="pipeline">
-        <svg width="20" height="20" viewBox="0 0 18 18" fill="none"><path d="M2 14V8h3v6H2zM7.5 14V5h3v9h-3zM13 14V2h3v12h-3z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-      </button>
-
-      <button className={`${styles.btn} ${activeItem === "services" ? styles.active : ""}`} onClick={() => onItemClick("services")} aria-label="Services" title="services">
-        <svg width="20" height="20" viewBox="0 0 18 18" fill="none"><path d="M2 3h6l7 7-6 6-7-7V3z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/><circle cx="6" cy="7" r="1.2" fill="currentColor"/></svg>
-      </button>
-
       <button className={`${styles.btn} ${activeItem === "templates" ? styles.active : ""}`} onClick={() => onItemClick("templates")} aria-label="Templates" title="templates">
         <svg width="20" height="20" viewBox="0 0 18 18" fill="none"><rect x="3" y="2" width="12" height="14" rx="1.5" stroke="currentColor" strokeWidth="1.2"/><path d="M6 6h6M6 9h4M6 12h5" stroke="currentColor" strokeWidth="1" strokeLinecap="round"/></svg>
-      </button>
-
-      <button className={`${styles.btn} ${activeItem === "finance" ? styles.active : ""}`} onClick={() => onItemClick("finance")} aria-label="Finance" title="finance">
-        <svg width="20" height="20" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6.5" stroke="currentColor" strokeWidth="1.2"/><path d="M9 5.5v7M7 7.5c0-.8.9-1.5 2-1.5s2 .7 2 1.5-.9 1.5-2 1.5-2 .7-2 1.5.9 1.5 2 1.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/></svg>
       </button>
 
       <button className={`${styles.btn} ${activeItem === "forge" ? styles.active : ""}`} onClick={() => onItemClick("forge")} aria-label="Forge Paper" title="forge">

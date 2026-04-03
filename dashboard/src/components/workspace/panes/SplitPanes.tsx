@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import WorkspaceTerminalMount from "@/components/terminal/mounts/WorkspaceTerminalMount";
 import { useWorkspaceNav } from "@/views/routers/WorkspaceRouter";
 import styles from "./SplitPanes.module.css";
@@ -321,7 +321,11 @@ function Pane({ surface, onSurfaceChange, focused, onFocus, zoomed, onZoom, onSp
 
   const closeAll = () => { setDropOpen(false); setSplitOpen(false); setCtxOpen(false); };
 
+  // Close all menus when pane loses focus
+  useEffect(() => { if (!focused) closeAll(); }, [focused]);
+
   const handleContextMenu = (e: React.MouseEvent) => {
+    if (!focused) return; // only active pane gets context menu
     e.preventDefault();
     setCtxPos({ top: e.clientY, left: e.clientX });
     setCtxOpen(true);
@@ -524,31 +528,51 @@ export function HybridHeader({ activeTab, topSurface, bottomSurface }: { activeT
   const bottomLabel = SURFACES.find(s => s.id === bottomSurface)?.label ?? bottomSurface;
   const nav = useWorkspaceNav();
 
-  const handleTabClick = (tabId: string) => {
-    if (tabId === "workspace") nav.closeHub();
-    if (tabId === "hub" && nav.hubTab) nav.openHub(nav.hubTab);
-  };
-
-  // Dynamic tab label for hub
-  const getTabLabel = (t: typeof HEADER_TABS[number]) => {
-    if (t.id === "hub" && nav.hubTab) return `Hub: ${nav.hubTab.clientName}`;
-    return t.label;
-  };
-
   return (
     <div className={styles.header}>
       <div className={styles.headerRow1}>
-        {HEADER_TABS.map(t => (
-          <div key={t.id}
-            className={`${styles.headerTab} ${(t.id === "workspace" && nav.activeView === "workspace") || (t.id === "hub" && nav.activeView === "hub") ? styles.headerTabOn : ""}`}
-            onClick={() => handleTabClick(t.id)}
+        {/* Workspace tab */}
+        <div
+          className={`${styles.headerTab} ${nav.activeView === "workspace" ? styles.headerTabOn : ""}`}
+          onClick={() => nav.goToWorkspace()}
+        >
+          <span className={styles.headerTabIcon}>{"\u25c6"}</span>
+          <span>Workspace</span>
+        </div>
+
+        {/* Dynamic hub tabs — one per client */}
+        {nav.hubTabs.map(ht => (
+          <div key={ht.clientId}
+            className={`${styles.headerTab} ${nav.activeView === "hub" && nav.activeHubId === ht.clientId ? styles.headerTabOn : ""}`}
+            onClick={() => nav.switchHub(ht.clientId)}
           >
-            <span className={styles.headerTabIcon}>{t.icon}</span>
-            <span>{getTabLabel(t)}</span>
-            {"dot" in t && nav.hubTab && t.id === "hub" && <span className={styles.headerTabDot} style={{ background: t.dot }} />}
+            <span className={styles.headerTabIcon}>{"\u25c7"}</span>
+            <span>{ht.clientName}</span>
+            <span className={styles.headerTabClose} onClick={(e) => { e.stopPropagation(); nav.closeHubTab(ht.clientId); }}>{"\u00d7"}</span>
           </div>
         ))}
-        <div className={styles.headerNew}>+</div>
+
+        {/* Dynamic tool tabs — pipeline, finance, etc. */}
+        {nav.toolTabs.map(tt => (
+          <div key={tt.id}
+            className={`${styles.headerTab} ${nav.activeView === "tool" && nav.activeToolId === tt.id ? styles.headerTabOn : ""}`}
+            onClick={() => nav.switchTool(tt.id)}
+          >
+            <span className={styles.headerTabIcon}>{tt.icon}</span>
+            <span>{tt.label}</span>
+            <span className={styles.headerTabClose} onClick={(e) => { e.stopPropagation(); nav.closeToolTab(tt.id); }}>{"\u00d7"}</span>
+          </div>
+        ))}
+
+        {/* New Tab — shows as a tab when active */}
+        {nav.activeView === "newtab" && (
+          <div className={`${styles.headerTab} ${styles.headerTabOn}`}>
+            <span className={styles.headerTabIcon}>+</span>
+            <span>New Tab</span>
+          </div>
+        )}
+
+        <div className={styles.headerNew} onClick={() => nav.openNewTab()}>+</div>
       </div>
       <div className={styles.headerRow2}>
         <span className={styles.promptMark}>{"\u25c6"}</span>

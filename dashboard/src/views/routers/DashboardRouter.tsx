@@ -4,10 +4,7 @@ import type { Workstation, Project } from "@/lib/types";
 import HomeView from "../home";
 import CalendarView from "../calendar";
 import SearchView from "../search";
-import ServicesView from "../services";
-import PipelineView from "../pipeline";
 import TemplatesView from "../templates";
-import FinanceView from "../finance";
 import WireView from "../wire";
 import TeamView from "../team";
 
@@ -54,14 +51,8 @@ export default function DashboardRouter({ railActive, ...props }: DashboardRoute
       );
     case "search":
       return wrap(<SearchView workstations={props.workstations} />);
-    case "services":
-      return wrap(<ServicesView />);
-    case "pipeline":
-      return wrap(<PipelineView />);
     case "templates":
       return wrap(<TemplatesView />);
-    case "finance":
-      return wrap(<FinanceView />);
     case "wire":
       return wrap(<WireView workstations={props.workstations} />);
     case "team":

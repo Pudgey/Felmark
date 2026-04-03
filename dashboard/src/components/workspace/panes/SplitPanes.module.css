@@ -54,6 +54,11 @@
   background: rgba(255, 255, 255, .03);
 }
 
+.headerTabOn:hover {
+  color: var(--ink-900, #1a1918);
+  background: #fff;
+}
+
 .headerTabOn {
   color: var(--ink-900, #1a1918);
   background: #fff;
@@ -68,6 +73,19 @@
   border-radius: 50%;
   flex-shrink: 0;
 }
+
+.headerTabClose {
+  font-size: 10px;
+  margin-left: 4px;
+  opacity: .3;
+  cursor: pointer;
+  transition: opacity .06s;
+  line-height: 1;
+}
+
+.headerTabClose:hover { opacity: .8; }
+.headerTabOn .headerTabClose { opacity: .4; }
+.headerTabOn .headerTabClose:hover { opacity: 1; }
 
 .headerNew {
   display: flex;
