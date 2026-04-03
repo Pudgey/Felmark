@@ -18,7 +18,7 @@
 
 | Agent | Task | Started | Status |
 |-------|------|---------|--------|
-| — | — | — | — |
+| claude-main | Fixed null workstation when switching rail back from Home to workstations | 2026-04-03 | COMPLETE |
 
 ## Recent
 

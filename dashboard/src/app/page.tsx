@@ -253,7 +253,7 @@ export default function Dashboard() {
     archiveProject, archiveCompletedInWorkstation: _archiveCompletedInWorkstation, archiveWorkstation: _archiveWorkstation, restoreProject,
     handleNewTab, handleNewTabInWorkstation,
     handleBlocksChange, handleWordCountChange,
-    navigateRail, handleRenameWorkstation,
+    navigateToWorkstations, navigateRail, handleRenameWorkstation,
   } = actions;
 
   const activeBlocks = blocksMap[activeProject] || EMPTY_BLOCKS;
@@ -268,16 +268,7 @@ export default function Dashboard() {
         overdueCount={overdueCount}
         onItemClick={(item) => {
           if (item === "workstations") {
-            restoreWorkstationContext();
-            // If no active project (e.g. coming back from Home), re-activate last tab or first workstation
-            if (!activeProject) {
-              const firstTab = tabs[0];
-              if (firstTab) {
-                handleTabClick(firstTab.id);
-              } else if (workstations.length > 0) {
-                selectWorkstation(workstations[0].id);
-              }
-            }
+            navigateToWorkstations();
             return;
           }
           if (item === "forge") {

@@ -84,6 +84,7 @@ export interface UseWorkstationActionsResult {
   handleNewTabInWorkstation: (wsId: string) => void;
   handleBlocksChange: (projectId: string, blocks: Block[]) => void;
   handleWordCountChange: (words: number, chars: number) => void;
+  navigateToWorkstations: () => void;
   navigateRail: (item: string) => void;
   handleRenameWorkstation: (wsId: string, name: string) => void;
 }
@@ -298,9 +299,25 @@ export function useWorkstationActions(config: UseWorkstationActionsConfig): UseW
     setCharCount(chars);
   }, [setWordCount, setCharCount]);
 
+  // ── navigateToWorkstations: restore UI + data state when returning to workstations ──
+  const navigateToWorkstationsRef = useRef<() => void>(undefined);
+  const navigateToWorkstationsImpl = () => {
+    restoreWorkstationContext();
+    if (!activeProject) {
+      const firstTab = tabs[0];
+      if (firstTab) {
+        handleTabClick(firstTab.id);
+      } else if (workstations.length > 0) {
+        selectWorkstation(workstations[0].id);
+      }
+    }
+  };
+  useEffect(() => { navigateToWorkstationsRef.current = navigateToWorkstationsImpl; });
+  const navigateToWorkstations = useCallback(() => navigateToWorkstationsRef.current?.(), []);
+
   const navigateRail = useCallback((item: string) => {
     if (item === "workstations") {
-      restoreWorkstationContext();
+      navigateToWorkstations();
       return;
     }
     if (item === "forge") {
@@ -315,7 +332,7 @@ export function useWorkstationActions(config: UseWorkstationActionsConfig): UseW
       updateActiveProject("");
       setSidebarOpen(true);
     }
-  }, [restoreWorkstationContext, openForgeRail, updateTabs, updateActiveProject, setLaunchpadOpen, setRailActive, setSidebarOpen, setActiveWorkstationId]);
+  }, [navigateToWorkstations, openForgeRail, updateTabs, updateActiveProject, setLaunchpadOpen, setRailActive, setSidebarOpen, setActiveWorkstationId]);
 
   const handleRenameWorkstation = useCallback((wsId: string, name: string) => {
     updateWorkstations(prev => prev.map(w => w.id === wsId ? { ...w, client: name, avatar: name[0].toUpperCase() } : w));
@@ -352,6 +369,7 @@ export function useWorkstationActions(config: UseWorkstationActionsConfig): UseW
     handleNewTabInWorkstation,
     handleBlocksChange,
     handleWordCountChange,
+    navigateToWorkstations,
     navigateRail,
     handleRenameWorkstation,
   };
