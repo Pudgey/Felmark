@@ -273,59 +273,67 @@ export default function Dashboard() {
       ) : (
         <ViewRouter
           railActive={railActive}
-          workstations={workstations}
-          tabs={tabs}
-          activeProject={activeProject}
-          activeWorkstationId={activeWorkstationId}
-          activeBlocks={activeBlocks}
-          blocksMap={blocksMap}
-          sidebarOpen={sidebarOpen}
-          wordCount={wordCount}
-          charCount={charCount}
-          overdueCount={overdueCount}
-          splitProject={splitProject}
-          comments={comments}
-          activities={activitiesMap[activeProject] || []}
-          docTemplates={docTemplates}
-          zenMode={zenMode}
-          calendarScrollTarget={calendarScrollTarget}
-          onOpenSidebar={() => setSidebarOpen(true)}
-          onTabClick={handleTabClick}
-          onTabClose={handleTabClose}
-          onNewTab={handleNewTab}
-          onTabRename={handleTabRename}
-          onTabReorder={handleTabReorder}
-          onBlocksChange={handleBlocksChange}
-          onWordCountChange={handleWordCountChange}
-          onSelectProject={selectProject}
-          onSelectWorkstation={selectWorkstation}
-          onNavigateRail={navigateRail}
-          onSaveAsTemplate={() => setShowSaveTemplate(true)}
-          onRenameWorkstation={handleRenameWorkstation}
-          onUpdateProjectDue={updateProjectDue}
-          onCommentsChange={updateComments}
-          onActivitiesChange={(newActivities) => updateActivitiesMap(prev => ({ ...prev, [activeProject]: newActivities }))}
-          onToggleZen={() => setZenMode(prev => !prev)}
-          onSplitOpen={(id) => setSplitProject(id)}
-          onSplitClose={() => setSplitProject(null)}
-          onSplitMakePrimary={() => {
-            if (!splitProject) return;
-            const ws = workstations.find(w => w.projects.some(p => p.id === splitProject));
-            const proj = ws?.projects.find(p => p.id === splitProject);
-            if (ws && proj) {
-              selectProject(proj, ws.client);
-              setSplitProject(null);
-            }
+          workstationProps={{
+            workstations,
+            tabs,
+            activeProject,
+            activeWorkstationId,
+            activeBlocks,
+            blocksMap,
+            sidebarOpen,
+            wordCount,
+            charCount,
+            splitProject,
+            comments,
+            activities: activitiesMap[activeProject] || [],
+            docTemplates,
+            zenMode,
+            onOpenSidebar: () => setSidebarOpen(true),
+            onTabClick: handleTabClick,
+            onTabClose: handleTabClose,
+            onNewTab: handleNewTab,
+            onTabRename: handleTabRename,
+            onTabReorder: handleTabReorder,
+            onBlocksChange: handleBlocksChange,
+            onWordCountChange: handleWordCountChange,
+            onSelectProject: selectProject,
+            onSelectWorkstation: selectWorkstation,
+            onNavigateRail: navigateRail,
+            onSaveAsTemplate: () => setShowSaveTemplate(true),
+            onRenameWorkstation: handleRenameWorkstation,
+            onUpdateProjectDue: updateProjectDue,
+            onCommentsChange: updateComments,
+            onActivitiesChange: (newActivities) => updateActivitiesMap(prev => ({ ...prev, [activeProject]: newActivities })),
+            onToggleZen: () => setZenMode(prev => !prev),
+            onSplitOpen: (id) => setSplitProject(id),
+            onSplitClose: () => setSplitProject(null),
+            onSplitMakePrimary: () => {
+              if (!splitProject) return;
+              const ws = workstations.find(w => w.projects.some(p => p.id === splitProject));
+              const proj = ws?.projects.find(p => p.id === splitProject);
+              if (ws && proj) {
+                selectProject(proj, ws.client);
+                setSplitProject(null);
+              }
+            },
+            onForgeClose: restoreWorkstationContext,
+            onForgeSave: (newBlocks) => {
+              if (activeProject) {
+                updateBlocksMap(prev => ({ ...prev, [activeProject]: newBlocks }));
+              }
+            },
           }}
-          onNewWorkstation={() => setOnboardingName("New Client")}
-          onNewTabInWorkstation={handleNewTabInWorkstation}
-          onCalendarOpenProject={calendarOpenProject}
-          onCalendarScrollComplete={() => setCalendarScrollTarget(null)}
-          onForgeClose={restoreWorkstationContext}
-          onForgeSave={(newBlocks) => {
-            if (activeProject) {
-              updateBlocksMap(prev => ({ ...prev, [activeProject]: newBlocks }));
-            }
+          dashboardProps={{
+            workstations,
+            overdueCount,
+            calendarScrollTarget,
+            onSelectWorkstation: selectWorkstation,
+            onSelectProject: selectProject,
+            onNewTabInWorkstation: handleNewTabInWorkstation,
+            onNewWorkstation: () => setOnboardingName("New Client"),
+            onCalendarOpenProject: calendarOpenProject,
+            onCalendarScrollComplete: () => setCalendarScrollTarget(null),
+            onNavigateRail: navigateRail,
           }}
         />
       )}
