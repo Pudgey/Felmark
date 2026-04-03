@@ -1,5 +1,7 @@
 # workspace/
 
+> **V1 archived to `workspace-v1/`. V2 redesign pending. Current workspace rail redirects to home.**
+
 Workspace — task/project management surface. ClickUp-style: tasks, subtasks, statuses, priorities, time tracking, list/board/timeline views. For freelancers who need to get stuff done.
 
 ## Exports

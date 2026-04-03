@@ -8,13 +8,13 @@ Domain sub-routers. Each router owns one product surface and maps `railActive` t
 |------|-----------|--------|
 | `WorkstationRouter.tsx` | `WorkstationRouter` | Editor + Forge Paper (`workstations`, `forge`) |
 | `DashboardRouter.tsx` | `DashboardRouter` | Home, Calendar, Search, Pipeline, etc. |
-| `WorkspaceRouter.tsx` | `WorkspaceRouter` | Canvas workspace |
+| `WorkspaceRouter.tsx` | `WorkspaceRouter` | Redirects to home (V1 archived, V2 pending) |
 
 ## Dependencies
 
 - `../editor`, `../forge` -- workstation views
 - `../home`, `../calendar`, `../search`, `../services`, `../pipeline`, `../templates`, `../finance`, `../wire`, `../team` -- dashboard views
-- `../workspace` -- workspace view
+- ~~`../workspace` -- workspace view~~ (disconnected — WorkspaceRouter redirects to home)
 - `@/lib/types` -- Block, Workstation, Tab, Project, DocumentTemplate
 - `@/components/comments/CommentPanel` -- Comment type
 - `@/components/activity/ActivityMargin` -- BlockActivity type
