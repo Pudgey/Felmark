@@ -23,8 +23,8 @@
 
 | Agent | Task | Completed |
 |-------|------|-----------|
+| codex-main | Merged the verified editor memory work from the worktree into `main` and prepared it for push to origin. | 2026-04-03 06:59 EDT |
 | codex-main | Wired the live editor persistence flow onto forge memory so hydration, migration, and saves now use one path. | 2026-04-03 06:22 EDT |
 | codex-main | Scaffolded a forge memory boundary so editor persistence, migrations, and debug reporting have one typed home. | 2026-04-03 05:51 EDT |
 | codex-main | Audited the workstation editor, migrated legacy stored blocks, and removed dead `columns` / `data-chips` editor code. | 2026-04-03 05:42 EDT |
 | codex-main | Re-scanned dashboard architecture and rebuilt FORGE_MAP.md so conductor structure matches the current codebase after recent updates | 2026-04-03 05:19 EDT |
-| claude-main | Slop remediation: collapsed page.tsx wrappers, extracted Canvas hooks, extracted persistence + shell hooks from page.tsx, fixed GraphDataEditor stale-closure bug | 2026-04-03 00:15 EDT |

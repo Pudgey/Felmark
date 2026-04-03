@@ -30,7 +30,7 @@ Felmark is actively building the browser-native dashboard experience in `dashboa
 | Forge memory boundary | Active — `forge/memory/` owns editor snapshot load/save, legacy block migration, and debug reporting; `page.tsx` + `usePersistence.ts` are wired to it |
 | Settings surface | Directory exists, no implementation yet |
 | TerminalWelcome | Onboarding/empty state only (no-workstation fallback) |
-| Quality gates | Configured — lint (strict), typecheck, CI on PRs exist, but lint is currently failing locally after recent app changes |
+| Quality gates | Active — strict lint, typecheck, build, and PR CI are configured; merged editor-memory work passed verification before merge |
 | Redesign workflow | Active — prototype-first redesign skill exists in `conductor/skills/redesign/` |
 
 ## Recent Completed Work
@@ -39,6 +39,7 @@ Felmark is actively building the browser-native dashboard experience in `dashboa
 - **Legacy editor block cleanup** — removed dead `columns` / `data-chips` workstation blocks from forge defaults, shared types, and block folders; `loadFromStorage()` now migrates old saved blocks into supported callouts
 - **Forge memory scaffold** — added `dashboard/src/forge/memory/` with typed storage adapter, snapshot model, migration pipeline, and debug report builder for the next persistence refactor
 - **Editor memory wiring** — `page.tsx` now hydrates blocks through `loadEditorMemory()`, legacy snapshots get promoted forward, and `usePersistence.ts` now saves editor state through `saveEditorMemory()`
+- **Main merge** — the verified editor cleanup + memory scaffold + memory wiring work is now merged into `main`
 - **Redesign skill** — added a prototype-first redesign protocol that requires spec + plan before structural UI implementation
 - **Quality gates** — `npm run lint` (strict), `npm run typecheck`, `npm run check`, CI workflow
 - **Lint baseline cleanup** — repo-wide dashboard lint baseline driven to zero
