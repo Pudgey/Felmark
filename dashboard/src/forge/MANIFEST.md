@@ -38,6 +38,7 @@ page.tsx → createForge(stateUpdater) → forge.workstations.create(...)
 | `services/documents.ts` | `createDocumentServices` | setBlocks |
 | `services/tabs.ts` | `createTabServices` | Select, close, reorder |
 | `services/blocks/` | Block factories | `getBlockDefaults` + block type utilities |
+| `memory/` | Editor memory boundary | Centralized load/save, migration, and debug reporting for persisted editor state |
 
 ## Block Factory Registry (services/blocks/)
 
@@ -45,7 +46,7 @@ page.tsx → createForge(stateUpdater) → forge.workstations.create(...)
 |------|-------------------|
 | `core.ts` | Master `getBlockDefaults` switch + shared utilities |
 | `basic.ts` | paragraph, h1, h2, h3, bullet, numbered, todo, quote, divider, callout, code, image, embed, toggle |
-| `content.ts` | deadline, canvas, audio, data-chips, columns |
+| `content.ts` | deadline, canvas, audio |
 | `collaboration.ts` | comment-thread, mention, question, feedback, decision, poll, handoff, signoff, annotation |
 | `visual.ts` | timeline, flow, brand-board, mood-board, wireframe, pull-quote, hero-spotlight, kinetic-type, number-cascade, stat-reveal, value-counter, graph |
 | `money.ts` | money (all sub-types) |

@@ -1,7 +1,6 @@
 "use client";
 
 import type { Tab, Workstation } from "@/lib/types";
-import { STATUS } from "@/lib/constants";
 import styles from "./Breadcrumb.module.css";
 
 interface BreadcrumbProps {

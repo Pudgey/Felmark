@@ -2,8 +2,6 @@ import type { Block } from "@/lib/types";
 import { getDefaultDeadlineData } from "@/components/workstation/editor/blocks/deadline/DeadlineBlock";
 import { getDefaultCanvasData } from "@/components/workstation/editor/blocks/canvas/CanvasBlock";
 import { getDefaultAudioData } from "@/components/workstation/editor/blocks/audio/AudioBlock";
-import { getDefaultDataChipsData } from "@/components/workstation/editor/blocks/data-chips/DataChipsBlock";
-import { getDefaultColumnsData } from "@/components/workstation/editor/blocks/columns/ColumnsBlock";
 
 export const CONTENT_DEFAULTS: Record<string, () => Partial<Block>> = {
   table: () => ({ tableData: { rows: [["Column 1", "Column 2", "Column 3"], ["—", "—", "—"], ["—", "—", "—"]] } }),
@@ -14,8 +12,6 @@ export const CONTENT_DEFAULTS: Record<string, () => Partial<Block>> = {
   bookmark: () => ({ bookmarkData: { url: "https://example.com", title: "Link Title", description: "A brief description.", source: "Website", favicon: "◇" } }),
   audio: () => ({ audioData: getDefaultAudioData() }),
   canvas: () => ({ canvasData: getDefaultCanvasData() }),
-  columns: () => ({ columnsData: getDefaultColumnsData() }),
-  "data-chips": () => ({ dataChipsData: getDefaultDataChipsData() }),
   deadline: () => ({ deadlineData: getDefaultDeadlineData() }),
   deliverable: () => ({
     deliverableData: {

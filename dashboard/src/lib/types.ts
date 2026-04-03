@@ -278,29 +278,6 @@ export interface SignoffData {
   savedFreelancerSig?: SavedSignature;
 }
 
-export type ColumnLayout = "2-col" | "3-col" | "sidebar";
-
-export interface ColumnData {
-  label: string;
-  content: string;
-}
-
-export interface ColumnsBlockData {
-  layout: ColumnLayout;
-  columns: ColumnData[];
-}
-
-export type DataChipType = "revenue" | "deadline" | "status" | "progress" | "timer" | "effective-rate" | "hours" | "budget-burn";
-
-export interface DataChip {
-  type: DataChipType;
-  label: string;
-}
-
-export interface DataChipsBlockData {
-  chips: DataChip[];
-}
-
 export type VisualVariant = "process-flow" | "timeline" | "brand-board" | "mood-board" | "wireframe";
 
 export interface VisualStep { id: string; label: string; desc: string; status: "done" | "current" | "upcoming"; }
@@ -599,8 +576,6 @@ export interface Block {
   annotationData?: AnnotationData;
   canvasData?: CanvasBlockData;
   drawingData?: DrawingBlockData;
-  columnsData?: ColumnsBlockData;
-  dataChipsData?: DataChipsBlockData;
   visualData?: VisualBlockData;
   aiActionData?: AiActionBlockData;
   timelineData?: TimelineBlockData;

@@ -4,6 +4,7 @@ import { useState, useCallback, useRef, useEffect, type SetStateAction, type Dis
 import type { Block, Workstation, Tab, ArchivedProject } from "@/lib/types";
 import type { Comment } from "@/components/comments/CommentPanel";
 import type { BlockActivity } from "@/components/activity/ActivityMargin";
+import { loadEditorMemory, saveEditorMemory } from "../memory";
 
 // ── localStorage persistence ──
 const STORAGE_KEY = "felmark_workspace";
@@ -66,14 +67,8 @@ export function usePersistence({ state, setters }: UsePersistenceConfig): UsePer
   const [saveIndicatorState, setSaveIndicatorState] = useState<"saved" | "saving">("saved");
   const [saveRequestToken, setSaveRequestToken] = useState(0);
   const [lastCompletedSaveToken, setLastCompletedSaveToken] = useState<number | null>(null);
-  const [lastSavedAt, setLastSavedAt] = useState<number | null>(() => {
-    const ls = loadFromStorage("lastSavedAt", null);
-    return typeof ls === "number" ? ls : null;
-  });
-  const [saveStatusTick, setSaveStatusTick] = useState(() => {
-    const ls = loadFromStorage("lastSavedAt", null);
-    return typeof ls === "number" ? ls : 0;
-  });
+  const [lastSavedAt, setLastSavedAt] = useState<number | null>(() => loadEditorMemory().snapshot.savedAt);
+  const [saveStatusTick, setSaveStatusTick] = useState(() => loadEditorMemory().snapshot.savedAt ?? 0);
 
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -94,13 +89,12 @@ export function usePersistence({ state, setters }: UsePersistenceConfig): UsePer
   const persistWorkstationState = useCallback((saveToken: number) => {
     const savedAt = Date.now();
     saveToStorage("workstations", workstations);
-    saveToStorage("blocksMap", blocksMap);
+    saveEditorMemory(blocksMap, savedAt);
     saveToStorage("tabs", tabs);
     saveToStorage("archived", archived);
     saveToStorage("comments", comments);
     saveToStorage("activitiesMap", activitiesMap);
     saveToStorage("activeProject", activeProject);
-    saveToStorage("lastSavedAt", savedAt);
     setLastSavedAt(savedAt);
     setSaveStatusTick(savedAt);
     setLastCompletedSaveToken(saveToken);
