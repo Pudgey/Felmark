@@ -38,7 +38,7 @@ page.tsx → createForge(stateUpdater) → forge.workstations.create(...)
 | `services/documents.ts` | `createDocumentServices` | setBlocks |
 | `services/tabs.ts` | `createTabServices` | Select, close, reorder |
 | `services/blocks/` | Block factories | `getBlockDefaults` + block type utilities |
-| `memory/` | Editor memory boundary | Centralized load/save, migration, and debug reporting for persisted editor state |
+| `memory/editor/` | Editor memory boundary | Centralized load/save, migration, and debug reporting for persisted editor state (routed through `memory/index.ts` barrel) |
 
 ## Block Factory Registry (services/blocks/)
 
