@@ -11,6 +11,7 @@ const SURFACES = [
   { id: "pipeline", label: "Pipeline", icon: "\u2192", desc: "Deals, proposals, contracts", action: "+ New Deal", shortcut: "P", stateVal: "4", stateLb: "deals", color: "#26a69a" },
   { id: "clients", label: "Clients", icon: "\u25c7", desc: "Client records & contacts", action: "+ Add Client", shortcut: "C", stateVal: "4", stateLb: "total", color: "#2962ff" },
   { id: "time", label: "Time", icon: "\u25b6", desc: "Time entries & tracking", action: "\u25b6 Start Timer", shortcut: "T", stateVal: "7.2h", stateLb: "today", color: "#ff9800" },
+  { id: "terminal", label: "Terminal", icon: "\u25b8", desc: "Forge command line", action: "Open Terminal", shortcut: "`", stateVal: "forge", stateLb: "ready", color: "#26a69a" },
 ] as const;
 
 type SurfaceId = (typeof SURFACES)[number]["id"];
@@ -254,6 +255,118 @@ function TimePane() {
   );
 }
 
+function TerminalPane() {
+  const [expanded, setExpanded] = useState<string | null>("tb2");
+  return (
+    <div className={styles.termSession}>
+      {/* Tab strip */}
+      <div className={styles.termTabs}>
+        <span className={`${styles.termTab} ${styles.termTabOn}`}>forge</span>
+        <span className={styles.termTab}>logs</span>
+        <span className={styles.termTab}>ai</span>
+      </div>
+
+      {/* Output stream */}
+      <div className={styles.termStream}>
+        {/* Notification */}
+        <div className={`${styles.termNotif} ${styles.termNotifSuccess}`}>
+          <span className={styles.termNotifIcon}>{"\u2713"}</span>
+          <div className={styles.termNotifBody}>
+            <span className={styles.termNotifTitle}>Payment: $2,200 from Nora Kim</span>
+          </div>
+          <span className={styles.termNotifTime}>14:30</span>
+        </div>
+
+        {/* Status block */}
+        <div className={`${styles.termBlock} ${expanded === "tb1" ? styles.termBlockExp : ""}`}>
+          <div className={styles.termBlockHd} onClick={() => setExpanded(expanded === "tb1" ? null : "tb1")}>
+            <div className={`${styles.termBlockDot} ${styles.termBlockDotOk}`} />
+            <span className={styles.termBlockCmd}><span className={styles.termCmdName}>status</span></span>
+            <span className={styles.termBlockTime}>14:32</span>
+            <span className={styles.termBlockDur}>42ms</span>
+            <span className={styles.termBlockChev}>{expanded === "tb1" ? "\u25be" : "\u203a"}</span>
+          </div>
+          {expanded === "tb1" && (
+            <div className={styles.termBlockBody}>
+              <div className={styles.termOut}>
+                <span className={styles.termOutOk}>{"\u25cf"} Connected</span> {"\u00b7"} 4 clients {"\u00b7"} 7 tasks {"\u00b7"} <span className={styles.termOutErr}>1 overdue</span>
+              </div>
+              <div className={styles.termSummary}>
+                <span className={styles.termSummaryItem}><span className={styles.termSummaryDot} style={{ background: "#26a69a" }} /><span style={{ color: "#26a69a", fontWeight: 600 }}>$14.8k</span> earned</span>
+                <span className={styles.termSummaryItem}><span className={styles.termSummaryDot} style={{ background: "#ef5350" }} /><span style={{ color: "#ef5350", fontWeight: 600 }}>$9.6k</span> owed</span>
+                <span className={styles.termSummaryItem}><span className={styles.termSummaryDot} style={{ background: "#ff9800" }} /><span style={{ color: "#ff9800", fontWeight: 600 }}>74%</span> goal</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Invoice block */}
+        <div className={`${styles.termBlock} ${expanded === "tb2" ? styles.termBlockExp : ""}`}>
+          <div className={styles.termBlockHd} onClick={() => setExpanded(expanded === "tb2" ? null : "tb2")}>
+            <div className={`${styles.termBlockDot} ${styles.termBlockDotOk}`} />
+            <span className={styles.termBlockCmd}><span className={styles.termCmdName}>invoice</span> <span className={styles.termCmdArg}>list</span> <span className={styles.termCmdFlag}>--overdue</span></span>
+            <span className={styles.termBlockTime}>14:31</span>
+            <span className={styles.termBlockDur}>128ms</span>
+            <span className={styles.termBlockChev}>{expanded === "tb2" ? "\u25be" : "\u203a"}</span>
+          </div>
+          {expanded === "tb2" && (
+            <div className={styles.termBlockBody}>
+              <div className={styles.termOut}>
+                <span className={styles.termOutErr}>1 invoice overdue</span> {"\u00b7"} total outstanding: <span className={styles.termOutWarn}>$9,600</span>
+              </div>
+              <div className={styles.termTable}>
+                <div className={styles.termTableRow}>
+                  <span className={styles.termTableCell}>#047</span>
+                  <span className={styles.termTableCell}>Bolt Fitness</span>
+                  <span className={`${styles.termTableCell} ${styles.termOutErr}`}>$4,000</span>
+                  <span className={`${styles.termTableCell} ${styles.termOutErr}`}>4d late</span>
+                  <span className={`${styles.termTableCell} ${styles.termOutErr}`}>overdue</span>
+                </div>
+              </div>
+              <div className={styles.termActions}>
+                <button className={`${styles.termBtn} ${styles.termBtnDanger}`}>invoice remind bolt</button>
+                <button className={styles.termBtn}>invoice list --all</button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* AI suggestion */}
+        <div className={styles.termAi}>
+          <div className={styles.termAiHd}>
+            <span className={styles.termAiIcon}>{"\u25c6"}</span>
+            <span className={styles.termAiLabel}>Forge AI</span>
+          </div>
+          <div className={styles.termAiBody}>
+            <span className={styles.termAiText}><strong>Bolt Fitness</strong> is 4 days overdue on $4,000. Draft a reminder?</span>
+            <div className={styles.termAiActions}>
+              <button className={`${styles.termBtn} ${styles.termBtnPrimary}`}>{"\u2713"} Draft</button>
+              <button className={styles.termBtn}>Skip</button>
+            </div>
+          </div>
+        </div>
+
+        {/* Running timer */}
+        <div className={styles.termBlock}>
+          <div className={styles.termBlockHd}>
+            <div className={`${styles.termBlockDot} ${styles.termBlockDotRun}`} />
+            <span className={styles.termBlockCmd}><span className={styles.termCmdName}>timer</span> <span className={styles.termCmdArg}>start</span> <span className={styles.termCmdFlag}>&quot;Color palette&quot;</span></span>
+            <span className={styles.termBlockDur} style={{ color: "#26a69a" }}>{"\u25cf"} 1:22:14</span>
+          </div>
+        </div>
+
+        {/* Input prompt */}
+        <div className={styles.termPrompt}>
+          <span className={styles.termPromptUser}>alex</span>
+          <span className={styles.termPromptSep}>{"\u203a"}</span>
+          <span className={styles.termPromptPath}>forge</span>
+          <span className={styles.termPromptCursor} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const PANE_MAP: Record<SurfaceId, () => React.ReactNode> = {
   money: MoneyPane,
   work: WorkPane,
@@ -261,6 +374,7 @@ const PANE_MAP: Record<SurfaceId, () => React.ReactNode> = {
   pipeline: PipelinePane,
   clients: ClientsPane,
   time: TimePane,
+  terminal: TerminalPane,
 };
 
 /* ── Context hints per surface ── */
@@ -271,18 +385,35 @@ const SURFACE_CONTEXT: Record<SurfaceId, string> = {
   pipeline: "4 deals \u00b7 $18,500 pipeline",
   clients: "4 clients \u00b7 1 overdue",
   time: "7.1h today \u00b7 $833 value",
+  terminal: "forge \u00b7 ready",
 };
 
 /* ── Single Pane ── */
-function Pane({ surface, onSurfaceChange, focused, onFocus, zoomed, onZoom }: { surface: SurfaceId; onSurfaceChange: (id: SurfaceId) => void; focused?: boolean; onFocus?: () => void; zoomed?: boolean; onZoom?: () => void }) {
+function Pane({ surface, onSurfaceChange, focused, onFocus, zoomed, onZoom, onSplit, onClose, canClose, canSplit, canFSplit, canRowSplit }: {
+  surface: SurfaceId;
+  onSurfaceChange: (id: SurfaceId) => void;
+  focused?: boolean;
+  onFocus?: () => void;
+  zoomed?: boolean;
+  onZoom?: () => void;
+  onSplit?: (dir: "above" | "below" | "left" | "right" | "f-left" | "f-right") => void;
+  canFSplit?: boolean;
+  canRowSplit?: boolean;
+  onClose?: () => void;
+  canClose?: boolean;
+  canSplit?: boolean;
+}) {
   const [dropOpen, setDropOpen] = useState(false);
+  const [splitOpen, setSplitOpen] = useState(false);
+  const [splitPos, setSplitPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+  const [dropPos, setDropPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const Content = PANE_MAP[surface] ?? (() => <EmptyPane surfaceId={surface} />);
   const surf = SURFACES.find(s => s.id === surface)!;
 
   return (
     <div className={`${styles.pane} ${focused ? styles.paneFocused : styles.paneInactive}`} onClick={onFocus}>
       <div className={styles.paneHd}>
-        <div className={styles.paneHdLeft} onClick={() => setDropOpen(!dropOpen)}>
+        <div className={styles.paneHdLeft} onClick={(e) => { const rect = e.currentTarget.getBoundingClientRect(); setDropPos({ top: rect.bottom + 2, left: rect.left }); setDropOpen(!dropOpen); setSplitOpen(false); }}>
           <span className={styles.paneIcon}>{surf.icon}</span>
           <span className={styles.paneLabel}>{surf.label}</span>
           <span className={styles.paneChevron}>{"\u25be"}</span>
@@ -290,7 +421,7 @@ function Pane({ surface, onSurfaceChange, focused, onFocus, zoomed, onZoom }: { 
         <div className={styles.paneHdSep} />
         <span className={styles.paneHdContext}>{SURFACE_CONTEXT[surface]}</span>
         {dropOpen && (
-          <div className={styles.paneDrop}>
+          <div className={styles.paneDrop} style={{ position: "fixed", top: dropPos.top, left: dropPos.left }}>
             {SURFACES.map((s, i) => (
               <div key={s.id} className={`${styles.paneDropOpt} ${s.id === surface ? styles.paneDropOn : ""}`}
                 onClick={() => { onSurfaceChange(s.id); setDropOpen(false); }}>
@@ -308,6 +439,82 @@ function Pane({ surface, onSurfaceChange, focused, onFocus, zoomed, onZoom }: { 
             ))}
           </div>
         )}
+        {splitOpen && canSplit && (
+          <div className={styles.splitDrop} style={{ position: "fixed", top: splitPos.top, left: splitPos.left }}>
+            <div className={styles.splitDropOpt} onClick={() => { onSplit?.("above"); setSplitOpen(false); }}>
+              <div className={styles.splitDropPreview}>
+                <div className={styles.splitDropNew} />
+                <div className={styles.splitDropCur}>{surf.icon}</div>
+              </div>
+              <div className={styles.splitDropInfo}>
+                <span className={styles.splitDropLabel}>Split above</span>
+                <span className={styles.splitDropKey}>{"\u21e7\u2191"}</span>
+              </div>
+            </div>
+            <div className={styles.splitDropOpt} onClick={() => { onSplit?.("below"); setSplitOpen(false); }}>
+              <div className={styles.splitDropPreview}>
+                <div className={styles.splitDropCur}>{surf.icon}</div>
+                <div className={styles.splitDropNew} />
+              </div>
+              <div className={styles.splitDropInfo}>
+                <span className={styles.splitDropLabel}>Split below</span>
+                <span className={styles.splitDropKey}>{"\u21e7\u2193"}</span>
+              </div>
+            </div>
+            {canRowSplit && <>
+              <div className={styles.splitDropSep} />
+              <div className={styles.splitDropOpt} onClick={() => { onSplit?.("left"); setSplitOpen(false); }}>
+                <div className={`${styles.splitDropPreview} ${styles.splitDropPreviewH}`}>
+                  <div className={styles.splitDropNew} />
+                  <div className={styles.splitDropCur}>{surf.icon}</div>
+                </div>
+                <div className={styles.splitDropInfo}>
+                  <span className={styles.splitDropLabel}>Split left</span>
+                  <span className={styles.splitDropKey}>{"\u21e7\u2190"}</span>
+                </div>
+              </div>
+              <div className={styles.splitDropOpt} onClick={() => { onSplit?.("right"); setSplitOpen(false); }}>
+                <div className={`${styles.splitDropPreview} ${styles.splitDropPreviewH}`}>
+                  <div className={styles.splitDropCur}>{surf.icon}</div>
+                  <div className={styles.splitDropNew} />
+                </div>
+                <div className={styles.splitDropInfo}>
+                  <span className={styles.splitDropLabel}>Split right</span>
+                  <span className={styles.splitDropKey}>{"\u21e7\u2192"}</span>
+                </div>
+              </div>
+            </>}
+            {canFSplit && <>
+              <div className={styles.splitDropSep} />
+              <div className={styles.splitDropOpt} onClick={() => { onSplit?.("f-left"); setSplitOpen(false); }}>
+                <div className={`${styles.splitDropPreview} ${styles.splitDropPreviewH}`}>
+                  <div className={styles.splitDropNew} />
+                  <div className={styles.splitDropCurStack}>
+                    <div className={styles.splitDropCurMini} />
+                    <div className={styles.splitDropCurMini} />
+                  </div>
+                </div>
+                <div className={styles.splitDropInfo}>
+                  <span className={styles.splitDropLabel}>Full left</span>
+                  <span className={styles.splitDropKey}>F{"\u2190"}</span>
+                </div>
+              </div>
+              <div className={styles.splitDropOpt} onClick={() => { onSplit?.("f-right"); setSplitOpen(false); }}>
+                <div className={`${styles.splitDropPreview} ${styles.splitDropPreviewH}`}>
+                  <div className={styles.splitDropCurStack}>
+                    <div className={styles.splitDropCurMini} />
+                    <div className={styles.splitDropCurMini} />
+                  </div>
+                  <div className={styles.splitDropNew} />
+                </div>
+                <div className={styles.splitDropInfo}>
+                  <span className={styles.splitDropLabel}>Full right</span>
+                  <span className={styles.splitDropKey}>F{"\u2192"}</span>
+                </div>
+              </div>
+            </>}
+          </div>
+        )}
         <div className={styles.paneHdRight}>
           <div className={styles.paneBeacon}>
             <span className={`${styles.paneBeaconLabel} ${focused ? styles.paneBeaconLabelOn : styles.paneBeaconLabelOff}`}>
@@ -316,8 +523,10 @@ function Pane({ surface, onSurfaceChange, focused, onFocus, zoomed, onZoom }: { 
             <div className={`${styles.paneBeaconDot} ${focused ? styles.paneBeaconDotOn : styles.paneBeaconDotOff}`} />
           </div>
           <span className={`${styles.paneHdAction} ${zoomed ? styles.paneHdActionActive : ""}`} onClick={e => { e.stopPropagation(); onZoom?.(); }} title={zoomed ? "Restore" : "Maximize"}>{zoomed ? "\u2923" : "\u2922"}</span>
-          <span className={styles.paneHdAction}>{"\u2295"}</span>
-          <span className={styles.paneHdAction}>{"\u00d7"}</span>
+          {canSplit && !zoomed && (
+            <span className={styles.paneHdAction} onClick={e => { e.stopPropagation(); const rect = e.currentTarget.getBoundingClientRect(); setSplitPos({ top: rect.bottom + 2, left: rect.right - 180 }); setSplitOpen(!splitOpen); setDropOpen(false); }} title="Split pane">{"\u2295"}</span>
+          )}
+          {canClose && <span className={`${styles.paneHdAction} ${styles.paneHdActionClose}`} onClick={e => { e.stopPropagation(); onClose?.(); }} title="Close pane">{"\u00d7"}</span>}
         </div>
       </div>
       <div className={styles.paneBody}><Content /></div>
@@ -388,79 +597,279 @@ const PRESETS: LayoutPreset[] = [
 ];
 
 /* ── Split Panes Shell ── */
+
+interface PaneState {
+  id: string;
+  surface: SurfaceId;
+}
+
+interface StackRow {
+  left: PaneState;
+  right: PaneState | null;
+}
+
+interface PaneLayout {
+  fLeft: PaneState | null;
+  fRight: PaneState | null;
+  stack: StackRow[];
+}
+
+let _paneId = 0;
+const nextPaneId = () => `pane-${++_paneId}`;
+
+function countPanes(layout: PaneLayout): number {
+  let n = 0;
+  if (layout.fLeft) n++;
+  if (layout.fRight) n++;
+  for (const row of layout.stack) { n++; if (row.right) n++; }
+  return n;
+}
+
+function allPanes(layout: PaneLayout): PaneState[] {
+  const out: PaneState[] = [];
+  if (layout.fLeft) out.push(layout.fLeft);
+  for (const row of layout.stack) { out.push(row.left); if (row.right) out.push(row.right); }
+  if (layout.fRight) out.push(layout.fRight);
+  return out;
+}
+
 export default function SplitPanes() {
-  const [topSurface, setTopSurface] = useState<SurfaceId>("money");
-  const [bottomSurface, setBottomSurface] = useState<SurfaceId>("work");
-  const [splitRatio, setSplitRatio] = useState(50);
-  const [dragging, setDragging] = useState(false);
-  const [activePane, setActivePane] = useState<"top" | "bottom">("top");
-  const [zoomedPane, setZoomedPane] = useState<"top" | "bottom" | null>(null);
+  const [layout, setLayout] = useState<PaneLayout>({
+    fLeft: null,
+    fRight: null,
+    stack: [
+      { left: { id: nextPaneId(), surface: "money" }, right: null },
+      { left: { id: nextPaneId(), surface: "work" }, right: null },
+    ],
+  });
+  const [activeId, setActiveId] = useState<string>(layout.stack[0].left.id);
+  const [zoomedId, setZoomedId] = useState<string | null>(null);
   const [activePreset, setActivePreset] = useState<string>("daily");
+  const [dragging, setDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const MAX_PANES = 4;
+  const total = countPanes(layout);
+  const canSplitMore = total < MAX_PANES;
+  const hasFLeft = layout.fLeft !== null;
+  const hasFRight = layout.fRight !== null;
+
+  const changeSurface = (id: string, surface: SurfaceId) => {
+    setLayout(prev => ({
+      ...prev,
+      fLeft: prev.fLeft?.id === id ? { ...prev.fLeft, surface } : prev.fLeft,
+      fRight: prev.fRight?.id === id ? { ...prev.fRight, surface } : prev.fRight,
+      stack: prev.stack.map(row => ({
+        left: row.left.id === id ? { ...row.left, surface } : row.left,
+        right: row.right?.id === id ? { ...row.right, surface } : row.right,
+      })),
+    }));
+  };
+
+  const splitPane = (targetId: string, dir: "above" | "below" | "left" | "right" | "f-left" | "f-right") => {
+    if (!canSplitMore) return;
+    const newPane: PaneState = { id: nextPaneId(), surface: "signals" };
+
+    setLayout(prev => {
+      const next = { ...prev, stack: prev.stack.map(r => ({ ...r })) };
+
+      if (dir === "f-left") {
+        if (next.fLeft) return prev;
+        next.fLeft = newPane;
+        return next;
+      }
+      if (dir === "f-right") {
+        if (next.fRight) return prev;
+        next.fRight = newPane;
+        return next;
+      }
+
+      // Find which row contains the target
+      const rowIdx = next.stack.findIndex(r => r.left.id === targetId || r.right?.id === targetId);
+      if (rowIdx === -1) return prev;
+
+      if (dir === "above") {
+        next.stack.splice(rowIdx, 0, { left: newPane, right: null });
+        return next;
+      }
+      if (dir === "below") {
+        next.stack.splice(rowIdx + 1, 0, { left: newPane, right: null });
+        return next;
+      }
+      if (dir === "left") {
+        const row = next.stack[rowIdx];
+        if (row.right) return prev; // already split
+        next.stack[rowIdx] = { left: newPane, right: row.left };
+        return next;
+      }
+      if (dir === "right") {
+        const row = next.stack[rowIdx];
+        if (row.right) return prev;
+        next.stack[rowIdx] = { left: row.left, right: newPane };
+        return next;
+      }
+      return prev;
+    });
+    setActiveId(newPane.id);
+    setZoomedId(null);
+    setActivePreset("");
+  };
+
+  const closePane = (id: string) => {
+    if (total <= 1) return;
+    setLayout(prev => {
+      const next = { ...prev, stack: prev.stack.map(r => ({ ...r })) };
+
+      if (next.fLeft?.id === id) { next.fLeft = null; return next; }
+      if (next.fRight?.id === id) { next.fRight = null; return next; }
+
+      for (let i = 0; i < next.stack.length; i++) {
+        const row = next.stack[i];
+        if (row.left.id === id) {
+          if (row.right) {
+            // Left closed, right becomes the row
+            next.stack[i] = { left: row.right, right: null };
+          } else {
+            // Only pane in row, remove the row
+            next.stack.splice(i, 1);
+          }
+          return next;
+        }
+        if (row.right?.id === id) {
+          next.stack[i] = { left: row.left, right: null };
+          return next;
+        }
+      }
+      return prev;
+    });
+    if (activeId === id) {
+      const all = allPanes(layout).filter(p => p.id !== id);
+      setActiveId(all[0]?.id ?? "");
+    }
+    if (zoomedId === id) setZoomedId(null);
+    setActivePreset("");
+  };
+
   const applyPreset = (preset: LayoutPreset) => {
-    setTopSurface(preset.top);
-    setBottomSurface(preset.bottom);
-    setSplitRatio(preset.ratio);
-    setZoomedPane(preset.ratio === 100 ? "top" : null);
+    const p1 = nextPaneId();
+    const p2 = nextPaneId();
+    if (preset.ratio === 100) {
+      setLayout({ fLeft: null, fRight: null, stack: [{ left: { id: p1, surface: preset.top }, right: null }] });
+    } else {
+      setLayout({
+        fLeft: null, fRight: null,
+        stack: [
+          { left: { id: p1, surface: preset.top }, right: null },
+          { left: { id: p2, surface: preset.bottom }, right: null },
+        ],
+      });
+    }
+    setActiveId(p1);
+    setZoomedId(null);
     setActivePreset(preset.id);
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!dragging || !containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const pct = ((e.clientY - rect.top) / rect.height) * 100;
-    setSplitRatio(Math.min(80, Math.max(20, pct)));
+  const topSurface = layout.stack[0]?.left.surface ?? "money";
+  const bottomSurface = layout.stack[1]?.left.surface ?? topSurface;
+
+  const renderPane = (p: PaneState, rowHasRight: boolean) => {
+    const isZoomed = zoomedId === p.id;
+    const isHidden = zoomedId !== null && zoomedId !== p.id;
+    // Can split left/right only if this row doesn't already have two panes
+    const canRowSplitHere = !rowHasRight;
+    return (
+      <div key={p.id} className={styles.paneSlot} style={{
+        flex: isZoomed ? "1" : isHidden ? "0 0 0px" : "1 1 0px",
+        opacity: isHidden ? 0 : 1,
+      }}>
+        <Pane
+          surface={p.surface}
+          onSurfaceChange={(s) => changeSurface(p.id, s)}
+          focused={activeId === p.id}
+          onFocus={() => setActiveId(p.id)}
+          zoomed={isZoomed}
+          onZoom={() => setZoomedId(isZoomed ? null : p.id)}
+          onSplit={(dir) => splitPane(p.id, dir)}
+          onClose={() => closePane(p.id)}
+          canClose={total > 1}
+          canSplit={canSplitMore}
+          canFSplit={canSplitMore && !hasFLeft && !hasFRight}
+          canRowSplit={canSplitMore && canRowSplitHere}
+        />
+      </div>
+    );
   };
 
   return (
     <div
       className={styles.panes}
       ref={containerRef}
-      onMouseMove={handleMouseMove}
       onMouseUp={() => setDragging(false)}
       onMouseLeave={() => setDragging(false)}
     >
       <HybridHeader activeTab="workspace" topSurface={topSurface} bottomSurface={bottomSurface} />
-      <div className={styles.panesInner}>
-        <div className={styles.paneSlot} style={{
-          flex: zoomedPane === "top" ? "1" : zoomedPane === "bottom" ? "0" : `0 0 ${splitRatio}%`,
-          opacity: zoomedPane === "bottom" ? 0 : 1,
-          overflow: zoomedPane === "bottom" ? "hidden" : undefined,
-          minHeight: zoomedPane === "bottom" ? 0 : undefined,
-        }}>
-          <Pane
-            surface={topSurface}
-            onSurfaceChange={setTopSurface}
-            focused={activePane === "top"}
-            onFocus={() => setActivePane("top")}
-            zoomed={zoomedPane === "top"}
-            onZoom={() => setZoomedPane(zoomedPane === "top" ? null : "top")}
-          />
-        </div>
+      {(() => {
+        // When zoomed, find where the zoomed pane lives and render only that
+        if (zoomedId) {
+          // Check F-columns
+          if (layout.fLeft?.id === zoomedId) {
+            return <div className={styles.panesOuter}><div className={styles.panesInner}>{renderPane(layout.fLeft, false)}</div></div>;
+          }
+          if (layout.fRight?.id === zoomedId) {
+            return <div className={styles.panesOuter}><div className={styles.panesInner}>{renderPane(layout.fRight, false)}</div></div>;
+          }
+          // Check stack
+          for (const row of layout.stack) {
+            if (row.left.id === zoomedId) {
+              return <div className={styles.panesOuter}><div className={styles.panesInner}><div className={styles.paneSlot} style={{ flex: "1 1 0px" }}>{renderPane(row.left, false)}</div></div></div>;
+            }
+            if (row.right?.id === zoomedId) {
+              return <div className={styles.panesOuter}><div className={styles.panesInner}><div className={styles.paneSlot} style={{ flex: "1 1 0px" }}>{renderPane(row.right, false)}</div></div></div>;
+            }
+          }
+        }
 
-        {!zoomedPane && (
-          <div className={`${styles.splitHandle} ${dragging ? styles.splitHandleDragging : ""}`} onMouseDown={() => setDragging(true)}>
-            <div className={styles.splitHandleLine} />
+        // Normal (non-zoomed) rendering
+        return (
+          <div className={styles.panesOuter}>
+            {/* F-Left column */}
+            {layout.fLeft && (
+              <div className={styles.fColumn}>
+                {renderPane(layout.fLeft, false)}
+              </div>
+            )}
+
+            {/* Center stack */}
+            <div className={styles.panesInner}>
+              {layout.stack.map((row, i) => (
+                <div key={row.left.id} className={styles.paneSlot} style={{ flex: "1 1 0px" }}>
+                  {i > 0 && (
+                    <div className={`${styles.splitHandle} ${dragging ? styles.splitHandleDragging : ""}`}>
+                      <div className={styles.splitHandleLine} />
+                    </div>
+                  )}
+                  {row.right ? (
+                    <div className={styles.rowPair}>
+                      {renderPane(row.left, true)}
+                      <div className={styles.vSplitHandle} />
+                      {renderPane(row.right, true)}
+                    </div>
+                  ) : (
+                    renderPane(row.left, false)
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* F-Right column */}
+            {layout.fRight && (
+              <div className={styles.fColumn}>
+                {renderPane(layout.fRight, false)}
+              </div>
+            )}
           </div>
-        )}
-
-        <div className={styles.paneSlot} style={{
-          flex: zoomedPane === "bottom" ? "1" : zoomedPane === "top" ? "0" : `0 0 ${100 - splitRatio}%`,
-          opacity: zoomedPane === "top" ? 0 : 1,
-          overflow: zoomedPane === "top" ? "hidden" : undefined,
-          minHeight: zoomedPane === "top" ? 0 : undefined,
-        }}>
-          <Pane
-            surface={bottomSurface}
-            onSurfaceChange={setBottomSurface}
-            focused={activePane === "bottom"}
-            onFocus={() => setActivePane("bottom")}
-            zoomed={zoomedPane === "bottom"}
-            onZoom={() => setZoomedPane(zoomedPane === "bottom" ? null : "bottom")}
-          />
-        </div>
-      </div>
+        );
+      })()}
 
       <div className={styles.statusBar}>
         <div className={styles.statusLeft}>
