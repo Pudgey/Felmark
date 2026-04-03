@@ -16,6 +16,7 @@ interface DocumentSurfaceProps {
   activeProject: string;
   workstations: Workstation[];
   breathe: boolean;
+  rightPanelOpen?: boolean;
   splitProject?: string | null;
   handlePageClick: (e: React.MouseEvent<HTMLDivElement>) => void;
   onUpdateProjectDue?: (projectId: string, due: string | null) => void;
@@ -74,6 +75,7 @@ export default function DocumentSurface({
   activeProject,
   workstations,
   breathe,
+  rightPanelOpen,
   splitProject,
   handlePageClick,
   onUpdateProjectDue,
@@ -125,7 +127,7 @@ export default function DocumentSurface({
 
   return (
     <div className={styles.editor} ref={editorRef} onMouseDown={() => { onCloseConvo(); onCloseComment(); }} style={{ flex: 1 }}>
-      <div className={`${styles.page} ${breathe ? styles.pageBreathe : ""} ${splitProject ? styles.pageSplit : ""}`} onClick={handlePageClick}>
+      <div className={`${styles.page} ${breathe ? styles.pageBreathe : ""} ${breathe && rightPanelOpen ? styles.pageBreathePanel : ""} ${splitProject ? styles.pageSplit : ""}`} onClick={handlePageClick}>
         {/* Project meta bar with due date picker */}
         {activeWs && (() => {
           const project = activeWs.projects.find(p => p.id === activeProject);

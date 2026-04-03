@@ -18,7 +18,7 @@ export function usePanelState({ splitPickerRef }: UsePanelStateOptions) {
   const [notifPanelOpen, setNotifPanelOpen] = useState(false);
   const [cmdPalette, setCmdPalette] = useState(false);
   const cmdPaletteSourceBlockId = useRef<string | null>(null);
-  const [breathe, setBreathe] = useState(false);
+  const [breathe, setBreathe] = useState(true);
   const [splitPickerOpen, setSplitPickerOpen] = useState(false);
   const [templatePanelOpen, setTemplatePanelOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([
