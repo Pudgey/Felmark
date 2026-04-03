@@ -1,20 +1,65 @@
 import type { ReactNode } from "react";
 import type { Workstation, Project } from "@/lib/types";
 
+export interface TerminalNlResponsePayload {
+  text: string;
+  data?: NLResponseData | null;
+  model?: string;
+}
+
 export interface TerminalBlock {
   id: string;
   type: "command" | "output" | "welcome" | "error" | "whisper" | "nudge" | "alert" | "loading" | "nl-response";
   command?: string;
   content: ReactNode;
   timestamp: number;
+  nlData?: TerminalNlResponsePayload;
   /** For whisper/nudge/alert: unique key for dismiss tracking */
   insightKey?: string;
   /** For nudge/alert: structured data */
   insight?: AmbientInsight;
 }
 
+export interface TerminalCommandEntry {
+  id: string;
+  kind: "command";
+  input: string;
+  activeProject: string | null;
+  timestamp: number;
+}
+
+export interface TerminalErrorEntry {
+  id: string;
+  kind: "error";
+  input: string;
+  message: string;
+  timestamp: number;
+}
+
+export interface TerminalOutputEntry {
+  id: string;
+  kind: "output";
+  input: string;
+  message: string;
+  timestamp: number;
+}
+
+export interface TerminalNlResponseEntry {
+  id: string;
+  kind: "nl-response";
+  query: string;
+  response: TerminalNlResponsePayload;
+  timestamp: number;
+}
+
+export type TerminalSessionEntry =
+  | TerminalCommandEntry
+  | TerminalErrorEntry
+  | TerminalOutputEntry
+  | TerminalNlResponseEntry;
+
 export interface TerminalSessionState {
-  blocks: TerminalBlock[];
+  entries: TerminalSessionEntry[];
   inputHistory: string[];
   dismissedInsightKeys: string[];
 }
