@@ -88,7 +88,7 @@ export default function EditorSidebar({
   const words = useMemo(() => countWords(blocks), [blocks]);
 
   const projects = workstation?.projects ?? [];
-  const clientName = workstation?.client ?? "Personal";
+  const clientName = workstation?.client ?? "";
   const wsArchived = workstation
     ? archived.map((a, idx) => ({ ...a, globalIdx: idx })).filter(a => a.workstationId === workstation.id)
     : [];
