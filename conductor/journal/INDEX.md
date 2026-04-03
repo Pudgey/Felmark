@@ -5,16 +5,15 @@
 | Tag | Count | Files |
 |-----|-------|-------|
 | `branding` | 1 | `2026-03-29_felmark-setup.md` |
-| `cleanup` | 3 | `2026-03-30_skill-library-felmark-cleanup.md`, `2026-04-01_housekeeping-sweep.md`, `2026-04-03_editor-legacy-block-cleanup.md` |
+| `cleanup` | 2 | `2026-03-30_skill-library-felmark-cleanup.md`, `2026-04-01_housekeeping-sweep.md` |
 | `codex` | 2 | `2026-03-30_codex-skill-packaging.md`, `2026-04-01_housekeeping-sweep.md` |
-| `conductor` | 6 | `2026-03-30_skill-library-felmark-cleanup.md`, `2026-03-30_codex-skill-packaging.md`, `2026-04-01_housekeeping-sweep.md`, `2026-04-03_redesign-skill-and-spec-pause.md`, `2026-04-03_forge-map-rescan.md`, `2026-04-03_editor-memory-merge-to-main.md` |
-| `design` | 1 | `2026-04-03_redesign-skill-and-spec-pause.md` |
-| `architecture` | 4 | `2026-04-02_editor-core-refactor.md`, `2026-04-03_forge-map-rescan.md`, `2026-04-03_forge-memory-scaffold.md`, `2026-04-03_editor-memory-wiring.md` |
-| `dashboard` | 6 | `2026-04-01_forge-paper-and-settings-handoff.md`, `2026-04-03_forge-map-rescan.md`, `2026-04-03_editor-legacy-block-cleanup.md`, `2026-04-03_forge-memory-scaffold.md`, `2026-04-03_editor-memory-wiring.md`, `2026-04-03_editor-memory-merge-to-main.md` |
-| `editor` | 5 | `2026-04-02_editor-core-refactor.md`, `2026-04-03_editor-legacy-block-cleanup.md`, `2026-04-03_forge-memory-scaffold.md`, `2026-04-03_editor-memory-wiring.md`, `2026-04-03_editor-memory-merge-to-main.md` |
+| `conductor` | 3 | `2026-03-30_skill-library-felmark-cleanup.md`, `2026-03-30_codex-skill-packaging.md`, `2026-04-01_housekeeping-sweep.md` |
+| `architecture` | 1 | `2026-04-02_editor-core-refactor.md` |
+| `dashboard` | 1 | `2026-04-01_forge-paper-and-settings-handoff.md` |
+| `editor` | 1 | `2026-04-02_editor-core-refactor.md` |
 | `home` | 1 | `2026-04-02_editor-core-refactor.md` |
 | `refactor` | 1 | `2026-04-02_editor-core-refactor.md` |
-| `docs` | 2 | `2026-03-30_skill-library-felmark-cleanup.md`, `2026-04-03_forge-map-rescan.md` |
+| `docs` | 1 | `2026-03-30_skill-library-felmark-cleanup.md` |
 | `felmark` | 1 | `2026-03-29_felmark-setup.md` |
 | `forge-paper` | 1 | `2026-04-01_forge-paper-and-settings-handoff.md` |
 | `naming` | 1 | `2026-03-29_felmark-setup.md` |
@@ -22,11 +21,7 @@
 | `project-setup` | 1 | `2026-03-29_felmark-setup.md` |
 | `settings` | 1 | `2026-04-01_forge-paper-and-settings-handoff.md` |
 | `housekeeping` | 1 | `2026-04-01_housekeeping-sweep.md` |
-| `migration` | 1 | `2026-04-03_editor-legacy-block-cleanup.md` |
-| `persistence` | 2 | `2026-04-03_forge-memory-scaffold.md`, `2026-04-03_editor-memory-wiring.md` |
-| `git` | 1 | `2026-04-03_editor-memory-merge-to-main.md` |
-| `skills` | 4 | `2026-03-30_skill-library-felmark-cleanup.md`, `2026-03-30_codex-skill-packaging.md`, `2026-04-01_housekeeping-sweep.md`, `2026-04-03_redesign-skill-and-spec-pause.md` |
-| `process` | 1 | `2026-04-03_redesign-skill-and-spec-pause.md` |
+| `skills` | 3 | `2026-03-30_skill-library-felmark-cleanup.md`, `2026-03-30_codex-skill-packaging.md`, `2026-04-01_housekeeping-sweep.md` |
 | `tooling` | 2 | `2026-03-30_codex-skill-packaging.md`, `2026-04-02_quality-gates.md` |
 | `lint` | 1 | `2026-04-02_quality-gates.md` |
 | `ci` | 1 | `2026-04-02_quality-gates.md` |
