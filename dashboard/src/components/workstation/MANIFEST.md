@@ -16,15 +16,7 @@ The Workstation is Felmark's flagship product surface — the full-featured free
 | `services/` | **Services** | Service offerings and pricing management |
 | `templates/` | **Templates** | Document and project templates (SaveTemplateModal, TemplatePicker, TemplatesPage) |
 | `forge-paper/` | **Forge Paper** | AI-assisted document generation surface |
-| `dashboard/` | **Dashboard Home** | Workstation landing with project overview and quick actions |
 | `terminal-welcome/` | **Terminal Welcome** | First-run / empty-state welcome screen with stats |
-
-## Root Files
-
-| File | Description |
-|------|-------------|
-| `Workstation.tsx` | Workstation home view — project grid, stats, deadline overview |
-| `Workstation.module.css` | Workstation home styles |
 
 ## Imported By
 
