@@ -27,6 +27,36 @@ const INITIAL_TABS: Tab[] = [
   { id: "p1", name: "Brand Guidelines v2", client: "Meridian Studio", active: true },
 ];
 
+function reconcileTabs(tabs: Tab[], workstations: Workstation[]): Tab[] {
+  const owners = new Map<string, { name: string; client: string }>();
+
+  for (const workstation of workstations) {
+    for (const project of workstation.projects) {
+      owners.set(project.id, {
+        name: project.name,
+        client: workstation.client,
+      });
+    }
+  }
+
+  const seen = new Set<string>();
+
+  return tabs.flatMap((tab) => {
+    const owner = owners.get(tab.id);
+    if (!owner || seen.has(tab.id)) {
+      return [];
+    }
+
+    seen.add(tab.id);
+    return [{
+      id: tab.id,
+      name: owner.name,
+      client: owner.client,
+      active: tab.active,
+    }];
+  });
+}
+
 /** Ensure at least one tab is active. */
 function ensureActiveTab(tabs: Tab[], workstations: Workstation[]): { tabs: Tab[]; activeProject: string } {
   if (tabs.length > 0 && tabs.some(t => t.active)) {
@@ -111,8 +141,10 @@ export default function Dashboard() {
       Object.keys(editorMemory.snapshot.blocksMap).length > 0;
 
     const ws = savedWs ?? INITIAL_WORKSTATIONS;
-    const rawTabs = savedTabs ?? INITIAL_TABS.map(t => ({ ...t, active: false }));
-    const rawProject = savedProject ?? "";
+    const rawTabs = reconcileTabs(savedTabs ?? INITIAL_TABS.map(t => ({ ...t, active: false })), ws);
+    const rawProject = savedProject && ws.some(w => w.projects.some(p => p.id === savedProject))
+      ? savedProject
+      : "";
 
     if (hasEditorMemoryAlerts(editorMemory.report)) {
       console.warn("[felmark:editor-memory]", {
@@ -137,8 +169,9 @@ export default function Dashboard() {
       if (savedComments) setComments(savedComments);
       if (savedActivities) setActivitiesMap(savedActivities);
 
-      if (rawProject && rawTabs.some(t => t.active && t.id === rawProject)) {
-        setTabs(rawTabs);
+      if (rawProject && rawTabs.some(t => t.id === rawProject)) {
+        const resolvedTabs = rawTabs.map(t => ({ ...t, active: t.id === rawProject }));
+        setTabs(resolvedTabs);
         setActiveProject(rawProject);
         const owningWs = ws.find(w => w.projects.some(p => p.id === rawProject));
         setActiveWorkstationId(owningWs?.id ?? null);

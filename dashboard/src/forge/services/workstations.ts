@@ -1,6 +1,7 @@
 import type { Project, WorkstationTemplate } from "@/lib/types";
 import type { StateUpdater, ForgeResult } from "../types";
 import { uid, makeBlocks } from "@/lib/utils";
+import { resolveDefaultTab } from "./tabs";
 
 export function createWorkstationServices(state: StateUpdater) {
   return {
@@ -100,11 +101,13 @@ export function createWorkstationServices(state: StateUpdater) {
 
     /** Archive an entire workstation */
     archive(wsId: string): ForgeResult {
-      const ws = state.getState().workstations.find(w => w.id === wsId);
+      const workstations = state.getState().workstations;
+      const ws = workstations.find(w => w.id === wsId);
       if (!ws) return { ok: false, error: "Workstation not found" };
-      if (ws.personal && state.getState().workstations.filter(w => w.personal).length <= 1) {
+      if (ws.personal && workstations.filter(w => w.personal).length <= 1) {
         return { ok: false, error: "Cannot archive the last personal workstation" };
       }
+      const nextWorkstations = workstations.filter(w => w.id !== wsId);
 
       state.setArchived(prev => [...prev, ...ws.projects.map(project => ({
         project, workstationId: ws.id, workstationName: ws.client,
@@ -112,22 +115,21 @@ export function createWorkstationServices(state: StateUpdater) {
       }))]);
 
       const projectIds = new Set(ws.projects.map(p => p.id));
-      state.setWorkstations(prev => prev.filter(w => w.id !== wsId));
+      state.setWorkstations(() => nextWorkstations);
       state.setTabs(prev => {
         const n = prev.filter(t => !projectIds.has(t.id));
         if (n.length > 0 && !n.some(t => t.active)) {
           n[n.length - 1].active = true;
           state.setActiveProject(n[n.length - 1].id);
-          const owner = state.getState().workstations.find(w => w.projects.some(p => p.id === n[n.length - 1].id));
+          const owner = nextWorkstations.find(w => w.projects.some(p => p.id === n[n.length - 1].id));
           state.setActiveWorkstationId(owner?.id ?? null);
         }
         if (n.length === 0) {
-          const personal = state.getState().workstations.find(w => w.personal);
-          const fallback = personal?.projects[0];
-          if (personal && fallback) {
-            n.push({ id: fallback.id, name: fallback.name, client: personal.client, active: true });
-            state.setActiveProject(fallback.id);
-            state.setActiveWorkstationId(personal.id);
+          const fallback = resolveDefaultTab(nextWorkstations);
+          if (fallback) {
+            n.push(fallback.tab);
+            state.setActiveProject(fallback.tab.id);
+            state.setActiveWorkstationId(fallback.workstationId);
           } else {
             state.setActiveProject("");
             state.setActiveWorkstationId(null);
@@ -141,35 +143,36 @@ export function createWorkstationServices(state: StateUpdater) {
 
     /** Archive all completed projects in a workstation */
     archiveCompleted(wsId: string) {
-      const ws = state.getState().workstations.find(w => w.id === wsId);
+      const workstations = state.getState().workstations;
+      const ws = workstations.find(w => w.id === wsId);
       if (!ws) return;
       const completed = ws.projects.filter(p => p.status === "completed");
       if (completed.length === 0) return;
+      const completedIds = new Set(completed.map(p => p.id));
+      const nextWorkstations = workstations.map(w =>
+        w.id === wsId ? { ...w, projects: w.projects.filter(p => !completedIds.has(p.id)) } : w
+      );
 
       state.setArchived(prev => [...prev, ...completed.map(project => ({
         project, workstationId: ws.id, workstationName: ws.client,
         archivedAt: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" }),
       }))]);
 
-      const completedIds = new Set(completed.map(p => p.id));
-      state.setWorkstations(prev => prev.map(w =>
-        w.id === wsId ? { ...w, projects: w.projects.filter(p => !completedIds.has(p.id)) } : w
-      ));
+      state.setWorkstations(() => nextWorkstations);
       state.setTabs(prev => {
         const n = prev.filter(t => !completedIds.has(t.id));
         if (n.length > 0 && !n.some(t => t.active)) {
           n[n.length - 1].active = true;
           state.setActiveProject(n[n.length - 1].id);
-          const owner = state.getState().workstations.find(w => w.projects.some(p => p.id === n[n.length - 1].id));
+          const owner = nextWorkstations.find(w => w.projects.some(p => p.id === n[n.length - 1].id));
           state.setActiveWorkstationId(owner?.id ?? null);
         }
         if (n.length === 0) {
-          const personal = state.getState().workstations.find(w => w.personal);
-          const fallback = personal?.projects[0];
-          if (personal && fallback) {
-            n.push({ id: fallback.id, name: fallback.name, client: personal.client, active: true });
-            state.setActiveProject(fallback.id);
-            state.setActiveWorkstationId(personal.id);
+          const fallback = resolveDefaultTab(nextWorkstations);
+          if (fallback) {
+            n.push(fallback.tab);
+            state.setActiveProject(fallback.tab.id);
+            state.setActiveWorkstationId(fallback.workstationId);
           } else {
             state.setActiveProject("");
             state.setActiveWorkstationId(null);
