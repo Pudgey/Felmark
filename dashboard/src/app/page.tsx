@@ -10,13 +10,11 @@ import ErrorBoundary from "@/components/shared/ErrorBoundary";
 import { INITIAL_COMMENTS, type Comment } from "@/components/comments/CommentPanel";
 import { INITIAL_ACTIVITIES, type BlockActivity } from "@/components/activity/ActivityMargin";
 import CreationAnimation from "@/components/onboarding/CreationAnimation";
-import Launchpad from "@/components/launchpad/Launchpad";
 import type { DocumentTemplate } from "@/lib/types";
 import { STARTER_TEMPLATES } from "@/lib/starter-templates";
-import SaveTemplateModal from "@/components/workstation/templates/SaveTemplateModal";
 import { useWorkstationActions, type CreationAnimState } from "@/forge/hooks/useWorkstationActions";
-import TemplatePicker from "@/components/workstation/templates/TemplatePicker";
 import ViewRouter from "@/views/ViewRouter";
+import ShellModals from "./ShellModals";
 import { usePersistence } from "@/forge/hooks/usePersistence";
 import { useShellLayout } from "@/forge/hooks/useShellLayout";
 import { useHydrateAppState, ensureActiveTab, INITIAL_TABS } from "@/forge/hooks/useHydrateAppState";
@@ -338,11 +336,11 @@ export default function Dashboard() {
       )}
     </div>
 
-    <Launchpad
-      open={launchpadOpen}
-      onClose={() => setLaunchpadOpen(false)}
+    <ShellModals
+      launchpadOpen={launchpadOpen}
       workstations={workstations}
-      onNavigate={(screenId) => {
+      onCloseLaunchpad={() => setLaunchpadOpen(false)}
+      onLaunchpadNavigate={(screenId) => {
         setRailActive(screenId);
         if (screenId === "home") {
           setActiveWorkstationId(null);
@@ -351,7 +349,7 @@ export default function Dashboard() {
         }
         setSidebarOpen(true);
       }}
-      onSelectWorkstation={(wsId) => {
+      onLaunchpadSelectWorkstation={(wsId) => {
         selectWorkstation(wsId);
         setRailActive("workstations");
       }}
@@ -359,19 +357,13 @@ export default function Dashboard() {
         // Editor manages command palette state internally
         // This is a placeholder — in the future, lift cmdPalette state to page.tsx
       }}
-    />
-
-    <SaveTemplateModal
-      open={showSaveTemplate}
-      onClose={() => setShowSaveTemplate(false)}
-      blocks={blocksMap[activeProject] || []}
-      onSave={(template) => setDocTemplates(prev => [...prev, template])}
-    />
-
-    <TemplatePicker
-      open={showTemplatePicker}
-      onClose={() => setShowTemplatePicker(false)}
-      templates={docTemplates}
+      showSaveTemplate={showSaveTemplate}
+      onCloseSaveTemplate={() => setShowSaveTemplate(false)}
+      activeProjectBlocks={blocksMap[activeProject] || []}
+      onSaveTemplate={(template) => setDocTemplates(prev => [...prev, template])}
+      showTemplatePicker={showTemplatePicker}
+      onCloseTemplatePicker={() => setShowTemplatePicker(false)}
+      docTemplates={docTemplates}
       onSelectBlank={() => {
         // Just close — the new tab is already created with blank blocks
       }}
