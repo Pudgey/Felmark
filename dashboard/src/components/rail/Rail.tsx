@@ -38,16 +38,8 @@ export default function Rail({ activeItem, overdueCount, onItemClick, zenMode, o
         <svg width="20" height="20" viewBox="0 0 18 18" fill="none"><rect x="2.5" y="3" width="13" height="12" rx="2" stroke="currentColor" strokeWidth="1.2"/><path d="M2.5 7h13M6 1.5v3M12 1.5v3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
       </button>
 
-      <button className={`${styles.btn} ${activeItem === "templates" ? styles.active : ""}`} onClick={() => onItemClick("templates")} aria-label="Templates" title="templates">
-        <svg width="20" height="20" viewBox="0 0 18 18" fill="none"><rect x="3" y="2" width="12" height="14" rx="1.5" stroke="currentColor" strokeWidth="1.2"/><path d="M6 6h6M6 9h4M6 12h5" stroke="currentColor" strokeWidth="1" strokeLinecap="round"/></svg>
-      </button>
-
       <button className={`${styles.btn} ${activeItem === "forge" ? styles.active : ""}`} onClick={() => onItemClick("forge")} aria-label="Forge Paper" title="forge">
         <svg width="20" height="20" viewBox="0 0 18 18" fill="none"><path d="M4.5 2h6l4 4v9a1.5 1.5 0 01-1.5 1.5H4.5A1.5 1.5 0 013 15V3.5A1.5 1.5 0 014.5 2z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/><path d="M10 2v4.5h4.5" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/><path d="M6.5 10h5M6.5 12.5h3" stroke="currentColor" strokeWidth="1" strokeLinecap="round"/></svg>
-      </button>
-
-      <button className={`${styles.btn} ${activeItem === "wire" ? styles.active : ""}`} onClick={() => onItemClick("wire")} aria-label="The Wire" title="wire">
-        <svg width="20" height="20" viewBox="0 0 18 18" fill="none"><path d="M2 9h3l2-5 2 10 2-7 2 4h3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
       </button>
 
       <button className={`${styles.btn} ${activeItem === "team" ? styles.active : ""}`} onClick={() => onItemClick("team")} aria-label="Team" title="team">

@@ -114,6 +114,12 @@ Chrome Extension (~50 lines)          Web App (app.tryfelmark.com)
 - Don't create helpers or utilities for one-time operations.
 - Avoid backwards-compatibility hacks. If something is unused, delete it completely.
 
+### 3.5 Discipline Over Brevity
+- The goal is not to make the code less verbose. Brevity is only useful when it comes from clearer thinking.
+- Prefer fewer responsibilities per file, clearer boundaries, fewer fake abstractions, and simpler state flow.
+- Aim for solutions that feel inevitable once seen: simple, direct, and slightly creative when the product benefits from it.
+- Human-quality code usually comes from sharper judgment about what not to build, not from compressing everything into fewer lines.
+
 ### 4. Conductor Integration
 
 The Conductor is the project's self-sustaining knowledge system in `conductor/`. All agents (Claude, Codex, etc.) share the same conductor state.

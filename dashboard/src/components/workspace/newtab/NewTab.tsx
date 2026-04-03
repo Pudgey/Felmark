@@ -9,7 +9,8 @@ const SURFACES = [
   { id: "pipeline", icon: "\u2192", label: "Pipeline", desc: "Deals & proposals", key: "2", stat: "$18.5k pipeline" },
   { id: "finance", icon: "$", label: "Finance", desc: "Invoices & billing", key: "3", stat: "$14.8k earned" },
   { id: "services", icon: "\u25c7", label: "Products", desc: "Services catalog", key: "4", stat: "8 products" },
-  { id: "terminal", icon: ">_", label: "Terminal", desc: "Forge command line", key: "5", stat: "last: 2m ago" },
+  { id: "wire", icon: "\u223c", label: "The Wire", desc: "News & updates", key: "5", stat: "3 new" },
+  { id: "terminal", icon: ">_", label: "Terminal", desc: "Forge command line", key: "6", stat: "last: 2m ago" },
 ];
 
 const RECENTS = [
@@ -32,6 +33,7 @@ export default function NewTab() {
     if (id === "pipeline") nav.openTool("pipeline");
     if (id === "finance") nav.openTool("finance");
     if (id === "services") nav.openTool("services");
+    if (id === "wire") nav.openTool("wire");
     // terminal — future navigation
   };
 

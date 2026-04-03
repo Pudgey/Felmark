@@ -29,6 +29,7 @@ import ZenHint from "./components/zen-hint/ZenHint";
 import ShareModal from "../panels/share-modal/ShareModal";
 import CatTerminal from "../panels/cat/CatTerminal";
 import ConversationPanel from "../panels/conversation/ConversationPanel";
+import TemplatePicker from "../../templates/TemplatePicker";
 import ActivityMargin from "../../../activity/ActivityMargin";
 import HistoryModal from "../../../history/HistoryModal";
 import EditorMargin from "../chrome/margin/EditorMargin";
@@ -90,6 +91,7 @@ export default function EditorCore(props: EditorProps) {
     onUpdateProjectDue, comments: _comments, onCommentsChange: _onCommentsChange, activities, onActivitiesChange,
     zenMode, onToggleZen, splitProject, splitBlocks, splitProjectName, splitClientName,
     onSplitOpen, onSplitClose, onSplitMakePrimary,
+    docTemplates,
   } = props;
 
   // Local UI state
@@ -266,6 +268,7 @@ export default function EditorCore(props: EditorProps) {
           onOpenSidebar={onOpenSidebar}
           convoPanelOpen={panels.convoPanelOpen}
           onToggleConvo={() => panels.setConvoPanelOpen(p => !p)}
+          onOpenTemplates={() => panels.setTemplatePanelOpen(p => !p)}
           unreadTotal={unreadTotal}
           tabZoneRef={tabOverflow.tabZoneRef}
           visibleTabs={tabOverflow.visibleTabs}
@@ -322,6 +325,13 @@ export default function EditorCore(props: EditorProps) {
       {/* Editor + panels */}
       <div className={styles.editorRow}>
         <ConversationPanel open={panels.convoPanelOpen} onClose={() => panels.setConvoPanelOpen(false)} />
+        <TemplatePicker
+          open={panels.templatePanelOpen}
+          onClose={() => panels.setTemplatePanelOpen(false)}
+          templates={docTemplates ?? []}
+          onSelectBlank={() => { onNewTab(); panels.setTemplatePanelOpen(false); }}
+          onSelectTemplate={(blocks) => { onBlocksChange(activeProject, blocks); panels.setTemplatePanelOpen(false); }}
+        />
 
         <div className={styles.editorCol}>
           <div className={styles.surfaceStage}>

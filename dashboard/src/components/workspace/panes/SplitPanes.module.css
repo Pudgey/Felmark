@@ -54,18 +54,19 @@
   background: rgba(255, 255, 255, .03);
 }
 
-.headerTabOn:hover {
-  color: var(--ink-900, #1a1918);
-  background: #fff;
+.headerTabOn {
+  color: #fff;
+  background: rgba(255, 255, 255, .12);
+  font-weight: 600;
 }
 
-.headerTabOn {
-  color: var(--ink-900, #1a1918);
-  background: #fff;
+.headerTabOn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, .15);
 }
 
 .headerTabIcon { font-size: 13px; opacity: .4; }
-.headerTabOn .headerTabIcon { opacity: .6; }
+.headerTabOn .headerTabIcon { opacity: .8; color: #26a69a; }
 
 .headerTabDot {
   width: 4px;

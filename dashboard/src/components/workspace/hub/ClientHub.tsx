@@ -53,8 +53,10 @@ const statusColor = (s: string) => s === "overdue" || s === "urgent" ? "#ef5350"
 
 export default function ClientHub({ clientId, clientName, clientAvatar, clientColor, onClose }: ClientHubProps) {
   const [view, setView] = useState("board");
+  const [tasks, setTasks] = useState<Task[]>(TASKS);
   const [selectedTask, setSelectedTask] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState<string | null>(null);
+  const [dragId, setDragId] = useState<string | null>(null);
   const hubRef = useRef<HTMLDivElement>(null);
 
   // Auto scroll to top when client changes or hub opens
@@ -64,10 +66,17 @@ export default function ClientHub({ clientId, clientName, clientAvatar, clientCo
     setSelectedTask(null);
   }, [clientId]);
 
-  const task = selectedTask ? TASKS.find(t => t.id === selectedTask) ?? null : null;
-  const totalLogged = TASKS.reduce((s, t) => s + t.logged, 0);
-  const totalEst = TASKS.reduce((s, t) => s + t.est, 0);
-  const allEntries = TASKS.flatMap(t => t.entries.map(e => ({ ...e, task: t.title }))).sort((a, b) => b.date.localeCompare(a.date));
+  const task = selectedTask ? tasks.find(t => t.id === selectedTask) ?? null : null;
+  const totalLogged = tasks.reduce((s, t) => s + t.logged, 0);
+  const totalEst = tasks.reduce((s, t) => s + t.est, 0);
+  const allEntries = tasks.flatMap(t => t.entries.map(e => ({ ...e, task: t.title }))).sort((a, b) => b.date.localeCompare(a.date));
+
+  const handleDrop = (targetCol: Task["status"]) => {
+    if (!dragId) return;
+    setTasks(prev => prev.map(t => t.id === dragId ? { ...t, status: targetCol, overdue: targetCol === "todo" ? t.overdue : false } : t));
+    setDragId(null);
+    setDragOver(null);
+  };
 
   return (
     <div className={styles.hub} ref={hubRef}>
@@ -109,10 +118,10 @@ export default function ClientHub({ clientId, clientName, clientAvatar, clientCo
         {view === "board" && (
           <div className={styles.board}>
             {COLUMNS.map(col => {
-              const colTasks = TASKS.filter(t => t.status === col.id);
+              const colTasks = tasks.filter(t => t.status === col.id);
               return (
                 <div key={col.id} className={`${styles.col} ${dragOver === col.id ? styles.colDragOver : ""}`}
-                  onDragOver={e => { e.preventDefault(); setDragOver(col.id); }} onDragLeave={() => setDragOver(null)} onDrop={() => setDragOver(null)}>
+                  onDragOver={e => { e.preventDefault(); setDragOver(col.id); }} onDragLeave={() => setDragOver(null)} onDrop={() => handleDrop(col.id)}>
                   <div className={styles.colHd}>
                     <div className={styles.colDot} style={{ background: col.color }} />
                     <span className={styles.colLabel}>{col.label}</span>
@@ -124,7 +133,9 @@ export default function ClientHub({ clientId, clientName, clientAvatar, clientCo
                       const st = t.subs.length;
                       const pct = st > 0 ? Math.round((sd / st) * 100) : t.status === "done" ? 100 : 0;
                       return (
-                        <div key={t.id} draggable className={`${styles.card} ${t.overdue ? styles.cardOv : ""} ${selectedTask === t.id ? styles.cardSelected : ""}`}
+                        <div key={t.id} draggable className={`${styles.card} ${t.overdue ? styles.cardOv : ""} ${selectedTask === t.id ? styles.cardSelected : ""} ${dragId === t.id ? styles.cardDragging : ""}`}
+                          onDragStart={() => setDragId(t.id)}
+                          onDragEnd={() => { setDragId(null); setDragOver(null); }}
                           onClick={() => setSelectedTask(selectedTask === t.id ? null : t.id)}>
                           <div className={styles.cardPri} style={{ background: priColor(t.pri) }} />
                           <div className={styles.cardTitle}>{t.title}</div>

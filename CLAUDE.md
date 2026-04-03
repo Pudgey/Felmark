@@ -191,6 +191,12 @@ Follow `conductor/skills/a11y/PROTOCOL.md`.
 ### 1. No Scope Creep
 - **STOP -> PROPOSE -> WAIT** before expanding scope beyond the current task.
 
+### 1.5 Discipline Over Brevity
+- The goal is not to make the code less verbose. Brevity is only useful when it comes from clearer thinking.
+- Prefer fewer responsibilities per file, clearer boundaries, fewer fake abstractions, and simpler state flow.
+- Aim for solutions that feel inevitable once seen: simple, direct, and slightly creative when the product benefits from it.
+- Human-quality code usually comes from sharper judgment about what not to build, not from compressing everything into fewer lines.
+
 ### 2. Organization Over Speed (NON-NEGOTIABLE)
 
 **Building on disorganized code creates more disorganized code.** Before writing a single line, assess the health of the area you're about to touch. If it needs restructuring, propose that first — do NOT pile more code on top of a mess.

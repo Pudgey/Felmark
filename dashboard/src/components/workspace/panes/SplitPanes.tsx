@@ -318,15 +318,23 @@ function Pane({ surface, onSurfaceChange, focused, onFocus, zoomed, onZoom, onSp
   const [ctxPos, setCtxPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const Content = PANE_MAP[surface];
   const surf = SURFACES.find(s => s.id === surface)!;
+  const nav = useWorkspaceNav();
 
   const closeAll = () => { setDropOpen(false); setSplitOpen(false); setCtxOpen(false); };
 
-  // Close all menus when pane loses focus
+  // Close all menus when pane loses focus or global dismiss fires
   useEffect(() => { if (!focused) closeAll(); }, [focused]);
+  useEffect(() => {
+    const handler = () => closeAll();
+    window.addEventListener("felmark:dismiss-ctx", handler);
+    return () => window.removeEventListener("felmark:dismiss-ctx", handler);
+  }, []);
 
   const handleContextMenu = (e: React.MouseEvent) => {
     if (!focused) return; // only active pane gets context menu
     e.preventDefault();
+    e.stopPropagation(); // prevent workspace-level ctx from opening
+    nav.dismissGlobalCtx(); // close any workspace ctx menu
     setCtxPos({ top: e.clientY, left: e.clientX });
     setCtxOpen(true);
     setDropOpen(false);

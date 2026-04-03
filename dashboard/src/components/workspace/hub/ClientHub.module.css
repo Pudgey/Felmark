@@ -59,6 +59,7 @@
 .card { background: #fff; border: 1px solid #e2e1dd; border-radius: 8px; padding: 10px 12px; cursor: pointer; transition: all .08s; position: relative; }
 .card:hover { border-color: #d0cfcb; box-shadow: 0 2px 8px rgba(0,0,0,.04); transform: translateY(-1px); }
 .cardSelected { border-color: #1a1918; box-shadow: 0 0 0 2px rgba(26,25,24,.06); }
+.cardDragging { opacity: .4; transform: scale(.97); }
 .cardOv { border-left: 3px solid #ef5350; }
 .cardPri { position: absolute; top: 10px; right: 10px; width: 4px; height: 16px; border-radius: 2px; }
 .cardTitle { font-size: 13px; font-weight: 500; color: #2a2926; padding-right: 12px; line-height: 1.35; }

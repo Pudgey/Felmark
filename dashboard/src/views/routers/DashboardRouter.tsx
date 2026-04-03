@@ -5,7 +5,6 @@ import HomeView from "../home";
 import CalendarView from "../calendar";
 import SearchView from "../search";
 import TemplatesView from "../templates";
-import WireView from "../wire";
 import TeamView from "../team";
 
 export interface DashboardRouterProps {
@@ -53,8 +52,6 @@ export default function DashboardRouter({ railActive, ...props }: DashboardRoute
       return wrap(<SearchView workstations={props.workstations} />);
     case "templates":
       return wrap(<TemplatesView />);
-    case "wire":
-      return wrap(<WireView workstations={props.workstations} />);
     case "team":
       return wrap(<TeamView />);
     default:

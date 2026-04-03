@@ -20,6 +20,7 @@ export function usePanelState({ splitPickerRef }: UsePanelStateOptions) {
   const cmdPaletteSourceBlockId = useRef<string | null>(null);
   const [breathe, setBreathe] = useState(false);
   const [splitPickerOpen, setSplitPickerOpen] = useState(false);
+  const [templatePanelOpen, setTemplatePanelOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([
     { id: "n1", type: "payment", title: "Payment received \u2014 $1,800", desc: "Nora Kim paid Invoice #046 \u00b7 Retainer (March)", time: "32m ago", read: false, action: "View invoice", workstation: "Nora Kim" },
     { id: "n2", type: "comment", title: "Sarah commented on Brand Guidelines v2", desc: "\"Can we make the logo usage section more specific? I want exact minimum sizes.\"", time: "2h ago", read: false, action: "Reply", workstation: "Meridian Studio", avatar: "S", avatarBg: "#8a7e63" },
@@ -58,6 +59,7 @@ export function usePanelState({ splitPickerRef }: UsePanelStateOptions) {
     cmdPaletteSourceBlockId,
     breathe, setBreathe,
     splitPickerOpen, setSplitPickerOpen,
+    templatePanelOpen, setTemplatePanelOpen,
     notifications, setNotifications,
   };
 }

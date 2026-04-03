@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useWorkspaceNav } from "@/views/routers/WorkspaceRouter";
 import styles from "./WorkspaceSidebar.module.css";
 
@@ -49,15 +49,26 @@ export default function WorkspaceSidebar() {
 
   const openClientCtx = (e: React.MouseEvent, clientId: string) => {
     e.preventDefault();
+    e.stopPropagation();
+    nav.dismissGlobalCtx();
     setCtx({ type: "client", pos: { top: e.clientY, left: e.clientX }, clientId });
   };
 
   const openSectionCtx = (e: React.MouseEvent, section: "clients" | "signals") => {
     e.preventDefault();
+    e.stopPropagation();
+    nav.dismissGlobalCtx();
     setCtx({ type: "section", pos: { top: e.clientY, left: e.clientX }, section });
   };
 
   const closeCtx = () => setCtx(null);
+
+  // Close sidebar ctx when global dismiss fires
+  useEffect(() => {
+    const handler = () => closeCtx();
+    window.addEventListener("felmark:dismiss-ctx", handler);
+    return () => window.removeEventListener("felmark:dismiss-ctx", handler);
+  }, []);
 
   const ctxClient = ctx?.clientId ? CLIENTS.find(c => c.id === ctx.clientId) : null;
 

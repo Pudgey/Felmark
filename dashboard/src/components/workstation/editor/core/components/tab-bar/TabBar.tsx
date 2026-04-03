@@ -8,6 +8,7 @@ interface TabBarProps {
   onOpenSidebar: () => void;
   convoPanelOpen: boolean;
   onToggleConvo: () => void;
+  onOpenTemplates?: () => void;
   unreadTotal: number;
   tabZoneRef: React.RefObject<HTMLDivElement | null>;
   visibleTabs: { visible: Tab[]; overflow: Tab[] };
@@ -28,6 +29,7 @@ interface TabBarProps {
 export default function TabBar({
   sidebarOpen,
   onOpenSidebar,
+  onOpenTemplates,
   convoPanelOpen,
   onToggleConvo,
   unreadTotal,
@@ -60,6 +62,14 @@ export default function TabBar({
         </svg>
         {!convoPanelOpen && unreadTotal > 0 && <span className={styles.toolsBadge}>{unreadTotal}</span>}
       </button>
+      {onOpenTemplates && (
+        <button className={styles.toolsBtn} onClick={onOpenTemplates} title="Templates" aria-label="Templates">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <rect x="2.5" y="1.5" width="11" height="13" rx="1.5" stroke="currentColor" strokeWidth="1.2" />
+            <path d="M5 5.5h6M5 8h4M5 10.5h5" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
+          </svg>
+        </button>
+      )}
 
       {/* Tab zone -- shrinks tabs, overflows into pill */}
       <div className={styles.tabZone} ref={tabZoneRef}>
