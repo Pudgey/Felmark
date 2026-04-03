@@ -1,6 +1,6 @@
 /* ═══ Workspace Split Panes ═══ */
 
-:root {
+.panes {
   --ov: #d9453a;
   --ov-bg: #fef2f1;
   --ov-bd: #fcd5d2;
@@ -10,9 +10,6 @@
   --rdy-bg: #edf4fc;
   --wtc: #c07a1e;
   --wtc-bg: #fdf5e9;
-}
-
-.panes {
   flex: 1;
   display: flex;
   flex-direction: column;

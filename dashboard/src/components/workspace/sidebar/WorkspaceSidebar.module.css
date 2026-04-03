@@ -1,6 +1,6 @@
 /* ═══ Workspace Sidebar V2 ═══ */
 
-:root {
+.sb {
   --ov: #d9453a;
   --ov-bg: #fef2f1;
   --ov-bd: #fcd5d2;
@@ -10,9 +10,6 @@
   --rdy-bg: #edf4fc;
   --wtc: #c07a1e;
   --wtc-bg: #fdf5e9;
-}
-
-.sb {
   width: 280px;
   min-width: 280px;
   display: flex;

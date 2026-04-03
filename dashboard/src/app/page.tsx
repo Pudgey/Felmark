@@ -20,6 +20,7 @@ import ViewRouter from "@/views/ViewRouter";
 import { usePersistence, loadFromStorage } from "@/forge/hooks/usePersistence";
 import { loadEditorMemory, saveEditorMemory, type EditorMemoryDebugReport } from "@/forge";
 import { useShellLayout } from "@/forge/hooks/useShellLayout";
+import SharedTerminalProvider from "@/components/terminal/mounts/SharedTerminalProvider";
 
 const SUPPORTED_BLOCK_TYPES = new Set(BLOCK_TYPES.map((block) => block.type));
 
@@ -257,6 +258,10 @@ export default function Dashboard() {
   } = actions;
 
   const activeBlocks = blocksMap[activeProject] || EMPTY_BLOCKS;
+  const handleOpenWorkstationFromTerminal = (workstationId: string) => {
+    navigateToWorkstations();
+    selectWorkstation(workstationId);
+  };
 
   const showSidebar = !zenMode && !creationAnim && onboardingName === null && railActive === "workstations";
 
@@ -381,71 +386,77 @@ export default function Dashboard() {
           />
         </div>
       ) : (
-        <ViewRouter
-          railActive={railActive}
-          workstationProps={{
-            workstations,
-            tabs,
-            activeProject,
-            activeWorkstationId,
-            activeBlocks,
-            blocksMap,
-            sidebarOpen,
-            wordCount,
-            charCount,
-            splitProject,
-            comments,
-            activities: activitiesMap[activeProject] || [],
-            docTemplates,
-            zenMode,
-            onOpenSidebar: () => setSidebarOpen(true),
-            onTabClick: handleTabClick,
-            onTabClose: handleTabClose,
-            onNewTab: handleNewTab,
-            onTabRename: handleTabRename,
-            onTabReorder: handleTabReorder,
-            onBlocksChange: handleBlocksChange,
-            onWordCountChange: handleWordCountChange,
-            onSelectProject: selectProject,
-            onSelectWorkstation: selectWorkstation,
-            onNavigateRail: navigateRail,
-            onSaveAsTemplate: () => setShowSaveTemplate(true),
-            onRenameWorkstation: handleRenameWorkstation,
-            onUpdateProjectDue: updateProjectDue,
-            onCommentsChange: updateComments,
-            onActivitiesChange: (newActivities) => updateActivitiesMap(prev => ({ ...prev, [activeProject]: newActivities })),
-            onToggleZen: () => setZenMode(prev => !prev),
-            onSplitOpen: (id) => setSplitProject(id),
-            onSplitClose: () => setSplitProject(null),
-            onSplitMakePrimary: () => {
-              if (!splitProject) return;
-              const ws = workstations.find(w => w.projects.some(p => p.id === splitProject));
-              const proj = ws?.projects.find(p => p.id === splitProject);
-              if (ws && proj) {
-                selectProject(proj, ws.client);
-                setSplitProject(null);
-              }
-            },
-            onForgeClose: restoreWorkstationContext,
-            onForgeSave: (newBlocks) => {
-              if (activeProject) {
-                updateBlocksMap(prev => ({ ...prev, [activeProject]: newBlocks }));
-              }
-            },
-          }}
-          dashboardProps={{
-            workstations,
-            overdueCount,
-            calendarScrollTarget,
-            onSelectWorkstation: selectWorkstation,
-            onSelectProject: selectProject,
-            onNewTabInWorkstation: handleNewTabInWorkstation,
-            onNewWorkstation: () => setOnboardingName("New Client"),
-            onCalendarOpenProject: calendarOpenProject,
-            onCalendarScrollComplete: () => setCalendarScrollTarget(null),
-            onNavigateRail: navigateRail,
-          }}
-        />
+        <SharedTerminalProvider
+          workstations={workstations}
+          activeProject={activeProject}
+          onOpenWorkstation={handleOpenWorkstationFromTerminal}
+        >
+          <ViewRouter
+            railActive={railActive}
+            workstationProps={{
+              workstations,
+              tabs,
+              activeProject,
+              activeWorkstationId,
+              activeBlocks,
+              blocksMap,
+              sidebarOpen,
+              wordCount,
+              charCount,
+              splitProject,
+              comments,
+              activities: activitiesMap[activeProject] || [],
+              docTemplates,
+              zenMode,
+              onOpenSidebar: () => setSidebarOpen(true),
+              onTabClick: handleTabClick,
+              onTabClose: handleTabClose,
+              onNewTab: handleNewTab,
+              onTabRename: handleTabRename,
+              onTabReorder: handleTabReorder,
+              onBlocksChange: handleBlocksChange,
+              onWordCountChange: handleWordCountChange,
+              onSelectProject: selectProject,
+              onSelectWorkstation: selectWorkstation,
+              onNavigateRail: navigateRail,
+              onSaveAsTemplate: () => setShowSaveTemplate(true),
+              onRenameWorkstation: handleRenameWorkstation,
+              onUpdateProjectDue: updateProjectDue,
+              onCommentsChange: updateComments,
+              onActivitiesChange: (newActivities) => updateActivitiesMap(prev => ({ ...prev, [activeProject]: newActivities })),
+              onToggleZen: () => setZenMode(prev => !prev),
+              onSplitOpen: (id) => setSplitProject(id),
+              onSplitClose: () => setSplitProject(null),
+              onSplitMakePrimary: () => {
+                if (!splitProject) return;
+                const ws = workstations.find(w => w.projects.some(p => p.id === splitProject));
+                const proj = ws?.projects.find(p => p.id === splitProject);
+                if (ws && proj) {
+                  selectProject(proj, ws.client);
+                  setSplitProject(null);
+                }
+              },
+              onForgeClose: restoreWorkstationContext,
+              onForgeSave: (newBlocks) => {
+                if (activeProject) {
+                  updateBlocksMap(prev => ({ ...prev, [activeProject]: newBlocks }));
+                }
+              },
+            }}
+            dashboardProps={{
+              workstations,
+              overdueCount,
+              calendarScrollTarget,
+              onSelectWorkstation: selectWorkstation,
+              onSelectProject: selectProject,
+              onNewTabInWorkstation: handleNewTabInWorkstation,
+              onNewWorkstation: () => setOnboardingName("New Client"),
+              onCalendarOpenProject: calendarOpenProject,
+              onCalendarScrollComplete: () => setCalendarScrollTarget(null),
+              onNavigateRail: navigateRail,
+            }}
+          />
+        </SharedTerminalProvider>
       )}
     </div>
 

@@ -8,6 +8,14 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 **Organization and scale are more important than shipping fast.** Every agent — whether running a sprint, fixing a bug, or building a feature — must follow these rules. No exceptions.
 
+## Update MANIFEST.md on Every Task (NON-NEGOTIABLE)
+
+- **Every completed task that creates, modifies, or deletes files in a component folder MUST update that folder's `MANIFEST.md` before the task is considered done.**
+- If the folder has no `MANIFEST.md`, create one.
+- If the task created a new folder, create a `MANIFEST.md` in the same commit.
+- The manifest declares: Exports, Dependencies, Imported By, Files. Keep it current.
+- **No exceptions.** Every task, every time.
+
 ## Read Before You Write (NON-NEGOTIABLE)
 
 - **Before modifying ANY file, read its current contents from disk.** Do not regenerate a file from memory or context — the file on disk is the source of truth.

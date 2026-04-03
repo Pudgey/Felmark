@@ -10,14 +10,16 @@
 
 ## Dependencies
 - `@/lib/terminal/commands` -- COMMAND_REGISTRY
-- `@/lib/terminal/types` -- TerminalBlock, NLResponseData, TerminalContextType, CommandHandlerContext, AmbientInsight
+- `@/lib/terminal/types` -- TerminalBlock, NLResponseData, TerminalContextType, AmbientInsight, TerminalSessionState
+- `@/lib/terminal/session` -- shared session serialization + render helpers
 - `@/lib/terminal/parser` -- parseCommand
 - `@/lib/terminal/watcher` -- extractDocumentContext, hashContext
 - `@/lib/wire-context` -- buildWireContext
 - `@/lib/types` -- Workspace, Project
 
 ## Imported By
-- `Editor.tsx` -- Terminal and TerminalProvider rendered in split pane
+- `mounts/WorkstationTerminalMount.tsx` -- workstation/editor split-pane mount
+- `mounts/WorkspaceTerminalMount.tsx` -- workspace surface mount
 - `editor/ai/AiBlock.tsx` -- AIThink animations imported
 
 ## Files
@@ -26,3 +28,4 @@
 - `TerminalProvider.tsx` -- context provider (353 lines)
 - `AIThink.tsx` -- thinking animations (287 lines)
 - `AIThink.module.css` -- animation styles
+- `mounts/` -- shared session provider + workstation/workspace mount adapters

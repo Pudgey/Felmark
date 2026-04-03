@@ -175,7 +175,14 @@ Follow `conductor/skills/a11y/PROTOCOL.md`.
 - **This applies to**: sprints, missions, bug fixes, feature builds, refactors — any task that modifies `dashboard/src/` files.
 - **Exceptions**: Conductor-only edits (THOUGHTS.md, HANDOFF.md, mission docs) can run in the main worktree since they're not watched by linters.
 
-### 0.5 Read Before You Write (NON-NEGOTIABLE)
+### 0.5 Update MANIFEST.md on Every Task (NON-NEGOTIABLE)
+- **Every completed task that creates, modifies, or deletes files in a component folder MUST update that folder's `MANIFEST.md` before the task is considered done.**
+- If the folder has no `MANIFEST.md`, create one.
+- If the task created a new folder, create a `MANIFEST.md` in the same commit.
+- The manifest declares: Exports, Dependencies, Imported By, Files. Keep it current.
+- **No exceptions.** This is not optional. It is not "if exports changed." It is every task, every time.
+
+### 0.6 Read Before You Write (NON-NEGOTIABLE)
 - **Before modifying ANY file, read its current contents.** Do not regenerate a file from memory or context — the file on disk is the source of truth.
 - **Never overwrite functionality you didn't add.** If a file has features, props, sections, or logic you don't recognize, those were added by another session. Preserve them. If your task conflicts with existing work, STOP and ask the user.
 - **Refactors must preserve, not replace.** If you're restructuring a file (renaming, extracting, reorganizing), diff your output against the original. Every prop, handler, section, and import in the original must appear in the result unless explicitly removed by the user.

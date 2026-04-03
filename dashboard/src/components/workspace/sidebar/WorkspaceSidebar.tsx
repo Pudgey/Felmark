@@ -96,7 +96,7 @@ export default function WorkspaceSidebar() {
               const goal = 20000;
               const pts = data.map((v, i) => `${(i / 29) * 252},${38 - (v / goal) * 36}`);
               const line = pts.map((p, i) => `${i === 0 ? "M" : "L"}${p}`).join(" ");
-              const area = `M0,40 ${pts.map((p, i) => `L${p}`).join(" ")} L252,40 Z`;
+              const area = `M0,40 ${pts.map((p) => `L${p}`).join(" ")} L252,40 Z`;
               const lastY = 38 - (14800 / goal) * 36;
               return (
                 <>

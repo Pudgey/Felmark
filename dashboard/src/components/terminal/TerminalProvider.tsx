@@ -1,9 +1,22 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from "react";
+import React, { createContext, useContext, useState, useCallback, useRef, useEffect, useMemo } from "react";
 import type { ReactNode } from "react";
-import type { Workstation, Project } from "@/lib/types";
-import type { TerminalBlock, TerminalContextType, CommandHandlerContext, AmbientInsight, TerminalSessionState } from "@/lib/terminal/types";
+import type { Workstation } from "@/lib/types";
+import type {
+  TerminalBlock,
+  TerminalContextType,
+  AmbientInsight,
+  TerminalSessionState,
+} from "@/lib/terminal/types";
+import {
+  buildTerminalBlocks,
+  createCommandEntry,
+  createErrorEntry,
+  createNlResponseEntry,
+  createOutputEntry,
+  EMPTY_TERMINAL_SESSION_STATE,
+} from "@/lib/terminal/session";
 import { parseCommand } from "@/lib/terminal/parser";
 import { COMMAND_REGISTRY } from "@/lib/terminal/commands";
 import { extractDocumentContext, hashContext } from "@/lib/terminal/watcher";
@@ -17,6 +30,8 @@ export function useTerminalContext() {
   return ctx;
 }
 
+type TerminalSessionUpdater = TerminalSessionState | ((prev: TerminalSessionState) => TerminalSessionState);
+
 interface TerminalProviderProps {
   workstations: Workstation[];
   activeProject: string;
@@ -26,7 +41,7 @@ interface TerminalProviderProps {
   /** Callback for navigate actions (D7) */
   onOpenWorkstation?: (workstationId: string) => void;
   sessionState?: TerminalSessionState;
-  onSessionStateChange?: (state: TerminalSessionState) => void;
+  onSessionStateChange?: (state: TerminalSessionUpdater) => void;
 }
 
 let blockIdCounter = 0;
@@ -48,10 +63,17 @@ export default function TerminalProvider({
   sessionState,
   onSessionStateChange,
 }: TerminalProviderProps) {
-  const [blocks, setBlocks] = useState<TerminalBlock[]>(sessionState?.blocks ?? []);
-  const [inputHistory, setInputHistory] = useState<string[]>(sessionState?.inputHistory ?? []);
-  const [dismissedInsights, setDismissedInsights] = useState<Set<string>>(
-    () => new Set(sessionState?.dismissedInsightKeys ?? [])
+  const [fallbackSessionState, setFallbackSessionState] = useState<TerminalSessionState>(
+    sessionState ?? EMPTY_TERMINAL_SESSION_STATE
+  );
+  const [pendingBlocks, setPendingBlocks] = useState<TerminalBlock[]>([]);
+  const [ambientBlocks, setAmbientBlocks] = useState<TerminalBlock[]>([]);
+
+  const isControlled = sessionState !== undefined && onSessionStateChange !== undefined;
+  const sharedState = isControlled ? sessionState : fallbackSessionState;
+  const dismissedInsights = useMemo(
+    () => new Set(sharedState.dismissedInsightKeys),
+    [sharedState.dismissedInsightKeys]
   );
 
   const workstationsRef = useRef(workstations);
@@ -65,36 +87,123 @@ export default function TerminalProvider({
   const dismissedRef = useRef(dismissedInsights);
   dismissedRef.current = dismissedInsights;
 
+  const updateSharedState = useCallback((updater: TerminalSessionUpdater) => {
+    if (isControlled) {
+      onSessionStateChange?.(updater);
+      return;
+    }
+
+    setFallbackSessionState((prev) => typeof updater === "function" ? updater(prev) : updater);
+  }, [isControlled, onSessionStateChange]);
+
   useEffect(() => {
     mountedRef.current = true;
     return () => { mountedRef.current = false; };
   }, []);
 
-  useEffect(() => {
-    onSessionStateChange?.({
-      blocks,
-      inputHistory,
-      dismissedInsightKeys: Array.from(dismissedInsights),
-    });
-  }, [blocks, inputHistory, dismissedInsights, onSessionStateChange]);
+  const allProjects = useMemo(
+    () => workstations.flatMap((ws) => ws.projects.map((project) => ({
+      project,
+      client: ws.client,
+      workstationId: ws.id,
+    }))),
+    [workstations]
+  );
 
-  const allProjects: { project: Project; client: string; workstationId: string }[] = workstations.flatMap(
-    ws => ws.projects.map(p => ({ project: p, client: ws.client, workstationId: ws.id }))
+  const sessionBlocks = useMemo(
+    () => buildTerminalBlocks(sharedState.entries, workstations),
+    [sharedState.entries, workstations]
+  );
+
+  const blocks = useMemo(
+    () => [...sessionBlocks, ...pendingBlocks, ...ambientBlocks].sort((a, b) => a.timestamp - b.timestamp),
+    [sessionBlocks, pendingBlocks, ambientBlocks]
   );
 
   const addBlock = useCallback((block: TerminalBlock) => {
-    setBlocks(prev => [...prev, block]);
+    setPendingBlocks((prev) => [...prev, block]);
   }, []);
 
   const clearBlocks = useCallback(() => {
-    setBlocks([]);
-  }, []);
+    setPendingBlocks([]);
+    setAmbientBlocks([]);
+    updateSharedState((prev) => ({
+      ...prev,
+      entries: [],
+    }));
+  }, [updateSharedState]);
 
   // D4/D5: Dismiss an insight by key
   const dismissInsight = useCallback((key: string) => {
-    setDismissedInsights(prev => new Set(prev).add(key));
-    setBlocks(prev => prev.filter(b => b.insightKey !== key));
-  }, []);
+    setAmbientBlocks((prev) => prev.filter((block) => block.insightKey !== key));
+    updateSharedState((prev) => {
+      if (prev.dismissedInsightKeys.includes(key)) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        dismissedInsightKeys: [...prev.dismissedInsightKeys, key],
+      };
+    });
+  }, [updateSharedState]);
+
+  // ─── Core command execution ───────────────────────
+  const executeCommandInner = useCallback((input: string) => {
+    const trimmed = input.trim();
+    if (!trimmed) return;
+
+    updateSharedState((prev) => ({
+      ...prev,
+      inputHistory: [...prev.inputHistory, trimmed],
+    }));
+
+    const parsed = parseCommand(trimmed);
+
+    if (parsed.command === "clear") {
+      clearBlocks();
+      return;
+    }
+
+    const entry = COMMAND_REGISTRY[parsed.command];
+    if (!entry) {
+      const timestamp = Date.now();
+      updateSharedState((prev) => ({
+        ...prev,
+        entries: prev.entries.concat(
+          createErrorEntry(trimmed, `Unknown command: ${parsed.command}`, timestamp, nextBlockId())
+        ),
+      }));
+      return;
+    }
+
+    const timestamp = Date.now();
+    const loadingId = nextBlockId();
+    const loadingBlock: TerminalBlock = {
+      id: loadingId,
+      type: "loading",
+      command: trimmed,
+      content: null,
+      timestamp,
+    };
+    setPendingBlocks((prev) => [...prev, loadingBlock]);
+
+    // Brief think delay, then replace with a shared session entry
+    setTimeout(() => {
+      if (!mountedRef.current) return;
+
+      setPendingBlocks((prev) => prev.filter((block) => block.id !== loadingId));
+      updateSharedState((prev) => ({
+        ...prev,
+        entries: prev.entries.concat(
+          createCommandEntry(trimmed, activeProject || null, timestamp, nextBlockId())
+        ),
+      }));
+    }, 600);
+  }, [activeProject, clearBlocks, updateSharedState]);
+
+  // Alias for context consumption (matches existing API)
+  const executeCommand = executeCommandInner;
 
   // ─── D7: Action routing ───────────────────────────
   const executeAction = useCallback((command: string) => {
@@ -106,18 +215,19 @@ export default function TerminalProvider({
 
     if (command.startsWith("insert:")) {
       const insertType = command.replace("insert:", "");
-      const block: TerminalBlock = {
-        id: nextBlockId(),
-        type: "command",
-        command: `insert:${insertType}`,
-        content: (
-          <div style={{ fontFamily: "var(--mono), monospace", fontSize: 12, color: "#9b988f" }}>
-            Insert action: <strong>{insertType}</strong> block — coming soon
-          </div>
+      const timestamp = Date.now();
+
+      updateSharedState((prev) => ({
+        ...prev,
+        entries: prev.entries.concat(
+          createOutputEntry(
+            `insert:${insertType}`,
+            `Insert action: ${insertType} block - coming soon`,
+            timestamp,
+            nextBlockId()
+          )
         ),
-        timestamp: Date.now(),
-      };
-      setBlocks(prev => [...prev, block]);
+      }));
       return;
     }
 
@@ -125,90 +235,25 @@ export default function TerminalProvider({
     if (command.startsWith("/")) {
       executeCommandInner(command);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onOpenWorkstation]);
-
-  // ─── Core command execution ───────────────────────
-  const executeCommandInner = useCallback((input: string) => {
-    const trimmed = input.trim();
-    if (!trimmed) return;
-
-    setInputHistory(prev => [...prev, trimmed]);
-    const parsed = parseCommand(trimmed);
-
-    if (parsed.command === "clear") {
-      clearBlocks();
-      return;
-    }
-
-    const entry = COMMAND_REGISTRY[parsed.command];
-    if (!entry) {
-      const errorBlock: TerminalBlock = {
-        id: nextBlockId(),
-        type: "error",
-        command: trimmed,
-        content: (
-          <div style={{ fontFamily: "var(--mono), 'JetBrains Mono', monospace", fontSize: 12, color: "#dc2626" }}>
-            Unknown command: <strong>{parsed.command}</strong>
-            <div style={{ color: "#9b988f", marginTop: 4, fontSize: 11 }}>
-              Available: {Object.keys(COMMAND_REGISTRY).map(k => `/${k}`).join(", ")}
-            </div>
-          </div>
-        ),
-        timestamp: Date.now(),
-      };
-      setBlocks(prev => [...prev, errorBlock]);
-      return;
-    }
-
-    const context: CommandHandlerContext = {
-      workstations: workstationsRef.current,
-      projects: workstationsRef.current.flatMap(ws =>
-        ws.projects.map(p => ({ project: p, client: ws.client, workstationId: ws.id }))
-      ),
-      activeProject: activeProject || null,
-    };
-
-    // Show loading animation before result
-    const loadingId = nextBlockId();
-    const loadingBlock: TerminalBlock = {
-      id: loadingId,
-      type: "loading",
-      command: trimmed,
-      content: null,
-      timestamp: Date.now(),
-    };
-    setBlocks(prev => [...prev, loadingBlock]);
-
-    // Brief think delay, then replace with result
-    setTimeout(() => {
-      const result = entry.handler(parsed, context);
-      const outputBlock: TerminalBlock = {
-        id: nextBlockId(),
-        type: "command",
-        command: trimmed,
-        content: result,
-        timestamp: Date.now(),
-      };
-      setBlocks(prev => prev.filter(b => b.id !== loadingId).concat(outputBlock));
-    }, 600);
-  }, [activeProject, clearBlocks]);
-
-  // Alias for context consumption (matches existing API)
-  const executeCommand = executeCommandInner;
+  }, [executeCommandInner, onOpenWorkstation, updateSharedState]);
 
   // ─── D6: Natural language query ───────────────────
   const sendNLQuery = useCallback(async (query: string) => {
+    const timestamp = Date.now();
     const loadingId = nextBlockId();
     const loadingBlock: TerminalBlock = {
       id: loadingId,
       type: "loading",
       command: query,
       content: null,
-      timestamp: Date.now(),
+      timestamp,
     };
-    setBlocks(prev => [...prev, loadingBlock]);
-    setInputHistory(prev => [...prev, query]);
+
+    setPendingBlocks((prev) => [...prev, loadingBlock]);
+    updateSharedState((prev) => ({
+      ...prev,
+      inputHistory: [...prev.inputHistory, query],
+    }));
 
     try {
       const businessCtx = buildWireContext(workstationsRef.current, []);
@@ -221,54 +266,50 @@ export default function TerminalProvider({
       if (!mountedRef.current) return;
 
       const data = await res.json();
-
-      const responseBlock: TerminalBlock & { nlData?: { text: string; data?: { type: string; content: unknown } | null; model?: string } } = {
-        id: nextBlockId(),
-        type: "nl-response",
-        command: query,
-        content: null,
-        timestamp: Date.now(),
-      };
-
-      responseBlock.nlData = {
-        text: data.text || data.error || "No response",
-        data: data.data || null,
-        model: data.model,
-      };
-
-      setBlocks(prev => prev.map(b => b.id === loadingId ? responseBlock : b));
+      setPendingBlocks((prev) => prev.filter((block) => block.id !== loadingId));
+      updateSharedState((prev) => ({
+        ...prev,
+        entries: prev.entries.concat(
+          createNlResponseEntry(
+            query,
+            {
+              text: data.text || data.error || "No response",
+              data: data.data || null,
+              model: data.model,
+            },
+            timestamp,
+            nextBlockId()
+          )
+        ),
+      }));
     } catch (err) {
       if (!mountedRef.current) return;
-      const errorBlock: TerminalBlock = {
-        id: nextBlockId(),
-        type: "error",
-        command: query,
-        content: (
-          <div style={{ fontFamily: "var(--mono), monospace", fontSize: 12, color: "#dc2626" }}>
-            Query failed: {String(err)}
-          </div>
+
+      setPendingBlocks((prev) => prev.filter((block) => block.id !== loadingId));
+      updateSharedState((prev) => ({
+        ...prev,
+        entries: prev.entries.concat(
+          createErrorEntry(query, `Query failed: ${String(err)}`, timestamp, nextBlockId())
         ),
-        timestamp: Date.now(),
-      };
-      setBlocks(prev => prev.map(b => b.id === loadingId ? errorBlock : b));
+      }));
     }
-  }, []);
+  }, [updateSharedState]);
 
   // ─── D5: Ambient intelligence loop ────────────────
   const runAmbientCheck = useCallback(async () => {
     if (!mountedRef.current) return;
     if (!editorBlocks || editorBlocks.length === 0) return;
 
-    const activeWs = workstationsRef.current.find(ws =>
-      ws.projects.some(p => p.id === activeProject)
+    const activeWs = workstationsRef.current.find((ws) =>
+      ws.projects.some((project) => project.id === activeProject)
     );
-    const activeProj = activeWs?.projects.find(p => p.id === activeProject);
+    const activeProj = activeWs?.projects.find((project) => project.id === activeProject);
 
     const docCtx = extractDocumentContext(
       editorBlocks,
       activeWs ? { client: activeWs.client } : null,
       activeProj
-        ? { name: activeProj.name, status: activeProj.status, due: (activeProj as unknown as { due?: string }).due }
+        ? { name: activeProj.name, status: activeProj.status, due: (activeProj as { due?: string }).due }
         : null
     );
 
@@ -317,7 +358,11 @@ export default function TerminalProvider({
       }
 
       if (newBlocks.length > 0) {
-        setBlocks(prev => [...prev, ...newBlocks]);
+        setAmbientBlocks((prev) => {
+          const existingKeys = new Set(prev.map((block) => block.insightKey).filter(Boolean));
+          const deduped = newBlocks.filter((block) => !block.insightKey || !existingKeys.has(block.insightKey));
+          return deduped.length > 0 ? [...prev, ...deduped] : prev;
+        });
       }
     } catch {
       // Silently fail — ambient is best-effort
@@ -343,7 +388,7 @@ export default function TerminalProvider({
     };
   }, [editorBlocks, activeProject, runAmbientCheck]);
 
-  const value: TerminalContextType = {
+  const value = useMemo<TerminalContextType>(() => ({
     workstations,
     projects: allProjects,
     activeProject: activeProject || null,
@@ -351,12 +396,25 @@ export default function TerminalProvider({
     addBlock,
     clearBlocks,
     executeCommand,
-    inputHistory,
+    inputHistory: sharedState.inputHistory,
     dismissedInsights,
     dismissInsight,
     executeAction,
     sendNLQuery,
-  };
+  }), [
+    workstations,
+    allProjects,
+    activeProject,
+    blocks,
+    addBlock,
+    clearBlocks,
+    executeCommand,
+    sharedState.inputHistory,
+    dismissedInsights,
+    dismissInsight,
+    executeAction,
+    sendNLQuery,
+  ]);
 
   return (
     <TerminalContext.Provider value={value}>
