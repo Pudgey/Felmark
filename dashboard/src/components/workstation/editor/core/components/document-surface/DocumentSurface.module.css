@@ -22,6 +22,12 @@
   padding-right: clamp(24px, 5vw, 64px);
 }
 
+/* Breathe mode with a right panel open -- pull content back from panel edge */
+.pageBreathePanel {
+  max-width: 820px;
+  padding-right: clamp(24px, 3vw, 40px);
+}
+
 .pageSplit {
   max-width: 620px;
   padding-left: clamp(44px, 5vw, 60px);
