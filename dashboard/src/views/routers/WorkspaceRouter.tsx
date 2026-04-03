@@ -1,27 +1,82 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, createContext, useContext } from "react";
 import WorkspaceSidebar from "@/components/workspace/sidebar/WorkspaceSidebar";
 import SplitPanes from "@/components/workspace/panes/SplitPanes";
 import Toasts, { DEMO_TOASTS, type Toast } from "@/components/workspace/toasts/Toasts";
+import ClientHub from "@/components/workspace/hub/ClientHub";
+
+/* ── Workspace navigation context ── */
+export interface HubTab {
+  clientId: string;
+  clientName: string;
+  clientAvatar: string;
+  clientColor: string;
+}
+
+interface WorkspaceNav {
+  activeView: "workspace" | "hub";
+  hubTab: HubTab | null;
+  openHub: (client: HubTab) => void;
+  closeHub: () => void;
+}
+
+const WorkspaceNavContext = createContext<WorkspaceNav>({
+  activeView: "workspace",
+  hubTab: null,
+  openHub: () => {},
+  closeHub: () => {},
+});
+
+export const useWorkspaceNav = () => useContext(WorkspaceNavContext);
 
 export default function WorkspaceRouter() {
   const [toasts, setToasts] = useState<Toast[]>(DEMO_TOASTS);
+  const [activeView, setActiveView] = useState<"workspace" | "hub">("workspace");
+  const [hubTab, setHubTab] = useState<HubTab | null>(null);
 
   const dismissToast = useCallback((id: string) => {
     setToasts(prev => prev.filter(t => t.id !== id));
   }, []);
 
   const handleAction = useCallback((id: string) => {
-    // Future: route actions to the right surface
     dismissToast(id);
   }, [dismissToast]);
 
+  // Deduplication guard: if same client already open, just focus it
+  const openHub = useCallback((client: HubTab) => {
+    if (hubTab?.clientId === client.clientId) {
+      // Already open — just switch to it
+      setActiveView("hub");
+      return;
+    }
+    setHubTab(client);
+    setActiveView("hub");
+  }, [hubTab]);
+
+  const closeHub = useCallback(() => {
+    setActiveView("workspace");
+    // Keep hubTab in memory so re-opening the same client is instant
+  }, []);
+
+  const nav: WorkspaceNav = { activeView, hubTab, openHub, closeHub };
+
   return (
-    <div style={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex", position: "relative" }}>
-      <WorkspaceSidebar />
-      <SplitPanes />
-      <Toasts toasts={toasts} onDismiss={dismissToast} onAction={handleAction} />
-    </div>
+    <WorkspaceNavContext.Provider value={nav}>
+      <div style={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex", position: "relative" }}>
+        <WorkspaceSidebar />
+        {activeView === "workspace" && <SplitPanes />}
+        {activeView === "hub" && hubTab && (
+          <ClientHub
+            clientId={hubTab.clientId}
+            clientName={hubTab.clientName}
+            clientAvatar={hubTab.clientAvatar}
+            clientColor={hubTab.clientColor}
+            onClose={closeHub}
+          />
+        )}
+        <Toasts toasts={toasts} onDismiss={dismissToast} onAction={handleAction} />
+      </div>
+    </WorkspaceNavContext.Provider>
   );
 }

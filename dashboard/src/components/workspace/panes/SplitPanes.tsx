@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useWorkspaceNav } from "@/views/routers/WorkspaceRouter";
 import styles from "./SplitPanes.module.css";
 
 /* ── Surface definitions ── */
@@ -124,6 +125,19 @@ function MoneyPane() {
 
 function WorkPane() {
   const [exp, setExp] = useState<string | null>("t1");
+  const nav = useWorkspaceNav();
+
+  const CLIENT_MAP: Record<string, { id: string; name: string; av: string; color: string }> = {
+    "Meridian": { id: "c1", name: "Meridian Studio", av: "MS", color: "#7c8594" },
+    "Bolt Fitness": { id: "c3", name: "Bolt Fitness", av: "BF", color: "#8a7e63" },
+    "Nora Kim": { id: "c2", name: "Nora Kim", av: "NK", color: "#a08472" },
+  };
+
+  const openClientHub = (clientKey: string) => {
+    const c = CLIENT_MAP[clientKey];
+    if (c) nav.openHub({ clientId: c.id, clientName: c.name, clientAvatar: c.av, clientColor: c.color });
+  };
+
   return (
     <div>
       {TASKS.map(t => {
@@ -154,7 +168,7 @@ function WorkPane() {
                   {!t.timer && <button className={styles.btn}>&#9654; Timer</button>}
                   {t.timer && <button className={`${styles.btn} ${styles.btnTimer}`}>&#9632; Stop</button>}
                   <button className={styles.btn}>+ Subtask</button>
-                  <button className={styles.btn}>Editor</button>
+                  <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={(e) => { e.stopPropagation(); openClientHub(t.client); }}>Open Hub {"\u2192"}</button>
                 </div>
               </div>
             )}
@@ -545,15 +559,30 @@ const HEADER_TABS = [
 function HybridHeader({ activeTab, topSurface, bottomSurface }: { activeTab: string; topSurface: string; bottomSurface: string }) {
   const topLabel = SURFACES.find(s => s.id === topSurface)?.label ?? topSurface;
   const bottomLabel = SURFACES.find(s => s.id === bottomSurface)?.label ?? bottomSurface;
+  const nav = useWorkspaceNav();
+
+  const handleTabClick = (tabId: string) => {
+    if (tabId === "workspace") nav.closeHub();
+    if (tabId === "hub" && nav.hubTab) nav.openHub(nav.hubTab);
+  };
+
+  // Dynamic tab label for hub
+  const getTabLabel = (t: typeof HEADER_TABS[number]) => {
+    if (t.id === "hub" && nav.hubTab) return `Hub: ${nav.hubTab.clientName}`;
+    return t.label;
+  };
 
   return (
     <div className={styles.header}>
       <div className={styles.headerRow1}>
         {HEADER_TABS.map(t => (
-          <div key={t.id} className={`${styles.headerTab} ${activeTab === t.id ? styles.headerTabOn : ""}`}>
+          <div key={t.id}
+            className={`${styles.headerTab} ${(t.id === "workspace" && nav.activeView === "workspace") || (t.id === "hub" && nav.activeView === "hub") ? styles.headerTabOn : ""}`}
+            onClick={() => handleTabClick(t.id)}
+          >
             <span className={styles.headerTabIcon}>{t.icon}</span>
-            <span>{t.label}</span>
-            {"dot" in t && <span className={styles.headerTabDot} style={{ background: t.dot }} />}
+            <span>{getTabLabel(t)}</span>
+            {"dot" in t && nav.hubTab && t.id === "hub" && <span className={styles.headerTabDot} style={{ background: t.dot }} />}
           </div>
         ))}
         <div className={styles.headerNew}>+</div>
