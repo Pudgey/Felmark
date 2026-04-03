@@ -1,10 +1,11 @@
 # Forge Map — Dependency & Architecture Scan
 
-> **Last forged**: 2026-03-31
-> **Codebase**: 174 files, ~45,500 lines
-> **Block types**: 55
-> **Component folders**: 22
-> **Editor imports**: 53
+> **Last forged**: 2026-04-03
+> **Codebase**: 335 `.ts` / `.tsx` / `.css` files, ~60,689 lines
+> **Block types**: 55 public workstation block types
+> **Workspace canvas blocks**: 21 dashboard block defs
+> **Component directories**: 101
+> **Views layer**: 18 files total, 13 view wrappers, 3 routers
 
 ---
 
@@ -12,159 +13,201 @@
 
 | Route | Entry File | Purpose |
 |-------|-----------|---------|
-| `/` | `app/page.tsx` | Dashboard shell — composes Editor, Sidebar, Rail, Launchpad |
-| `/share/[id]` | `app/share/[id]/page.tsx` | Public shared document view |
-| `/api/generate` | `app/api/generate/route.ts` | AI block generation endpoint |
-| `/api/share` | `app/api/share/route.ts` | Share CRUD (create, lookup, update) |
-| `/api/wire` | `app/api/wire/route.ts` | The Wire data endpoint |
-| `/api/terminal/query` | `app/api/terminal/query/route.ts` | Terminal command processing |
-| `/api/terminal/ambient` | `app/api/terminal/ambient/route.ts` | Terminal ambient data |
+| `/` | `dashboard/src/app/page.tsx` | Dashboard shell. Owns hydration, persistence, shell layout state, forge wiring, rail/sidebar composition, and passes routed props into `ViewRouter`. |
+| `/share/[id]` | `dashboard/src/app/share/[id]/page.tsx` | Public shared document view. |
+| `/api/generate` | `dashboard/src/app/api/generate/route.ts` | AI generation endpoint. |
+| `/api/share` | `dashboard/src/app/api/share/route.ts` | Share CRUD endpoint. |
+| `/api/wire` | `dashboard/src/app/api/wire/route.ts` | The Wire data endpoint. |
+| `/api/terminal/query` | `dashboard/src/app/api/terminal/query/route.ts` | Terminal command processing. |
+| `/api/terminal/ambient` | `dashboard/src/app/api/terminal/ambient/route.ts` | Terminal ambient data. |
 
 ---
 
-## Hotspot Files
+## Routing Topology
 
-| File | Importers | Risk |
-|------|-----------|------|
-| `lib/types.ts` | 68 | Critical — every component imports types |
-| `lib/constants.ts` | 7 | High — block registry, status config, commands |
-| `lib/due-dates.ts` | 3 | Medium — date utilities |
-| `lib/utils.ts` | 5 | Medium — uid, cursorTo, makeBlocks |
-| `editor/Editor.tsx` | 1 (page.tsx) but imports 53 | High — central dispatch for all blocks |
-| `app/page.tsx` | 0 (entry point) but composes entire app | Critical — app shell |
+### Root shell
 
----
+`app/page.tsx`
+- Boots `INITIAL_WORKSTATIONS`, tabs, comments, activities, blocks, archived projects.
+- Hydrates from local storage via `loadFromStorage`.
+- Delegates persistence to `forge/hooks/usePersistence.ts`.
+- Delegates shell UI state to `forge/hooks/useShellLayout.ts`.
+- Delegates workstation/project/document actions to `forge/hooks/useWorkstationActions.ts`.
+- Renders global frame: `Rail`, `EditorSidebar`, onboarding, launchpad, template modals, and `ViewRouter`.
 
-## Block Registry
+### Router split
 
-### Text (11)
-paragraph, h1, h2, h3, bullet, numbered, todo, quote, code, callout, divider — all rendered inline via EditableBlock
+`views/ViewRouter.tsx`
+- Resolves `railActive` into one of three domains: `dashboard`, `workstation`, `workspace`.
 
-### Rich Content (9)
-| Type | Slash | Component | File |
-|------|-------|-----------|------|
-| table | `/table` | TableBlock | `blocks/ContentBlocks.tsx` |
-| accordion | `/acc` | AccordionBlock | `blocks/ContentBlocks.tsx` |
-| math | `/math` | MathBlock | `blocks/ContentBlocks.tsx` |
-| gallery | `/gallery` | GalleryBlock | `blocks/ContentBlocks.tsx` |
-| swatches | `/color` | SwatchesBlock | `blocks/ContentBlocks.tsx` |
-| beforeafter | `/ba` | BeforeAfterBlock | `blocks/ContentBlocks.tsx` |
-| bookmark | `/link` | BookmarkBlock | `blocks/ContentBlocks.tsx` |
-| canvas | `/canvas` | CanvasBlock | `canvas/CanvasBlock.tsx` |
-| audio | `/audio` | AudioBlockComponent | `audio/AudioBlock.tsx` |
+`views/routers/DashboardRouter.tsx`
+- Owns dashboard-facing rail views: `home`, `calendar`, `search`, `services`, `pipeline`, `templates`, `finance`, `wire`, `team`.
 
-### Visual (12)
-| Type | Slash | Component | File |
-|------|-------|-----------|------|
-| graph | `/graph` | GraphBlockComponent | `graphs/GraphBlock.tsx` |
-| deliverable | `/deliv` | DeliverableBlockComponent | `deliverable/DeliverableBlock.tsx` |
-| deadline | `/deadline` | DeadlineBlockComponent | `deadline-block/DeadlineBlock.tsx` |
-| visual | `/visual` | VisualBlock | `visual/VisualBlock.tsx` |
-| timeline | `/timeline` | TimelineBlock | `blocks/VisualBlocks.tsx` |
-| flow | `/flow` | FlowBlock | `blocks/VisualBlocks.tsx` |
-| brandboard | `/brand` | BrandBoardBlock | `blocks/VisualBlocks.tsx` |
-| moodboard | `/mood` | MoodBoardBlock | `blocks/VisualBlocks.tsx` |
-| wireframe | `/wireframe` | WireframeBlock | `blocks/VisualBlocks.tsx` |
-| pullquote | `/testimonial` | PullQuoteBlock | `blocks/VisualBlocks.tsx` |
-| drawing | `/drawing` | DrawingBlock | `drawing/DrawingBlock.tsx` |
-| columns | (internal) | ColumnsBlock | `columns/ColumnsBlock.tsx` |
+`views/routers/WorkstationRouter.tsx`
+- Owns document-editing flows.
+- `workstations` -> `views/editor.tsx` -> `components/workstation/editor/Editor.tsx` -> `core/EditorCore.tsx`
+- `forge` -> `views/forge.tsx` -> `components/workstation/forge-paper/ForgePaper.tsx`
 
-### Animation (5)
-| Type | Slash | Component | File |
-|------|-------|-----------|------|
-| hero-spotlight | `/spotlight` | HeroSpotlightBlock | `blocks/AnimationBlocks.tsx` |
-| kinetic-type | `/kinetic` | KineticTypeBlock | `blocks/AnimationBlocks.tsx` |
-| number-cascade | `/cascade` | NumberCascadeBlock | `blocks/AnimationBlocks.tsx` |
-| stat-reveal | `/stats` | StatRevealBlock | `blocks/AnimationBlocks.tsx` |
-| value-counter | `/value` | ValueCounterBlock | `blocks/AnimationBlocks.tsx` |
-
-### Money (1)
-| Type | Slash | Component | File |
-|------|-------|-----------|------|
-| money | `/money` | MoneyBlockComponent | `money/MoneyBlock.tsx` |
-
-### Collaboration (9)
-| Type | Slash | Component | File |
-|------|-------|-----------|------|
-| comment-thread | `/thread` | CommentThreadBlock | `blocks/CollabBlocks.tsx` |
-| mention | `/mention` | MentionBlock | `blocks/CollabBlocks.tsx` |
-| question | `/question` | QuestionBlock | `blocks/CollabBlocks.tsx` |
-| feedback | `/feedback` | FeedbackBlock | `blocks/CollabBlocks.tsx` |
-| decision | `/decision` | DecisionBlock | `blocks/CollabBlocks.tsx` |
-| poll | `/poll` | PollBlock | `blocks/CollabBlocks.tsx` |
-| handoff | `/handoff` | HandoffBlock | `blocks/CollabBlocks.tsx` |
-| signoff | `/esign` | SignoffBlock | `blocks/CollabBlocks.tsx` |
-| annotation | `/annotate` | AnnotationBlock | `blocks/CollabBlocks.tsx` |
-
-### AI (2)
-| Type | Slash | Component | File |
-|------|-------|-----------|------|
-| ai | `/ai` | AiBlock | `ai/AiBlock.tsx` |
-| ai-action | `/action` | AiActionBlock | `ai-action/AiActionBlock.tsx` |
-
-### Unique (8)
-| Type | Slash | Component | File |
-|------|-------|-----------|------|
-| pricing-config | `/pricing` | PricingConfigBlock | `unique/PricingConfigBlock.tsx` |
-| scope-boundary | `/scope` | ScopeBoundaryBlock | `unique/ScopeBoundaryBlock.tsx` |
-| asset-checklist | `/assets` | AssetChecklistBlock | `unique/AssetChecklistBlock.tsx` |
-| decision-picker | `/decide` | DecisionPickerBlock | `unique/DecisionPickerBlock.tsx` |
-| availability-picker | `/avail` | AvailabilityPickerBlock | `unique/AvailabilityPickerBlock.tsx` |
-| progress-stream | `/stream` | ProgressStreamBlock | `unique/ProgressStreamBlock.tsx` |
-| dependency-map | `/deps` | DependencyMapBlock | `unique/DependencyMapBlock.tsx` |
-| revision-heatmap | `/heat` | RevisionHeatmapBlock | `unique/RevisionHeatmapBlock.tsx` |
+`views/routers/WorkspaceRouter.tsx`
+- Owns the standalone workspace surface.
+- Renders `views/workspace.tsx`, which now composes `WorkspaceSidebar` + `Canvas`.
 
 ---
 
-## Shared Components & Hooks
+## Current Hotspots
 
-| Name | File | Importers | Count |
-|------|------|-----------|-------|
-| DueDatePicker | `shared/DueDatePicker.tsx` | Editor | 1 |
-| ErrorBoundary | `shared/ErrorBoundary.tsx` | page.tsx | 1 |
-| useFocusTrap | `shared/useFocusTrap.ts` | ShareModal, TemplatePicker | 2 |
-
-**Extraction gaps** (from Shared Primitives mission):
-- useClickOutside — duplicated 10+
-- useEditableField — duplicated 8+
-- useEscapeKey — duplicated 30
-- Avatar, IconButton, EmptyState — duplicated 4-8 each
-
----
-
-## Feature Folders
-
-| Folder | Files | External Deps | Notes |
-|--------|-------|---------------|-------|
-| `editor/` | 55 | types, constants, utils, due-dates, shared | Core product — 55 of 174 files |
-| `sidebar/` | 2 | types, constants, due-dates | Workspace tree |
-| `rail/` | 2 | (self-contained) | Navigation icons |
-| `dashboard/` | 2 | types, constants, due-dates | Home view |
-| `calendar/` | 2 | types | Full calendar |
-| `notifications/` | 2 | (self-contained) | Notification panel |
-| `onboarding/` | 4 | types | Workspace creation + animation |
-| `launchpad/` | 2 | types | Workspace picker |
-| `search/` | 2 | types | Cross-workspace search |
-| `templates/` | 4 | types, shared | Template management |
-| `services/` | 2 | (self-contained) | Services page |
-| `pipeline/` | 2 | types | Pipeline board |
-| `finance/` | 2 | (self-contained) | Finance page |
-| `team/` | 2 | types | Team screen |
-| `wire/` | 2 | (self-contained) | The Wire |
-| `workspace/` | 2 | types, constants, due-dates | Workspace home |
-| `share/` | 2 | types | Public share view |
-| `activity/` | 2 | types | Activity margin |
-| `comments/` | 2 | types | Comment panel |
-| `history/` | 2 | (self-contained) | Version history |
-| `shared/` | 4 | types, due-dates | Reusable primitives |
-| `terminal/` | 2 | (self-contained) | Terminal welcome |
+| File | Lines | Why it matters | Status |
+|------|-------|----------------|--------|
+| `dashboard/src/lib/types.ts` | 735 | Widest type hub in the app; central block, shell, and feature contracts. | Yellow watch |
+| `dashboard/src/components/workspace/canvas/Canvas.tsx` | 726 | Main workspace canvas composition layer; owns grid state, drag interactions, render orchestration. | Yellow watch |
+| `dashboard/src/components/workstation/editor/core/EditorCore.tsx` | 493 | Editor integration hub after the monolith split; sits just under the organization threshold. | Green, near threshold |
+| `dashboard/src/components/workstation/forge-paper/ForgePaper.tsx` | 470 | Forge document surface with local block state, outline sync, slash behavior, and save handoff. | Green |
+| `dashboard/src/app/page.tsx` | 418 | App composition root and state hub. No longer a red hotspot, but still broad blast radius. | Green |
+| `dashboard/src/components/workspace/sidebar/WorkspaceSidebar.tsx` | 405 | Workspace shell navigation and summary layer. | Green |
+| `dashboard/src/forge/hooks/useWorkstationActions.ts` | 360 | Action orchestration seam between page state and forge services. | Watch |
+| `dashboard/src/components/workstation/editor/core/hooks/useBlockOperations.ts` | 345 | Editor mutation hub; next hook to split on touch. | Watch |
+| `dashboard/src/components/sidebar/EditorSidebar.tsx` | 306 | Document-context sidebar with workstation switcher, archive, and save state UI. | Stable |
+| `dashboard/src/lib/constants.ts` | 126 | Public block registry, slash metadata, status config, and workstation seeds. | Stable |
+| `dashboard/src/components/workspace/canvas/registry.ts` | 106 | Source of truth for workspace canvas block defs and initial rows. | Stable |
+| `dashboard/src/views/ViewRouter.tsx` | 30 | Domain dispatcher for the whole UI shell. | Stable |
+| `dashboard/src/forge/index.ts` | 36 | Public forge entrypoint and block-ops export seam. | Stable |
 
 ---
 
-## Pending Structural Missions
+## Product Surfaces
 
-| Mission | Status | Impact |
-|---------|--------|--------|
-| Editor Core Refactor | Approved | Creates `editor/core/` (10 files), Editor.tsx → <200 lines |
-| Shared Primitives | Approved | Adds 14 files to `shared/`, deduplicates hooks/components |
-| Block Reorganization | Depends on Core | Splits 4 mega-files into category folders |
+| Surface | Current entry | Notes |
+|---------|---------------|-------|
+| Dashboard shell | `dashboard/src/app/page.tsx` | Owns state, persistence, shell chrome, and routing. |
+| Workstation editor | `dashboard/src/views/editor.tsx` | Thin wrapper into the modular editor core. |
+| Forge Paper | `dashboard/src/views/forge.tsx` | Dedicated document surface sharing forge block operations. |
+| Workspace canvas | `dashboard/src/views/workspace.tsx` | Standalone workspace made of `WorkspaceSidebar` plus grid `Canvas`. |
+| Dashboard home | `dashboard/src/views/home.tsx` | App-level home surface, separate from workstation/editor. |
+| Dashboard tools | `calendar.tsx`, `search.tsx`, `services.tsx`, `pipeline.tsx`, `templates.tsx`, `finance.tsx`, `wire.tsx`, `team.tsx` | Routed by `DashboardRouter`. |
+| Settings | `dashboard/src/components/settings/` | Directory exists but is currently empty. No live routed surface yet. |
+
+---
+
+## Workstation Editor Map
+
+`dashboard/src/components/workstation/editor/`
+- `Editor.tsx` is now a 2-line re-export into `core/EditorCore.tsx`.
+- `core/` contains the modular editor shell:
+  - 7 component folders: `block-registry`, `block-renderer`, `breadcrumb`, `document-surface`, `tab-bar`, `toolbar`, `zen-hint`
+  - 8 hooks: `useBlockOperations`, `useContentCache`, `useEditorKeys`, `useFocusManager`, `usePanelState`, `useSlashMenu`, `useTabOverflow`, `useUndoStack`
+- `chrome/` contains editor UI layers:
+  - `command-bar`, `command-palette`, `editable-block`, `format-bar`, `margin`, `slash-menu`, `split-pane`
+- `panels/` contains `cat`, `conversation`, and `share-modal`
+- `blocks/` contains 41 block directories plus shared helpers
+
+### Public workstation block registry
+
+Source of truth: `dashboard/src/lib/constants.ts`
+
+- Categories exposed in the slash system: `Basic`, `Blocks`, `Visual`, `Collaboration`
+- Public block count: 55
+- Representative families:
+  - Basic text: paragraph, headings, bullet, numbered, todo
+  - Structured content: table, accordion, math, gallery, swatches, bookmark, deadline, audio, canvas
+  - Collaboration: comment-thread, mention, question, feedback, decision, poll, handoff, signoff, annotation
+  - Visual/animated: graph, timeline, flow, brandboard, moodboard, wireframe, pullquote, hero-spotlight, kinetic-type, number-cascade, stat-reveal, value-counter, drawing
+  - Domain blocks: money, deliverable, ai, ai-action, pricing-config, scope-boundary, asset-checklist, decision-picker, availability-picker, progress-stream, dependency-map, revision-heatmap
+
+---
+
+## Workspace Canvas Map
+
+`dashboard/src/components/workspace/canvas/`
+- `Canvas.tsx` is the composition root for the workspace surface.
+- `storage.ts` persists canvas state.
+- `layout.ts` handles row-based layout calculations.
+- `registry.ts` defines constants, initial rows, and 21 canvas block defs.
+- `hooks/` contains:
+  - `useCanvasFooter`
+  - `useCanvasGrid`
+  - `useCanvasLabels`
+  - `useDragMove`
+  - `useDragPlace`
+  - `useDragResize`
+- `chrome/` contains `BlockChrome`, `ReplacePopover`, `Splitter`
+- `insertions/` contains row and column insertion affordances
+- `library/` contains the block picker
+- `toolbar/` contains the top-level workspace toolbar
+- `blocks/` contains the block content dispatcher and concrete workspace block UIs
+
+### Workspace canvas block defs
+
+Source of truth: `dashboard/src/components/workspace/canvas/registry.ts`
+
+`revenue`, `outstanding`, `tasks`, `activity`, `health`, `timer`, `calendar`, `chat`, `invoices`, `files`, `pipeline`, `automation`, `whisper`, `rate`, `goal`, `note`, `revenue-chart`, `project-summary`, `command-surface`, `client-pulse`, `invoice-surface`
+
+---
+
+## Forge Layer
+
+`dashboard/src/forge/` currently has 20 files.
+
+### Public entry
+
+`dashboard/src/forge/index.ts`
+- Exposes `createForge(state)`
+- Re-exports shared block operations:
+  - `getBlockDefaults`
+  - `needsTrailingParagraph`
+  - `needsPicker`
+  - `createEmptyBlock`
+  - `createEmptyDocument`
+  - `convertBlock`
+  - `insertAfter`
+  - `removeBlock`
+
+### Hooks
+
+- `usePersistence.ts` - local storage persistence, save indicator state, explicit save
+- `useShellLayout.ts` - rail/sidebar/layout/zen/split shell state
+- `useWorkstationActions.ts` - high-level shell actions and forge wiring
+
+### Services
+
+- `services/workstations.ts`
+- `services/projects.ts`
+- `services/documents.ts`
+- `services/tabs.ts`
+
+### Block default registries
+
+- `services/blocks/basic.ts`
+- `services/blocks/content.ts`
+- `services/blocks/visual.ts`
+- `services/blocks/money.ts`
+- `services/blocks/collaboration.ts`
+- `services/blocks/ai.ts`
+- `services/blocks/unique.ts`
+- `services/blocks/core.ts` merges them into one default registry
+
+### Important seam
+
+Forge block defaults import from the actual workstation block components. That means "is this block still live?" checks must scan the whole `dashboard/src/` tree, not just `lib/constants.ts` or the editor UI.
+
+---
+
+## Folder Scan
+
+| Area | File count | Notes |
+|------|------------|-------|
+| `dashboard/src/components/workstation/` | 258 | Flagship product surface; editor dominates the file count. |
+| `dashboard/src/components/workstation/editor/` | 220 | Blocks, chrome, panels, and modular editor core. |
+| `dashboard/src/components/workspace/` | 63 | Canvas surface, sidebar, timer, and legacy workspace page file. |
+| `dashboard/src/forge/` | 20 | State hooks, services, types, and block default registries. |
+| `dashboard/src/views/` | 18 | View wrappers plus domain routers. |
+| `dashboard/src/lib/` | 8 | Shared constants, types, seeds, and utilities. |
+
+---
+
+## Drift / Watch Items
+
+1. `dashboard/src/components/settings/` exists but is empty. The surface is still pending a rebuild.
+2. `dashboard/src/components/workspace/Workspace.tsx` and `dashboard/src/components/workspace/MANIFEST.md` describe an older self-contained workspace page, but the live route now renders `WorkspaceSidebar` + `Canvas`.
+3. Forge block defaults still include `columns` and `data-chips` factories via `services/blocks/content.ts`, while those types are not exposed in the public `BLOCK_TYPES` list in `lib/constants.ts`.
+4. `types.ts`, `Canvas.tsx`, and `useBlockOperations.ts` remain the clearest next organization watch items.
+

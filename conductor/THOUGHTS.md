@@ -18,14 +18,13 @@
 
 | Agent | Task | Started | Status |
 |-------|------|---------|--------|
-| — | — | — | — |
 
 ## Recent
 
 | Agent | Task | Completed |
 |-------|------|-----------|
+| codex-main | Wired the live editor persistence flow onto forge memory so hydration, migration, and saves now use one path. | 2026-04-03 06:22 EDT |
+| codex-main | Scaffolded a forge memory boundary so editor persistence, migrations, and debug reporting have one typed home. | 2026-04-03 05:51 EDT |
+| codex-main | Audited the workstation editor, migrated legacy stored blocks, and removed dead `columns` / `data-chips` editor code. | 2026-04-03 05:42 EDT |
+| codex-main | Re-scanned dashboard architecture and rebuilt FORGE_MAP.md so conductor structure matches the current codebase after recent updates | 2026-04-03 05:19 EDT |
 | claude-main | Slop remediation: collapsed page.tsx wrappers, extracted Canvas hooks, extracted persistence + shell hooks from page.tsx, fixed GraphDataEditor stale-closure bug | 2026-04-03 00:15 EDT |
-| claude-main | Added quality gate scripts (lint strict, typecheck, check) + CI workflow + cleaned entire 99-problem lint baseline to zero | 2026-04-02 17:55 EDT |
-| codex-main | Defining a redesign skill that forces prototype scan, deep requirement questioning, and a full plan before implementation | 2026-04-02 13:20 EDT |
-| codex-main | Gave workstation blocks subtler edit identities so metric, chat, and utility blocks read differently without adding noise | 2026-04-02 04:49 EDT |
-| codex-main | Reduced workstation canvas border, chrome, and insertion noise so only one editing layer is visually leading at a time | 2026-04-02 04:49 EDT |

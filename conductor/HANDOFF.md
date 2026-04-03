@@ -1,28 +1,39 @@
 # Session Handoff — 2026-04-03
 
 ## What happened
-Rail icon refresh + Codex skill discovery fix.
+
+This session debugged the workstation editor, removed a real dead-code path, scaffolded the persistence boundary, and then wired the live editor flow onto that new boundary.
 
 ### Completed
-1. **Workstation icon** — Replaced generic monitor icon with anvil SVG in Rail.tsx. Added strike-spark animation on hover/active.
-2. **Workspace icon** — Restructured planet SVG with orbit `<g>` group. Added spin animation + opacity pulse on hover/active (triggers on full button area, not just SVG).
-3. **Codex skills fix** — Renamed all 29 `.agents/skills/*/AGENT.md` → `SKILL.md` so Codex CLI discovers them in the `$` menu.
-4. **AGENTS.md update** — Added 4 missing skills (superbrain, deep-debug, diagnose, forge) to the skills table.
-5. **CLAUDE.md sync** — Updated skill format references to match new `SKILL.md` naming.
+1. **Root cause confirmed** — the mounted workstation editor could neither render nor insert `columns` / `data-chips`, but forge defaults and persisted state still carried them.
+2. **Safe migration added** — `dashboard/src/forge/hooks/usePersistence.ts` now converts legacy stored `columns` / `data-chips` blocks into supported `callout` blocks during hydration so old local documents do not silently lose everything.
+3. **Dead editor code removed** — the legacy block folders and shared type/default references were deleted from the worktree branch `codex-editor-unmounted-cleanup` at commit `50ce2a6`.
+4. **Docs/guardrails synced** — `dashboard/src/forge/MANIFEST.md`, `dashboard/src/components/workstation/editor/blocks/MANIFEST.md`, and `conductor/GUARDRAIL.md` no longer list those removed block types.
+5. **Forge memory scaffolded** — `dashboard/src/forge/memory/` now contains typed storage, migration, and debug modules for a future single editor snapshot boundary. That scaffold is committed in the same worktree branch at `d2466fe`.
+6. **Live persistence rewired** — `dashboard/src/app/page.tsx` now hydrates editor blocks through `loadEditorMemory()`, promotes legacy block storage into the new snapshot on load, and `dashboard/src/forge/hooks/usePersistence.ts` now saves editor state through `saveEditorMemory()`. That wiring landed in the same worktree branch at `8849802`.
 
 ## In-progress work
+
 None.
 
 ## Remaining work
-- [ ] Rebuild `FORGE_MAP.md` (stale — reports 174 files vs ~325 actual)
+
+- [ ] Draft the workstation rail/sidebar redesign spec in `conductor/`
+- [ ] Capture the intended workstation rail prototype in `Prototype/`
 - [ ] Rebuild Settings page
 - [ ] Verify TerminalWelcome split pane in browser
-- [ ] Split `useBlockOperations.ts` on next touch (watch item — 346 lines, 7 concerns)
-- [ ] Split `types.ts` by block family on next touch (watch item — 735 lines, 89 exports)
+- [ ] Split `useBlockOperations.ts` on next touch if editor work resumes
+- [ ] Split large type hubs by block family on next touch if type work resumes
+- [ ] Reconcile stale workspace docs with the live `WorkspaceSidebar + Canvas` route
 
 ## Gotchas
-- `Canvas.tsx` is at 726 lines (YELLOW). The remaining bulk is render JSX.
-- `npm run lint` passes clean. Do not add eslint-disable comments without a concrete reason.
-- `types.ts` is still 735 lines / 89 exports — next type hub to watch.
-- EditorSidebar.tsx has user-added props (`onSelectWorkstation`, `onDuplicateProject`, `onArchiveProject`, `archived`, `onRestoreProject`) — preserve these on any future touch.
-- Rail icon animations use CSS module classes (`.orbit`, `.planetBody`, `.spark`, `.planetIcon`, `.anvilIcon`) — if touching Rail.tsx or Rail.module.css, preserve these.
+
+- The user manually reverted workstation UI changes back to the original state. Do not assume any in-progress workstation rail redesign code is still present in `dashboard/src/`.
+- The next workstation rail attempt must begin with the new redesign skill and a written spec. Do not start by mutating `EditorMargin` or shell/sidebar code directly.
+- `components/settings/` exists as an empty directory. The settings surface is not rebuilt yet even though the folder is back in the tree.
+- `components/workspace/Workspace.tsx` and `components/workspace/MANIFEST.md` describe the older self-contained workspace page, but the live route now renders `WorkspaceSidebar` + `Canvas`.
+- The legacy editor cleanup currently lives in the dedicated worktree branch `codex-editor-unmounted-cleanup` (`50ce2a6`). Main has not been merged yet.
+- The forge memory scaffold and wiring both live only in that worktree branch (`d2466fe`, `8849802`). Main has not been merged yet.
+- New editor writes now go to the `editorMemory` snapshot key. Old `blocksMap` / `lastSavedAt` keys are still readable as fallback during hydration, but they are no longer the primary write path.
+- Worktree production builds need a real local `node_modules` directory. Turbopack rejected a symlinked `node_modules` tree as outside the filesystem root during verification.
+- Verification in the worktree passed: full `npm run lint`, `./node_modules/.bin/tsc --noEmit --incremental false`, and `npm run build`.

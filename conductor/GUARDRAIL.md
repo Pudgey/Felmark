@@ -1,6 +1,6 @@
 # Guardrail — Feature Inventory & Codebase Health
 
-> **Last synced**: 2026-04-01
+> **Last synced**: 2026-04-03
 > **Auto-update rule**: This file MUST be updated in the same commit as any feature add, delete, rename, or move. This is not optional — the AI enforces it as a mandatory post-commit check.
 
 ## Codebase Pulse
@@ -97,6 +97,7 @@ This is boilerplate, not complexity. No refactor needed unless Editor.tsx itself
 | **Terminal Welcome** | Active | `editor/TerminalWelcome.tsx` | Dead-state splash screen |
 | **History** | Active | `history/` | Version history modal |
 | **Conversations** | Active | `editor/ConversationPanel.tsx` | Left-side conversation panel |
+| **Forge memory** | Active | `forge/memory/`, `forge/hooks/usePersistence.ts` | Centralized persisted editor snapshot, migrations, and debug reporting; live editor hydration/saves now run through it |
 
 ---
 
