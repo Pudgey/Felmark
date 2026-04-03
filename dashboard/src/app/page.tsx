@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { INITIAL_WORKSTATIONS } from "@/lib/constants";
 import type { Block, Workstation, Tab, ArchivedProject } from "@/lib/types";
 import Rail from "@/components/rail/Rail";
-import Sidebar from "@/components/sidebar/Sidebar";
 import EditorSidebar from "@/components/sidebar/EditorSidebar";
 import WorkstationOnboarding from "@/components/onboarding/WorkstationOnboarding";
 import ErrorBoundary from "@/components/shared/ErrorBoundary";
@@ -25,6 +24,27 @@ const INITIAL_TABS: Tab[] = [
   { id: "p1", name: "Brand Guidelines v2", client: "Meridian Studio", active: true },
 ];
 
+/** Ensure at least one tab is active. */
+function ensureActiveTab(tabs: Tab[], workstations: Workstation[]): { tabs: Tab[]; activeProject: string } {
+  if (tabs.length > 0 && tabs.some(t => t.active)) {
+    return { tabs, activeProject: tabs.find(t => t.active)!.id };
+  }
+  if (tabs.length > 0) {
+    const activated = tabs.map((t, i) => ({ ...t, active: i === 0 }));
+    return { tabs: activated, activeProject: activated[0].id };
+  }
+  // No tabs at all — create one from first workstation's first project
+  const ws = workstations[0];
+  const pj = ws?.projects[0];
+  if (ws && pj) {
+    return {
+      tabs: [{ id: pj.id, name: pj.name, client: ws.client, active: true }],
+      activeProject: pj.id,
+    };
+  }
+  return { tabs: [], activeProject: "" };
+}
+
 function getInitialBlocks(): Record<string, Block[]> {
   return {
     p1: [
@@ -43,19 +63,60 @@ function getInitialBlocks(): Record<string, Block[]> {
   };
 }
 
-const HYDRATION_SAFE_EMPTY_BLOCKS: Block[] = [
-  { id: "seed-empty-title", type: "h1", content: "", checked: false },
-  { id: "seed-empty-body", type: "paragraph", content: "", checked: false },
-];
+const EMPTY_BLOCKS: Block[] = [];
 
 export default function Dashboard() {
-  const [workstations, setWorkstations] = useState<Workstation[]>(() => loadFromStorage("workstations", null) ?? INITIAL_WORKSTATIONS);
-  const [tabs, setTabs] = useState<Tab[]>(() => loadFromStorage("tabs", null) ?? INITIAL_TABS.map(t => ({ ...t, active: false })));
-  const [activeProject, setActiveProject] = useState(() => loadFromStorage("activeProject", null) ?? "");
-  const [blocksMap, setBlocksMap] = useState<Record<string, Block[]>>(() => loadFromStorage("blocksMap", null) ?? getInitialBlocks());
-  const [archived, setArchived] = useState<ArchivedProject[]>(() => loadFromStorage("archived", null) ?? []);
-  const [comments, setComments] = useState<Comment[]>(() => loadFromStorage("comments", null) ?? INITIAL_COMMENTS);
-  const [activitiesMap, setActivitiesMap] = useState<Record<string, BlockActivity[]>>(() => loadFromStorage("activitiesMap", null) ?? { p1: INITIAL_ACTIVITIES });
+  // SSR-safe defaults — always render the same HTML on server and client first pass
+  const ssrDefault = ensureActiveTab(
+    INITIAL_TABS.map(t => ({ ...t, active: false })),
+    INITIAL_WORKSTATIONS,
+  );
+
+  const [workstations, setWorkstations] = useState<Workstation[]>(INITIAL_WORKSTATIONS);
+  const [tabs, setTabs] = useState<Tab[]>(ssrDefault.tabs);
+  const [activeProject, setActiveProject] = useState(ssrDefault.activeProject);
+  const [blocksMap, setBlocksMap] = useState<Record<string, Block[]>>(getInitialBlocks);
+  const [archived, setArchived] = useState<ArchivedProject[]>([]);
+  const [comments, setComments] = useState<Comment[]>(INITIAL_COMMENTS);
+  const [activitiesMap, setActivitiesMap] = useState<Record<string, BlockActivity[]>>({ p1: INITIAL_ACTIVITIES });
+
+  // Hydrate from localStorage after mount
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => {
+    const savedWs = loadFromStorage<Workstation[] | null>("workstations", null);
+    const savedTabs = loadFromStorage<Tab[] | null>("tabs", null);
+    const savedProject = loadFromStorage<string | null>("activeProject", null);
+    const savedBlocks = loadFromStorage<Record<string, Block[]> | null>("blocksMap", null);
+    const savedArchived = loadFromStorage<ArchivedProject[] | null>("archived", null);
+    const savedComments = loadFromStorage<Comment[] | null>("comments", null);
+    const savedActivities = loadFromStorage<Record<string, BlockActivity[]> | null>("activitiesMap", null);
+
+    const ws = savedWs ?? INITIAL_WORKSTATIONS;
+    const rawTabs = savedTabs ?? INITIAL_TABS.map(t => ({ ...t, active: false }));
+    const rawProject = savedProject ?? "";
+
+    if (savedWs) setWorkstations(savedWs);
+    if (savedBlocks) setBlocksMap(savedBlocks);
+    if (savedArchived) setArchived(savedArchived);
+    if (savedComments) setComments(savedComments);
+    if (savedActivities) setActivitiesMap(savedActivities);
+
+    // Ensure an active tab
+    if (rawProject && rawTabs.some(t => t.active && t.id === rawProject)) {
+      setTabs(rawTabs);
+      setActiveProject(rawProject);
+      const owningWs = ws.find(w => w.projects.some(p => p.id === rawProject));
+      setActiveWorkstationId(owningWs?.id ?? null);
+    } else {
+      const resolved = ensureActiveTab(rawTabs, ws);
+      setTabs(resolved.tabs);
+      setActiveProject(resolved.activeProject);
+      const owningWs = ws.find(w => w.projects.some(p => p.id === resolved.activeProject));
+      setActiveWorkstationId(owningWs?.id ?? null);
+    }
+
+    setHydrated(true);
+  }, []);
   const {
     updateWorkstations, updateTabs, updateActiveProject, updateBlocksMap,
     updateArchived, updateComments, updateActivitiesMap,
@@ -82,7 +143,10 @@ export default function Dashboard() {
   const [charCount, setCharCount] = useState(0);
   const [onboardingName, setOnboardingName] = useState<string | null>(null);
   const [creationAnim, setCreationAnim] = useState<CreationAnimState>(null);
-  const [activeWorkstationId, setActiveWorkstationId] = useState<string | null>(null);
+  const [activeWorkstationId, setActiveWorkstationId] = useState<string | null>(() => {
+    const ws = INITIAL_WORKSTATIONS.find(w => w.projects.some(p => p.id === ssrDefault.activeProject));
+    return ws?.id ?? null;
+  });
   const [docTemplates, setDocTemplates] = useState<DocumentTemplate[]>(STARTER_TEMPLATES);
   const [showSaveTemplate, setShowSaveTemplate] = useState(false);
   const [showTemplatePicker, setShowTemplatePicker] = useState(false);
@@ -113,12 +177,9 @@ export default function Dashboard() {
     navigateRail, handleRenameWorkstation,
   } = actions;
 
-  const activeBlocks = blocksMap[activeProject] || HYDRATION_SAFE_EMPTY_BLOCKS;
+  const activeBlocks = blocksMap[activeProject] || EMPTY_BLOCKS;
 
-  const showSidebar = !zenMode && !creationAnim && onboardingName === null;
-  const hasActiveTab = tabs.some(t => t.active);
-  const showNavigationSidebar = showSidebar && railActive === "workstations" && !hasActiveTab;
-  const showEditorSidebar = showSidebar && railActive === "workstations" && hasActiveTab;
+  const showSidebar = !zenMode && !creationAnim && onboardingName === null && railActive === "workstations";
 
   return (
     <ErrorBoundary>
@@ -147,38 +208,7 @@ export default function Dashboard() {
         zenMode={zenMode}
         onToggleZen={() => setZenMode(true)}
       />}
-      {showNavigationSidebar && (
-          <Sidebar
-            workstations={workstations}
-            archived={archived}
-            activeProject={activeProject}
-            open={sidebarOpen}
-            width={sidebarWidth}
-            isResizing={isResizing}
-            wordCount={wordCount}
-            railActive={railActive}
-            onClose={() => setSidebarOpen(false)}
-            onToggleWorkstation={toggleWorkstation}
-            onSelectWorkstation={selectWorkstation}
-            onSelectProject={selectProject}
-            onArchiveProject={archiveProject}
-            onArchiveCompleted={archiveCompletedInWorkstation}
-            onArchiveWorkstation={archiveWorkstation}
-            onRestoreProject={restoreProject}
-            onRenameProject={handleTabRename}
-            onUpdateProjectDue={updateProjectDue}
-            onRenameWorkstation={(wsId, name) => forge.workstations.rename(wsId, name)}
-            onReorderWorkstations={(fromIdx, toIdx) => forge.workstations.reorder(fromIdx, toIdx)}
-            onAddWorkstation={addWorkstation}
-            onTogglePin={togglePin}
-            onCycleStatus={cycleStatus}
-            onScrollToCalendarEvent={(projectId) => setCalendarScrollTarget(projectId)}
-            saveIndicatorState={saveIndicatorState}
-            saveStatusLabel={saveStatusLabel}
-            onSaveNow={saveNow}
-          />
-      )}
-      {showEditorSidebar && (
+      {showSidebar && (
         <EditorSidebar
           workstation={workstations.find(w => w.id === activeWorkstationId) ?? null}
           workstations={workstations}
@@ -201,11 +231,12 @@ export default function Dashboard() {
           onArchiveProject={archiveProject}
           archived={archived}
           onRestoreProject={restoreProject}
+          onPermanentDelete={(idx: number) => forge.projects.permanentDelete(idx)}
           onSaveNow={saveNow}
         />
       )}
       {/* Resize handle */}
-      {sidebarOpen && (showNavigationSidebar || showEditorSidebar) && (
+      {sidebarOpen && showSidebar && (
         <div
           style={{
             width: 5,

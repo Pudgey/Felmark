@@ -144,10 +144,6 @@ export default function DocumentSurface({
                 date={project.due}
                 onChange={(due) => onUpdateProjectDue?.(activeProject, due)}
               />
-              {project.amount !== "\u2014" && <>
-                <span className={styles.metaSep}>&middot;</span>
-                <span className={styles.metaBudget}>{project.amount}</span>
-              </>}
             </div>
           );
         })()}

@@ -103,7 +103,7 @@ export default function Sidebar({ workstations, archived, activeProject, open, w
   const clientWorkstations = filtered.filter(w => !w.personal);
   const personalWorkstations = filtered.filter(w => w.personal);
 
-  const renderProjects = (ws: Workstation, showAmount: boolean) => (
+  const renderProjects = (ws: Workstation) => (
     <div className={`${styles.projectList} ${ws.open ? styles.projectListOpen : ""}`} aria-hidden={!ws.open}>
       <div className={styles.projectListInner}>
         {ws.projects.map(pj => {
@@ -114,12 +114,14 @@ export default function Sidebar({ workstations, archived, activeProject, open, w
               className={`${styles.project} ${activeProject === pj.id ? styles.projectActive : ""}`}
               onClick={() => { if (editingPjId !== pj.id) onSelectProject(pj, ws.client); }}
             >
-              <div
-                className={styles.projectStatusDot}
-                style={{ background: st.color }}
+              <button
+                className={styles.projectStatusBadge}
+                style={{ color: st.color, background: `${st.color}10`, borderColor: `${st.color}20` }}
                 onClick={e => { e.stopPropagation(); onCycleStatus(pj.id); }}
-                title={`${st.label} — click to change`}
-              />
+                title="Click to change status"
+              >
+                {st.label}
+              </button>
               <div className={styles.projectContent}>
                 {editingPjId === pj.id ? (
                   <input className={styles.pjRenameInput} value={editingPjName} autoFocus
@@ -135,11 +137,6 @@ export default function Sidebar({ workstations, archived, activeProject, open, w
                     {getDueLabelFromDate(pj.due)}
                     <input type="date" value={pj.due || ""} onChange={e => onUpdateProjectDue(pj.id, e.target.value || null)} style={{ position: "absolute", opacity: 0, width: 0, height: 0, overflow: "hidden" }} />
                   </label>
-                  {showAmount && pj.amount !== "—" && <span className={styles.projectAmount}>{pj.amount}</span>}
-                  <div className={styles.projectProgressBar}>
-                    <div className={styles.projectProgressFill} style={{ width: `${pj.progress}%`, background: st.color }} />
-                  </div>
-                  <span className={styles.projectProgressPct}>{pj.progress}%</span>
                 </div>
               </div>
               <div className={styles.projectActions}>
@@ -216,9 +213,6 @@ export default function Sidebar({ workstations, archived, activeProject, open, w
                   <div className={styles.pinnedName}>{p.name}</div>
                   <div className={styles.pinnedWs}>{p.wsName}</div>
                 </div>
-                <div className={styles.pinnedProgress}>
-                  <div className={styles.pinnedProgressFill} style={{ width: `${p.progress}%`, background: STATUS[p.status].color }} />
-                </div>
               </div>
             ))}
           </div>
@@ -287,7 +281,7 @@ export default function Sidebar({ workstations, archived, activeProject, open, w
                 </div>
               )}
 
-              {renderProjects(ws, true)}
+              {renderProjects(ws)}
             </div>
           ))}
 
@@ -338,7 +332,7 @@ export default function Sidebar({ workstations, archived, activeProject, open, w
                     </div>
                   )}
 
-                  {renderProjects(ws, false)}
+                  {renderProjects(ws)}
                 </div>
               ))}
             </>

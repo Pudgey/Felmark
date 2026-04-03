@@ -125,8 +125,25 @@ export function createProjectServices(state: StateUpdater) {
       ));
       state.setTabs(prev => {
         const n = prev.filter(t => t.id !== projectId);
-        if (n.length > 0 && !n.some(t => t.active)) { n[n.length - 1].active = true; state.setActiveProject(n[n.length - 1].id); }
-        if (n.length === 0) state.setActiveProject("");
+        if (n.length > 0 && !n.some(t => t.active)) {
+          n[n.length - 1].active = true;
+          state.setActiveProject(n[n.length - 1].id);
+          const owner = state.getState().workstations.find(w => w.projects.some(p => p.id === n[n.length - 1].id));
+          state.setActiveWorkstationId(owner?.id ?? null);
+        }
+        if (n.length === 0) {
+          // Fall back to personal workstation
+          const personal = state.getState().workstations.find(w => w.personal);
+          const fallback = personal?.projects[0];
+          if (personal && fallback) {
+            n.push({ id: fallback.id, name: fallback.name, client: personal.client, active: true });
+            state.setActiveProject(fallback.id);
+            state.setActiveWorkstationId(personal.id);
+          } else {
+            state.setActiveProject("");
+            state.setActiveWorkstationId(null);
+          }
+        }
         return n;
       });
     },
@@ -143,6 +160,19 @@ export function createProjectServices(state: StateUpdater) {
           return prev.map(w => w.id === item.workstationId ? { ...w, projects: [...w.projects, item.project] } : w);
         }
         return [...prev, { id: item.workstationId, client: item.workstationName, avatar: item.workstationName[0], avatarBg: "#7c8594", open: true, lastActive: "now", projects: [item.project] }];
+      });
+      state.setArchived(prev => prev.filter((_, i) => i !== archivedIdx));
+    },
+
+    /** Permanently delete an archived project and its blocks */
+    permanentDelete(archivedIdx: number) {
+      const { archived } = state.getState();
+      const item = archived[archivedIdx];
+      if (!item) return;
+      state.setBlocksMap(prev => {
+        const next = { ...prev };
+        delete next[item.project.id];
+        return next;
       });
       state.setArchived(prev => prev.filter((_, i) => i !== archivedIdx));
     },

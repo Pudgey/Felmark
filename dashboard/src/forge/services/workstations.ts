@@ -115,8 +115,24 @@ export function createWorkstationServices(state: StateUpdater) {
       state.setWorkstations(prev => prev.filter(w => w.id !== wsId));
       state.setTabs(prev => {
         const n = prev.filter(t => !projectIds.has(t.id));
-        if (n.length > 0 && !n.some(t => t.active)) { n[n.length - 1].active = true; state.setActiveProject(n[n.length - 1].id); }
-        if (n.length === 0) state.setActiveProject("");
+        if (n.length > 0 && !n.some(t => t.active)) {
+          n[n.length - 1].active = true;
+          state.setActiveProject(n[n.length - 1].id);
+          const owner = state.getState().workstations.find(w => w.projects.some(p => p.id === n[n.length - 1].id));
+          state.setActiveWorkstationId(owner?.id ?? null);
+        }
+        if (n.length === 0) {
+          const personal = state.getState().workstations.find(w => w.personal);
+          const fallback = personal?.projects[0];
+          if (personal && fallback) {
+            n.push({ id: fallback.id, name: fallback.name, client: personal.client, active: true });
+            state.setActiveProject(fallback.id);
+            state.setActiveWorkstationId(personal.id);
+          } else {
+            state.setActiveProject("");
+            state.setActiveWorkstationId(null);
+          }
+        }
         return n;
       });
 
@@ -141,8 +157,24 @@ export function createWorkstationServices(state: StateUpdater) {
       ));
       state.setTabs(prev => {
         const n = prev.filter(t => !completedIds.has(t.id));
-        if (n.length > 0 && !n.some(t => t.active)) { n[n.length - 1].active = true; state.setActiveProject(n[n.length - 1].id); }
-        if (n.length === 0) state.setActiveProject("");
+        if (n.length > 0 && !n.some(t => t.active)) {
+          n[n.length - 1].active = true;
+          state.setActiveProject(n[n.length - 1].id);
+          const owner = state.getState().workstations.find(w => w.projects.some(p => p.id === n[n.length - 1].id));
+          state.setActiveWorkstationId(owner?.id ?? null);
+        }
+        if (n.length === 0) {
+          const personal = state.getState().workstations.find(w => w.personal);
+          const fallback = personal?.projects[0];
+          if (personal && fallback) {
+            n.push({ id: fallback.id, name: fallback.name, client: personal.client, active: true });
+            state.setActiveProject(fallback.id);
+            state.setActiveWorkstationId(personal.id);
+          } else {
+            state.setActiveProject("");
+            state.setActiveWorkstationId(null);
+          }
+        }
         return n;
       });
     },

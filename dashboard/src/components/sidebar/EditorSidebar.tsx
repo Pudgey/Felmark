@@ -27,6 +27,7 @@ interface EditorSidebarProps {
   onArchiveProject: (projectId: string) => void;
   archived: ArchivedProject[];
   onRestoreProject: (archivedIdx: number) => void;
+  onPermanentDelete: (archivedIdx: number) => void;
   onSaveNow: () => void;
 }
 
@@ -61,11 +62,14 @@ export default function EditorSidebar({
   onArchiveProject,
   archived,
   onRestoreProject,
+  onPermanentDelete,
   onSaveNow,
 }: EditorSidebarProps) {
   const [docsOpen, setDocsOpen] = useState(true);
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [switcherOpen, setSwitcherOpen] = useState(false);
+  const [holdIdx, setHoldIdx] = useState<number | null>(null);
+  const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const switcherRef = useRef<HTMLDivElement>(null);
 
   // Close switcher on outside click
@@ -84,7 +88,7 @@ export default function EditorSidebar({
   const words = useMemo(() => countWords(blocks), [blocks]);
 
   const projects = workstation?.projects ?? [];
-  const clientName = workstation?.client ?? "Workspace";
+  const clientName = workstation?.client ?? "Personal";
   const wsArchived = workstation
     ? archived.map((a, idx) => ({ ...a, globalIdx: idx })).filter(a => a.workstationId === workstation.id)
     : [];
@@ -191,7 +195,6 @@ export default function EditorSidebar({
                         <span className={styles.docRowName}>{project.name}</span>
                         <span className={styles.docRowMeta}>
                           {st?.label || "draft"}
-                          {project.progress > 0 && ` · ${project.progress}%`}
                         </span>
                       </div>
                       <div className={styles.docActions}>
@@ -229,22 +232,53 @@ export default function EditorSidebar({
                 <span className={styles.sectionLabel}>archive</span>
                 <span className={styles.sectionCount}>{wsArchived.length}</span>
               </div>
-              {archiveOpen && wsArchived.map(item => (
-                <div key={`${item.project.id}-${item.globalIdx}`} className={styles.archiveItem}>
-                  <div className={styles.archiveDot} />
-                  <div className={styles.archiveInfo}>
-                    <span className={styles.archiveName}>{item.project.name}</span>
-                    <span className={styles.archiveMeta}>{item.archivedAt}</span>
-                  </div>
-                  <button
-                    className={styles.archiveRestore}
-                    title="Restore"
-                    onClick={() => onRestoreProject(item.globalIdx)}
+              {archiveOpen && wsArchived.map(item => {
+                const isHeld = holdIdx === item.globalIdx;
+                return (
+                  <div
+                    key={`${item.project.id}-${item.globalIdx}`}
+                    className={`${styles.archiveItem} ${isHeld ? styles.archiveItemHeld : ""}`}
+                    onMouseDown={() => {
+                      holdTimer.current = setTimeout(() => setHoldIdx(item.globalIdx), 500);
+                    }}
+                    onMouseUp={() => {
+                      if (holdTimer.current) { clearTimeout(holdTimer.current); holdTimer.current = null; }
+                    }}
+                    onMouseLeave={() => {
+                      if (holdTimer.current) { clearTimeout(holdTimer.current); holdTimer.current = null; }
+                      if (isHeld) setHoldIdx(null);
+                    }}
                   >
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6.5a4 4 0 017.5-1.5M10 2v3H7" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" /><path d="M10 5.5a4 4 0 01-7.5 1.5M2 10V7h3" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                  </button>
-                </div>
-              ))}
+                    {isHeld ? (
+                      <>
+                        <span className={styles.archiveHeldName}>{item.project.name}</span>
+                        <button
+                          className={styles.archiveDelete}
+                          title="Permanently delete"
+                          onClick={() => { onPermanentDelete(item.globalIdx); setHoldIdx(null); }}
+                        >
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 3h8M4.5 3V2h3v1M3 3v7a1 1 0 001 1h4a1 1 0 001-1V3" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" /><path d="M5 5.5v3M7 5.5v3" stroke="currentColor" strokeWidth="1" strokeLinecap="round" /></svg>
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <div className={styles.archiveDot} />
+                        <div className={styles.archiveInfo}>
+                          <span className={styles.archiveName}>{item.project.name}</span>
+                          <span className={styles.archiveMeta}>{item.archivedAt}</span>
+                        </div>
+                        <button
+                          className={styles.archiveRestore}
+                          title="Restore"
+                          onClick={() => onRestoreProject(item.globalIdx)}
+                        >
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6.5a4 4 0 017.5-1.5M10 2v3H7" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" /><path d="M10 5.5a4 4 0 01-7.5 1.5M2 10V7h3" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                        </button>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
 
@@ -263,7 +297,7 @@ export default function EditorSidebar({
             aria-label="Save now"
           >
             <span className={`${styles.savedDot} ${saveIndicatorState === "saving" ? styles.savedDotSaving : ""}`} />
-            <span className={styles.savedText}>{saveStatusLabel}</span>
+            <span className={styles.savedText} suppressHydrationWarning>{saveStatusLabel}</span>
           </button>
         </div>
       </div>

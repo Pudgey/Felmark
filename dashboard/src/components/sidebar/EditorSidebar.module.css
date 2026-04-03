@@ -502,6 +502,45 @@
   color: var(--ember);
 }
 
+/* Archive held state — long press reveals delete */
+.archiveItemHeld {
+  background: rgba(194, 75, 56, 0.04);
+  border: 1px solid rgba(194, 75, 56, 0.12);
+  border-radius: var(--radius-sm);
+  padding: 5px 8px 5px 14px;
+  margin: 0 4px;
+}
+
+.archiveHeldName {
+  font-size: 12px;
+  color: #c24b38;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archiveDelete {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: rgba(194, 75, 56, 0.08);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c24b38;
+  flex-shrink: 0;
+  padding: 0;
+  transition: background 0.08s;
+}
+
+.archiveDelete:hover {
+  background: rgba(194, 75, 56, 0.16);
+}
+
 /* Outline */
 .outline {
   padding: 0 14px 4px 22px;

@@ -22,7 +22,9 @@
 | `settings` | 1 | `2026-04-01_forge-paper-and-settings-handoff.md` |
 | `housekeeping` | 1 | `2026-04-01_housekeeping-sweep.md` |
 | `skills` | 3 | `2026-03-30_skill-library-felmark-cleanup.md`, `2026-03-30_codex-skill-packaging.md`, `2026-04-01_housekeeping-sweep.md` |
-| `tooling` | 1 | `2026-03-30_codex-skill-packaging.md` |
+| `tooling` | 2 | `2026-03-30_codex-skill-packaging.md`, `2026-04-02_quality-gates.md` |
+| `lint` | 1 | `2026-04-02_quality-gates.md` |
+| `ci` | 1 | `2026-04-02_quality-gates.md` |
 
 ## Pattern Alerts
 

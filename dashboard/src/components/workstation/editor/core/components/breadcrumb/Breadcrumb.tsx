@@ -46,12 +46,6 @@ export default function Breadcrumb({ tabs, activeProject, workstations, onSelect
       </button>
       <span style={{ color: "var(--warm-300)" }}>/</span>
       <span style={{ color: "var(--ink-700)", margin: "0 4px", fontWeight: 500 }}>{activeTab?.name || "Untitled"}</span>
-      {(() => {
-        const pj = workstations.flatMap(w => w.projects).find(p => p.id === activeProject);
-        if (!pj) return null;
-        const st = STATUS[pj.status];
-        return <span className={styles.breadStatus} style={{ background: `${st.color}12`, color: st.color, border: `1px solid ${st.color}20` }}>{st.label}</span>;
-      })()}
     </div>
   );
 }

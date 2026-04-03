@@ -7,6 +7,7 @@ export interface ForgeState {
   workstations: Workstation[];
   tabs: Tab[];
   activeProject: string;
+  activeWorkstationId: string | null;
   blocksMap: Record<string, Block[]>;
   archived: ArchivedProject[];
   comments: Comment[];
@@ -33,6 +34,7 @@ export type StateUpdater = {
   setWorkstations: (fn: (prev: Workstation[]) => Workstation[]) => void;
   setTabs: (fn: (prev: Tab[]) => Tab[]) => void;
   setActiveProject: (id: string) => void;
+  setActiveWorkstationId: (id: string | null) => void;
   setBlocksMap: (fn: (prev: Record<string, Block[]>) => Record<string, Block[]>) => void;
   setArchived: (fn: (prev: ArchivedProject[]) => ArchivedProject[]) => void;
   setComments: (fn: (prev: Comment[]) => Comment[]) => void;
