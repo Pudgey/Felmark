@@ -24,8 +24,8 @@
 
 | Agent | Task | Completed |
 |-------|------|-----------|
+| claude-main | Slop remediation: collapsed page.tsx wrappers, extracted Canvas hooks, extracted persistence + shell hooks from page.tsx, fixed GraphDataEditor stale-closure bug | 2026-04-03 00:15 EDT |
 | claude-main | Added quality gate scripts (lint strict, typecheck, check) + CI workflow + cleaned entire 99-problem lint baseline to zero | 2026-04-02 17:55 EDT |
 | codex-main | Defining a redesign skill that forces prototype scan, deep requirement questioning, and a full plan before implementation | 2026-04-02 13:20 EDT |
 | codex-main | Gave workstation blocks subtler edit identities so metric, chat, and utility blocks read differently without adding noise | 2026-04-02 04:49 EDT |
 | codex-main | Reduced workstation canvas border, chrome, and insertion noise so only one editing layer is visually leading at a time | 2026-04-02 04:49 EDT |
-| codex-main | Demoted the workstation gutter delete control to a secondary hover action so breathe mode keeps stable add and drag controls | 2026-04-02 04:46 EDT |
