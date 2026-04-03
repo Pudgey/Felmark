@@ -148,38 +148,6 @@ export default function TerminalProvider({
     });
   }, [updateSharedState]);
 
-  // ─── D7: Action routing ───────────────────────────
-  const executeAction = useCallback((command: string) => {
-    if (command.startsWith("navigate:workstation:")) {
-      const wsId = command.replace("navigate:workstation:", "");
-      onOpenWorkstation?.(wsId);
-      return;
-    }
-
-    if (command.startsWith("insert:")) {
-      const insertType = command.replace("insert:", "");
-      const timestamp = Date.now();
-
-      updateSharedState((prev) => ({
-        ...prev,
-        entries: prev.entries.concat(
-          createOutputEntry(
-            `insert:${insertType}`,
-            `Insert action: ${insertType} block - coming soon`,
-            timestamp,
-            nextBlockId()
-          )
-        ),
-      }));
-      return;
-    }
-
-    // Default: treat as a terminal command (e.g., "/rate", "/client Meridian")
-    if (command.startsWith("/")) {
-      executeCommandInner(command);
-    }
-  }, [executeCommandInner, onOpenWorkstation, updateSharedState]);
-
   // ─── Core command execution ───────────────────────
   const executeCommandInner = useCallback((input: string) => {
     const trimmed = input.trim();
@@ -236,6 +204,38 @@ export default function TerminalProvider({
 
   // Alias for context consumption (matches existing API)
   const executeCommand = executeCommandInner;
+
+  // ─── D7: Action routing ───────────────────────────
+  const executeAction = useCallback((command: string) => {
+    if (command.startsWith("navigate:workstation:")) {
+      const wsId = command.replace("navigate:workstation:", "");
+      onOpenWorkstation?.(wsId);
+      return;
+    }
+
+    if (command.startsWith("insert:")) {
+      const insertType = command.replace("insert:", "");
+      const timestamp = Date.now();
+
+      updateSharedState((prev) => ({
+        ...prev,
+        entries: prev.entries.concat(
+          createOutputEntry(
+            `insert:${insertType}`,
+            `Insert action: ${insertType} block - coming soon`,
+            timestamp,
+            nextBlockId()
+          )
+        ),
+      }));
+      return;
+    }
+
+    // Default: treat as a terminal command (e.g., "/rate", "/client Meridian")
+    if (command.startsWith("/")) {
+      executeCommandInner(command);
+    }
+  }, [executeCommandInner, onOpenWorkstation, updateSharedState]);
 
   // ─── D6: Natural language query ───────────────────
   const sendNLQuery = useCallback(async (query: string) => {
