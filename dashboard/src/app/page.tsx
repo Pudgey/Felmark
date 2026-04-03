@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState } from "react";
 import { INITIAL_WORKSTATIONS } from "@/lib/constants";
-import type { Block, Workstation, Project, Tab, ArchivedProject, WorkstationTemplate } from "@/lib/types";
-import { uid } from "@/lib/utils";
+import type { Block, Workstation, Tab, ArchivedProject } from "@/lib/types";
 import Rail from "@/components/rail/Rail";
 import Sidebar from "@/components/sidebar/Sidebar";
 import EditorSidebar from "@/components/sidebar/EditorSidebar";
@@ -15,9 +14,8 @@ import CreationAnimation from "@/components/onboarding/CreationAnimation";
 import Launchpad from "@/components/launchpad/Launchpad";
 import type { DocumentTemplate } from "@/lib/types";
 import { STARTER_TEMPLATES } from "@/lib/starter-templates";
-import { createForge } from "@/forge";
-import type { StateUpdater } from "@/forge";
 import SaveTemplateModal from "@/components/workstation/templates/SaveTemplateModal";
+import { useWorkstationActions, type CreationAnimState } from "@/forge/hooks/useWorkstationActions";
 import TemplatePicker from "@/components/workstation/templates/TemplatePicker";
 import ViewRouter from "@/views/ViewRouter";
 import { usePersistence, loadFromStorage } from "@/forge/hooks/usePersistence";
@@ -49,13 +47,6 @@ const HYDRATION_SAFE_EMPTY_BLOCKS: Block[] = [
   { id: "seed-empty-title", type: "h1", content: "", checked: false },
   { id: "seed-empty-body", type: "paragraph", content: "", checked: false },
 ];
-
-function makeEmptyBlocks(): Block[] {
-  return [
-    { id: uid(), type: "h1", content: "", checked: false },
-    { id: uid(), type: "paragraph", content: "", checked: false },
-  ];
-}
 
 export default function Dashboard() {
   const [workstations, setWorkstations] = useState<Workstation[]>(() => loadFromStorage("workstations", null) ?? INITIAL_WORKSTATIONS);
@@ -90,7 +81,7 @@ export default function Dashboard() {
   const [wordCount, setWordCount] = useState(0);
   const [charCount, setCharCount] = useState(0);
   const [onboardingName, setOnboardingName] = useState<string | null>(null);
-  const [creationAnim, setCreationAnim] = useState<{ name: string; template: string; color: string; pendingData: { name: string; contact: string; rate: string; budget: string; color: string; template: WorkstationTemplate } } | null>(null);
+  const [creationAnim, setCreationAnim] = useState<CreationAnimState>(null);
   const [activeWorkstationId, setActiveWorkstationId] = useState<string | null>(null);
   const [docTemplates, setDocTemplates] = useState<DocumentTemplate[]>(STARTER_TEMPLATES);
   const [showSaveTemplate, setShowSaveTemplate] = useState(false);
@@ -98,210 +89,31 @@ export default function Dashboard() {
 
   const overdueCount = workstations.reduce((s, w) => s + w.projects.filter(p => p.status === "overdue").length, 0);
 
-  // ── Forge — the root service layer ──
-  const forgeState: StateUpdater = {
-    getState: () => ({ workstations, tabs, activeProject, blocksMap, archived, comments, activitiesMap }),
-    setWorkstations: updateWorkstations,
-    setTabs: updateTabs,
-    setActiveProject: updateActiveProject,
-    setBlocksMap: updateBlocksMap,
-    setArchived: updateArchived,
-    setComments: updateComments,
-    setActivitiesMap: updateActivitiesMap,
-  };
-  const forge = createForge(forgeState);
+  // ── All workstation handlers via extracted hook ──
+  const actions = useWorkstationActions({
+    workstations, tabs, activeProject, activeWorkstationId,
+    blocksMap, archived, comments, activitiesMap,
+    creationAnim, onboardingName,
+    updateWorkstations, updateTabs, updateActiveProject, updateBlocksMap,
+    updateArchived, updateComments, updateActivitiesMap,
+    setActiveWorkstationId, setWordCount, setCharCount,
+    setOnboardingName, setCreationAnim, setSplitProject,
+    restoreWorkstationContext, setRailActive, setLaunchpadOpen, setSidebarOpen, setCalendarScrollTarget,
+  });
 
-  // Single click — pure expand/collapse toggle
-  const toggleWorkstation = (wid: string) => forge.workstations.toggle(wid);
-
-  // Double click — open the first project in the workstation
-  const selectWorkstation = (wid: string) => {
-    restoreWorkstationContext();
-    const ws = workstations.find(w => w.id === wid);
-    if (!ws) return;
-    if (ws.projects.length > 0) {
-      selectProject(ws.projects[0], ws.client);
-    }
-    // Ensure workstation is expanded in sidebar
-    updateWorkstations(prev => prev.map(w => w.id === wid ? { ...w, open: true } : w));
-  };
-
-  const selectProject = (project: Project, client: string) => {
-    restoreWorkstationContext();
-    const ws = workstations.find(w => w.projects.some(p => p.id === project.id));
-    setActiveWorkstationId(ws?.id ?? null);
-    updateActiveProject(project.id);
-    if (!tabs.find(t => t.id === project.id)) {
-      updateTabs(prev => [...prev.map(t => ({ ...t, active: false })), { id: project.id, name: project.name, client, active: true }]);
-    } else {
-      updateTabs(prev => prev.map(t => ({ ...t, active: t.id === project.id })));
-    }
-    // Ensure blocks exist for this project
-    if (!blocksMap[project.id]) {
-      updateBlocksMap(prev => ({ ...prev, [project.id]: makeEmptyBlocks() }));
-    }
-  };
-
-  // Double-click calendar event → open that exact project
-  const calendarOpenProject = (projectId: string) => {
-    const ws = workstations.find(workstation => workstation.projects.some(project => project.id === projectId));
-    const project = ws?.projects.find(item => item.id === projectId);
-    if (!ws || !project) return;
-    selectProject(project, ws.client);
-  };
-
-  const handleTabClick = (id: string) => {
-    restoreWorkstationContext();
-    const ws = workstations.find(w => w.projects.some(p => p.id === id));
-    setActiveWorkstationId(ws?.id ?? null);
-    forge.tabs.select(id);
-  };
-
-  const openForgeRailRef = useRef<() => void>(undefined);
-  const openForgeRailImpl = () => {
-    setLaunchpadOpen(false);
-    setSidebarOpen(true);
-
-    const currentActiveTab = tabs.find(tab => tab.active);
-    if (currentActiveTab) {
-      setActiveWorkstationId(null);
-      setRailActive("forge");
-      return;
-    }
-
-    if (activeProject) {
-      setActiveWorkstationId(null);
-      forge.tabs.select(activeProject);
-      setRailActive("forge");
-      return;
-    }
-
-    const workstationContext = activeWorkstationId
-      ? workstations.find(workstation => workstation.id === activeWorkstationId)
-      : null;
-    const workstationProject = workstationContext?.projects[0];
-    if (workstationContext && workstationProject) {
-      selectProject(workstationProject, workstationContext.client);
-      setRailActive("forge");
-      return;
-    }
-
-    const fallbackTab = tabs[0];
-    if (fallbackTab) {
-      setActiveWorkstationId(null);
-      forge.tabs.select(fallbackTab.id);
-      setRailActive("forge");
-      return;
-    }
-
-    const fallbackWorkstation = workstations[0];
-    const fallbackProject = fallbackWorkstation?.projects[0];
-    if (fallbackWorkstation && fallbackProject) {
-      selectProject(fallbackProject, fallbackWorkstation.client);
-      setRailActive("forge");
-      return;
-    }
-
-    restoreWorkstationContext();
-  };
-  useEffect(() => { openForgeRailRef.current = openForgeRailImpl; });
-  const openForgeRail = useCallback(() => openForgeRailRef.current?.(), []);
-
-  const handleTabClose = (id: string) => forge.tabs.close(id);
-
-  const handleTabRename = (id: string, name: string) => forge.projects.rename(id, name);
-
-  const handleTabReorder = (sourceId: string, targetId: string, position: "before" | "after") => forge.tabs.reorder(sourceId, targetId, position);
-
-  const togglePin = (projectId: string) => forge.projects.togglePin(projectId);
-  const cycleStatus = (projectId: string) => forge.projects.cycleStatus(projectId);
-
-  const addWorkstation = (name: string) => {
-    // Show onboarding card instead of creating immediately
-    setOnboardingName(name);
-  };
-
-  const TEMPLATE_LABELS: Record<WorkstationTemplate, string> = {
-    blank: "Blank Project", proposal: "Proposal", meeting: "Meeting Notes",
-    brief: "Project Brief", retainer: "Retainer", invoice: "Invoice",
-  };
-
-  const completeOnboarding = (data: { name: string; contact: string; rate: string; budget: string; color: string; template: WorkstationTemplate }) => {
-    setOnboardingName(null);
-    setCreationAnim({ name: data.name, template: TEMPLATE_LABELS[data.template], color: data.color, pendingData: data });
-  };
-
-  const finishCreation = () => {
-    if (!creationAnim) return;
-    forge.workstations.create(creationAnim.pendingData);
-    setCreationAnim(null);
-  };
-
-  const skipOnboarding = () => {
-    if (!onboardingName) return;
-    forge.workstations.quickCreate(onboardingName);
-    setOnboardingName(null);
-  };
-
-  const updateProjectDue = (projectId: string, due: string | null) => forge.projects.setDue(projectId, due);
-
-  const archiveProject = (projectId: string) => forge.projects.archive(projectId);
-  const archiveCompletedInWorkstation = (wsId: string) => forge.workstations.archiveCompleted(wsId);
-  const archiveWorkstation = (wsId: string) => forge.workstations.archive(wsId);
-  const restoreProject = (archivedIdx: number) => forge.projects.restore(archivedIdx);
-
-  const handleNewTab = () => {
-    restoreWorkstationContext();
-    const activeWs = workstations.find(w => w.projects.some(p => p.id === activeProject)) || workstations[0];
-    forge.projects.createInWorkstation(activeWs.id);
-  };
-
-  const handleNewTabInWorkstation = (wsId: string) => {
-    restoreWorkstationContext();
-    setActiveWorkstationId(null);
-    forge.projects.createInWorkstation(wsId);
-  };
-
-  const forgeRef = useRef(forge);
-  useEffect(() => { forgeRef.current = forge; });
-  const handleBlocksChange = useCallback((projectId: string, blocks: Block[]) => {
-    forgeRef.current.documents.setBlocks(projectId, blocks);
-  }, []);
-
-  const handleWordCountChange = useCallback((words: number, chars: number) => {
-    setWordCount(words);
-    setCharCount(chars);
-  }, []);
+  const {
+    forge, toggleWorkstation, selectWorkstation, selectProject,
+    calendarOpenProject, handleTabClick, openForgeRail,
+    handleTabClose, handleTabRename, handleTabReorder,
+    togglePin, cycleStatus, addWorkstation, completeOnboarding,
+    finishCreation, skipOnboarding, updateProjectDue,
+    archiveProject, archiveCompletedInWorkstation, archiveWorkstation, restoreProject,
+    handleNewTab, handleNewTabInWorkstation,
+    handleBlocksChange, handleWordCountChange,
+    navigateRail, handleRenameWorkstation,
+  } = actions;
 
   const activeBlocks = blocksMap[activeProject] || HYDRATION_SAFE_EMPTY_BLOCKS;
-
-  const navigateRail = useCallback((item: string) => {
-    if (item === "workstations") {
-      restoreWorkstationContext();
-      return;
-    }
-    if (item === "forge") {
-      openForgeRail();
-      return;
-    }
-    setLaunchpadOpen(false);
-    setRailActive(item);
-    if (item === "home") {
-      setActiveWorkstationId(null);
-      updateTabs(prev => prev.map(t => ({ ...t, active: false })));
-      updateActiveProject("");
-      setSidebarOpen(true);
-    }
-  }, [restoreWorkstationContext, openForgeRail, updateTabs, updateActiveProject, setLaunchpadOpen, setRailActive, setSidebarOpen]);
-
-  const handleRenameWorkstation = useCallback((wsId: string, name: string) => {
-    updateWorkstations(prev => prev.map(w => w.id === wsId ? { ...w, client: name, avatar: name[0].toUpperCase() } : w));
-    updateTabs(prev => prev.map(t => {
-      const ws = workstations.find(w => w.id === wsId);
-      if (ws && ws.projects.some(p => p.id === t.id)) return { ...t, client: name };
-      return t;
-    }));
-  }, [updateWorkstations, updateTabs, workstations]);
 
   const showSidebar = !zenMode && !creationAnim && onboardingName === null;
   const hasActiveTab = tabs.some(t => t.active);
