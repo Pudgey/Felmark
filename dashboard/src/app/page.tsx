@@ -86,14 +86,14 @@ export default function Dashboard() {
   const {
     sidebarOpen, setSidebarOpen,
     railActive, setRailActive,
-    sidebarWidth, setSidebarWidth,
-    isResizing, setIsResizing,
+    sidebarWidth,
+    isResizing,
     calendarScrollTarget, setCalendarScrollTarget,
     launchpadOpen, setLaunchpadOpen,
     zenMode, setZenMode,
     splitProject, setSplitProject,
-    resizeRef,
     restoreWorkstationContext,
+    onResizeHandleMouseDown,
   } = useShellLayout();
 
   const [wordCount, setWordCount] = useState(0);
@@ -232,32 +232,7 @@ export default function Dashboard() {
             marginLeft: -3,
             marginRight: -2,
           }}
-          onMouseDown={e => {
-            e.preventDefault();
-            resizeRef.current = { startX: e.clientX, startW: sidebarWidth };
-            setIsResizing(true);
-
-            const onMouseMove = (ev: MouseEvent) => {
-              if (!resizeRef.current) return;
-              const delta = ev.clientX - resizeRef.current.startX;
-              const newW = Math.min(720, Math.max(220, resizeRef.current.startW + delta));
-              setSidebarWidth(newW);
-            };
-
-            const onMouseUp = () => {
-              resizeRef.current = null;
-              setIsResizing(false);
-              document.removeEventListener("mousemove", onMouseMove);
-              document.removeEventListener("mouseup", onMouseUp);
-              document.body.style.cursor = "";
-              document.body.style.userSelect = "";
-            };
-
-            document.addEventListener("mousemove", onMouseMove);
-            document.addEventListener("mouseup", onMouseUp);
-            document.body.style.cursor = "col-resize";
-            document.body.style.userSelect = "none";
-          }}
+          onMouseDown={onResizeHandleMouseDown}
         >
           <div style={{
             position: "absolute",

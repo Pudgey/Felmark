@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect, type Dispatch, type SetStateAction } from "react";
+import React, { useState, useCallback, useRef, useEffect, type Dispatch, type SetStateAction } from "react";
 
 export interface UseShellLayoutResult {
   sidebarOpen: boolean;
@@ -21,6 +21,7 @@ export interface UseShellLayoutResult {
   setSplitProject: Dispatch<SetStateAction<string | null>>;
   resizeRef: React.MutableRefObject<{ startX: number; startW: number } | null>;
   restoreWorkstationContext: () => void;
+  onResizeHandleMouseDown: (e: React.MouseEvent) => void;
 }
 
 export function useShellLayout(): UseShellLayoutResult {
@@ -39,6 +40,33 @@ export function useShellLayout(): UseShellLayoutResult {
     setLaunchpadOpen(false);
     setSidebarOpen(true);
   }, []);
+
+  const onResizeHandleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    resizeRef.current = { startX: e.clientX, startW: sidebarWidth };
+    setIsResizing(true);
+
+    const onMouseMove = (ev: MouseEvent) => {
+      if (!resizeRef.current) return;
+      const delta = ev.clientX - resizeRef.current.startX;
+      const newW = Math.min(720, Math.max(220, resizeRef.current.startW + delta));
+      setSidebarWidth(newW);
+    };
+
+    const onMouseUp = () => {
+      resizeRef.current = null;
+      setIsResizing(false);
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+  }, [sidebarWidth]);
 
   // Zen mode: Escape to exit
   useEffect(() => {
@@ -69,5 +97,6 @@ export function useShellLayout(): UseShellLayoutResult {
     setSplitProject,
     resizeRef,
     restoreWorkstationContext,
+    onResizeHandleMouseDown,
   };
 }
