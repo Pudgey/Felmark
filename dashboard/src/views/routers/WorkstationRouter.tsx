@@ -43,6 +43,8 @@ export interface WorkstationRouterProps {
   onSplitMakePrimary: () => void;
   onForgeClose: () => void;
   onForgeSave: (blocks: Block[]) => void;
+  splitProjectName?: string;
+  splitClientName?: string;
 }
 
 export default function WorkstationRouter({ railActive, ...props }: WorkstationRouterProps & { railActive: string }) {
@@ -102,6 +104,8 @@ export default function WorkstationRouter({ railActive, ...props }: WorkstationR
       onSplitOpen={props.onSplitOpen}
       onSplitClose={props.onSplitClose}
       onSplitMakePrimary={props.onSplitMakePrimary}
+      splitProjectName={props.splitProjectName}
+      splitClientName={props.splitClientName}
     />
   );
 }
