@@ -24,8 +24,8 @@
 
 | Agent | Task | Completed |
 |-------|------|-----------|
+| codex-main | Fixed the remaining fake Personal sidebar state by restoring workstation ownership for active tabs and creation flows. | 2026-04-03 07:55 EDT |
 | codex-main | Fixed the ghost personal tab bug by removing stale personal fallback creation and repairing empty-workstation document targeting in a worktree. | 2026-04-03 07:31 EDT |
 | claude-main | Added quality gate scripts (lint strict, typecheck, check) + CI workflow + cleaned entire 99-problem lint baseline to zero | 2026-04-02 17:55 EDT |
 | codex-main | Defining a redesign skill that forces prototype scan, deep requirement questioning, and a full plan before implementation | 2026-04-02 13:20 EDT |
 | codex-main | Gave workstation blocks subtler edit identities so metric, chat, and utility blocks read differently without adding noise | 2026-04-02 04:49 EDT |
-| codex-main | Reduced workstation canvas border, chrome, and insertion noise so only one editing layer is visually leading at a time | 2026-04-02 04:49 EDT |
