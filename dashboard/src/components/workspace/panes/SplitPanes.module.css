@@ -784,6 +784,107 @@
 .btnTimer { color: #26a69a !important; border-color: rgba(38, 166, 154, .15) !important; }
 .btnPrimary { background: var(--ink-900, #1a1918); color: #fff; border-color: var(--ink-900, #1a1918); }
 .btnPrimary:hover { background: var(--ink-800, #2a2926); }
+
+/* ── Context Menu ── */
+.ctxMenu {
+  width: 200px;
+  background: #fff;
+  border: 1px solid var(--warm-200, #e0dfdb);
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, .12), 0 2px 8px rgba(0, 0, 0, .06);
+  z-index: 9999;
+  padding: 4px;
+  animation: ctxIn .08s ease;
+}
+
+@keyframes ctxIn {
+  from { opacity: 0; transform: scale(.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.ctxGroup {
+  padding: 2px 0;
+}
+
+.ctxGroupLabel {
+  font-family: 'JetBrains Mono', var(--mono, monospace);
+  font-size: 8px;
+  color: var(--ink-400, #a5a49f);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 4px 10px 2px;
+  display: block;
+}
+
+.ctxItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--ink-600, #5c5b57);
+  transition: background .04s;
+}
+
+.ctxItem:hover {
+  background: rgba(0, 0, 0, .03);
+  color: var(--ink-900, #1a1918);
+}
+
+.ctxItemOn {
+  background: rgba(0, 0, 0, .03);
+  font-weight: 500;
+}
+
+.ctxItemIcon {
+  font-size: 11px;
+  color: var(--ink-400, #a5a49f);
+  width: 16px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.ctxItem:hover .ctxItemIcon {
+  color: var(--ink-700, #3d3c38);
+}
+
+.ctxItemLabel {
+  flex: 1;
+}
+
+.ctxItemKey {
+  font-family: 'JetBrains Mono', var(--mono, monospace);
+  font-size: 9px;
+  color: var(--ink-300, #cccbc7);
+  flex-shrink: 0;
+}
+
+.ctxItemCheck {
+  font-size: 11px;
+  color: #26a69a;
+  flex-shrink: 0;
+}
+
+.ctxSep {
+  height: 1px;
+  background: var(--warm-200, #e0dfdb);
+  margin: 3px 8px;
+}
+
+.ctxItemDanger {
+  color: #ef5350;
+}
+
+.ctxItemDanger .ctxItemIcon {
+  color: #ef5350;
+}
+
+.ctxItemDanger:hover {
+  background: rgba(239, 83, 80, .06);
+  color: #ef5350;
+}
 .confirm { font-size: 11px; color: #26a69a; font-weight: 500; display: flex; align-items: center; }
 
 /* Avatars */

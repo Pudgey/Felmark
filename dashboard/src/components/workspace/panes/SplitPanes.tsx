@@ -419,14 +419,26 @@ function Pane({ surface, onSurfaceChange, focused, onFocus, zoomed, onZoom, onSp
 }) {
   const [dropOpen, setDropOpen] = useState(false);
   const [splitOpen, setSplitOpen] = useState(false);
+  const [ctxOpen, setCtxOpen] = useState(false);
   const [splitPos, setSplitPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const [dropPos, setDropPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+  const [ctxPos, setCtxPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const Content = PANE_MAP[surface] ?? (() => <EmptyPane surfaceId={surface} />);
   const surf = SURFACES.find(s => s.id === surface)!;
 
+  const closeAll = () => { setDropOpen(false); setSplitOpen(false); setCtxOpen(false); };
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setCtxPos({ top: e.clientY, left: e.clientX });
+    setCtxOpen(true);
+    setDropOpen(false);
+    setSplitOpen(false);
+  };
+
   return (
     <div className={`${styles.pane} ${focused ? styles.paneFocused : styles.paneInactive}`} onClick={onFocus}>
-      <div className={styles.paneHd}>
+      <div className={styles.paneHd} onContextMenu={handleContextMenu}>
         <div className={styles.paneHdLeft} onClick={(e) => { const rect = e.currentTarget.getBoundingClientRect(); setDropPos({ top: rect.bottom + 2, left: rect.left }); setDropOpen(!dropOpen); setSplitOpen(false); }}>
           <span className={styles.paneIcon}>{surf.icon}</span>
           <span className={styles.paneLabel}>{surf.label}</span>
@@ -542,8 +554,64 @@ function Pane({ surface, onSurfaceChange, focused, onFocus, zoomed, onZoom, onSp
           )}
           {canClose && <span className={`${styles.paneHdAction} ${styles.paneHdActionClose}`} onClick={e => { e.stopPropagation(); onClose?.(); }} title="Close pane">{"\u00d7"}</span>}
         </div>
+        {/* Right-click context menu */}
+        {ctxOpen && (
+          <div className={styles.ctxMenu} style={{ position: "fixed", top: ctxPos.top, left: ctxPos.left }}>
+            {/* Switch surface */}
+            <div className={styles.ctxGroup}>
+              <span className={styles.ctxGroupLabel}>Switch surface</span>
+              {SURFACES.map(s => (
+                <div key={s.id} className={`${styles.ctxItem} ${s.id === surface ? styles.ctxItemOn : ""}`}
+                  onClick={() => { onSurfaceChange(s.id); closeAll(); }}>
+                  <span className={styles.ctxItemIcon}>{s.icon}</span>
+                  <span className={styles.ctxItemLabel}>{s.label}</span>
+                  {s.id === surface && <span className={styles.ctxItemCheck}>{"\u2713"}</span>}
+                </div>
+              ))}
+            </div>
+            <div className={styles.ctxSep} />
+            {/* Pane actions */}
+            <div className={styles.ctxItem} onClick={() => { onZoom?.(); closeAll(); }}>
+              <span className={styles.ctxItemIcon}>{zoomed ? "\u2923" : "\u2922"}</span>
+              <span className={styles.ctxItemLabel}>{zoomed ? "Restore pane" : "Maximize pane"}</span>
+              <span className={styles.ctxItemKey}>{"\u21e7"}F</span>
+            </div>
+            {canSplit && !zoomed && <>
+              <div className={styles.ctxItem} onClick={() => { onSplit?.("above"); closeAll(); }}>
+                <span className={styles.ctxItemIcon}>{"\u2191"}</span>
+                <span className={styles.ctxItemLabel}>Split above</span>
+                <span className={styles.ctxItemKey}>{"\u21e7\u2191"}</span>
+              </div>
+              <div className={styles.ctxItem} onClick={() => { onSplit?.("below"); closeAll(); }}>
+                <span className={styles.ctxItemIcon}>{"\u2193"}</span>
+                <span className={styles.ctxItemLabel}>Split below</span>
+                <span className={styles.ctxItemKey}>{"\u21e7\u2193"}</span>
+              </div>
+              {canRowSplit && <>
+                <div className={styles.ctxItem} onClick={() => { onSplit?.("left"); closeAll(); }}>
+                  <span className={styles.ctxItemIcon}>{"\u2190"}</span>
+                  <span className={styles.ctxItemLabel}>Split left</span>
+                  <span className={styles.ctxItemKey}>{"\u21e7\u2190"}</span>
+                </div>
+                <div className={styles.ctxItem} onClick={() => { onSplit?.("right"); closeAll(); }}>
+                  <span className={styles.ctxItemIcon}>{"\u2192"}</span>
+                  <span className={styles.ctxItemLabel}>Split right</span>
+                  <span className={styles.ctxItemKey}>{"\u21e7\u2192"}</span>
+                </div>
+              </>}
+            </>}
+            {canClose && <>
+              <div className={styles.ctxSep} />
+              <div className={`${styles.ctxItem} ${styles.ctxItemDanger}`} onClick={() => { onClose?.(); closeAll(); }}>
+                <span className={styles.ctxItemIcon}>{"\u00d7"}</span>
+                <span className={styles.ctxItemLabel}>Close pane</span>
+                <span className={styles.ctxItemKey}>{"\u21e7"}W</span>
+              </div>
+            </>}
+          </div>
+        )}
       </div>
-      <div className={styles.paneBody}><Content /></div>
+      <div className={styles.paneBody} onClick={() => { if (ctxOpen) closeAll(); }} onContextMenu={handleContextMenu}><Content /></div>
     </div>
   );
 }

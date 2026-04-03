@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import styles from "./ClientHub.module.css";
 
 interface ClientHubProps {
@@ -51,10 +51,18 @@ const FILES = [
 const priColor = (p: string) => p === "urgent" ? "#ef5350" : p === "high" ? "#ff9800" : p === "medium" ? "#2962ff" : "#4c525e";
 const statusColor = (s: string) => s === "overdue" || s === "urgent" ? "#ef5350" : s === "active" ? "#26a69a" : s === "review" ? "#ff9800" : s === "done" ? "#787b86" : "#4c525e";
 
-export default function ClientHub({ clientName, clientAvatar, clientColor, onClose }: ClientHubProps) {
+export default function ClientHub({ clientId, clientName, clientAvatar, clientColor, onClose }: ClientHubProps) {
   const [view, setView] = useState("board");
   const [selectedTask, setSelectedTask] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState<string | null>(null);
+  const hubRef = useRef<HTMLDivElement>(null);
+
+  // Auto scroll to top when client changes or hub opens
+  useEffect(() => {
+    hubRef.current?.scrollTo(0, 0);
+    setView("board");
+    setSelectedTask(null);
+  }, [clientId]);
 
   const task = selectedTask ? TASKS.find(t => t.id === selectedTask) ?? null : null;
   const totalLogged = TASKS.reduce((s, t) => s + t.logged, 0);
@@ -62,7 +70,7 @@ export default function ClientHub({ clientName, clientAvatar, clientColor, onClo
   const allEntries = TASKS.flatMap(t => t.entries.map(e => ({ ...e, task: t.title }))).sort((a, b) => b.date.localeCompare(a.date));
 
   return (
-    <div className={styles.hub}>
+    <div className={styles.hub} ref={hubRef}>
       {/* Client header */}
       <div className={styles.header}>
         <div className={styles.headerTop}>

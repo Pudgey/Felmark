@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useWorkspaceNav } from "@/views/routers/WorkspaceRouter";
 import styles from "./WorkspaceSidebar.module.css";
 
 const CLIENTS = [
@@ -32,10 +33,33 @@ const SIGNALS = [
 
 const URG_CLASS: Record<string, string> = { hot: "sigDotHot", ready: "sigDotReady", watch: "sigDotWatch", done: "sigDotDone" };
 
+interface CtxMenu {
+  type: "client" | "section";
+  pos: { top: number; left: number };
+  clientId?: string;
+  section?: "clients" | "signals";
+}
+
 export default function WorkspaceSidebar() {
   const [active, setActive] = useState<string | null>("c1");
   const [clientsOpen, setClientsOpen] = useState(true);
   const [signalsOpen, setSignalsOpen] = useState(true);
+  const [ctx, setCtx] = useState<CtxMenu | null>(null);
+  const nav = useWorkspaceNav();
+
+  const openClientCtx = (e: React.MouseEvent, clientId: string) => {
+    e.preventDefault();
+    setCtx({ type: "client", pos: { top: e.clientY, left: e.clientX }, clientId });
+  };
+
+  const openSectionCtx = (e: React.MouseEvent, section: "clients" | "signals") => {
+    e.preventDefault();
+    setCtx({ type: "section", pos: { top: e.clientY, left: e.clientX }, section });
+  };
+
+  const closeCtx = () => setCtx(null);
+
+  const ctxClient = ctx?.clientId ? CLIENTS.find(c => c.id === ctx.clientId) : null;
 
   return (
     <div className={styles.sb}>
@@ -176,7 +200,7 @@ export default function WorkspaceSidebar() {
       {/* Scroll */}
       <div className={styles.sbScroll}>
         {/* Clients */}
-        <div className={styles.sbSec} onClick={() => setClientsOpen(!clientsOpen)}>
+        <div className={styles.sbSec} onClick={() => setClientsOpen(!clientsOpen)} onContextMenu={(e) => openSectionCtx(e, "clients")}>
           <span className={styles.sbSecArrow} style={{ transform: clientsOpen ? "rotate(90deg)" : "rotate(0)" }}>&#9656;</span>
           <span className={styles.sbSecLb}>Clients</span>
           <span className={styles.sbSecN}>{CLIENTS.length}</span>
@@ -190,7 +214,7 @@ export default function WorkspaceSidebar() {
 
             return (
               <div key={cl.id} className={`${styles.cl} ${on ? styles.clOn : ""}`}>
-                <div className={styles.clMain} onClick={() => setActive(on ? null : cl.id)}>
+                <div className={styles.clMain} onClick={() => setActive(on ? null : cl.id)} onContextMenu={(e) => openClientCtx(e, cl.id)}>
                   <div className={`${styles.clAv} ${cl.status === "overdue" ? styles.clAvOv : cl.status === "lead" ? styles.clAvLead : ""}`}>
                     {cl.av}
                     <div className={styles.clAvDot} style={{ background: sc }} />
@@ -209,7 +233,7 @@ export default function WorkspaceSidebar() {
                 </div>
 
                 {on && (
-                  <div className={styles.clExp}>
+                  <div className={styles.clExp} onContextMenu={(e) => openClientCtx(e, cl.id)}>
                     {cl.tasks.length > 0 && (
                       <div className={styles.clTasks}>
                         {cl.tasks.slice(0, 3).map((t, i) => (
@@ -240,14 +264,14 @@ export default function WorkspaceSidebar() {
         </>}
 
         {/* Signals */}
-        <div className={styles.sbSec} onClick={() => setSignalsOpen(!signalsOpen)}>
+        <div className={styles.sbSec} onClick={() => setSignalsOpen(!signalsOpen)} onContextMenu={(e) => openSectionCtx(e, "signals")}>
           <span className={styles.sbSecArrow} style={{ transform: signalsOpen ? "rotate(90deg)" : "rotate(0)" }}>&#9656;</span>
           <span className={styles.sbSecLb}>Signals</span>
           <span className={styles.sbSecN}>{SIGNALS.length}</span>
         </div>
 
         {signalsOpen && SIGNALS.map((sig, i) => (
-          <div key={i} className={styles.sig}>
+          <div key={i} className={styles.sig} onContextMenu={(e) => openSectionCtx(e, "signals")}>
             <div className={`${styles.sigDot} ${styles[URG_CLASS[sig.urg]] || ""}`} />
             <span className={styles.sigText}>{sig.text}</span>
             <span className={styles.sigTime}>{sig.time}</span>
@@ -266,6 +290,68 @@ export default function WorkspaceSidebar() {
         <span className={styles.sbFtL}>{CLIENTS.length} clients &middot; 7 tasks</span>
         <div className={styles.sbFtR}><span className={styles.sbFtDot} /><span>synced</span></div>
       </div>
+      {/* Context menu */}
+      {ctx && (
+        <div className={styles.ctxOverlay} onClick={closeCtx}>
+          <div className={styles.ctxMenu} style={{ position: "fixed", top: ctx.pos.top, left: ctx.pos.left }} onClick={e => e.stopPropagation()}>
+            {ctx.type === "client" && ctxClient && <>
+              <div className={styles.ctxHeader}>{ctxClient.name}</div>
+              <div className={styles.ctxItem} onClick={() => { nav.openHub({ clientId: ctxClient.id, clientName: ctxClient.name, clientAvatar: ctxClient.av, clientColor: ctxClient.status === "overdue" ? "#8a7e63" : "#7c8594" }); closeCtx(); }}>
+                <span className={styles.ctxIcon}>{"\u25c7"}</span><span>Open Hub</span>
+              </div>
+              <div className={styles.ctxItem} onClick={closeCtx}>
+                <span className={styles.ctxIcon}>{"\u25b6"}</span><span>Start Timer</span>
+              </div>
+              <div className={styles.ctxItem} onClick={closeCtx}>
+                <span className={styles.ctxIcon}>$</span><span>Send Invoice</span>
+              </div>
+              <div className={styles.ctxItem} onClick={closeCtx}>
+                <span className={styles.ctxIcon}>{"\u2709"}</span><span>Message</span>
+              </div>
+              <div className={styles.ctxSep} />
+              <div className={styles.ctxItem} onClick={closeCtx}>
+                <span className={styles.ctxIcon}>{"\u270e"}</span><span>Edit Client</span>
+              </div>
+              <div className={`${styles.ctxItem} ${styles.ctxItemDanger}`} onClick={closeCtx}>
+                <span className={styles.ctxIcon}>{"\u2715"}</span><span>Archive Client</span>
+              </div>
+            </>}
+            {ctx.type === "section" && ctx.section === "clients" && <>
+              <div className={styles.ctxHeader}>Clients</div>
+              <div className={styles.ctxItem} onClick={() => { setClientsOpen(!clientsOpen); closeCtx(); }}>
+                <span className={styles.ctxIcon}>{clientsOpen ? "\u25b4" : "\u25be"}</span><span>{clientsOpen ? "Collapse" : "Expand"}</span>
+              </div>
+              <div className={styles.ctxSep} />
+              <div className={styles.ctxItem} onClick={closeCtx}>
+                <span className={styles.ctxIcon}>{"\u2195"}</span><span>Sort by name</span>
+              </div>
+              <div className={styles.ctxItem} onClick={closeCtx}>
+                <span className={styles.ctxIcon}>$</span><span>Sort by owed</span>
+              </div>
+              <div className={styles.ctxItem} onClick={closeCtx}>
+                <span className={styles.ctxIcon}>!</span><span>Sort by status</span>
+              </div>
+              <div className={styles.ctxSep} />
+              <div className={styles.ctxItem} onClick={closeCtx}>
+                <span className={styles.ctxIcon}>+</span><span>Add Client</span>
+              </div>
+            </>}
+            {ctx.type === "section" && ctx.section === "signals" && <>
+              <div className={styles.ctxHeader}>Signals</div>
+              <div className={styles.ctxItem} onClick={() => { setSignalsOpen(!signalsOpen); closeCtx(); }}>
+                <span className={styles.ctxIcon}>{signalsOpen ? "\u25b4" : "\u25be"}</span><span>{signalsOpen ? "Collapse" : "Expand"}</span>
+              </div>
+              <div className={styles.ctxSep} />
+              <div className={styles.ctxItem} onClick={closeCtx}>
+                <span className={styles.ctxIcon}>{"\u2713"}</span><span>Mark all read</span>
+              </div>
+              <div className={styles.ctxItem} onClick={closeCtx}>
+                <span className={styles.ctxIcon}>{"\u25ce"}</span><span>Filter by urgency</span>
+              </div>
+            </>}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

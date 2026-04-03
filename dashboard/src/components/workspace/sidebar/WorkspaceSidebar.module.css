@@ -25,11 +25,12 @@
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── Header ── */
+/* ── Header — aligned with prompt bar ── */
 .sbHd {
-  height: 40px;
+  height: 38px;
   padding: 0 14px;
-  background: var(--ink-900, #1a1918);
+  background: #fff;
+  border-bottom: 1px solid var(--warm-200, #e2e1dd);
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -37,25 +38,25 @@
 }
 
 .sbAvatar {
-  width: 22px;
-  height: 22px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, .1);
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  background: var(--ink-900, #1a1918);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'JetBrains Mono', var(--mono, monospace);
-  font-size: 9px;
+  font-size: 7px;
   font-weight: 600;
-  color: rgba(255, 255, 255, .6);
+  color: rgba(255, 255, 255, .7);
   flex-shrink: 0;
 }
 
 .sbHdName {
   font-family: 'JetBrains Mono', var(--mono, monospace);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 500;
-  color: rgba(255, 255, 255, .7);
+  color: var(--ink-600, #5c5b57);
   flex: 1;
   white-space: nowrap;
   overflow: hidden;
@@ -68,7 +69,7 @@
   border-radius: 5px;
   border: none;
   background: transparent;
-  color: rgba(255, 255, 255, .3);
+  color: var(--ink-400, #a5a49f);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -78,8 +79,8 @@
 }
 
 .sbIco:hover {
-  background: rgba(255, 255, 255, .06);
-  color: rgba(255, 255, 255, .6);
+  background: rgba(0, 0, 0, .04);
+  color: var(--ink-600, #5c5b57);
 }
 
 /* ── Stats ── */
@@ -875,3 +876,74 @@
   border-radius: 50%;
   background: var(--pos);
 }
+
+/* ── Context Menu ── */
+.ctxOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+}
+
+.ctxMenu {
+  width: 190px;
+  background: #fff;
+  border: 1px solid var(--warm-200, #e0dfdb);
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, .12), 0 2px 8px rgba(0, 0, 0, .06);
+  z-index: 9999;
+  padding: 4px;
+  animation: sbCtxIn .08s ease;
+}
+
+@keyframes sbCtxIn {
+  from { opacity: 0; transform: scale(.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.ctxHeader {
+  font-family: 'JetBrains Mono', var(--mono, monospace);
+  font-size: 8px;
+  color: var(--ink-400, #a5a49f);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 6px 10px 2px;
+}
+
+.ctxItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--ink-600, #5c5b57);
+  transition: background .04s;
+}
+
+.ctxItem:hover {
+  background: rgba(0, 0, 0, .03);
+  color: var(--ink-900, #1a1918);
+}
+
+.ctxIcon {
+  font-size: 11px;
+  color: var(--ink-400, #a5a49f);
+  width: 14px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.ctxItem:hover .ctxIcon {
+  color: var(--ink-700, #3d3c38);
+}
+
+.ctxSep {
+  height: 1px;
+  background: var(--warm-200, #e0dfdb);
+  margin: 3px 8px;
+}
+
+.ctxItemDanger { color: #ef5350; }
+.ctxItemDanger .ctxIcon { color: #ef5350; }
+.ctxItemDanger:hover { background: rgba(239, 83, 80, .06); color: #ef5350; }
