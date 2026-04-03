@@ -8,11 +8,115 @@ import type { BlockActivity } from "@/components/activity/ActivityMargin";
 // ── localStorage persistence ──
 const STORAGE_KEY = "felmark_workspace";
 
+type LegacyColumnsBlock = {
+  id?: string;
+  type: "columns";
+  content?: string;
+  checked?: boolean;
+  columnsData?: {
+    columns?: Array<{
+      label?: string;
+      content?: string;
+    }>;
+  };
+};
+
+type LegacyDataChipsBlock = {
+  id?: string;
+  type: "data-chips";
+  content?: string;
+  checked?: boolean;
+  dataChipsData?: {
+    chips?: Array<{
+      label?: string;
+      type?: string;
+    }>;
+  };
+};
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function migrateLegacyColumnsBlock(block: LegacyColumnsBlock): Block {
+  const sections = (block.columnsData?.columns ?? [])
+    .map((column, index) => {
+      const label = escapeHtml(column.label?.trim() || `Column ${index + 1}`);
+      const content = escapeHtml(column.content?.trim() || "");
+      return content ? `<strong>${label}</strong><br>${content}` : `<strong>${label}</strong>`;
+    })
+    .filter(Boolean);
+
+  return {
+    id: block.id || `migrated-columns-${Date.now()}`,
+    type: "callout",
+    checked: Boolean(block.checked),
+    content: sections.join("<br><br>") || block.content || "Legacy columns block",
+  };
+}
+
+function migrateLegacyDataChipsBlock(block: LegacyDataChipsBlock): Block {
+  const chips = (block.dataChipsData?.chips ?? [])
+    .map((chip) => chip.label?.trim() || chip.type?.trim() || "")
+    .filter(Boolean)
+    .map((label) => `<strong>${escapeHtml(label)}</strong>`);
+
+  return {
+    id: block.id || `migrated-data-chips-${Date.now()}`,
+    type: "callout",
+    checked: Boolean(block.checked),
+    content: chips.join(" • ") || block.content || "Legacy data chips block",
+  };
+}
+
+function migrateLegacyBlock(block: unknown): Block | null {
+  if (!isObject(block) || typeof block.id !== "string" || typeof block.type !== "string") return null;
+
+  if (block.type === "columns") {
+    return migrateLegacyColumnsBlock(block as LegacyColumnsBlock);
+  }
+
+  if (block.type === "data-chips") {
+    return migrateLegacyDataChipsBlock(block as LegacyDataChipsBlock);
+  }
+
+  return block as unknown as Block;
+}
+
+function normalizeBlocksMap(value: unknown): Record<string, Block[]> | null {
+  if (!isObject(value)) return null;
+
+  const normalizedEntries = Object.entries(value).map(([projectId, blocks]) => {
+    const nextBlocks = Array.isArray(blocks)
+      ? blocks.map(migrateLegacyBlock).filter((block): block is Block => block !== null)
+      : [];
+
+    return [projectId, nextBlocks];
+  });
+
+  return Object.fromEntries(normalizedEntries);
+}
+
 export function loadFromStorage<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
   try {
     const raw = localStorage.getItem(`${STORAGE_KEY}_${key}`);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (key === "blocksMap") {
+        return (normalizeBlocksMap(parsed) ?? fallback) as T;
+      }
+      return parsed;
+    }
   } catch { /* corrupted data — use fallback */ }
   return fallback;
 }

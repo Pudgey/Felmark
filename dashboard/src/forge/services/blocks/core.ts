@@ -31,7 +31,7 @@ export function needsTrailingParagraph(type: BlockType): boolean {
   const fullBlocks = new Set([
     "divider", "graph", "money", "deliverable", "deadline", "canvas", "audio",
     "table", "accordion", "math", "gallery", "swatches", "beforeafter", "bookmark",
-    "columns", "data-chips", "timeline", "flow", "brandboard", "moodboard", "wireframe",
+    "timeline", "flow", "brandboard", "moodboard", "wireframe",
     "pullquote", "hero-spotlight", "kinetic-type", "number-cascade",
     "comment-thread", "mention", "question", "feedback", "decision", "poll", "handoff", "signoff", "annotation",
     "ai-action", "pricing-config", "scope-boundary", "asset-checklist",

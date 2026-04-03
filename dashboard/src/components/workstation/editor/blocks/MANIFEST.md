@@ -14,8 +14,6 @@ All block-type components live here, organized by category.
 - `ai-action/` -- AI action block with configurable prompts
 - `audio/` -- Audio player/recorder block
 - `canvas/` -- Drawing canvas block
-- `columns/` -- Multi-column layout block
-- `data-chips/` -- Data chip display block
 - `deadline/` -- Deadline/due-date block (renamed from deadline-block)
 - `deliverable/` -- Project deliverable tracking block
 - `drawing/` -- Drawing/sketch block

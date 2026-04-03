@@ -105,8 +105,8 @@ This is boilerplate, not complexity. No refactor needed unless Editor.tsx itself
 ### Text (11)
 paragraph, h1, h2, h3, bullet, numbered, todo, quote, code, callout, divider
 
-### Rich Content (9)
-table, gallery, accordion, math, swatches, bookmark, canvas, audio, columns
+### Rich Content (8)
+table, gallery, accordion, math, swatches, bookmark, canvas, audio
 
 ### Visual (12)
 graph, beforeafter, deadline, deliverable, visual, timeline, flow, brandboard, moodboard, wireframe, pullquote, drawing
