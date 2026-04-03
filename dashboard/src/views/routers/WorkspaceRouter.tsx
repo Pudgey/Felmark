@@ -1,11 +1,15 @@
 "use client";
 
-import WorkspaceView from "../workspace";
+import { useEffect } from "react";
 
-export default function WorkspaceRouter() {
-  return (
-    <div style={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex" }}>
-      <WorkspaceView />
-    </div>
-  );
+interface WorkspaceRouterProps {
+  onNavigateHome: () => void;
+}
+
+export default function WorkspaceRouter({ onNavigateHome }: WorkspaceRouterProps) {
+  useEffect(() => {
+    onNavigateHome();
+  }, [onNavigateHome]);
+
+  return null;
 }

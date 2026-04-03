@@ -12,16 +12,17 @@ function getDomain(railActive: string): "workstation" | "workspace" | "dashboard
 
 export interface ViewRouterProps {
   railActive: string;
+  onNavigateHome: () => void;
   workstationProps: WorkstationRouterProps;
   dashboardProps: DashboardRouterProps;
 }
 
-export default function ViewRouter({ railActive, workstationProps, dashboardProps }: ViewRouterProps) {
+export default function ViewRouter({ railActive, onNavigateHome, workstationProps, dashboardProps }: ViewRouterProps) {
   const domain = getDomain(railActive);
 
   switch (domain) {
     case "workspace":
-      return <WorkspaceRouter />;
+      return <WorkspaceRouter onNavigateHome={onNavigateHome} />;
     case "workstation":
       return <WorkstationRouter railActive={railActive} {...workstationProps} />;
     case "dashboard":
