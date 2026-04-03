@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { INITIAL_WORKSTATIONS } from "@/lib/constants";
+import { BLOCK_TYPES, INITIAL_WORKSTATIONS } from "@/lib/constants";
 import type { Block, Workstation, Tab, ArchivedProject } from "@/lib/types";
 import Rail from "@/components/rail/Rail";
 import EditorSidebar from "@/components/sidebar/EditorSidebar";
@@ -18,7 +18,10 @@ import { useWorkstationActions, type CreationAnimState } from "@/forge/hooks/use
 import TemplatePicker from "@/components/workstation/templates/TemplatePicker";
 import ViewRouter from "@/views/ViewRouter";
 import { usePersistence, loadFromStorage } from "@/forge/hooks/usePersistence";
+import { loadEditorMemory, saveEditorMemory, type EditorMemoryDebugReport } from "@/forge";
 import { useShellLayout } from "@/forge/hooks/useShellLayout";
+
+const SUPPORTED_BLOCK_TYPES = new Set(BLOCK_TYPES.map((block) => block.type));
 
 const INITIAL_TABS: Tab[] = [
   { id: "p1", name: "Brand Guidelines v2", client: "Meridian Studio", active: true },
@@ -65,6 +68,15 @@ function getInitialBlocks(): Record<string, Block[]> {
 
 const EMPTY_BLOCKS: Block[] = [];
 
+function hasEditorMemoryAlerts(report: EditorMemoryDebugReport): boolean {
+  return (
+    report.migrationsApplied.length > 0 ||
+    report.unknownBlockTypes.length > 0 ||
+    report.deprecatedBlockTypes.length > 0 ||
+    report.fallbackConversions.length > 0
+  );
+}
+
 export default function Dashboard() {
   // SSR-safe defaults — always render the same HTML on server and client first pass
   const ssrDefault = ensureActiveTab(
@@ -79,43 +91,71 @@ export default function Dashboard() {
   const [archived, setArchived] = useState<ArchivedProject[]>([]);
   const [comments, setComments] = useState<Comment[]>(INITIAL_COMMENTS);
   const [activitiesMap, setActivitiesMap] = useState<Record<string, BlockActivity[]>>({ p1: INITIAL_ACTIVITIES });
+  const [activeWorkstationId, setActiveWorkstationId] = useState<string | null>(() => {
+    const ws = INITIAL_WORKSTATIONS.find(w => w.projects.some(p => p.id === ssrDefault.activeProject));
+    return ws?.id ?? null;
+  });
 
   // Hydrate from localStorage after mount
-  const [hydrated, setHydrated] = useState(false);
+  const [_hydrated, setHydrated] = useState(false);
   useEffect(() => {
+    const editorMemory = loadEditorMemory({ supportedBlockTypes: SUPPORTED_BLOCK_TYPES });
     const savedWs = loadFromStorage<Workstation[] | null>("workstations", null);
     const savedTabs = loadFromStorage<Tab[] | null>("tabs", null);
     const savedProject = loadFromStorage<string | null>("activeProject", null);
-    const savedBlocks = loadFromStorage<Record<string, Block[]> | null>("blocksMap", null);
     const savedArchived = loadFromStorage<ArchivedProject[] | null>("archived", null);
     const savedComments = loadFromStorage<Comment[] | null>("comments", null);
     const savedActivities = loadFromStorage<Record<string, BlockActivity[]> | null>("activitiesMap", null);
+    const shouldHydrateBlocks =
+      editorMemory.source === "snapshot" ||
+      Object.keys(editorMemory.snapshot.blocksMap).length > 0;
 
     const ws = savedWs ?? INITIAL_WORKSTATIONS;
     const rawTabs = savedTabs ?? INITIAL_TABS.map(t => ({ ...t, active: false }));
     const rawProject = savedProject ?? "";
 
-    if (savedWs) setWorkstations(savedWs);
-    if (savedBlocks) setBlocksMap(savedBlocks);
-    if (savedArchived) setArchived(savedArchived);
-    if (savedComments) setComments(savedComments);
-    if (savedActivities) setActivitiesMap(savedActivities);
-
-    // Ensure an active tab
-    if (rawProject && rawTabs.some(t => t.active && t.id === rawProject)) {
-      setTabs(rawTabs);
-      setActiveProject(rawProject);
-      const owningWs = ws.find(w => w.projects.some(p => p.id === rawProject));
-      setActiveWorkstationId(owningWs?.id ?? null);
-    } else {
-      const resolved = ensureActiveTab(rawTabs, ws);
-      setTabs(resolved.tabs);
-      setActiveProject(resolved.activeProject);
-      const owningWs = ws.find(w => w.projects.some(p => p.id === resolved.activeProject));
-      setActiveWorkstationId(owningWs?.id ?? null);
+    if (hasEditorMemoryAlerts(editorMemory.report)) {
+      console.warn("[felmark:editor-memory]", {
+        source: editorMemory.source,
+        report: editorMemory.report,
+      });
     }
 
-    setHydrated(true);
+    // Ensure an active tab
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+
+      if (savedWs) setWorkstations(savedWs);
+      if (shouldHydrateBlocks) {
+        setBlocksMap(editorMemory.snapshot.blocksMap);
+        if (editorMemory.source === "legacy") {
+          saveEditorMemory(editorMemory.snapshot.blocksMap, editorMemory.snapshot.savedAt);
+        }
+      }
+      if (savedArchived) setArchived(savedArchived);
+      if (savedComments) setComments(savedComments);
+      if (savedActivities) setActivitiesMap(savedActivities);
+
+      if (rawProject && rawTabs.some(t => t.active && t.id === rawProject)) {
+        setTabs(rawTabs);
+        setActiveProject(rawProject);
+        const owningWs = ws.find(w => w.projects.some(p => p.id === rawProject));
+        setActiveWorkstationId(owningWs?.id ?? null);
+      } else {
+        const resolved = ensureActiveTab(rawTabs, ws);
+        setTabs(resolved.tabs);
+        setActiveProject(resolved.activeProject);
+        const owningWs = ws.find(w => w.projects.some(p => p.id === resolved.activeProject));
+        setActiveWorkstationId(owningWs?.id ?? null);
+      }
+
+      setHydrated(true);
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
   const {
     updateWorkstations, updateTabs, updateActiveProject, updateBlocksMap,
@@ -143,10 +183,6 @@ export default function Dashboard() {
   const [charCount, setCharCount] = useState(0);
   const [onboardingName, setOnboardingName] = useState<string | null>(null);
   const [creationAnim, setCreationAnim] = useState<CreationAnimState>(null);
-  const [activeWorkstationId, setActiveWorkstationId] = useState<string | null>(() => {
-    const ws = INITIAL_WORKSTATIONS.find(w => w.projects.some(p => p.id === ssrDefault.activeProject));
-    return ws?.id ?? null;
-  });
   const [docTemplates, setDocTemplates] = useState<DocumentTemplate[]>(STARTER_TEMPLATES);
   const [showSaveTemplate, setShowSaveTemplate] = useState(false);
   const [showTemplatePicker, setShowTemplatePicker] = useState(false);
@@ -166,12 +202,12 @@ export default function Dashboard() {
   });
 
   const {
-    forge, toggleWorkstation, selectWorkstation, selectProject,
+    forge, toggleWorkstation: _toggleWorkstation, selectWorkstation, selectProject,
     calendarOpenProject, handleTabClick, openForgeRail,
     handleTabClose, handleTabRename, handleTabReorder,
-    togglePin, cycleStatus, addWorkstation, completeOnboarding,
+    togglePin: _togglePin, cycleStatus: _cycleStatus, addWorkstation: _addWorkstation, completeOnboarding,
     finishCreation, skipOnboarding, updateProjectDue,
-    archiveProject, archiveCompletedInWorkstation, archiveWorkstation, restoreProject,
+    archiveProject, archiveCompletedInWorkstation: _archiveCompletedInWorkstation, archiveWorkstation: _archiveWorkstation, restoreProject,
     handleNewTab, handleNewTabInWorkstation,
     handleBlocksChange, handleWordCountChange,
     navigateRail, handleRenameWorkstation,

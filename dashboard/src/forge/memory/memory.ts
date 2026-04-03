@@ -36,14 +36,27 @@ export function loadEditorMemory(
 ): EditorMemoryLoadResult {
   const storageKey = config.storageKey ?? EDITOR_MEMORY_STORAGE_KEY;
   const rawSnapshot = adapter.load(storageKey);
-  const migrationResult = isEditorMemorySnapshot(rawSnapshot)
-    ? normalizeEditorMemoryBlocks(rawSnapshot.blocksMap, coerceSavedAt(rawSnapshot.savedAt))
-    : normalizeEditorMemoryBlocks(
-      adapter.load(LEGACY_BLOCKS_STORAGE_KEY),
-      coerceSavedAt(adapter.load(LEGACY_SAVED_AT_STORAGE_KEY)),
+  let source: EditorMemoryLoadResult["source"] = "empty";
+  let migrationResult;
+
+  if (isEditorMemorySnapshot(rawSnapshot)) {
+    source = "snapshot";
+    migrationResult = normalizeEditorMemoryBlocks(
+      rawSnapshot.blocksMap,
+      coerceSavedAt(rawSnapshot.savedAt),
     );
+  } else {
+    const legacyBlocks = adapter.load(LEGACY_BLOCKS_STORAGE_KEY);
+    const legacySavedAt = adapter.load(LEGACY_SAVED_AT_STORAGE_KEY);
+    if (isObject(legacyBlocks)) source = "legacy";
+    migrationResult = normalizeEditorMemoryBlocks(
+      legacyBlocks,
+      coerceSavedAt(legacySavedAt),
+    );
+  }
 
   return {
+    source,
     snapshot: migrationResult.snapshot,
     report: buildEditorMemoryDebugReport(
       migrationResult,

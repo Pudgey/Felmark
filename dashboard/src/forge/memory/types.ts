@@ -38,6 +38,7 @@ export interface EditorMemoryDebugReport {
 }
 
 export interface EditorMemoryLoadResult {
+  source: "snapshot" | "legacy" | "empty";
   snapshot: EditorMemorySnapshot;
   report: EditorMemoryDebugReport;
 }
