@@ -1,0 +1,420 @@
+.surface {
+  height: 100%;
+  overflow: hidden;
+  padding: 18px;
+  color: var(--ink-700);
+  background: transparent;
+  font-family: var(--font-outfit), 'Outfit', sans-serif;
+}
+
+.panel {
+  height: 100%;
+}
+
+.stack {
+  position: relative;
+  display: grid;
+  gap: 16px;
+}
+
+.brandMeta,
+.label,
+.signalLabel,
+.financeMeta {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-400);
+}
+
+.headingLg,
+.headingMd,
+.headingLgTight,
+.amount,
+.signalScore,
+.financeValue {
+  font-family: var(--font-heading, 'Cormorant Garamond', serif);
+  color: var(--ink-900);
+  font-weight: 600;
+}
+
+.headingLg {
+  margin-top: 4px;
+  font-size: 26px;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+}
+
+.headingMd {
+  margin-top: 6px;
+  font-size: 19px;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+
+.headingLgTight {
+  margin-top: 6px;
+  font-size: 26px;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+}
+
+.body,
+.bodyStrong {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ink-700);
+}
+
+.body {
+  margin-top: 8px;
+  max-width: 440px;
+}
+
+.bodyStrong {
+  font-weight: 500;
+}
+
+.muted,
+.mutedBlock,
+.feedMeta,
+.stepMeta {
+  font-size: 13px;
+  line-height: 1.58;
+  color: var(--ink-500);
+}
+
+.mutedBlock {
+  margin-top: 8px;
+}
+
+.rowBetween,
+.rowBetweenTop,
+.clientLead,
+.feedLead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rowBetween,
+.rowBetweenTop {
+  justify-content: space-between;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  position: relative;
+  flex-shrink: 0;
+  box-shadow: 0 14px 28px rgba(44, 42, 37, 0.12);
+}
+
+.avatarDot {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: 2px solid #fff;
+  background: var(--success);
+}
+
+.livePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(90, 154, 60, 0.12);
+  background: rgba(90, 154, 60, 0.06);
+  color: var(--success);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.livePillDot {
+  animation: pulseDot 2s ease infinite;
+}
+
+@keyframes pulseDot {
+  0% { opacity: 0.35; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0.35; transform: scale(0.9); }
+}
+
+.pulseHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 156px;
+  gap: 16px;
+  align-items: center;
+}
+
+.spotlight {
+  position: relative;
+  overflow: hidden;
+  padding: 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(91, 127, 164, 0.12);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.86) 0%, rgba(240, 238, 233, 0.94) 100%);
+}
+
+.spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(91, 127, 164, 0.12), transparent 55%),
+    radial-gradient(circle at top right, rgba(124, 107, 158, 0.12), transparent 26%);
+  pointer-events: none;
+}
+
+.spotlightInner {
+  position: relative;
+  z-index: 1;
+}
+
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid var(--warm-200);
+  color: var(--ink-600);
+  font-size: 12px;
+}
+
+.signalCard {
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(229, 226, 219, 0.92);
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.88) inset;
+}
+
+.signalScore {
+  font-size: 42px;
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+}
+
+.meter {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+  align-items: end;
+  height: 72px;
+}
+
+.meterBar {
+  border-radius: 999px 999px 6px 6px;
+  background: linear-gradient(180deg, rgba(91, 127, 164, 0.9) 0%, rgba(91, 127, 164, 0.26) 100%);
+  box-shadow: 0 8px 18px rgba(91, 127, 164, 0.18);
+}
+
+.feed {
+  display: grid;
+  gap: 10px;
+}
+
+.feedRow {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(229, 226, 219, 0.9);
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.feedLead {
+  gap: 10px;
+}
+
+.feedRail {
+  width: 6px;
+  border-radius: 999px;
+  align-self: stretch;
+}
+
+.feedCopy {
+  min-width: 0;
+}
+
+.feedTitle,
+.stepTitle {
+  color: var(--ink-800);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.ticket {
+  position: relative;
+  overflow: hidden;
+  padding: 18px;
+  border-radius: 24px;
+  border: 1px solid rgba(176, 125, 79, 0.14);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(247, 246, 243, 0.9) 100%);
+  box-shadow: 0 20px 42px rgba(176, 125, 79, 0.08), 0 1px 0 rgba(255, 255, 255, 0.9) inset;
+}
+
+.ticket::before,
+.ticket::after {
+  content: none;
+}
+
+.ticketTop {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: start;
+}
+
+.amount {
+  margin-top: 8px;
+  font-size: 58px;
+  line-height: 0.88;
+  letter-spacing: -0.05em;
+}
+
+.ticketGrid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.ticketCard {
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(229, 226, 219, 0.92);
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.clientLead {
+  justify-content: flex-start;
+}
+
+.invoiceSteps {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.step {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.stepBullet {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-family: var(--mono);
+  font-size: 10px;
+  border: 1px solid var(--warm-200);
+  background: #fff;
+  color: var(--ink-500);
+}
+
+.step[data-done="true"] .stepBullet {
+  background: rgba(90, 154, 60, 0.08);
+  border-color: rgba(90, 154, 60, 0.14);
+  color: var(--success);
+}
+
+.step[data-active="true"] .stepBullet {
+  background: var(--ember-bg);
+  border-color: rgba(176, 125, 79, 0.14);
+  color: var(--ember);
+}
+
+.stepLine {
+  width: 1px;
+  height: 22px;
+  background: var(--warm-200);
+  margin: 2px auto 2px 10px;
+}
+
+.stepCopy {
+  min-width: 0;
+}
+
+.financeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.financeChip {
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(229, 226, 219, 0.94);
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.financeValue {
+  font-size: 24px;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+}
+
+@media (max-width: 980px) {
+  .ticketGrid,
+  .financeGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .pulseHero {
+    grid-template-columns: 1fr;
+  }
+}

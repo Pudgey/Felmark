@@ -1,0 +1,154 @@
+/* ── Block Chrome Bar ── */
+
+.blockChrome {
+  position: absolute;
+  top: -14px;
+  left: 16px;
+  right: 16px;
+  height: 30px;
+  background: rgba(255, 253, 249, 0.88);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(120, 114, 103, 0.1);
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 8px;
+  z-index: 10;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  box-shadow: 0 10px 18px rgba(44, 35, 22, 0.07);
+  transform: translateY(4px);
+  transition:
+    opacity var(--motion-soft-duration) var(--motion-soft-ease),
+    transform var(--motion-soft-duration) var(--motion-soft-ease),
+    visibility 0s linear var(--motion-soft-duration);
+}
+
+.blockChromeVisible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition-delay: 40ms, 40ms, 0s;
+}
+
+.blockHandle {
+  cursor: grab;
+  font-size: 10px;
+  color: var(--ink-400);
+  padding: 4px 2px 4px 0;
+  pointer-events: auto;
+  flex-shrink: 0;
+  transition:
+    color var(--motion-hover-duration) var(--motion-hover-ease),
+    transform var(--motion-hover-duration) var(--motion-hover-ease);
+}
+
+.blockType {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-400);
+  flex: 1;
+  min-width: 0;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.blockSize {
+  font-family: var(--mono);
+  font-size: 8px;
+  color: var(--ink-400);
+  background: rgba(120, 114, 103, 0.06);
+  padding: 3px 7px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.blockEditBtn {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(120, 114, 103, 0.1);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--ink-400);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  pointer-events: auto;
+  flex-shrink: 0;
+  transition:
+    background var(--motion-crisp-duration) var(--motion-crisp-ease),
+    border-color var(--motion-crisp-duration) var(--motion-crisp-ease),
+    color var(--motion-crisp-duration) var(--motion-crisp-ease),
+    transform var(--motion-hover-duration) var(--motion-hover-ease),
+    opacity var(--motion-crisp-duration) var(--motion-crisp-ease);
+}
+
+.blockEditBtn:disabled {
+  opacity: 0.34;
+  cursor: default;
+}
+
+.blockEditBtn:hover {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(120, 114, 103, 0.16);
+  color: var(--ink-600);
+  transform: translateY(-1px);
+}
+
+.blockEditBtn:disabled:hover {
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--ink-400);
+  transform: none;
+}
+
+.blockEditBtn:active {
+  transform: translateY(0);
+}
+
+.blockAddBtn {
+  font-size: 12px;
+  color: var(--ink-500);
+}
+
+.blockAddBtn:hover {
+  background: rgba(255, 250, 243, 0.96);
+  color: var(--ember);
+  border-color: rgba(176, 125, 79, 0.16);
+}
+
+.blockEditBtnDanger:hover {
+  background: rgba(255, 250, 248, 0.92);
+  color: var(--rose);
+  border-color: rgba(192, 122, 106, 0.1);
+}
+
+.blockChromeCompact {
+  top: -14px;
+  left: 8px;
+  right: auto;
+  width: max-content;
+  height: 28px;
+  gap: 4px;
+  padding: 0 8px;
+}
+
+.blockChromeCompact .blockHandle {
+  padding-right: 0;
+  font-size: 9px;
+}
+
+.blockChromeCompact .blockEditBtn {
+  width: 18px;
+  height: 18px;
+  font-size: 8px;
+}
+
+.blockChromeCompact .blockAddBtn {
+  font-size: 11px;
+}
