@@ -1,13 +1,14 @@
-# Session Handoff — 2026-04-02
+# Session Handoff — 2026-04-03
 
 ## What happened
-Added quality gate infrastructure and cleaned the entire lint baseline to zero.
+Debugged and fixed the workstation editor ghost-tab bug in a dedicated worktree, then merged the fix back onto `main`.
 
 ### Completed
-1. **Quality gate scripts** — `npm run lint` (strict, `--max-warnings=0`), `npm run typecheck` (`tsc --noEmit`), `npm run check` (lint + typecheck + build).
-2. **CI workflow** — `.github/workflows/dashboard-quality.yml` runs all gates on PRs touching `dashboard/`.
-3. **Lint baseline cleanup** — 99 problems → 0 across ~45 files (unused vars, `any` types, setState-in-effect, exhaustive-deps, unescaped entities, immutability violations, TS errors).
-4. **New ground rule** — "Read Before You Write" added to CLAUDE.md and AGENTS.md. Agents must read files before modifying and never overwrite functionality they didn't add.
+1. **Ghost personal tab root cause isolated** — stale fallback creation in forge services plus unreconciled persisted tabs on hydration.
+2. **Fallback repair** — tab/project/workstation services now resolve last-tab fallback only against real current projects, not a stale personal project.
+3. **Empty workstation repair** — selecting a workstation with `0` projects now enters that workstation cleanly, and `New document` targets the selected workstation instead of defaulting elsewhere.
+4. **Hydration cleanup** — saved tabs are now reconciled against the live workstation/project tree, which removes orphaned ghost tabs on load.
+5. **Verification** — targeted lint and `tsc --noEmit --incremental false` passed; production build passed with `next build --webpack`.
 
 ## In-progress work
 None.
@@ -22,7 +23,7 @@ None.
 - [ ] Start splitting `types.ts` by block family once graph work lands
 
 ## Gotchas
-- **Lint worktree merge damaged EditorSidebar props.** The lint agent removed props (`tabs`, `blocksMap`, `onTabClick`) it thought were unused, but these were from new in-progress work. The user manually restored the correct EditorSidebar interface with new props (`onSelectWorkstation`, `onDuplicateProject`, `onArchiveProject`, `archived`, `onRestoreProject`). The old `onSelectWorkstationHome` prop was renamed to `onSelectWorkstation`.
-- `types.ts` is still 735 lines / 89 exports — next type hub to watch.
-- `npm run lint` in `dashboard/` now passes clean. Any new warning breaks the build. Do not add eslint-disable comments without a concrete reason.
-- EditorSidebar.tsx and page.tsx were updated by the user after the merge — those are the source of truth, not the worktree branch versions.
+- The ghost-tab fix was committed in worktree branch `codex-personal-tab-bug` as `f86ae89` and merged onto `main`.
+- Worktree lint/typecheck ran with a symlinked `dashboard/node_modules`.
+- Turbopack build verification still panics on symlinked `node_modules` in a worktree. In the worktree, `./node_modules/.bin/next build --webpack` was the reliable production-build check.
+- On `main`, targeted lint and typecheck passed after merge. A direct `npm run build` retry hit an existing Next build lock (`dashboard/.next/lock`) because another build process is already running or did not exit cleanly.

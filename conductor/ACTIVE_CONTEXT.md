@@ -1,4 +1,4 @@
-# Active Context — 2026-04-02
+# Active Context — 2026-04-03
 
 ## Product Snapshot
 
@@ -32,6 +32,7 @@ Felmark is actively building the browser-native dashboard experience in `dashboa
 
 ## Recent Completed Work
 
+- **Personal tab ghost bug fix** — worktree patch removes stale personal fallback creation, lets empty workstations be selected, and filters orphan tabs on hydration
 - **Quality gates** — `npm run lint` (strict), `npm run typecheck`, `npm run check`, CI workflow
 - **Lint baseline cleanup** — 99 problems → 0 across ~45 files
 - **Read Before You Write rule** — added to CLAUDE.md and AGENTS.md
