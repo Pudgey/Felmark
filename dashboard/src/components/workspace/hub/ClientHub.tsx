@@ -47,7 +47,7 @@ const NAV_ITEMS = [
 const priColor = (p: string) => p === "urgent" ? "#ef5350" : p === "high" ? "#ff9800" : p === "medium" ? "#2962ff" : "#a5a49f";
 const priLabel = (p: string) => p === "urgent" ? "Urgent" : p === "high" ? "High" : p === "medium" ? "Medium" : "Low";
 
-export default function ClientHub({ clientId, clientName, clientAvatar, clientColor, onClose }: ClientHubProps) {
+export default function ClientHub({ clientId: _clientId, clientName, clientAvatar, clientColor, onClose: _onClose }: ClientHubProps) {
   const [tasks, setTasks] = useState<Task[]>(INIT_TASKS);
   const [selected, setSelected] = useState<string | null>("t1");
   const [navItem, setNavItem] = useState("tasks");
@@ -58,12 +58,15 @@ export default function ClientHub({ clientId, clientName, clientAvatar, clientCo
   const [timer, setTimer] = useState(4934);
   const hubRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { hubRef.current?.scrollTo(0, 0); setSelected("t1"); setNavItem("tasks"); setCollapsedSections(new Set()); setDwTab("detail"); }, [clientId]);
   useEffect(() => { const t = setInterval(() => setTimer(s => s + 1), 1000); return () => clearInterval(t); }, []);
 
   const toggleSection = (id: string) => setCollapsedSections(prev => {
     const next = new Set(prev);
-    next.has(id) ? next.delete(id) : next.add(id);
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
     return next;
   });
 

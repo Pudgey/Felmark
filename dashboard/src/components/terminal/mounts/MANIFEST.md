@@ -15,7 +15,7 @@
 ## Imported By
 - `app/page.tsx` -- wraps the app shell in `SharedTerminalProvider`
 - `workstation/editor/core/EditorCore.tsx` -- renders `WorkstationTerminalMount` in the editor split pane
-- `workspace/panes/SplitPanes.tsx` -- renders `WorkspaceTerminalMount` for the workspace terminal surface
+- `workspace/core/surfaces/TerminalPane.tsx` -- renders `WorkspaceTerminalMount` for the workspace terminal surface
 
 ## Files
 - `SharedTerminalProvider.tsx` -- session context + localStorage persistence

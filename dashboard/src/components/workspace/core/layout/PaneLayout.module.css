@@ -1,0 +1,41 @@
+.panes { display: flex; flex: 1; flex-direction: column; overflow: hidden; padding: 0; font-family: 'Inter', -apple-system, sans-serif; -webkit-font-smoothing: antialiased; user-select: none; }
+.panesOuter { display: flex; flex: 1; min-height: 0; overflow: hidden; }
+.fColumn { display: flex; flex: 0 0 280px; flex-direction: column; min-height: 0; overflow: hidden; }
+.panesInner { display: flex; flex: 1; min-width: 0; flex-direction: column; overflow: hidden; }
+.rowPair { display: flex; flex: 1; min-height: 0; overflow: hidden; }
+.paneSlot { display: flex; min-height: 0; flex-direction: column; overflow: hidden; transition: flex .3s ease, opacity .2s ease; }
+
+.vSplitHandle { position: relative; display: flex; width: 3px; flex-shrink: 0; align-items: center; justify-content: center; background: transparent; cursor: col-resize; }
+.vSplitHandle::before,
+.vSplitHandle::after,
+.splitHandle::before,
+.splitHandle::after { content: ""; position: absolute; opacity: 0; transition: opacity .15s; pointer-events: none; }
+.vSplitHandle::before,
+.vSplitHandle::after { top: 0; bottom: 0; width: 6px; }
+.vSplitHandle::before { right: 100%; background: linear-gradient(to left, rgba(26, 25, 24, .04), transparent); }
+.vSplitHandle::after { left: 100%; background: linear-gradient(to right, rgba(26, 25, 24, .04), transparent); }
+.vSplitHandle:hover::before,
+.vSplitHandle:hover::after,
+.splitHandle:hover::before,
+.splitHandle:hover::after { opacity: 1; }
+
+.splitHandle { position: relative; display: flex; height: 3px; flex-shrink: 0; align-items: center; justify-content: center; background: transparent; cursor: row-resize; }
+.splitHandle::before,
+.splitHandle::after { left: 0; right: 0; height: 6px; }
+.splitHandle::before { bottom: 100%; background: linear-gradient(to top, rgba(26, 25, 24, .04), transparent); }
+.splitHandle::after { top: 100%; background: linear-gradient(to bottom, rgba(26, 25, 24, .04), transparent); }
+.splitHandleLine { position: absolute; left: 25%; right: 25%; top: 50%; height: 1px; transform: translateY(-50%); background: var(--warm-300, #cccbc7); opacity: 0; transition: opacity .1s; }
+.splitHandle:hover .splitHandleLine { opacity: 1; }
+
+.statusBar { display: flex; height: 24px; flex-shrink: 0; align-items: center; justify-content: space-between; margin-top: 0; border-radius: 0; background: var(--ink-900, #1a1918); padding: 0 14px; }
+.statusLeft,
+.statusRight { display: flex; align-items: center; gap: 10px; font-family: var(--mono, 'IBM Plex Mono', monospace); font-size: 9px; color: rgba(255, 255, 255, .4); }
+.statusDot { width: 4px; height: 4px; border-radius: 50%; background: #7cda94; }
+.statusActive { color: rgba(255, 255, 255, .7); }
+.statusSep { color: rgba(255, 255, 255, .12); }
+
+.presetPill { display: flex; align-items: center; gap: 3px; border-radius: 3px; padding: 1px 7px; font-family: 'JetBrains Mono', var(--mono, monospace); font-size: 9px; color: rgba(255, 255, 255, .3); cursor: pointer; transition: all .06s; }
+.presetPill:hover { color: rgba(255, 255, 255, .6); background: rgba(255, 255, 255, .04); }
+.presetPillOn { color: rgba(255, 255, 255, .85); background: rgba(255, 255, 255, .08); }
+.presetKey { margin-left: 1px; font-size: 8px; color: rgba(255, 255, 255, .15); }
+.presetPillOn .presetKey { color: rgba(255, 255, 255, .35); }
