@@ -16,6 +16,7 @@ export type BlockType =
   | "table"
   | "accordion"
   | "math"
+  | "image"
   | "gallery"
   | "swatches"
   | "beforeafter"
@@ -150,6 +151,13 @@ export interface MathBlockData {
   result: string;
 }
 
+export interface ImageBlockData {
+  src: string;
+  alt: string;
+  caption: string;
+  fit: "contain" | "cover";
+}
+
 export interface GalleryImage {
   icon: string;
   caption: string;
@@ -200,7 +208,7 @@ export interface AudioBlockData {
 // ── Collaboration block data ──
 
 export interface CommentThreadData {
-  messages: { id: string; author: string; text: string; time: string; }[];
+  messages: { id: string; author: string; text: string; time: string }[];
   resolved: boolean;
 }
 
@@ -228,7 +236,7 @@ export interface FeedbackData {
 export interface DecisionData {
   title: string;
   decision: string;
-  alternatives: { label: string; reason: string; }[];
+  alternatives: { label: string; reason: string }[];
   context: string;
   decidedBy: string;
   decidedAt: string | null;
@@ -236,7 +244,7 @@ export interface DecisionData {
 
 export interface PollData {
   question: string;
-  options: { id: string; label: string; votes: number; }[];
+  options: { id: string; label: string; votes: number }[];
   closed: boolean;
   totalVotes: number;
 }
@@ -280,9 +288,24 @@ export interface SignoffData {
 
 export type VisualVariant = "process-flow" | "timeline" | "brand-board" | "mood-board" | "wireframe";
 
-export interface VisualStep { id: string; label: string; desc: string; status: "done" | "current" | "upcoming"; }
-export interface VisualPhase { id: string; label: string; start: string; end: string; color: string; }
-export interface VisualMoodItem { id: string; label: string; placeholder: string; }
+export interface VisualStep {
+  id: string;
+  label: string;
+  desc: string;
+  status: "done" | "current" | "upcoming";
+}
+export interface VisualPhase {
+  id: string;
+  label: string;
+  start: string;
+  end: string;
+  color: string;
+}
+export interface VisualMoodItem {
+  id: string;
+  label: string;
+  placeholder: string;
+}
 
 export interface VisualBlockData {
   variant: VisualVariant;
@@ -297,7 +320,7 @@ export interface VisualBlockData {
 
 export interface AnnotationData {
   imageUrl: string;
-  pins: { id: string; x: number; y: number; comment: string; author: string; resolved: boolean; }[];
+  pins: { id: string; x: number; y: number; comment: string; author: string; resolved: boolean }[];
 }
 
 export interface CanvasElement {
@@ -319,7 +342,15 @@ export interface CanvasBlockData {
   elements: CanvasElement[];
 }
 
-export type DrawingType = "flowchart" | "userflow" | "devices" | "sitemap" | "stickies" | "sketch-chart" | "stamps" | "wireframe-kit";
+export type DrawingType =
+  | "flowchart"
+  | "userflow"
+  | "devices"
+  | "sitemap"
+  | "stickies"
+  | "sketch-chart"
+  | "stamps"
+  | "wireframe-kit";
 
 export interface DrawingBlockData {
   drawingType: DrawingType;
@@ -559,6 +590,7 @@ export interface Block {
   tableData?: TableBlockData;
   accordionData?: AccordionBlockData;
   mathData?: MathBlockData;
+  imageData?: ImageBlockData;
   galleryData?: GalleryBlockData;
   swatchesData?: SwatchesBlockData;
   beforeAfterData?: BeforeAfterBlockData;
@@ -641,7 +673,7 @@ export interface Project {
   id: string;
   name: string;
   status: ProjectStatus;
-  due: string | null;        // ISO date string (e.g. "2026-04-03") or null
+  due: string | null; // ISO date string (e.g. "2026-04-03") or null
   amount: string;
   progress: number;
   pinned: boolean;
