@@ -20,4 +20,4 @@ Editor UI chrome -- toolbar components, menus, and structural elements that surr
 
 ## Imported By
 - `Editor.tsx` -- all chrome components
-- `forge-paper/ForgePaper.tsx` -- SlashMenu
+- `components/paper/Paper.tsx` -- SlashMenu

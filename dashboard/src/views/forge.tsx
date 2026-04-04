@@ -1,7 +1,7 @@
 "use client";
 
 import type { Block, Workstation, Tab } from "@/lib/types";
-import ForgePaper from "@/components/workstation/forge-paper/ForgePaper";
+import Paper from "@/components/paper/Paper";
 
 interface ForgeViewProps {
   tabs: Tab[];
@@ -17,7 +17,7 @@ export default function ForgeView({ tabs, activeBlocks, activeProject, workstati
 
   if (activeTab) {
     return (
-      <ForgePaper
+      <Paper
         initialBlocks={activeBlocks}
         workstation={workstations.find(w => w.projects.some(p => p.id === activeProject))}
         projectName={activeTab.name || "Untitled"}

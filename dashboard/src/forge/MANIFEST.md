@@ -58,5 +58,5 @@ page.tsx → createForge(stateUpdater) → forge.workstations.create(...)
 | Consumer | What |
 |----------|------|
 | `app/page.tsx` | `createForge`, `StateUpdater` |
-| `views/forge.tsx` | (via ForgePaper) `convertBlock`, `insertAfter`, `removeBlock` |
-| `components/workstation/forge-paper/ForgePaper.tsx` | `convertBlock`, `insertAfter`, `removeBlock` |
+| `views/forge.tsx` | (via Paper) `convertBlock`, `insertAfter`, `removeBlock` |
+| `components/paper/Paper.tsx` | `convertBlock`, `insertAfter`, `removeBlock` |

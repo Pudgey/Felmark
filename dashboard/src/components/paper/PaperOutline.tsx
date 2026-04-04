@@ -2,9 +2,9 @@
 
 import { useState, useMemo } from "react";
 import type { Block } from "@/lib/types";
-import styles from "./ForgePaperOutline.module.css";
+import styles from "./PaperOutline.module.css";
 
-interface ForgePaperOutlineProps {
+interface PaperOutlineProps {
   blocks: Block[];
   focusedBlock: string | null;
   hoveredBlock?: string | null;
@@ -219,7 +219,7 @@ function WordBar({ count, target, color }: { count: number; target: number; colo
   );
 }
 
-export default function ForgePaperOutline({ blocks, focusedBlock, hoveredBlock, onScrollTo, onHoverSection, clientName }: ForgePaperOutlineProps) {
+export default function PaperOutline({ blocks, focusedBlock, hoveredBlock, onScrollTo, onHoverSection, clientName }: PaperOutlineProps) {
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [showAI, setShowAI] = useState(true);
   const [hoveredSection, setHoveredSection] = useState<string | null>(null);

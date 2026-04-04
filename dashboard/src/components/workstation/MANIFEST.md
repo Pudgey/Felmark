@@ -12,10 +12,8 @@ The Workstation is Felmark's flagship product surface — the full-featured free
 | `pipeline/` | **Pipeline** | Kanban-style project pipeline board |
 | `finance/` | **Finance** | Revenue tracking, invoicing, and financial overview |
 | `wire/` | **The Wire** | Activity feed and communication stream |
-| `team/` | **Team** | Team member management and collaboration |
 | `services/` | **Services** | Service offerings and pricing management |
 | `templates/` | **Templates** | Document and project templates (SaveTemplateModal, TemplatePicker, TemplatesPage) |
-| `forge-paper/` | **Forge Paper** | AI-assisted document generation surface |
 | `terminal-welcome/` | **Terminal Welcome** | First-run / empty-state welcome screen with stats |
 
 ## Imported By
