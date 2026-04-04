@@ -9,8 +9,6 @@ The Workstation is Felmark's flagship product surface — the full-featured free
 | `editor/` | **Block Editor** | Notion-style document editor with slash commands, format bar, drag-and-drop, 40+ block types, split pane, and command palette |
 | `calendar/` | **Calendar** | Full calendar view with project deadlines, timeline visualization |
 | `search/` | **Search** | Cross-workstation search across projects and documents |
-| `pipeline/` | **Pipeline** | Kanban-style project pipeline board |
-| `finance/` | **Finance** | Revenue tracking, invoicing, and financial overview |
 | `wire/` | **The Wire** | Activity feed and communication stream |
 | `team/` | **Team** | Team member management and collaboration |
 | `services/` | **Services** | Service offerings and pricing management |

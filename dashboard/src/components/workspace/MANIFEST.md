@@ -21,6 +21,14 @@ Workspace — task/project management surface. ClickUp-style: tasks, subtasks, s
 | Importer | What |
 |----------|------|
 | `views/workspace.tsx` | `WorkspacePage` — rendered via ViewRouter when `railActive === "workspace"` |
+| `views/routers/WorkspaceRouter.tsx` | `PipelineBoard`, `FinancePage` — rendered as workspace tool tabs |
+
+## Tool Tabs (opened via WorkspaceRouter)
+
+| Folder | Component | Description |
+|--------|-----------|-------------|
+| `pipeline/` | `PipelineBoard` | Kanban-style project pipeline board |
+| `finance/` | `FinancePage` | Revenue tracking, invoicing, and financial overview |
 
 ## Files
 
