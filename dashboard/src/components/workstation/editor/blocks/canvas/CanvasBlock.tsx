@@ -9,6 +9,7 @@ import { getBBox, rectsIntersect, hitTest, moveElement, getSelectionBBox } from 
 import { type HandleId, HANDLE_CURSORS, hitTestHandles, computeResizedBBox, remapElements } from "./resize";
 import { renderEl, renderSelectionUI } from "./rendering";
 import { useCanvasUndo } from "./useCanvasUndo";
+import { useAutodraw } from "./useAutodraw";
 import styles from "./CanvasBlock.module.css";
 
 interface CanvasBlockProps {
@@ -64,6 +65,14 @@ export default function CanvasBlock({ data, onUpdate }: CanvasBlockProps) {
   const textRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<DragState | null>(null);
+
+  const allocateId = useCallback(() => nextCanvasId++, []);
+
+  const { prompt, setPrompt, isGenerating, error: autodrawError, generate } = useAutodraw(
+    data, onUpdate, pushUndo, svgRef, allocateId
+  );
+
+  const [autodrawOpen, setAutodrawOpen] = useState(false);
 
   const renderElements = movingElements ?? data.elements;
 
@@ -370,6 +379,29 @@ export default function CanvasBlock({ data, onUpdate }: CanvasBlockProps) {
         <span className={styles.sep} />
         <button className={styles.toolBtn} onClick={() => { pushUndo(); onUpdate({ elements: [] }); }}>Clear</button>
         <button className={`${styles.toolBtn} ${showStencils ? styles.toolOn : ""}`} onClick={() => setShowStencils(v => !v)} title="Stencils">⬡</button>
+        <span className={styles.sep} />
+        <button
+          className={`${styles.toolBtn} ${autodrawOpen ? styles.toolOn : ""}`}
+          onClick={() => setAutodrawOpen(v => !v)}
+          title="AI Autodraw (✦)"
+        >✦</button>
+        {autodrawOpen && (
+          <input
+            className={styles.autodrawInput}
+            placeholder="Describe a diagram…"
+            value={prompt}
+            onChange={e => setPrompt(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === "Enter" && !isGenerating) { generate(); setAutodrawOpen(false); }
+              if (e.key === "Escape") setAutodrawOpen(false);
+              e.stopPropagation();
+            }}
+            disabled={isGenerating}
+            autoFocus
+          />
+        )}
+        {isGenerating && <span className={styles.count}>✦…</span>}
+        {autodrawError && <span className={styles.autodrawErr}>{autodrawError}</span>}
         <span className={styles.count}>{data.elements.length}</span>
       </div>
 

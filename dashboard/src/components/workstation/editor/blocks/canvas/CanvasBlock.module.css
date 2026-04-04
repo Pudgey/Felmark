@@ -103,3 +103,33 @@
   outline: none;
   min-width: 80px;
 }
+
+.autodrawInput {
+  height: 24px;
+  padding: 0 8px;
+  border: 1px solid var(--ink-300);
+  border-radius: 4px;
+  background: var(--surface-2, #1a1915);
+  color: var(--ink-900, #e8e4dc);
+  font-size: 11px;
+  font-family: inherit;
+  width: 200px;
+  outline: none;
+}
+
+.autodrawInput:focus {
+  border-color: var(--ember);
+}
+
+.autodrawInput:disabled {
+  opacity: 0.5;
+}
+
+.autodrawErr {
+  font-size: 10px;
+  color: var(--coral, #c24b38);
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
