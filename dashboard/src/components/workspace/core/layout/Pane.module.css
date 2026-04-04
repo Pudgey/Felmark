@@ -17,10 +17,11 @@
   position: relative;
   display: flex;
   align-items: center;
-  height: 38px;
-  padding: 0 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, .06);
-  background: var(--ink-900, #1e222d);
+  gap: 8px;
+  height: 34px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--warm-200, #e2e1dd);
+  background: #fff;
   flex-shrink: 0;
 }
 .paneHd::after {
@@ -31,36 +32,32 @@
   bottom: 0;
   height: 2px;
   opacity: 0;
-  background: linear-gradient(90deg, rgba(var(--pane-accent-rgb), .42), rgba(var(--pane-accent-rgb), 0));
+  background: linear-gradient(90deg, rgba(var(--pane-accent-rgb), .4), rgba(var(--pane-accent-rgb), 0));
   pointer-events: none;
   transition: opacity .08s;
 }
 .paneFocused .paneHd::after { opacity: 1; }
 .paneTinted .paneHd {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--ink-900, #1e222d) 94%, var(--pane-accent) 6%) 0%, color-mix(in srgb, var(--ink-900, #1e222d) 97%, var(--pane-accent) 3%) 100%);
+  background: linear-gradient(180deg, color-mix(in srgb, #ffffff 94%, var(--pane-accent) 6%) 0%, color-mix(in srgb, #ffffff 97%, var(--pane-accent) 3%) 100%);
 }
-.paneHdLeft { display: flex; align-items: center; gap: 6px; padding: 4px 10px 4px 6px; border-radius: 999px; cursor: pointer; transition: background .06s; }
-.paneHdLeft:hover { background: rgba(255, 255, 255, .04); }
+.paneHdLeft { display: flex; align-items: center; gap: 6px; flex-shrink: 0; padding: 4px 8px 4px 0; border-radius: 999px; cursor: pointer; transition: background .06s; }
+.paneHdLeft:hover { background: rgba(0, 0, 0, .025); }
 .paneIcon { font-size: 12px; color: var(--pane-accent); }
-.paneLabel { font-family: 'JetBrains Mono', var(--mono, monospace); font-size: 11px; font-weight: 600; color: rgba(255, 255, 255, .58); text-transform: uppercase; letter-spacing: .05em; }
-.paneChevron { margin-left: 3px; font-size: 8px; color: rgba(255, 255, 255, .28); }
-.paneHdSep { width: 1px; height: 16px; margin: 0 10px; flex-shrink: 0; background: rgba(255, 255, 255, .08); }
-.paneHdContext { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: 'JetBrains Mono', var(--mono, monospace); font-size: 10px; color: rgba(255, 255, 255, .22); }
+.paneLabel { font-size: 13px; font-weight: 600; color: var(--ink-700, #3d3c38); letter-spacing: -.01em; }
+.paneHdContext { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: 'JetBrains Mono', var(--mono, monospace); font-size: 9px; color: var(--ink-400, #a5a49f); }
 .paneHdRight { margin-left: auto; display: flex; gap: 4px; }
 
-.paneBeacon { display: flex; align-items: center; gap: 8px; margin-right: 10px; }
-.paneBeaconLabel { font-family: 'JetBrains Mono', var(--mono, monospace); font-size: 9px; letter-spacing: .03em; }
-.paneBeaconLabelOn { color: rgba(var(--pane-accent-rgb), .7); }
-.paneBeaconLabelOff { color: rgba(255, 255, 255, .2); }
-.paneBeaconDot { position: relative; width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
-.paneBeaconDotOn { background: var(--pane-accent); }
-.paneBeaconDotOn::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; background: var(--pane-accent); opacity: 0; animation: beacon 3s ease infinite; }
-.paneBeaconDotOff { background: rgba(255, 255, 255, .18); }
+.paneHdBadge { display: inline-flex; align-items: center; flex-shrink: 0; padding: 2px 7px; border-radius: 4px; font-family: 'JetBrains Mono', var(--mono, monospace); font-size: 8px; font-weight: 500; letter-spacing: .02em; }
+.paneHdBadgeUrgent { background: rgba(239, 83, 80, .06); color: #ef5350; }
+.paneHdBadgeMoney { background: rgba(38, 166, 154, .06); color: #26a69a; }
+.paneHdBadgeWarning { background: rgba(255, 152, 0, .06); color: #ff9800; }
+.paneHdBadgeInfo { background: rgba(41, 98, 255, .06); color: #2962ff; }
+.paneHdBadgeNeutral { background: var(--warm-100, #ededeb); color: var(--ink-500, #7c7b77); }
 
-.paneHdAction { display: flex; width: 24px; height: 24px; align-items: center; justify-content: center; border-radius: 6px; font-size: 11px; color: rgba(255, 255, 255, .26); cursor: pointer; transition: all .06s; }
-.paneHdAction:hover { background: rgba(255, 255, 255, .04); color: rgba(255, 255, 255, .55); }
+.paneHdAction { display: flex; width: 24px; height: 24px; align-items: center; justify-content: center; border-radius: 5px; font-size: 10px; color: var(--ink-400, #a5a49f); cursor: pointer; transition: all .06s; }
+.paneHdAction:hover { background: var(--warm-100, #f0f0ee); color: var(--ink-700, #3d3c38); }
 .paneHdActionActive { color: var(--pane-accent); }
-.paneHdActionActive:hover { background: rgba(255, 255, 255, .04); color: var(--pane-accent); }
+.paneHdActionActive:hover { background: rgba(var(--pane-accent-rgb), .08); color: var(--pane-accent); }
 .paneHdActionClose:hover { background: rgba(239, 83, 80, .08); color: #ef5350; }
 
 .paneDrop,
@@ -100,7 +97,7 @@
 .paletteDrop { width: 220px; padding: 6px; display: flex; flex-direction: column; gap: 2px; }
 .paletteDropLabel { padding: 2px 8px 4px; font-family: 'JetBrains Mono', var(--mono, monospace); font-size: 8px; color: var(--ink-400, #a5a49f); text-transform: uppercase; letter-spacing: .08em; }
 .paletteOpt { display: flex; width: 100%; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid transparent; border-radius: 8px; background: none; text-align: left; cursor: pointer; transition: background .06s, border-color .06s; }
-.paletteOpt:hover { background: rgba(var(--pane-accent-rgb), .06); }
+.paletteOpt:hover { background: rgba(var(--pane-accent-rgb), .04); }
 .paletteOptActive { background: rgba(var(--pane-accent-rgb), .08); border-color: rgba(var(--pane-accent-rgb), .18); }
 .paletteSwatch { width: 16px; height: 16px; flex-shrink: 0; border-radius: 999px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .5), 0 0 0 1px rgba(26, 25, 24, .08); }
 .paletteMeta { display: flex; min-width: 0; flex: 1; flex-direction: column; }

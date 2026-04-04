@@ -1,24 +1,104 @@
-.sigRow { display: flex; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--warm-100, #ededeb); }
-.sigRow:last-child { border-bottom: none; }
-.sigRow:hover { background: rgba(0, 0, 0, .025); }
+.signals { display: flex; flex-direction: column; }
 
-.avXs { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 10px; font-weight: 600; }
-.avHot { background: rgba(239, 83, 80, .08); color: #ef5350; }
-.avReady { background: rgba(41, 98, 255, .08); color: #2962ff; }
-.avWatch { background: rgba(255, 152, 0, .08); color: #ff9800; }
-.avDone { background: var(--warm-100, #ededeb); color: var(--ink-400, #a5a49f); }
+.signalCard {
+  position: relative;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--warm-100, #f0f0ee);
+  transition: background .04s;
+}
 
-.sigBody { flex: 1; }
-.sigTop { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
-.rowName { font-size: 13px; font-weight: 500; color: var(--ink-800, #2a2926); }
-.rowMono { font-family: var(--mono, 'IBM Plex Mono', monospace); font-size: 12px; text-align: right; }
-.dim { color: var(--ink-400, #a5a49f); }
-.sigDesc { margin-top: 3px; font-size: 12px; line-height: 1.45; color: var(--ink-500, #7c7b77); }
+.signalCard:last-child { border-bottom: none; }
+.signalCard:hover { background: #fafaf8; }
 
-.sigBtn { margin-top: 6px; padding: 4px 10px; border-radius: 5px; border: 1px solid; font-size: 10px; font-family: inherit; font-weight: 500; cursor: pointer; transition: all .06s; }
-.sigBtnHot { color: #ef5350; border-color: rgba(239, 83, 80, .2); background: rgba(239, 83, 80, .06); }
-.sigBtnHot:hover { background: #ef5350; color: #fff; }
-.sigBtnReady { color: #2962ff; border-color: rgba(41, 98, 255, .15); background: rgba(41, 98, 255, .06); }
-.sigBtnReady:hover { background: #2962ff; color: #fff; }
-.sigBtnWatch { color: #ff9800; border-color: rgba(255, 152, 0, .15); background: rgba(255, 152, 0, .06); }
-.sigBtnWatch:hover { background: #ff9800; color: #fff; }
+.signalUrgent::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+}
+
+.signalUrgentRed::before { background: #ef5350; }
+.signalUrgentAmber::before { background: #ff9800; }
+
+.signalTop { display: flex; align-items: flex-start; gap: 10px; }
+
+.signalAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.signalAvatarSlate { background: rgba(124, 133, 148, .08); color: #7c8594; }
+.signalAvatarMoney { background: rgba(38, 166, 154, .06); color: #26a69a; }
+.signalAvatarWarning { background: rgba(255, 152, 0, .06); color: #ff9800; }
+.signalAvatarInfo { background: rgba(41, 98, 255, .06); color: #2962ff; }
+
+.signalBody { flex: 1; min-width: 0; }
+
+.signalTitleRow { display: flex; align-items: center; gap: 6px; }
+
+.signalTitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-800, #2a2926);
+  line-height: 1.35;
+}
+
+.signalAmount {
+  font-family: 'JetBrains Mono', var(--mono, monospace);
+  font-size: 11px;
+  font-weight: 600;
+  color: #26a69a;
+}
+
+.signalDesc {
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ink-400, #a5a49f);
+}
+
+.signalTime {
+  flex-shrink: 0;
+  margin-top: 2px;
+  font-family: 'JetBrains Mono', var(--mono, monospace);
+  font-size: 9px;
+  color: #d0cfcb;
+}
+
+.signalActions { display: flex; gap: 4px; margin-top: 8px; margin-left: 38px; }
+
+.signalBtn {
+  padding: 4px 10px;
+  border: 1px solid;
+  border-radius: 5px;
+  font-family: 'JetBrains Mono', var(--mono, monospace);
+  font-size: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .06s;
+}
+
+.signalBtnFollow { border-color: rgba(239, 83, 80, .12); color: #ef5350; background: rgba(239, 83, 80, .03); }
+.signalBtnFollow:hover { background: rgba(239, 83, 80, .08); }
+
+.signalBtnInvoice { border-color: rgba(38, 166, 154, .12); color: #26a69a; background: rgba(38, 166, 154, .03); }
+.signalBtnInvoice:hover { background: rgba(38, 166, 154, .08); }
+
+.signalBtnNudge { border-color: rgba(255, 152, 0, .12); color: #ff9800; background: rgba(255, 152, 0, .03); }
+.signalBtnNudge:hover { background: rgba(255, 152, 0, .08); }
+
+.signalBtnGhost { border-color: var(--warm-200, #e2e1dd); color: var(--ink-400, #a5a49f); background: transparent; }
+.signalBtnGhost:hover { background: #fafaf8; color: var(--ink-600, #5c5b57); }

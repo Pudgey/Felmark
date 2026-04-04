@@ -22,9 +22,19 @@ interface PaneProps {
   canRowSplit?: boolean;
 }
 
+const HEADER_BADGES: Partial<Record<SurfaceId, { label: string; tone: "urgent" | "money" | "warning" | "info" | "neutral" }>> = {
+  money: { label: "1 overdue", tone: "urgent" },
+  work: { label: "\u25cf tracking", tone: "money" },
+  signals: { label: "2 urgent", tone: "urgent" },
+  pipeline: { label: "4 deals", tone: "money" },
+  clients: { label: "1 overdue", tone: "warning" },
+  time: { label: "7.2h today", tone: "warning" },
+  terminal: { label: "forge ready", tone: "info" },
+};
+
 const PANE_ACCENT_OPTIONS = [
-  { id: "default", label: "Default chrome", treatment: "default", description: "Monochrome dark headers with surface icon tint and an active seam." },
-  { id: "tinted", label: "Tinted headers", treatment: "tinted", description: "Mix a small amount of each surface color into the dark header background." },
+  { id: "default", label: "Default chrome", treatment: "default", description: "White pane header with tinted icon and a focused seam." },
+  { id: "tinted", label: "Tinted headers", treatment: "tinted", description: "Mix a small amount of each surface color into the light header background." },
 ] as const;
 
 function EmptyPane({ surfaceId }: { surfaceId: SurfaceId }) {
@@ -83,6 +93,7 @@ export default function Pane({
   const nav = useWorkspaceNav();
   const Content = SURFACE_COMPONENTS[surface];
   const surfaceMeta = getSurfaceMeta(surface);
+  const headerBadge = HEADER_BADGES[surface];
   const paneStyle = {
     "--pane-accent": surfaceMeta.color,
     "--pane-accent-rgb": hexToRgbTriplet(surfaceMeta.color),
@@ -153,9 +164,7 @@ export default function Pane({
         >
           <span className={styles.paneIcon}>{surfaceMeta.icon}</span>
           <span className={styles.paneLabel}>{surfaceMeta.label}</span>
-          <span className={styles.paneChevron}>{"\u25be"}</span>
         </div>
-        <div className={styles.paneHdSep} />
         <span className={styles.paneHdContext}>{SURFACE_CONTEXT[surface]}</span>
 
         {surfaceMenuOpen && (
@@ -260,10 +269,7 @@ export default function Pane({
         )}
 
         <div className={styles.paneHdRight}>
-          <div className={styles.paneBeacon}>
-            <span className={`${styles.paneBeaconLabel} ${focused ? styles.paneBeaconLabelOn : styles.paneBeaconLabelOff}`}>{focused ? "active" : "idle"}</span>
-            <div className={`${styles.paneBeaconDot} ${focused ? styles.paneBeaconDotOn : styles.paneBeaconDotOff}`} />
-          </div>
+          {headerBadge && <span className={`${styles.paneHdBadge} ${styles[`paneHdBadge${headerBadge.tone.charAt(0).toUpperCase()}${headerBadge.tone.slice(1)}`]}`}>{headerBadge.label}</span>}
           <span
             className={`${styles.paneHdAction} ${paletteMenuOpen ? styles.paneHdActionActive : ""}`}
             onClick={(event) => {
@@ -277,9 +283,9 @@ export default function Pane({
               setSplitMenuOpen(false);
               setContextMenuOpen(false);
             }}
-            title="Header style"
+            title="Pane settings"
           >
-            {"\u25c9"}
+            {"\u2699"}
           </span>
           <span className={`${styles.paneHdAction} ${zoomed ? styles.paneHdActionActive : ""}`} onClick={(event) => { event.stopPropagation(); onZoom?.(); }} title={zoomed ? "Restore" : "Maximize"}>{zoomed ? "\u2923" : "\u2922"}</span>
           {canSplit && !zoomed && <span className={styles.paneHdAction} onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); setSplitMenuPosition({ top: rect.bottom + 2, left: rect.right - 180 }); setSplitMenuOpen(!splitMenuOpen); setSurfaceMenuOpen(false); setPaletteMenuOpen(false); }} title="Split pane">{"\u2295"}</span>}

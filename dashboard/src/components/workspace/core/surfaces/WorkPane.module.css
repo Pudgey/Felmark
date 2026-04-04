@@ -1,0 +1,285 @@
+.work { display: flex; flex-direction: column; }
+
+.taskRow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-height: 38px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--warm-100, #f0f0ee);
+  cursor: pointer;
+  transition: background .04s;
+}
+
+.taskRow:hover { background: #fafaf8; }
+.taskRowExpanded { background: #fafaf8; }
+.taskRowOverdue { border-left: 3px solid #ef5350; padding-left: 11px; }
+
+.taskPriority { width: 3px; height: 16px; margin-right: 10px; border-radius: 1.5px; flex-shrink: 0; }
+.taskPriorityUrgent { background: #ef5350; }
+.taskPriorityHigh { background: #ff9800; }
+.taskPriorityMedium { background: #2962ff; }
+.taskPriorityLow { background: #a5a49f; }
+
+.taskTitle {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 13px;
+  color: var(--ink-800, #2a2926);
+}
+
+.taskRowOverdue .taskTitle { color: #ef5350; }
+
+.taskClient,
+.taskSubs,
+.taskDue,
+.taskHours,
+.taskFieldLabel,
+.taskPill,
+.taskTimerValue,
+.taskTimerRate,
+.taskProgressCount,
+.taskAction,
+.taskNeutralAction {
+  font-family: 'JetBrains Mono', var(--mono, monospace);
+}
+
+.taskClient,
+.taskSubs {
+  flex-shrink: 0;
+  margin-right: 8px;
+  font-size: 9px;
+  color: #d0cfcb;
+}
+
+.taskTimerInline {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+  margin-right: 8px;
+  font-family: 'JetBrains Mono', var(--mono, monospace);
+  font-size: 9px;
+  color: #26a69a;
+}
+
+.taskTimerDot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #26a69a;
+  animation: taskPulse 2s ease infinite;
+}
+
+.taskDue {
+  width: 40px;
+  flex-shrink: 0;
+  margin-right: 8px;
+  font-size: 10px;
+  color: var(--ink-400, #a5a49f);
+  text-align: right;
+}
+
+.taskRowOverdue .taskDue { color: #ef5350; font-weight: 500; }
+
+.taskHours {
+  width: 48px;
+  flex-shrink: 0;
+  font-size: 9px;
+  color: #d0cfcb;
+  text-align: right;
+}
+
+.taskProgress {
+  width: 32px;
+  height: 3px;
+  margin-left: 8px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 1.5px;
+  background: #f0f0ee;
+}
+
+.taskProgressFill { height: 100%; border-radius: 1.5px; }
+
+.taskExpand {
+  border-bottom: 1px solid var(--warm-100, #f0f0ee);
+  background: #fafaf8;
+}
+
+.taskExpandBody { padding: 10px 14px; }
+
+.taskTimerBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  border: 1px solid rgba(38, 166, 154, .08);
+  border-radius: 6px;
+  background: rgba(38, 166, 154, .04);
+}
+
+.taskTimerValue {
+  font-size: 14px;
+  font-weight: 700;
+  color: #26a69a;
+}
+
+.taskTimerRate {
+  margin-left: auto;
+  font-size: 9px;
+  color: rgba(38, 166, 154, .5);
+}
+
+.taskFields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.taskField { display: flex; min-width: 0; flex-direction: column; }
+
+.taskFieldLabel {
+  font-size: 7px;
+  color: var(--ink-400, #a5a49f);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.taskFieldValue {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-700, #3d3c38);
+}
+
+.taskFieldValueMono {
+  font-family: 'JetBrains Mono', var(--mono, monospace);
+  font-size: 11px;
+}
+
+.taskFieldValueTimer { color: #26a69a; }
+
+.taskPill {
+  margin-top: 2px;
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 500;
+}
+
+.taskPillOverdue,
+.taskPillUrgent { background: rgba(239, 83, 80, .06); color: #ef5350; }
+.taskPillHigh { background: rgba(255, 152, 0, .06); color: #ff9800; }
+.taskPillActive { background: rgba(38, 166, 154, .06); color: #26a69a; }
+
+.taskSubsWrap { margin-bottom: 10px; }
+
+.taskSubsHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.taskSubsLabel {
+  font-family: 'JetBrains Mono', var(--mono, monospace);
+  font-size: 8px;
+  color: var(--ink-400, #a5a49f);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.taskPbar {
+  width: 48px;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 1.5px;
+  background: #e2e1dd;
+}
+
+.taskPbarFill { height: 100%; border-radius: 1.5px; background: #26a69a; }
+
+.taskProgressCount {
+  font-size: 9px;
+  color: var(--ink-400, #a5a49f);
+}
+
+.taskSubtask {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 0;
+}
+
+.taskSubtaskDone .taskSubtaskText {
+  text-decoration: line-through;
+  color: var(--ink-400, #a5a49f);
+}
+
+.taskCheckbox {
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1.5px solid #d0cfcb;
+  border-radius: 50%;
+  font-size: 7px;
+  color: transparent;
+}
+
+.taskCheckboxDone {
+  border-color: #26a69a;
+  background: #26a69a;
+  color: #fff;
+}
+
+.taskSubtaskText { font-size: 12px; color: var(--ink-700, #3d3c38); }
+
+.taskActions {
+  display: flex;
+  gap: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--warm-100, #f0f0ee);
+}
+
+.taskAction,
+.taskNeutralAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  border: 1px solid;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .06s;
+}
+
+.taskActionPrimary { border-color: #2a2926; background: #2a2926; color: #fff; }
+.taskActionPrimary:hover { background: #3d3c38; }
+
+.taskActionGreen { border-color: rgba(38, 166, 154, .12); background: rgba(38, 166, 154, .04); color: #26a69a; }
+.taskActionGreen:hover { background: rgba(38, 166, 154, .1); }
+
+.taskNeutralAction { border-color: #e2e1dd; background: #fff; color: #7c7b77; }
+.taskNeutralAction:hover { background: #f0f0ee; }
+
+@keyframes taskPulse {
+  0%, 60%, 100% { opacity: .25; }
+  20% { opacity: 1; }
+}
