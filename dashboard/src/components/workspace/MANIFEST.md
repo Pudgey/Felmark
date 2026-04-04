@@ -33,9 +33,10 @@ Workspace — task/project management surface. ClickUp-style: tasks, subtasks, s
 
 | File | Lines | Purpose |
 |------|-------|---------|
-| `core/tabs/WorkspaceTabs.tsx` | ~90 | Workspace chrome tabs and prompt bar |
+| `command/WorkspaceCommandPalette.tsx` | ~190 | Cmd+K command palette modal — navigate surfaces, open tools, open clients |
+| `core/tabs/WorkspaceTabs.tsx` | ~90 | Workspace chrome tabs and prompt bar; clicking prompt opens command palette |
 | `core/layout/PaneLayout.tsx` | ~260 | Split-pane layout state machine, zoom, presets, and composition |
 | `core/layout/Pane.tsx` | ~230 | Pane shell, menus, and empty state wrapper |
 | `core/surfaces/` | — | Individual workspace pane bodies and surface registry |
-| `sidebar/WorkspaceSidebar.tsx` | ~380 | Workspace client sidebar and context menus |
+| `sidebar/WorkspaceSidebar.tsx` | ~380 | Workspace client sidebar with live search filtering |
 | `Workspace.tsx` | ~550 | Legacy standalone workspace surface, not the live router entrypoint |

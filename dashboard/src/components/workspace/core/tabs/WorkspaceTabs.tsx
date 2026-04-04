@@ -90,7 +90,7 @@ export default function WorkspaceTabs({ topSurface, bottomSurface }: WorkspaceTa
         <span className={styles.promptBranch}>
           <span>{"\u2387"}</span> {topLabel} + {bottomLabel}
         </span>
-        <div className={styles.promptInput}>
+        <div className={styles.promptInput} onClick={() => nav.openCommand()} style={{ cursor: "pointer" }}>
           <span>Search or command...</span>
           <span className={styles.promptCursor} />
         </div>

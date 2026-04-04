@@ -71,7 +71,18 @@ export default function WorkspaceSidebar() {
   const [clientsOpen, setClientsOpen] = useState(true);
   const [signalsOpen, setSignalsOpen] = useState(true);
   const [ctx, setCtx] = useState<CtxMenu | null>(null);
+  const [search, setSearch] = useState("");
   const nav = useWorkspaceNav();
+
+  const filteredClients = search
+    ? CLIENTS.filter(
+        (c) =>
+          c.name.toLowerCase().includes(search.toLowerCase()) ||
+          c.tasks.some((t) => t.title.toLowerCase().includes(search.toLowerCase())),
+      )
+    : CLIENTS;
+
+  const filteredSignals = search ? SIGNALS.filter((s) => s.text.toLowerCase().includes(search.toLowerCase())) : SIGNALS;
 
   const openClientCtx = (e: React.MouseEvent, clientId: string) => {
     e.preventDefault();
@@ -273,7 +284,12 @@ export default function WorkspaceSidebar() {
       {/* Search */}
       <div className={styles.sbSearch}>
         <span className={styles.sbSearchIcon}>&#8981;</span>
-        <input className={styles.sbSearchInput} placeholder="Search clients, tasks..." />
+        <input
+          className={styles.sbSearchInput}
+          placeholder="Search clients, tasks..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
         <div className={styles.sbKeys}>
           <span className={styles.sbKey}>&#8984;</span>
           <span className={styles.sbKey}>K</span>
@@ -297,7 +313,7 @@ export default function WorkspaceSidebar() {
 
         {clientsOpen && (
           <>
-            {CLIENTS.map((cl) => {
+            {filteredClients.map((cl) => {
               const on = active === cl.id;
               const sc =
                 cl.status === "overdue"
@@ -411,7 +427,7 @@ export default function WorkspaceSidebar() {
         </div>
 
         {signalsOpen &&
-          SIGNALS.map((sig, i) => (
+          filteredSignals.map((sig, i) => (
             <div key={i} className={styles.sig} onContextMenu={(e) => openSectionCtx(e, "signals")}>
               <div className={`${styles.sigDot} ${styles[URG_CLASS[sig.urg]] || ""}`} />
               <span className={styles.sigText}>{sig.text}</span>
