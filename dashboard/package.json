@@ -8,8 +8,20 @@
     "start": "next start",
     "lint": "eslint --max-warnings=0",
     "lint:fix": "eslint --fix",
+    "prepare": "cd .. && husky || true",
     "typecheck": "tsc --noEmit",
-    "check": "npm run lint && npm run typecheck && npm run build"
+    "format": "prettier --write \"src/**/*.{ts,tsx,css,json}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,css,json}\"",
+    "check": "npm run lint && npm run typecheck && npm run format:check && npm run build"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,tsx}": [
+      "eslint --max-warnings=0 --no-warn-ignored",
+      "prettier --write"
+    ],
+    "src/**/*.{css,json}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "next": "16.2.1",
@@ -23,6 +35,9 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.8.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

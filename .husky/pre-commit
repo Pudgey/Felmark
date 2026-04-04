@@ -1,0 +1,21 @@
+cd dashboard || exit 1
+
+echo ""
+echo "▸ Pre-commit: running ESLint + Prettier on staged files..."
+echo ""
+
+if npx lint-staged; then
+  echo ""
+  echo "✓ All checks passed."
+  echo ""
+else
+  echo ""
+  echo "✗ Commit blocked — fix the errors above, then:"
+  echo ""
+  echo "  npm run lint:fix    # auto-fix lint issues"
+  echo "  npm run format      # auto-fix formatting"
+  echo "  git add <files>     # re-stage the fixes"
+  echo "  git commit          # try again"
+  echo ""
+  exit 1
+fi

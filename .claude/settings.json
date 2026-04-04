@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "postToolUse": [
+      {
+        "matcher": "Edit|Write|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /Users/donteennis/Felmark/dashboard && npx eslint --no-warn-ignored --max-warnings=0 \"$CLAUDE_FILE_PATH\" 2>&1 || true"
+          }
+        ]
+      }
+    ]
+  }
+}

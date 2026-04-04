@@ -5,22 +5,43 @@ import { useWorkspaceNav } from "@/views/routers/WorkspaceRouter";
 import styles from "./WorkspaceSidebar.module.css";
 
 const CLIENTS = [
-  { id: "c1", name: "Meridian Studio", av: "MS", status: "active" as const, owed: 2400, last: "2m",
+  {
+    id: "c1",
+    name: "Meridian Studio",
+    av: "MS",
+    status: "active" as const,
+    owed: 2400,
+    last: "2m",
     tasks: [
       { title: "Client review & revisions", due: "Apr 1", status: "overdue" as const },
       { title: "Color palette & typography", due: "Apr 2", status: "active" as const, timer: true },
       { title: "Brand guidelines document", due: "Apr 5", status: "todo" as const },
-    ]},
-  { id: "c2", name: "Nora Kim", av: "NK", status: "active" as const, owed: 3200, last: "1h",
+    ],
+  },
+  {
+    id: "c2",
+    name: "Nora Kim",
+    av: "NK",
+    status: "active" as const,
+    owed: 3200,
+    last: "1h",
     tasks: [
       { title: "Landing page wireframes", due: "Apr 8", status: "todo" as const },
       { title: "Email sequence draft", due: "Apr 12", status: "todo" as const },
-    ]},
-  { id: "c3", name: "Bolt Fitness", av: "BF", status: "overdue" as const, owed: 4000, last: "3d",
+    ],
+  },
+  {
+    id: "c3",
+    name: "Bolt Fitness",
+    av: "BF",
+    status: "overdue" as const,
+    owed: 4000,
+    last: "3d",
     tasks: [
       { title: "Onboarding UX revisions", due: "Apr 5", status: "active" as const },
       { title: "Blog post #1 draft", due: "Apr 3", status: "active" as const },
-    ]},
+    ],
+  },
   { id: "c4", name: "Luna Boutique", av: "LB", status: "lead" as const, owed: 0, last: "2h", tasks: [] },
 ];
 
@@ -31,7 +52,12 @@ const SIGNALS = [
   { text: "$2,200 received from Nora", time: "2h", urg: "done" },
 ];
 
-const URG_CLASS: Record<string, string> = { hot: "sigDotHot", ready: "sigDotReady", watch: "sigDotWatch", done: "sigDotDone" };
+const URG_CLASS: Record<string, string> = {
+  hot: "sigDotHot",
+  ready: "sigDotReady",
+  watch: "sigDotWatch",
+  done: "sigDotDone",
+};
 
 interface CtxMenu {
   type: "client" | "section";
@@ -70,7 +96,7 @@ export default function WorkspaceSidebar() {
     return () => window.removeEventListener("felmark:dismiss-ctx", handler);
   }, []);
 
-  const ctxClient = ctx?.clientId ? CLIENTS.find(c => c.id === ctx.clientId) : null;
+  const ctxClient = ctx?.clientId ? CLIENTS.find((c) => c.id === ctx.clientId) : null;
 
   return (
     <div className={styles.sb}>
@@ -95,30 +121,59 @@ export default function WorkspaceSidebar() {
               <span className={styles.earnedGoal}>of $20k goal</span>
             </div>
           </div>
-          <svg className={styles.earnedChart} viewBox="0 0 252 40" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="earnGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#26a69a" stopOpacity="0.15" />
-                <stop offset="100%" stopColor="#26a69a" stopOpacity="0.01" />
-              </linearGradient>
-            </defs>
-            {(() => {
-              const data = [0,0,450,450,1650,1650,1650,2450,2450,2450,4850,4850,5450,5450,5450,7250,7250,7250,8200,8200,8200,10400,10400,10400,12000,12000,12000,12000,13800,14800];
-              const goal = 20000;
-              const pts = data.map((v, i) => `${(i / 29) * 252},${38 - (v / goal) * 36}`);
-              const line = pts.map((p, i) => `${i === 0 ? "M" : "L"}${p}`).join(" ");
-              const area = `M0,40 ${pts.map((p) => `L${p}`).join(" ")} L252,40 Z`;
-              const lastY = 38 - (14800 / goal) * 36;
-              return (
-                <>
-                  <line x1="0" y1={38 - (goal / goal) * 36} x2="252" y2={38 - (goal / goal) * 36} stroke="var(--warm-200, #e0dfdb)" strokeWidth="0.5" strokeDasharray="3 2" />
+          {(() => {
+            const data = [
+              0, 0, 450, 450, 1650, 1650, 1650, 2450, 2450, 2450, 4850, 4850, 5450, 5450, 5450, 7250, 7250, 7250, 8200,
+              8200, 8200, 10400, 10400, 10400, 12000, 12000, 12000, 12000, 13800, 14800,
+            ];
+            const goal = 20000;
+            const W = 252,
+              H = 40,
+              PAD = 4;
+            const plotW = W - PAD * 2,
+              plotH = H - PAD * 2;
+            const pts = data.map((v, i) => ({
+              x: PAD + (i / (data.length - 1)) * plotW,
+              y: PAD + plotH - (v / goal) * plotH,
+            }));
+            const line = pts.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ");
+            const area = `M${PAD},${H - PAD} ${pts.map((p) => `L${p.x},${p.y}`).join(" ")} L${W - PAD},${H - PAD} Z`;
+            const goalY = PAD + plotH - (goal / goal) * plotH;
+            const last = pts[pts.length - 1];
+            const dotLeft = (last.x / W) * 100;
+            const dotTop = (last.y / H) * 100;
+            return (
+              <div className={styles.earnedChartWrap}>
+                <svg className={styles.earnedChart} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="earnGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#26a69a" stopOpacity="0.15" />
+                      <stop offset="100%" stopColor="#26a69a" stopOpacity="0.01" />
+                    </linearGradient>
+                  </defs>
+                  <line
+                    x1={PAD}
+                    y1={goalY}
+                    x2={W - PAD}
+                    y2={goalY}
+                    stroke="var(--warm-200, #e0dfdb)"
+                    strokeWidth="0.5"
+                    strokeDasharray="3 2"
+                  />
                   <path d={area} fill="url(#earnGrad)" />
-                  <path d={line} fill="none" stroke="#26a69a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  <circle cx={252} cy={lastY} r="2.5" fill="#fff" stroke="#26a69a" strokeWidth="1.5" />
-                </>
-              );
-            })()}
-          </svg>
+                  <path
+                    d={line}
+                    fill="none"
+                    stroke="#26a69a"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span className={styles.earnedDot} style={{ left: `${dotLeft}%`, top: `${dotTop}%` }} />
+              </div>
+            );
+          })()}
           <div className={styles.earnedFt}>
             <span>Apr 1</span>
             <span style={{ color: "#26a69a" }}>+12% vs last month</span>
@@ -139,10 +194,22 @@ export default function WorkspaceSidebar() {
               { av: "MS", name: "Meridian", amount: "$2,400", days: "8d left", status: "pending" as const },
             ].map((c, i) => (
               <div key={i} className={`${styles.outClient} ${c.status === "overdue" ? styles.outClientOv : ""}`}>
-                <div className={`${styles.outClientAv} ${c.status === "overdue" ? styles.outClientAvOv : ""}`}>{c.av}</div>
+                <div className={`${styles.outClientAv} ${c.status === "overdue" ? styles.outClientAvOv : ""}`}>
+                  {c.av}
+                </div>
                 <span className={styles.outClientName}>{c.name}</span>
-                <span className={styles.outClientAmount} style={{ color: c.status === "overdue" ? "#ef5350" : "var(--ink-800, #2a2926)" }}>{c.amount}</span>
-                <span className={styles.outClientDays} style={{ color: c.status === "overdue" ? "#ef5350" : "var(--ink-400, #a5a49f)" }}>{c.days}</span>
+                <span
+                  className={styles.outClientAmount}
+                  style={{ color: c.status === "overdue" ? "#ef5350" : "var(--ink-800, #2a2926)" }}
+                >
+                  {c.amount}
+                </span>
+                <span
+                  className={styles.outClientDays}
+                  style={{ color: c.status === "overdue" ? "#ef5350" : "var(--ink-400, #a5a49f)" }}
+                >
+                  {c.days}
+                </span>
               </div>
             ))}
           </div>
@@ -192,7 +259,9 @@ export default function WorkspaceSidebar() {
                 <div className={`${styles.taskPri} ${t.pri === "high" ? styles.taskPriHigh : styles.taskPriMed}`} />
                 <span className={styles.taskName}>{t.title}</span>
                 {"timer" in t && t.timer && <span className={styles.taskTimer}>{"\u25cf"}</span>}
-                <div className={styles.taskBar}><div className={styles.taskBarFill} style={{ width: `${t.pct}%` }} /></div>
+                <div className={styles.taskBar}>
+                  <div className={styles.taskBarFill} style={{ width: `${t.pct}%` }} />
+                </div>
                 <span className={styles.taskDue}>{t.due}</span>
               </div>
             ))}
@@ -205,161 +274,276 @@ export default function WorkspaceSidebar() {
       <div className={styles.sbSearch}>
         <span className={styles.sbSearchIcon}>&#8981;</span>
         <input className={styles.sbSearchInput} placeholder="Search clients, tasks..." />
-        <div className={styles.sbKeys}><span className={styles.sbKey}>&#8984;</span><span className={styles.sbKey}>K</span></div>
+        <div className={styles.sbKeys}>
+          <span className={styles.sbKey}>&#8984;</span>
+          <span className={styles.sbKey}>K</span>
+        </div>
       </div>
 
       {/* Scroll */}
       <div className={styles.sbScroll}>
         {/* Clients */}
-        <div className={styles.sbSec} onClick={() => setClientsOpen(!clientsOpen)} onContextMenu={(e) => openSectionCtx(e, "clients")}>
-          <span className={styles.sbSecArrow} style={{ transform: clientsOpen ? "rotate(90deg)" : "rotate(0)" }}>&#9656;</span>
+        <div
+          className={styles.sbSec}
+          onClick={() => setClientsOpen(!clientsOpen)}
+          onContextMenu={(e) => openSectionCtx(e, "clients")}
+        >
+          <span className={styles.sbSecArrow} style={{ transform: clientsOpen ? "rotate(90deg)" : "rotate(0)" }}>
+            &#9656;
+          </span>
           <span className={styles.sbSecLb}>Clients</span>
           <span className={styles.sbSecN}>{CLIENTS.length}</span>
         </div>
 
-        {clientsOpen && <>
-          {CLIENTS.map(cl => {
-            const on = active === cl.id;
-            const sc = cl.status === "overdue" ? "var(--ov)" : cl.status === "active" ? "var(--pos)" : cl.status === "lead" ? "var(--rdy)" : "var(--g300, #d0cfcb)";
-            const hasOverdue = cl.tasks.some(t => t.status === "overdue");
+        {clientsOpen && (
+          <>
+            {CLIENTS.map((cl) => {
+              const on = active === cl.id;
+              const sc =
+                cl.status === "overdue"
+                  ? "var(--ov)"
+                  : cl.status === "active"
+                    ? "var(--pos)"
+                    : cl.status === "lead"
+                      ? "var(--rdy)"
+                      : "var(--g300, #d0cfcb)";
+              const hasOverdue = cl.tasks.some((t) => t.status === "overdue");
 
-            return (
-              <div key={cl.id} className={`${styles.cl} ${on ? styles.clOn : ""}`}>
-                <div className={styles.clMain} onClick={() => setActive(on ? null : cl.id)} onContextMenu={(e) => openClientCtx(e, cl.id)}>
-                  <div className={`${styles.clAv} ${cl.status === "overdue" ? styles.clAvOv : cl.status === "lead" ? styles.clAvLead : ""}`}>
-                    {cl.av}
-                    <div className={styles.clAvDot} style={{ background: sc }} />
-                  </div>
-                  <div className={styles.clInfo}>
-                    <div className={styles.clName}>{cl.name}</div>
-                    <div className={styles.clMeta}>
-                      {cl.owed > 0 ? <span style={{ color: cl.status === "overdue" ? "var(--ov)" : undefined }}>${(cl.owed / 1000).toFixed(1)}k owed</span> : <span>New lead</span>}
-                      {" \u00b7 "}{cl.last}
+              return (
+                <div key={cl.id} className={`${styles.cl} ${on ? styles.clOn : ""}`}>
+                  <div
+                    className={styles.clMain}
+                    onClick={() => setActive(on ? null : cl.id)}
+                    onContextMenu={(e) => openClientCtx(e, cl.id)}
+                  >
+                    <div
+                      className={`${styles.clAv} ${cl.status === "overdue" ? styles.clAvOv : cl.status === "lead" ? styles.clAvLead : ""}`}
+                    >
+                      {cl.av}
+                      <div className={styles.clAvDot} style={{ background: sc }} />
+                    </div>
+                    <div className={styles.clInfo}>
+                      <div className={styles.clName}>{cl.name}</div>
+                      <div className={styles.clMeta}>
+                        {cl.owed > 0 ? (
+                          <span style={{ color: cl.status === "overdue" ? "var(--ov)" : undefined }}>
+                            ${(cl.owed / 1000).toFixed(1)}k owed
+                          </span>
+                        ) : (
+                          <span>New lead</span>
+                        )}
+                        {" \u00b7 "}
+                        {cl.last}
+                      </div>
+                    </div>
+                    <div className={styles.clRight}>
+                      {cl.tasks.length > 0 && (
+                        <span className={`${styles.clCount} ${hasOverdue ? styles.clCountAlert : ""}`}>
+                          {cl.tasks.length}
+                        </span>
+                      )}
+                      <span className={styles.clChevron}>{on ? "\u25be" : "\u203a"}</span>
                     </div>
                   </div>
-                  <div className={styles.clRight}>
-                    {cl.tasks.length > 0 && <span className={`${styles.clCount} ${hasOverdue ? styles.clCountAlert : ""}`}>{cl.tasks.length}</span>}
-                    <span className={styles.clChevron}>{on ? "\u25be" : "\u203a"}</span>
-                  </div>
-                </div>
 
-                {on && (
-                  <div className={styles.clExp} onContextMenu={(e) => openClientCtx(e, cl.id)}>
-                    {cl.tasks.length > 0 && (
-                      <div className={styles.clTasks}>
-                        {cl.tasks.slice(0, 3).map((t, i) => (
-                          <div key={i} className={`${styles.clTask} ${t.status === "overdue" ? styles.clTaskOv : ""}`}>
-                            <div className={styles.clTaskDot} style={{ background: t.status === "overdue" ? "var(--ov)" : t.status === "active" ? "var(--pos)" : "var(--g300, #d0cfcb)" }} />
-                            <span className={styles.clTaskName}>{t.title}</span>
-                            <div className={styles.clTaskRight}>
-                              {"timer" in t && t.timer && <span className={styles.clTaskTimer}>&#9679; 1:22</span>}
-                              <span className={styles.clTaskDue}>{t.due}</span>
+                  {on && (
+                    <div className={styles.clExp} onContextMenu={(e) => openClientCtx(e, cl.id)}>
+                      {cl.tasks.length > 0 && (
+                        <div className={styles.clTasks}>
+                          {cl.tasks.slice(0, 3).map((t, i) => (
+                            <div
+                              key={i}
+                              className={`${styles.clTask} ${t.status === "overdue" ? styles.clTaskOv : ""}`}
+                            >
+                              <div
+                                className={styles.clTaskDot}
+                                style={{
+                                  background:
+                                    t.status === "overdue"
+                                      ? "var(--ov)"
+                                      : t.status === "active"
+                                        ? "var(--pos)"
+                                        : "var(--g300, #d0cfcb)",
+                                }}
+                              />
+                              <span className={styles.clTaskName}>{t.title}</span>
+                              <div className={styles.clTaskRight}>
+                                {"timer" in t && t.timer && <span className={styles.clTaskTimer}>&#9679; 1:22</span>}
+                                <span className={styles.clTaskDue}>{t.due}</span>
+                              </div>
                             </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {cl.status === "overdue" && <button className={`${styles.clBtn} ${styles.clBtnRemind}`}>Send Reminder</button>}
-                    {cl.status === "active" && <button className={`${styles.clBtn} ${styles.clBtnInvoice}`}>$ Invoice</button>}
-                    {cl.status === "lead" && <button className={`${styles.clBtn} ${styles.clBtnPropose}`}>&rarr; Send Proposal</button>}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+                          ))}
+                        </div>
+                      )}
+                      {cl.status === "overdue" && (
+                        <button className={`${styles.clBtn} ${styles.clBtnRemind}`}>Send Reminder</button>
+                      )}
+                      {cl.status === "active" && (
+                        <button className={`${styles.clBtn} ${styles.clBtnInvoice}`}>$ Invoice</button>
+                      )}
+                      {cl.status === "lead" && (
+                        <button className={`${styles.clBtn} ${styles.clBtnPropose}`}>&rarr; Send Proposal</button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
 
-          <div className={styles.clAdd}>
-            <span className={styles.clAddIcon}>+</span>
-            Add Client
-          </div>
-        </>}
+            <div className={styles.clAdd}>
+              <span className={styles.clAddIcon}>+</span>
+              Add Client
+            </div>
+          </>
+        )}
 
         {/* Signals */}
-        <div className={styles.sbSec} onClick={() => setSignalsOpen(!signalsOpen)} onContextMenu={(e) => openSectionCtx(e, "signals")}>
-          <span className={styles.sbSecArrow} style={{ transform: signalsOpen ? "rotate(90deg)" : "rotate(0)" }}>&#9656;</span>
+        <div
+          className={styles.sbSec}
+          onClick={() => setSignalsOpen(!signalsOpen)}
+          onContextMenu={(e) => openSectionCtx(e, "signals")}
+        >
+          <span className={styles.sbSecArrow} style={{ transform: signalsOpen ? "rotate(90deg)" : "rotate(0)" }}>
+            &#9656;
+          </span>
           <span className={styles.sbSecLb}>Signals</span>
           <span className={styles.sbSecN}>{SIGNALS.length}</span>
         </div>
 
-        {signalsOpen && SIGNALS.map((sig, i) => (
-          <div key={i} className={styles.sig} onContextMenu={(e) => openSectionCtx(e, "signals")}>
-            <div className={`${styles.sigDot} ${styles[URG_CLASS[sig.urg]] || ""}`} />
-            <span className={styles.sigText}>{sig.text}</span>
-            <span className={styles.sigTime}>{sig.time}</span>
-          </div>
-        ))}
+        {signalsOpen &&
+          SIGNALS.map((sig, i) => (
+            <div key={i} className={styles.sig} onContextMenu={(e) => openSectionCtx(e, "signals")}>
+              <div className={`${styles.sigDot} ${styles[URG_CLASS[sig.urg]] || ""}`} />
+              <span className={styles.sigText}>{sig.text}</span>
+              <span className={styles.sigTime}>{sig.time}</span>
+            </div>
+          ))}
       </div>
 
       {/* Quick actions */}
       <div className={styles.sbQa}>
-        <button className={styles.sbQaBtn}><span className={styles.sbQaIcon}>$</span>Invoice<span className={styles.sbQaKey}>N</span></button>
-        <button className={styles.sbQaBtn}><span className={styles.sbQaIcon}>&#9654;</span>Timer<span className={styles.sbQaKey}>T</span></button>
+        <button className={styles.sbQaBtn}>
+          <span className={styles.sbQaIcon}>$</span>Invoice<span className={styles.sbQaKey}>N</span>
+        </button>
+        <button className={styles.sbQaBtn}>
+          <span className={styles.sbQaIcon}>&#9654;</span>Timer<span className={styles.sbQaKey}>T</span>
+        </button>
       </div>
 
       {/* Footer */}
       <div className={styles.sbFt}>
         <span className={styles.sbFtL}>{CLIENTS.length} clients &middot; 7 tasks</span>
-        <div className={styles.sbFtR}><span className={styles.sbFtDot} /><span>synced</span></div>
+        <div className={styles.sbFtR}>
+          <span className={styles.sbFtDot} />
+          <span>synced</span>
+        </div>
       </div>
       {/* Context menu */}
       {ctx && (
         <div className={styles.ctxOverlay} onClick={closeCtx}>
-          <div className={styles.ctxMenu} style={{ position: "fixed", top: ctx.pos.top, left: ctx.pos.left }} onClick={e => e.stopPropagation()}>
-            {ctx.type === "client" && ctxClient && <>
-              <div className={styles.ctxHeader}>{ctxClient.name}</div>
-              <div className={styles.ctxItem} onClick={() => { nav.openHub({ clientId: ctxClient.id, clientName: ctxClient.name, clientAvatar: ctxClient.av, clientColor: ctxClient.status === "overdue" ? "#8a7e63" : "#7c8594" }); closeCtx(); }}>
-                <span className={styles.ctxIcon}>{"\u25c7"}</span><span>Open Hub</span>
-              </div>
-              <div className={styles.ctxItem} onClick={closeCtx}>
-                <span className={styles.ctxIcon}>{"\u25b6"}</span><span>Start Timer</span>
-              </div>
-              <div className={styles.ctxItem} onClick={closeCtx}>
-                <span className={styles.ctxIcon}>$</span><span>Send Invoice</span>
-              </div>
-              <div className={styles.ctxItem} onClick={closeCtx}>
-                <span className={styles.ctxIcon}>{"\u2709"}</span><span>Message</span>
-              </div>
-              <div className={styles.ctxSep} />
-              <div className={styles.ctxItem} onClick={closeCtx}>
-                <span className={styles.ctxIcon}>{"\u270e"}</span><span>Edit Client</span>
-              </div>
-              <div className={`${styles.ctxItem} ${styles.ctxItemDanger}`} onClick={closeCtx}>
-                <span className={styles.ctxIcon}>{"\u2715"}</span><span>Archive Client</span>
-              </div>
-            </>}
-            {ctx.type === "section" && ctx.section === "clients" && <>
-              <div className={styles.ctxHeader}>Clients</div>
-              <div className={styles.ctxItem} onClick={() => { setClientsOpen(!clientsOpen); closeCtx(); }}>
-                <span className={styles.ctxIcon}>{clientsOpen ? "\u25b4" : "\u25be"}</span><span>{clientsOpen ? "Collapse" : "Expand"}</span>
-              </div>
-              <div className={styles.ctxSep} />
-              <div className={styles.ctxItem} onClick={closeCtx}>
-                <span className={styles.ctxIcon}>{"\u2195"}</span><span>Sort by name</span>
-              </div>
-              <div className={styles.ctxItem} onClick={closeCtx}>
-                <span className={styles.ctxIcon}>$</span><span>Sort by owed</span>
-              </div>
-              <div className={styles.ctxItem} onClick={closeCtx}>
-                <span className={styles.ctxIcon}>!</span><span>Sort by status</span>
-              </div>
-              <div className={styles.ctxSep} />
-              <div className={styles.ctxItem} onClick={closeCtx}>
-                <span className={styles.ctxIcon}>+</span><span>Add Client</span>
-              </div>
-            </>}
-            {ctx.type === "section" && ctx.section === "signals" && <>
-              <div className={styles.ctxHeader}>Signals</div>
-              <div className={styles.ctxItem} onClick={() => { setSignalsOpen(!signalsOpen); closeCtx(); }}>
-                <span className={styles.ctxIcon}>{signalsOpen ? "\u25b4" : "\u25be"}</span><span>{signalsOpen ? "Collapse" : "Expand"}</span>
-              </div>
-              <div className={styles.ctxSep} />
-              <div className={styles.ctxItem} onClick={closeCtx}>
-                <span className={styles.ctxIcon}>{"\u2713"}</span><span>Mark all read</span>
-              </div>
-              <div className={styles.ctxItem} onClick={closeCtx}>
-                <span className={styles.ctxIcon}>{"\u25ce"}</span><span>Filter by urgency</span>
-              </div>
-            </>}
+          <div
+            className={styles.ctxMenu}
+            style={{ position: "fixed", top: ctx.pos.top, left: ctx.pos.left }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {ctx.type === "client" && ctxClient && (
+              <>
+                <div className={styles.ctxHeader}>{ctxClient.name}</div>
+                <div
+                  className={styles.ctxItem}
+                  onClick={() => {
+                    nav.openHub({
+                      clientId: ctxClient.id,
+                      clientName: ctxClient.name,
+                      clientAvatar: ctxClient.av,
+                      clientColor: ctxClient.status === "overdue" ? "#8a7e63" : "#7c8594",
+                    });
+                    closeCtx();
+                  }}
+                >
+                  <span className={styles.ctxIcon}>{"\u25c7"}</span>
+                  <span>Open Hub</span>
+                </div>
+                <div className={styles.ctxItem} onClick={closeCtx}>
+                  <span className={styles.ctxIcon}>{"\u25b6"}</span>
+                  <span>Start Timer</span>
+                </div>
+                <div className={styles.ctxItem} onClick={closeCtx}>
+                  <span className={styles.ctxIcon}>$</span>
+                  <span>Send Invoice</span>
+                </div>
+                <div className={styles.ctxItem} onClick={closeCtx}>
+                  <span className={styles.ctxIcon}>{"\u2709"}</span>
+                  <span>Message</span>
+                </div>
+                <div className={styles.ctxSep} />
+                <div className={styles.ctxItem} onClick={closeCtx}>
+                  <span className={styles.ctxIcon}>{"\u270e"}</span>
+                  <span>Edit Client</span>
+                </div>
+                <div className={`${styles.ctxItem} ${styles.ctxItemDanger}`} onClick={closeCtx}>
+                  <span className={styles.ctxIcon}>{"\u2715"}</span>
+                  <span>Archive Client</span>
+                </div>
+              </>
+            )}
+            {ctx.type === "section" && ctx.section === "clients" && (
+              <>
+                <div className={styles.ctxHeader}>Clients</div>
+                <div
+                  className={styles.ctxItem}
+                  onClick={() => {
+                    setClientsOpen(!clientsOpen);
+                    closeCtx();
+                  }}
+                >
+                  <span className={styles.ctxIcon}>{clientsOpen ? "\u25b4" : "\u25be"}</span>
+                  <span>{clientsOpen ? "Collapse" : "Expand"}</span>
+                </div>
+                <div className={styles.ctxSep} />
+                <div className={styles.ctxItem} onClick={closeCtx}>
+                  <span className={styles.ctxIcon}>{"\u2195"}</span>
+                  <span>Sort by name</span>
+                </div>
+                <div className={styles.ctxItem} onClick={closeCtx}>
+                  <span className={styles.ctxIcon}>$</span>
+                  <span>Sort by owed</span>
+                </div>
+                <div className={styles.ctxItem} onClick={closeCtx}>
+                  <span className={styles.ctxIcon}>!</span>
+                  <span>Sort by status</span>
+                </div>
+                <div className={styles.ctxSep} />
+                <div className={styles.ctxItem} onClick={closeCtx}>
+                  <span className={styles.ctxIcon}>+</span>
+                  <span>Add Client</span>
+                </div>
+              </>
+            )}
+            {ctx.type === "section" && ctx.section === "signals" && (
+              <>
+                <div className={styles.ctxHeader}>Signals</div>
+                <div
+                  className={styles.ctxItem}
+                  onClick={() => {
+                    setSignalsOpen(!signalsOpen);
+                    closeCtx();
+                  }}
+                >
+                  <span className={styles.ctxIcon}>{signalsOpen ? "\u25b4" : "\u25be"}</span>
+                  <span>{signalsOpen ? "Collapse" : "Expand"}</span>
+                </div>
+                <div className={styles.ctxSep} />
+                <div className={styles.ctxItem} onClick={closeCtx}>
+                  <span className={styles.ctxIcon}>{"\u2713"}</span>
+                  <span>Mark all read</span>
+                </div>
+                <div className={styles.ctxItem} onClick={closeCtx}>
+                  <span className={styles.ctxIcon}>{"\u25ce"}</span>
+                  <span>Filter by urgency</span>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

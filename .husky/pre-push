@@ -1,0 +1,36 @@
+cd dashboard || exit 1
+
+echo ""
+echo "▸ Pre-push: running full lint + typecheck..."
+echo ""
+
+FAILED=0
+
+if ! npm run lint --silent; then
+  echo ""
+  echo "✗ ESLint failed."
+  FAILED=1
+fi
+
+if ! npm run typecheck --silent; then
+  echo ""
+  echo "✗ TypeScript failed."
+  FAILED=1
+fi
+
+if [ $FAILED -eq 1 ]; then
+  echo ""
+  echo "✗ Push blocked — fix the errors above, then:"
+  echo ""
+  echo "  npm run lint:fix    # auto-fix lint issues"
+  echo "  npm run typecheck   # see remaining type errors"
+  echo "  git add <files>"
+  echo "  git commit"
+  echo "  git push            # try again"
+  echo ""
+  exit 1
+else
+  echo ""
+  echo "✓ All checks passed."
+  echo ""
+fi
