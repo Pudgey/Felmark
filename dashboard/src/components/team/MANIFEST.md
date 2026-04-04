@@ -9,7 +9,7 @@
 - `react` -- useState
 
 ## Imported By
-- `Editor.tsx` -- rendered when team view is active
+- `views/team.tsx` -- rendered when team view is active
 
 ## Files
 - `TeamScreen.tsx` -- main component (370 lines)

@@ -6,8 +6,8 @@ import { uid } from "@/lib/utils";
 import { convertBlock, insertAfter, removeBlock } from "@/forge";
 import AiBlock from "@/components/workstation/editor/blocks/ai/AiBlock";
 import SlashMenu from "@/components/workstation/editor/chrome/slash-menu/SlashMenu";
-import ForgePaperOutline from "./ForgePaperOutline";
-import styles from "./ForgePaper.module.css";
+import PaperOutline from "./PaperOutline";
+import styles from "./Paper.module.css";
 
 const FORGE_PAPER_SLASH_TYPES: BlockType[] = [
   "paragraph",
@@ -27,7 +27,7 @@ const FORGE_PAPER_SLASH_TYPES: BlockType[] = [
   "signoff",
 ];
 
-interface ForgePaperProps {
+interface PaperProps {
   initialBlocks: Block[];
   workstation?: Workstation | null;
   projectName: string;
@@ -125,8 +125,8 @@ function PaperBlock({ block, sectionNum, isFocused, onFocus, onInput, onBlurFlus
   }
 }
 
-export default function ForgePaper({ initialBlocks, workstation, projectName, onClose, onSave }: ForgePaperProps) {
-  // ── ForgePaper owns its blocks state ──
+export default function Paper({ initialBlocks, workstation, projectName, onClose, onSave }: PaperProps) {
+  // ── Paper owns its blocks state ──
   const [blocks, setBlocks] = useState<Block[]>(initialBlocks);
   const [sent, setSent] = useState(false);
   const [focusedBlock, setFocusedBlock] = useState<string | null>(null);
@@ -360,8 +360,8 @@ export default function ForgePaper({ initialBlocks, workstation, projectName, on
       </div>
 
       <div className={styles.layout}>
-        {/* Forge Paper dedicated outline */}
-        <ForgePaperOutline
+        {/* Paper dedicated outline */}
+        <PaperOutline
           blocks={outlineBlocks}
           focusedBlock={focusedBlock}
           hoveredBlock={hoveredBlock}
@@ -372,6 +372,7 @@ export default function ForgePaper({ initialBlocks, workstation, projectName, on
           onHoverSection={(id) => setHoveredBlock(id)}
           clientName={workstation?.client || "Client"}
         />
+
 
         {/* Paper */}
         <div className={styles.scroll}>

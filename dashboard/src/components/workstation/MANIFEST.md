@@ -8,10 +8,8 @@ The Workstation is Felmark's flagship product surface — the full-featured free
 |--------|---------|-------------|
 | `editor/` | **Block Editor** | Notion-style document editor with slash commands, format bar, drag-and-drop, 40+ block types, split pane, and command palette |
 | `wire/` | **The Wire** | Activity feed and communication stream |
-| `team/` | **Team** | Team member management and collaboration |
 | `services/` | **Services** | Service offerings and pricing management |
 | `templates/` | **Templates** | Document and project templates (SaveTemplateModal, TemplatePicker, TemplatesPage) |
-| `forge-paper/` | **Forge Paper** | AI-assisted document generation surface |
 | `terminal-welcome/` | **Terminal Welcome** | First-run / empty-state welcome screen with stats |
 
 ## Imported By

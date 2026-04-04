@@ -65,4 +65,4 @@ All block-type components live here, organized by category.
 ## Imported By
 - `Editor.tsx` -- all block components rendered in contentBlockMap
 - `forge/services/blocks/*.ts` -- default data factories
-- `forge-paper/ForgePaper.tsx` -- AiBlock
+- `components/paper/Paper.tsx` -- AiBlock
