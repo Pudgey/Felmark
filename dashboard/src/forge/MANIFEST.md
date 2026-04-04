@@ -45,8 +45,8 @@ page.tsx → createForge(stateUpdater) → forge.workstations.create(...)
 | File | Block types covered |
 |------|-------------------|
 | `core.ts` | Master `getBlockDefaults` switch + shared utilities |
-| `basic.ts` | paragraph, h1, h2, h3, bullet, numbered, todo, quote, divider, callout, code, image, embed, toggle |
-| `content.ts` | deadline, canvas, audio |
+| `basic.ts` | paragraph, h1, h2, h3, bullet, numbered, todo, quote, divider, callout, code |
+| `content.ts` | table, accordion, math, image, gallery, swatches, bookmark, audio, canvas, deadline, deliverable |
 | `collaboration.ts` | comment-thread, mention, question, feedback, decision, poll, handoff, signoff, annotation |
 | `visual.ts` | timeline, flow, brand-board, mood-board, wireframe, pull-quote, hero-spotlight, kinetic-type, number-cascade, stat-reveal, value-counter, graph |
 | `money.ts` | money (all sub-types) |

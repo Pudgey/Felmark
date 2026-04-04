@@ -7,12 +7,10 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  width: 380px;
+  flex: 1;
   min-width: 320px;
-  max-width: 420px;
-  flex-shrink: 0;
   background: var(--parchment, #faf9f7);
-  font-family: var(--mono, 'JetBrains Mono'), 'JetBrains Mono', 'Fira Code', monospace;
+  font-family: var(--mono, "JetBrains Mono"), "JetBrains Mono", "Fira Code", monospace;
   font-size: 12px;
   color: var(--ink-700, #4f4c44);
   border-left: 1px solid var(--warm-200, #e5e2db);
@@ -40,14 +38,16 @@
 
 .headerTab {
   padding: 6px 12px;
-  font-family: var(--mono, 'JetBrains Mono'), 'JetBrains Mono', monospace;
+  font-family: var(--mono, "JetBrains Mono"), "JetBrains Mono", monospace;
   font-size: 11px;
   color: var(--ink-400, #9b988f);
   cursor: pointer;
   border: none;
   background: none;
   border-bottom: 2px solid transparent;
-  transition: color 0.1s, border-color 0.1s;
+  transition:
+    color 0.1s,
+    border-color 0.1s;
   letter-spacing: 0.02em;
 }
 
@@ -78,7 +78,9 @@
   border: none;
   background: none;
   border-radius: var(--radius-sm, 4px);
-  transition: color 0.1s, background 0.1s;
+  transition:
+    color 0.1s,
+    background 0.1s;
   line-height: 1;
 }
 
@@ -214,7 +216,10 @@
   cursor: pointer;
   color: var(--ink-300, #b5b2a9);
   border-radius: var(--radius-sm, 4px);
-  transition: opacity 0.12s, color 0.12s, background 0.12s;
+  transition:
+    opacity 0.12s,
+    color 0.12s,
+    background 0.12s;
   flex-shrink: 0;
 }
 
@@ -302,7 +307,7 @@
   background: none;
   width: 100%;
   text-align: left;
-  font-family: var(--mono, 'JetBrains Mono'), 'JetBrains Mono', monospace;
+  font-family: var(--mono, "JetBrains Mono"), "JetBrains Mono", monospace;
   transition: background 0.06s;
 }
 
@@ -452,7 +457,7 @@
   flex: 1;
   border: none;
   background: none;
-  font-family: var(--mono, 'JetBrains Mono'), 'JetBrains Mono', monospace;
+  font-family: var(--mono, "JetBrains Mono"), "JetBrains Mono", monospace;
   font-size: 12px;
   color: var(--ink-800, #3d3a33);
   outline: none;
@@ -496,15 +501,33 @@
 }
 
 /* ── Syntax colors (for potential future code output) ── */
-.synKeyword { color: #7c3aed; }
-.synString { color: #16a34a; }
-.synNumber { color: #c2410c; }
-.synFunc { color: #2563eb; }
-.synType { color: #0891b2; }
-.synError { color: #dc2626; }
-.synWarning { color: #d97706; }
-.synSuccess { color: #16a34a; }
-.synEmber { color: var(--ember, #b07d4f); }
+.synKeyword {
+  color: #7c3aed;
+}
+.synString {
+  color: #16a34a;
+}
+.synNumber {
+  color: #c2410c;
+}
+.synFunc {
+  color: #2563eb;
+}
+.synType {
+  color: #0891b2;
+}
+.synError {
+  color: #dc2626;
+}
+.synWarning {
+  color: #d97706;
+}
+.synSuccess {
+  color: #16a34a;
+}
+.synEmber {
+  color: var(--ember, #b07d4f);
+}
 
 /* ═══════════════════════════════════════════════════════
    D4 — Whisper / Nudge / Alert Intelligence Blocks
@@ -574,7 +597,7 @@
 }
 
 .nudgeAction {
-  font-family: var(--mono, 'JetBrains Mono'), monospace;
+  font-family: var(--mono, "JetBrains Mono"), monospace;
   font-size: 10px;
   font-weight: 600;
   color: var(--ember, #b07d4f);
@@ -583,7 +606,9 @@
   border-radius: 4px;
   padding: 3px 8px;
   cursor: pointer;
-  transition: background 0.1s, border-color 0.1s;
+  transition:
+    background 0.1s,
+    border-color 0.1s;
 }
 
 .nudgeAction:hover {
@@ -592,7 +617,7 @@
 }
 
 .nudgeDismiss {
-  font-family: var(--mono, 'JetBrains Mono'), monospace;
+  font-family: var(--mono, "JetBrains Mono"), monospace;
   font-size: 10px;
   color: var(--ink-300, #b5b2a9);
   background: none;
@@ -655,7 +680,7 @@
 }
 
 .alertActionPrimary {
-  font-family: var(--mono, 'JetBrains Mono'), monospace;
+  font-family: var(--mono, "JetBrains Mono"), monospace;
   font-size: 10px;
   font-weight: 600;
   color: #ffffff;
@@ -672,7 +697,7 @@
 }
 
 .alertDismiss {
-  font-family: var(--mono, 'JetBrains Mono'), monospace;
+  font-family: var(--mono, "JetBrains Mono"), monospace;
   font-size: 10px;
   color: var(--ink-300, #b5b2a9);
   background: none;
@@ -711,7 +736,9 @@
 }
 
 @keyframes terminalSpin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ── NL Response block ── */

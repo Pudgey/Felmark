@@ -41,11 +41,19 @@ function NLTable({ data }: { data: { headers: string[]; rows: string[][] } }) {
   return (
     <table className={styles.nlTable}>
       <thead>
-        <tr>{data.headers.map((h, i) => <th key={i}>{h}</th>)}</tr>
+        <tr>
+          {data.headers.map((h, i) => (
+            <th key={i}>{h}</th>
+          ))}
+        </tr>
       </thead>
       <tbody>
         {data.rows.map((row, ri) => (
-          <tr key={ri}>{row.map((cell, ci) => <td key={ci}>{cell}</td>)}</tr>
+          <tr key={ri}>
+            {row.map((cell, ci) => (
+              <td key={ci}>{cell}</td>
+            ))}
+          </tr>
         ))}
       </tbody>
     </table>
@@ -55,7 +63,9 @@ function NLTable({ data }: { data: { headers: string[]; rows: string[][] } }) {
 function NLList({ items }: { items: string[] }) {
   return (
     <ul className={styles.nlList}>
-      {items.map((item, i) => <li key={i}>{item}</li>)}
+      {items.map((item, i) => (
+        <li key={i}>{item}</li>
+      ))}
     </ul>
   );
 }
@@ -77,7 +87,11 @@ function NLCard({ data }: { data: { title: string; body: string; tags?: string[]
       <div className={styles.nlCardBody}>{data.body}</div>
       {data.tags && data.tags.length > 0 && (
         <div className={styles.nlCardTags}>
-          {data.tags.map((tag, i) => <span key={i} className={styles.nlCardTag}>{tag}</span>)}
+          {data.tags.map((tag, i) => (
+            <span key={i} className={styles.nlCardTag}>
+              {tag}
+            </span>
+          ))}
         </div>
       )}
     </div>
@@ -103,10 +117,8 @@ function RichDataRenderer({ data }: { data: NLResponseData }) {
 // ─────────────────────────────────────────────────────────────
 
 export default function Terminal({ onClose }: TerminalProps) {
-  const {
-    blocks, executeCommand, inputHistory, clearBlocks,
-    dismissInsight, executeAction, sendNLQuery,
-  } = useTerminalContext();
+  const { blocks, executeCommand, inputHistory, clearBlocks, dismissInsight, executeAction, sendNLQuery } =
+    useTerminalContext();
 
   const [input, setInput] = useState("");
   const [historyIdx, setHistoryIdx] = useState(-1);
@@ -142,7 +154,7 @@ export default function Terminal({ onClose }: TerminalProps) {
   }, [input]);
 
   // AI ghost suggestion
-  const lastCommand = blocks.length > 0 ? (blocks[blocks.length - 1].command || "") : "";
+  const lastCommand = blocks.length > 0 ? blocks[blocks.length - 1].command || "" : "";
   const aiSuggestion = getAiSuggestion(lastCommand);
 
   // D6: Determine if input is a natural language query (not a command)
@@ -180,83 +192,86 @@ export default function Terminal({ onClose }: TerminalProps) {
     setPaletteOpen(false);
   }, [input, executeCommand, clearBlocks, isNLQuery, sendNLQuery]);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    // Palette navigation
-    if (paletteOpen && paletteCommands.length > 0) {
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-        setPaletteIdx(prev => (prev + 1) % paletteCommands.length);
-        return;
-      }
-      if (e.key === "ArrowUp") {
-        e.preventDefault();
-        setPaletteIdx(prev => (prev - 1 + paletteCommands.length) % paletteCommands.length);
-        return;
-      }
-      if (e.key === "Tab") {
-        e.preventDefault();
-        const cmd = paletteCommands[paletteIdx];
-        if (cmd) {
-          setInput(`/${cmd.name} `);
-          setPaletteOpen(false);
-        }
-        return;
-      }
-      if (e.key === "Escape") {
-        e.preventDefault();
-        setPaletteOpen(false);
-        return;
-      }
-    }
-
-    // Tab for AI suggestion
-    if (e.key === "Tab" && !paletteOpen && aiSuggestion && !input) {
-      e.preventDefault();
-      const match = aiSuggestion.match(/\/\w+/);
-      if (match) {
-        setInput(match[0] + " ");
-      }
-      return;
-    }
-
-    // History navigation
-    if (e.key === "ArrowUp" && !paletteOpen) {
-      e.preventDefault();
-      if (inputHistory.length > 0) {
-        const newIdx = historyIdx === -1 ? inputHistory.length - 1 : Math.max(0, historyIdx - 1);
-        setHistoryIdx(newIdx);
-        setInput(inputHistory[newIdx]);
-      }
-      return;
-    }
-    if (e.key === "ArrowDown" && !paletteOpen) {
-      e.preventDefault();
-      if (historyIdx === -1) return;
-      const newIdx = historyIdx + 1;
-      if (newIdx >= inputHistory.length) {
-        setHistoryIdx(-1);
-        setInput("");
-      } else {
-        setHistoryIdx(newIdx);
-        setInput(inputHistory[newIdx]);
-      }
-      return;
-    }
-
-    if (e.key === "Enter") {
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      // Palette navigation
       if (paletteOpen && paletteCommands.length > 0) {
-        e.preventDefault();
-        const cmd = paletteCommands[paletteIdx];
-        if (cmd) {
-          setInput(`/${cmd.name} `);
+        if (e.key === "ArrowDown") {
+          e.preventDefault();
+          setPaletteIdx((prev) => (prev + 1) % paletteCommands.length);
+          return;
+        }
+        if (e.key === "ArrowUp") {
+          e.preventDefault();
+          setPaletteIdx((prev) => (prev - 1 + paletteCommands.length) % paletteCommands.length);
+          return;
+        }
+        if (e.key === "Tab") {
+          e.preventDefault();
+          const cmd = paletteCommands[paletteIdx];
+          if (cmd) {
+            setInput(`/${cmd.name} `);
+            setPaletteOpen(false);
+          }
+          return;
+        }
+        if (e.key === "Escape") {
+          e.preventDefault();
           setPaletteOpen(false);
+          return;
+        }
+      }
+
+      // Tab for AI suggestion
+      if (e.key === "Tab" && !paletteOpen && aiSuggestion && !input) {
+        e.preventDefault();
+        const match = aiSuggestion.match(/\/\w+/);
+        if (match) {
+          setInput(match[0] + " ");
         }
         return;
       }
-      e.preventDefault();
-      handleSubmit();
-    }
-  }, [paletteOpen, paletteCommands, paletteIdx, aiSuggestion, input, inputHistory, historyIdx, handleSubmit]);
+
+      // History navigation
+      if (e.key === "ArrowUp" && !paletteOpen) {
+        e.preventDefault();
+        if (inputHistory.length > 0) {
+          const newIdx = historyIdx === -1 ? inputHistory.length - 1 : Math.max(0, historyIdx - 1);
+          setHistoryIdx(newIdx);
+          setInput(inputHistory[newIdx]);
+        }
+        return;
+      }
+      if (e.key === "ArrowDown" && !paletteOpen) {
+        e.preventDefault();
+        if (historyIdx === -1) return;
+        const newIdx = historyIdx + 1;
+        if (newIdx >= inputHistory.length) {
+          setHistoryIdx(-1);
+          setInput("");
+        } else {
+          setHistoryIdx(newIdx);
+          setInput(inputHistory[newIdx]);
+        }
+        return;
+      }
+
+      if (e.key === "Enter") {
+        if (paletteOpen && paletteCommands.length > 0) {
+          e.preventDefault();
+          const cmd = paletteCommands[paletteIdx];
+          if (cmd) {
+            setInput(`/${cmd.name} `);
+            setPaletteOpen(false);
+          }
+          return;
+        }
+        e.preventDefault();
+        handleSubmit();
+      }
+    },
+    [paletteOpen, paletteCommands, paletteIdx, aiSuggestion, input, inputHistory, historyIdx, handleSubmit],
+  );
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -300,9 +315,7 @@ export default function Terminal({ onClose }: TerminalProps) {
             <span className={styles.nudgeIcon}>*</span>
             <div className={styles.nudgeBody}>
               <div className={styles.nudgeText}>{block.insight.text}</div>
-              {block.insight.reason && (
-                <div className={styles.nudgeReason}>{block.insight.reason}</div>
-              )}
+              {block.insight.reason && <div className={styles.nudgeReason}>{block.insight.reason}</div>}
               <div className={styles.nudgeActions}>
                 {block.insight.action && (
                   <button
@@ -339,9 +352,7 @@ export default function Terminal({ onClose }: TerminalProps) {
             <span className={styles.alertIcon}>!</span>
             <div className={styles.alertBody}>
               <div className={styles.alertText}>{block.insight.text}</div>
-              {block.insight.reason && (
-                <div className={styles.alertReason}>{block.insight.reason}</div>
-              )}
+              {block.insight.reason && <div className={styles.alertReason}>{block.insight.reason}</div>}
               <div className={styles.alertActions}>
                 {block.insight.action && (
                   <button
@@ -382,7 +393,9 @@ export default function Terminal({ onClose }: TerminalProps) {
 
     // D6: NL Response block
     if (block.type === "nl-response") {
-      const nlBlock = block as TerminalBlock & { nlData?: { text: string; data?: NLResponseData | null; model?: string } };
+      const nlBlock = block as TerminalBlock & {
+        nlData?: { text: string; data?: NLResponseData | null; model?: string };
+      };
       const nlData = nlBlock.nlData;
       return (
         <div key={block.id} className={styles.nlResponse}>
@@ -390,9 +403,7 @@ export default function Terminal({ onClose }: TerminalProps) {
             <span className={styles.nlResponseBadge}>AI</span>
             <span className={styles.nlResponseQuery}>{block.command}</span>
             {nlData?.model && (
-              <span className={styles.nlResponseModel}>
-                {nlData.model.includes("sonnet") ? "sonnet" : "haiku"}
-              </span>
+              <span className={styles.nlResponseModel}>{nlData.model.includes("sonnet") ? "sonnet" : "haiku"}</span>
             )}
           </div>
           <div className={styles.nlResponseBody}>
@@ -431,9 +442,20 @@ export default function Terminal({ onClose }: TerminalProps) {
             }}
           >
             {copiedId === block.id ? (
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path
+                  d="M2 6l3 3 5-6"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             ) : (
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="4" y="1.5" width="6.5" height="8" rx="1" stroke="currentColor" strokeWidth="1"/><path d="M1.5 3.5v6a1 1 0 001 1h5" stroke="currentColor" strokeWidth="1"/></svg>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <rect x="4" y="1.5" width="6.5" height="8" rx="1" stroke="currentColor" strokeWidth="1" />
+                <path d="M1.5 3.5v6a1 1 0 001 1h5" stroke="currentColor" strokeWidth="1" />
+              </svg>
             )}
           </button>
         </div>
@@ -467,14 +489,27 @@ export default function Terminal({ onClose }: TerminalProps) {
           </button>
         </div>
         <div className={styles.headerButtons}>
-          <button className={styles.headerBtn} title="Minimize" onClick={(e) => e.stopPropagation()}>&#8862;</button>
-          <button className={styles.headerBtn} title="Maximize" onClick={(e) => e.stopPropagation()}>&#9633;</button>
-          <button className={styles.headerBtn} title="Close" onClick={(e) => { e.stopPropagation(); onClose?.(); }}>&#10005;</button>
+          <button className={styles.headerBtn} title="Minimize" onClick={(e) => e.stopPropagation()}>
+            &#8862;
+          </button>
+          <button className={styles.headerBtn} title="Maximize" onClick={(e) => e.stopPropagation()}>
+            &#9633;
+          </button>
+          <button
+            className={styles.headerBtn}
+            title="Close"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose?.();
+            }}
+          >
+            &#10005;
+          </button>
         </div>
       </div>
 
       {/* Scrollable output */}
-      <div className={styles.output} ref={outputRef} onClick={(e) => e.stopPropagation()}>
+      <div className={styles.output} ref={outputRef}>
         {/* Welcome block */}
         {blocks.length === 0 && (
           <div className={styles.welcomeBlock}>
@@ -486,7 +521,7 @@ export default function Terminal({ onClose }: TerminalProps) {
               </span>
             </div>
             <div className={styles.welcomeHints}>
-              {WELCOME_HINTS.map(h => (
+              {WELCOME_HINTS.map((h) => (
                 <div key={h.cmd} className={styles.welcomeHint}>
                   <span className={styles.welcomeHintCmd}>{h.cmd}</span>
                   <span>{h.desc}</span>
@@ -497,12 +532,12 @@ export default function Terminal({ onClose }: TerminalProps) {
         )}
 
         {/* All blocks — commands, insights, NL responses */}
-        {blocks.map(block => renderBlock(block))}
+        {blocks.map((block) => renderBlock(block))}
       </div>
 
       {/* Slash command palette */}
       {paletteOpen && paletteCommands.length > 0 && (
-        <div className={styles.palette} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.palette}>
           <div className={styles.paletteList}>
             {paletteCommands.map((cmd, idx) => (
               <button
@@ -523,10 +558,18 @@ export default function Terminal({ onClose }: TerminalProps) {
             ))}
           </div>
           <div className={styles.paletteFooter}>
-            <span><span className={styles.paletteKey}>&#8593;&#8595;</span> navigate</span>
-            <span><span className={styles.paletteKey}>Tab</span> autocomplete</span>
-            <span><span className={styles.paletteKey}>Enter</span> select</span>
-            <span><span className={styles.paletteKey}>Esc</span> close</span>
+            <span>
+              <span className={styles.paletteKey}>&#8593;&#8595;</span> navigate
+            </span>
+            <span>
+              <span className={styles.paletteKey}>Tab</span> autocomplete
+            </span>
+            <span>
+              <span className={styles.paletteKey}>Enter</span> select
+            </span>
+            <span>
+              <span className={styles.paletteKey}>Esc</span> close
+            </span>
           </div>
         </div>
       )}
@@ -543,7 +586,13 @@ export default function Terminal({ onClose }: TerminalProps) {
       )}
 
       {/* Input bar */}
-      <div className={styles.inputBar} onClick={(e) => { e.stopPropagation(); inputRef.current?.focus(); }}>
+      <div
+        className={styles.inputBar}
+        onClick={(e) => {
+          e.stopPropagation();
+          inputRef.current?.focus();
+        }}
+      >
         <span className={styles.inputPrompt}>&#10095;</span>
         <input
           ref={inputRef}
