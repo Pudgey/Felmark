@@ -183,7 +183,7 @@ export function useAutodraw(
   data: CanvasBlockData,
   onUpdate: (data: CanvasBlockData) => void,
   pushUndo: () => void,
-  svgRef: RefObject<SVGSVGElement>,
+  svgRef: RefObject<SVGSVGElement | null>,
   allocateId: () => number,
 ): UseAutodrawReturn {
   const [prompt, setPrompt] = useState("");
