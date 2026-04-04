@@ -18,14 +18,13 @@
 
 | Agent | Task | Started | Status |
 |-------|------|---------|--------|
-| claude-main | Fixed null workstation when switching rail back from Home to workstations | 2026-04-03 | COMPLETE |
 
 ## Recent
 
 | Agent | Task | Completed |
 |-------|------|-----------|
-| codex-main | Removed the fake Personal fallback label from the editor sidebar header so null workstation state no longer presents as a real Personal workstation. | 2026-04-03 08:04 EDT |
-| codex-main | Fixed the remaining fake Personal sidebar state by restoring workstation ownership for active tabs and creation flows. | 2026-04-03 07:55 EDT |
-| codex-main | Fixed the ghost personal tab bug by removing stale personal fallback creation and repairing empty-workstation document targeting in a worktree. | 2026-04-03 07:31 EDT |
-| claude-main | Added quality gate scripts (lint strict, typecheck, check) + CI workflow + cleaned entire 99-problem lint baseline to zero | 2026-04-02 17:55 EDT |
-| codex-main | Defining a redesign skill that forces prototype scan, deep requirement questioning, and a full plan before implementation | 2026-04-02 13:20 EDT |
+| claude-main | Executed 3 super-brain follow-ups: repaired workstation MANIFEST, moved split lookups upstream, extracted hydration + resize + modals from page.tsx (509 → 378 lines). | 2026-04-03 |
+| codex-main | Tightened the root agent instruction docs to emphasize disciplined code over superficial brevity. | 2026-04-03 16:05 EDT |
+| codex-main | Benchmarked the Workstation surface against strong Next.js and React repos to extract only the patterns worth applying. | 2026-04-03 15:46 EDT |
+| claude-main | Fixed null workstation when switching rail back from Home to workstations | 2026-04-03 |
+| codex-main | Confirmed the shared terminal worktree branch was already contained by main, so no extra merge changes were needed. | 2026-04-03 15:04 EDT |

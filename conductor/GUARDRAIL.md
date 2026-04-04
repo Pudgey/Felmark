@@ -1,13 +1,13 @@
 # Guardrail — Feature Inventory & Codebase Health
 
-> **Last synced**: 2026-04-03
+> **Last synced**: 2026-04-03 (evening)
 > **Auto-update rule**: This file MUST be updated in the same commit as any feature add, delete, rename, or move. This is not optional — the AI enforces it as a mandatory post-commit check.
 
 ## Codebase Pulse
 
 | Metric | Value | Threshold | Status |
 |--------|-------|-----------|--------|
-| Total source files | 323 | <200 OK, 200–400 caution, 400+ split | ⚠️ Caution |
+| Total source files | 405 | <200 OK, 200–400 caution, 400+ split | 🔴 Split threshold |
 | Total lines of code | ~19,900 | <50K OK, 50–100K caution, 100K+ enterprise | ✅ OK |
 | Component directories | 22 | <30 OK, 30–50 caution, 50+ split | ✅ OK |
 | Block type folders | 40 | No limit — each lives in its own folder | ✅ OK |

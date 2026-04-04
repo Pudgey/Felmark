@@ -11,278 +11,287 @@ interface ClientHubProps {
   onClose: () => void;
 }
 
-/* ── Demo data ── */
 interface Sub { t: string; d: boolean }
-interface Entry { date: string; desc: string; h: number; v: number }
+interface Comment { user: string; av: string; time: string; text: string; reactions?: string[] }
 interface Task {
-  id: string; title: string; status: "todo" | "active" | "review" | "done"; pri: "urgent" | "high" | "medium" | "low";
-  due: string; overdue?: boolean; subs: Sub[]; logged: number; est: number; timer?: boolean; entries: Entry[];
+  id: string; title: string; section: "todo" | "active" | "done"; pri: "urgent" | "high" | "medium" | "low";
+  due: string; overdue?: boolean; assignee: string; subs: Sub[]; est: string; actual: string;
+  timer?: boolean; pct: number; desc: string; tags: string[]; comments: Comment[];
 }
 
-const TASKS: Task[] = [
-  { id: "t1", title: "Client review & revisions", status: "todo", pri: "urgent", due: "Apr 1", overdue: true, subs: [{ t: "Address color feedback", d: false }, { t: "Revise teal \u2192 warmer", d: false }, { t: "CEO sign-off", d: false }], logged: 1.5, est: 4, entries: [{ date: "Apr 1", desc: "Revision meeting", h: 1.5, v: 180 }] },
-  { id: "t2", title: "Color palette & typography", status: "active", pri: "high", due: "Apr 2", subs: [{ t: "Primary palette", d: true }, { t: "Secondary & accents", d: false }, { t: "Heading fonts", d: true }, { t: "Body & mono", d: false }], logged: 3, est: 6, timer: true, entries: [{ date: "Apr 2", desc: "Palette exploration", h: 2, v: 240 }, { date: "Apr 1", desc: "Research", h: 1, v: 120 }] },
-  { id: "t3", title: "Brand guidelines document", status: "todo", pri: "medium", due: "Apr 5", subs: [{ t: "Cover & TOC", d: false }, { t: "Logo rules", d: false }, { t: "Color specs", d: false }, { t: "Typography", d: false }, { t: "Photography", d: false }, { t: "Social guidelines", d: false }], logged: 0, est: 16, entries: [] },
-  { id: "t4", title: "Typography scale & pairings", status: "todo", pri: "medium", due: "Apr 5", subs: [], logged: 0, est: 4, entries: [] },
-  { id: "t5", title: "Imagery direction", status: "todo", pri: "low", due: "Apr 7", subs: [], logged: 0, est: 6, entries: [] },
-  { id: "t6", title: "Social media templates", status: "done", pri: "low", due: "Apr 10", subs: [], logged: 8, est: 8, entries: [{ date: "Mar 20", desc: "Template design", h: 8, v: 960 }] },
+const INIT_TASKS: Task[] = [
+  { id: "t1", title: "Client review & revisions", section: "todo", pri: "urgent", due: "Apr 1", overdue: true, assignee: "You", subs: [{ t: "Address color feedback", d: false }, { t: "Revise teal \u2192 warmer", d: false }, { t: "CEO sign-off", d: false }], est: "4h", actual: "1h 51m", pct: 0, desc: "Review all brand assets with Sarah. Address feedback on color temperature.", tags: ["revision"], comments: [{ user: "Sarah Chen", av: "SC", time: "2h ago", text: "Can we shift the teal to something warmer? The current palette feels too clinical.", reactions: ["\ud83d\udc4d 1"] }, { user: "You", av: "AX", time: "1h ago", text: "Noted \u2014 I'll explore a warmer direction. Will have options by tomorrow." }] },
+  { id: "t2", title: "Color palette & typography", section: "active", pri: "high", due: "Apr 2", assignee: "You", subs: [{ t: "Primary palette", d: true }, { t: "Secondary & accents", d: false }, { t: "Heading fonts", d: true }, { t: "Body & mono fonts", d: false }], est: "6h", actual: "3h 12m", timer: true, pct: 50, desc: "Define the complete color system and typography scale.", tags: ["design", "active"], comments: [{ user: "You", av: "AX", time: "3h ago", text: "Started with 3 palette directions. Leaning toward option B.", reactions: ["\ud83d\udd25 1"] }] },
+  { id: "t3", title: "Brand guidelines document", section: "todo", pri: "medium", due: "Apr 5", assignee: "You", subs: [{ t: "Cover & TOC", d: false }, { t: "Logo usage rules", d: false }, { t: "Color specifications", d: false }, { t: "Typography guide", d: false }, { t: "Photography direction", d: false }, { t: "Social guidelines", d: false }], est: "16h", actual: "0m", pct: 0, desc: "Master brand guidelines PDF. 30-40 pages covering all visual identity standards.", tags: ["deliverable"], comments: [] },
+  { id: "t4", title: "Typography scale & pairings", section: "todo", pri: "medium", due: "Apr 5", assignee: "You", subs: [], est: "4h", actual: "0m", pct: 0, desc: "", tags: [], comments: [] },
+  { id: "t5", title: "Imagery direction & moodboard", section: "todo", pri: "low", due: "Apr 7", assignee: "You", subs: [], est: "6h", actual: "0m", pct: 0, desc: "", tags: ["research"], comments: [] },
+  { id: "t6", title: "Social media templates", section: "done", pri: "low", due: "Mar 20", assignee: "You", subs: [], est: "8h", actual: "7h 45m", pct: 100, desc: "12 post templates + 4 story templates for Instagram and LinkedIn.", tags: ["deliverable"], comments: [{ user: "Sarah Chen", av: "SC", time: "Mar 22", text: "These look amazing! Team loves them. \u2728", reactions: ["\u2764\ufe0f 2"] }] },
+  { id: "t7", title: "Kickoff meeting notes", section: "done", pri: "low", due: "Mar 15", assignee: "You", subs: [], est: "1h", actual: "1h 10m", pct: 100, desc: "", tags: [], comments: [] },
 ];
 
-const COLUMNS = [
-  { id: "todo" as const, label: "To Do", color: "#4c525e" },
-  { id: "active" as const, label: "Active", color: "#26a69a" },
-  { id: "review" as const, label: "Review", color: "#ff9800" },
-  { id: "done" as const, label: "Done", color: "#787b86" },
+const SECTIONS = [
+  { id: "todo" as const, label: "To Do", icon: "\u25cb" },
+  { id: "active" as const, label: "In Progress", icon: "\u25d0" },
+  { id: "done" as const, label: "Done", icon: "\u25cf" },
 ];
 
-const INVOICES = [
-  { id: "046", amount: 1800, status: "paid" as const, desc: "Phase 1 \u2014 Discovery" },
-  { id: "048", amount: 2400, status: "pending" as const, desc: "Phase 2 \u2014 Design system", viewed: 3 },
-  { id: "050", amount: 4200, status: "draft" as const, desc: "Unbilled hours (14h)" },
+const NAV_ITEMS = [
+  { id: "tasks", icon: "\u25c6", label: "Tasks", count: "7" },
+  { id: "deliverables", icon: "\u2192", label: "Deliverables", count: "3" },
+  { id: "time", icon: "\u25b6", label: "Time & Billing", count: "" },
+  { id: "invoices", icon: "$", label: "Invoices", count: "3" },
+  { id: "files", icon: "\u2601", label: "Files", count: "9" },
+  { id: "scope", icon: "\u25ce", label: "Scope", count: "" },
 ];
 
-const FILES = [
-  { n: "Brand Guidelines v2.pdf", s: "2.4 MB", d: "Apr 2", type: "doc" },
-  { n: "Color-Palette-Final.fig", s: "18 MB", d: "Apr 1", type: "design" },
-  { n: "Contract-Meridian-2026.pdf", s: "340 KB", d: "Mar 15", type: "contract" },
-  { n: "Proposal-Phase2.pdf", s: "520 KB", d: "Mar 10", type: "proposal" },
-];
-
-const priColor = (p: string) => p === "urgent" ? "#ef5350" : p === "high" ? "#ff9800" : p === "medium" ? "#2962ff" : "#4c525e";
-const statusColor = (s: string) => s === "overdue" || s === "urgent" ? "#ef5350" : s === "active" ? "#26a69a" : s === "review" ? "#ff9800" : s === "done" ? "#787b86" : "#4c525e";
+const priColor = (p: string) => p === "urgent" ? "#ef5350" : p === "high" ? "#ff9800" : p === "medium" ? "#2962ff" : "#a5a49f";
+const priLabel = (p: string) => p === "urgent" ? "Urgent" : p === "high" ? "High" : p === "medium" ? "Medium" : "Low";
 
 export default function ClientHub({ clientId, clientName, clientAvatar, clientColor, onClose }: ClientHubProps) {
-  const [view, setView] = useState("board");
-  const [tasks, setTasks] = useState<Task[]>(TASKS);
-  const [selectedTask, setSelectedTask] = useState<string | null>(null);
-  const [dragOver, setDragOver] = useState<string | null>(null);
-  const [dragId, setDragId] = useState<string | null>(null);
+  const [tasks, setTasks] = useState<Task[]>(INIT_TASKS);
+  const [selected, setSelected] = useState<string | null>("t1");
+  const [navItem, setNavItem] = useState("tasks");
+  const [commentText, setCommentText] = useState("");
+  const [viewTab, setViewTab] = useState<"list" | "board" | "timeline">("list");
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
+  const [dwTab, setDwTab] = useState<"detail" | "comments">("detail");
+  const [timer, setTimer] = useState(4934);
   const hubRef = useRef<HTMLDivElement>(null);
 
-  // Auto scroll to top when client changes or hub opens
-  useEffect(() => {
-    hubRef.current?.scrollTo(0, 0);
-    setView("board");
-    setSelectedTask(null);
-  }, [clientId]);
+  useEffect(() => { hubRef.current?.scrollTo(0, 0); setSelected("t1"); setNavItem("tasks"); setCollapsedSections(new Set()); setDwTab("detail"); }, [clientId]);
+  useEffect(() => { const t = setInterval(() => setTimer(s => s + 1), 1000); return () => clearInterval(t); }, []);
 
-  const task = selectedTask ? tasks.find(t => t.id === selectedTask) ?? null : null;
-  const totalLogged = tasks.reduce((s, t) => s + t.logged, 0);
-  const totalEst = tasks.reduce((s, t) => s + t.est, 0);
-  const allEntries = tasks.flatMap(t => t.entries.map(e => ({ ...e, task: t.title }))).sort((a, b) => b.date.localeCompare(a.date));
+  const toggleSection = (id: string) => setCollapsedSections(prev => {
+    const next = new Set(prev);
+    next.has(id) ? next.delete(id) : next.add(id);
+    return next;
+  });
 
-  const handleDrop = (targetCol: Task["status"]) => {
+  const fmt = (s: number) => `${Math.floor(s / 3600)}:${String(Math.floor((s % 3600) / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+  const task = selected ? tasks.find(t => t.id === selected) ?? null : null;
+
+  const handleDrop = (targetSection: Task["section"]) => {
     if (!dragId) return;
-    setTasks(prev => prev.map(t => t.id === dragId ? { ...t, status: targetCol, overdue: targetCol === "todo" ? t.overdue : false } : t));
+    setTasks(prev => prev.map(t => t.id === dragId ? { ...t, section: targetSection, overdue: targetSection !== "todo" ? false : t.overdue, pct: targetSection === "done" ? 100 : t.pct } : t));
     setDragId(null);
-    setDragOver(null);
   };
+  const [dragId, setDragId] = useState<string | null>(null);
 
   return (
     <div className={styles.hub} ref={hubRef}>
-      {/* Client header */}
-      <div className={styles.header}>
-        <div className={styles.headerTop}>
-          <div className={styles.avatar} style={{ background: clientColor }}>{clientAvatar}</div>
-          <div className={styles.headerInfo}>
-            <div className={styles.nameRow}>
-              <span className={styles.name}>{clientName}</span>
-              <span className={styles.badge}>active</span>
+      <div className={styles.layout}>
+        {/* Left nav */}
+        <div className={styles.nav}>
+          <div className={styles.navClient}>
+            <div className={styles.navAv} style={{ background: clientColor }}>{clientAvatar}</div>
+            <div className={styles.navName}>{clientName}</div>
+            <div className={styles.navBadge}>active</div>
+            <div className={styles.navContact}>$120/hr</div>
+          </div>
+          <div className={styles.navItems}>
+            {NAV_ITEMS.map(n => (
+              <div key={n.id} className={`${styles.navItem} ${navItem === n.id ? styles.navItemOn : ""}`} onClick={() => setNavItem(n.id)}>
+                <span className={styles.navItemIcon}>{n.icon}</span>{n.label}
+                {n.count && <span className={styles.navItemCount}>{n.count}</span>}
+              </div>
+            ))}
+          </div>
+          <div className={styles.navStats}>
+            <div className={styles.navStat}><span>Billed</span><span className={`${styles.navStatVal} ${styles.green}`}>$8,400</span></div>
+            <div className={styles.navStat}><span>Outstanding</span><span className={styles.navStatVal} style={{ color: "#ff9800" }}>$2,400</span></div>
+            <div className={styles.navStat}><span>Overdue</span><span className={`${styles.navStatVal} ${styles.red}`}>1 task</span></div>
+            <div className={styles.navStat}><span>Progress</span><span className={styles.navStatVal}>65%</span></div>
+          </div>
+        </div>
+
+        {/* Task list */}
+        <div className={styles.list}>
+          <div className={styles.listHd}>
+            <span className={styles.listTitle}>Brand Guidelines v2</span>
+            <div className={styles.listFilters}>
+              <button className={styles.filterBtn}>{"▾"} Filter</button>
+              <button className={styles.filterBtn}>{"↕"} Sort</button>
             </div>
-            <span className={styles.contact}>sarah@meridian.co {"\u00b7"} $120/hr</span>
-          </div>
-          <div className={styles.headerActions}>
-            <button className={`${styles.headerBtn} ${styles.headerBtnGhost}`}>{"\u25b6"} Timer</button>
-            <button className={`${styles.headerBtn} ${styles.headerBtnGhost}`}>$ Invoice</button>
-            <button className={`${styles.headerBtn} ${styles.headerBtnPrimary}`}>+ New Task</button>
-            <button className={styles.closeBtn} onClick={onClose}>{"\u00d7"}</button>
-          </div>
-        </div>
-        <div className={styles.metrics}>
-          <div className={styles.metric}><span className={`${styles.metricVal} ${styles.metricGreen}`}>$8,400</span><span className={styles.metricLabel}>Total billed</span></div>
-          <div className={styles.metric}><span className={`${styles.metricVal} ${styles.metricAmber}`}>$2,400</span><span className={styles.metricLabel}>Outstanding</span></div>
-          <div className={styles.metric}><span className={styles.metricVal}>{totalLogged}h<span className={styles.metricSub}>/{totalEst}h</span></span><span className={styles.metricLabel}>Hours logged</span></div>
-          <div className={styles.metric}><span className={styles.metricVal}>65%</span><span className={styles.metricLabel}>Progress</span></div>
-          <div className={styles.metric}><span className={`${styles.metricVal} ${styles.metricRed}`}>1</span><span className={styles.metricLabel}>Overdue</span></div>
-        </div>
-        <div className={styles.views}>
-          {([["board", "Board"], ["list", "List"], ["time", "Time & Billing"], ["invoices", "Invoices"], ["files", "Files"]] as const).map(([id, lb]) => (
-            <div key={id} className={`${styles.viewTab} ${view === id ? styles.viewTabOn : ""}`} onClick={() => setView(id)}>{lb}</div>
-          ))}
-        </div>
-      </div>
-
-      {/* Content area */}
-      <div className={styles.contentArea}>
-        {/* ── BOARD ── */}
-        {view === "board" && (
-          <div className={styles.board}>
-            {COLUMNS.map(col => {
-              const colTasks = tasks.filter(t => t.status === col.id);
-              return (
-                <div key={col.id} className={`${styles.col} ${dragOver === col.id ? styles.colDragOver : ""}`}
-                  onDragOver={e => { e.preventDefault(); setDragOver(col.id); }} onDragLeave={() => setDragOver(null)} onDrop={() => handleDrop(col.id)}>
-                  <div className={styles.colHd}>
-                    <div className={styles.colDot} style={{ background: col.color }} />
-                    <span className={styles.colLabel}>{col.label}</span>
-                    <span className={styles.colCount}>{colTasks.length}</span>
-                  </div>
-                  <div className={styles.colCards}>
-                    {colTasks.map(t => {
-                      const sd = t.subs.filter(s => s.d).length;
-                      const st = t.subs.length;
-                      const pct = st > 0 ? Math.round((sd / st) * 100) : t.status === "done" ? 100 : 0;
-                      return (
-                        <div key={t.id} draggable className={`${styles.card} ${t.overdue ? styles.cardOv : ""} ${selectedTask === t.id ? styles.cardSelected : ""} ${dragId === t.id ? styles.cardDragging : ""}`}
-                          onDragStart={() => setDragId(t.id)}
-                          onDragEnd={() => { setDragId(null); setDragOver(null); }}
-                          onClick={() => setSelectedTask(selectedTask === t.id ? null : t.id)}>
-                          <div className={styles.cardPri} style={{ background: priColor(t.pri) }} />
-                          <div className={styles.cardTitle}>{t.title}</div>
-                          <div className={styles.cardMeta}>
-                            <span className={t.overdue ? styles.cardDueOv : ""}>{t.due}</span>
-                            {t.timer && <><span className={styles.cardMetaDot} /><span className={styles.cardTimer}>{"\u25cf"} 1:22</span></>}
-                            {st > 0 && <><span className={styles.cardMetaDot} /><span>{sd}/{st}</span></>}
-                            <span className={styles.cardMetaDot} /><span>{t.logged}h/{t.est}h</span>
-                          </div>
-                          {(st > 0 || t.status === "done") && (
-                            <div className={styles.cardProgress}><div className={styles.cardBar}><div className={styles.cardBarFill} style={{ width: `${pct}%`, background: t.overdue ? "#ef5350" : "#26a69a" }} /></div><span className={styles.cardPct}>{pct}%</span></div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <div className={styles.colAdd}><button className={styles.colAddBtn}>+ Add task</button></div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* ── LIST ── */}
-        {view === "list" && (
-          <div className={styles.listView}>
-            <div className={styles.listHd}><span style={{ width: 3 }} /><span style={{ width: 16 }} /><span style={{ flex: 1 }}>Task</span><span style={{ width: 60 }}>Status</span><span style={{ width: 44, textAlign: "right" }}>Due</span><span style={{ width: 50, textAlign: "right" }}>Hours</span><span style={{ width: 48 }}>Progress</span></div>
-            {TASKS.map(t => {
-              const sd = t.subs.filter(s => s.d).length; const st = t.subs.length;
-              const pct = st > 0 ? Math.round((sd / st) * 100) : t.status === "done" ? 100 : 0;
-              const sc = t.overdue ? "overdue" : t.status;
-              return (
-                <div key={t.id} className={`${styles.listRow} ${t.overdue ? styles.listRowOv : ""}`} onClick={() => setSelectedTask(selectedTask === t.id ? null : t.id)}>
-                  <div className={styles.listPri} style={{ background: priColor(t.pri) }} />
-                  <div className={`${styles.listCb} ${t.status === "done" ? styles.listCbDone : ""}`}>{t.status === "done" ? "\u2713" : ""}</div>
-                  <span className={`${styles.listTitle} ${t.overdue ? styles.listTitleOv : ""}`}>{t.title}{t.timer && <span className={styles.cardTimer} style={{ marginLeft: 6 }}>{"\u25cf"} 1:22</span>}</span>
-                  <span className={styles.listStatus} style={{ background: statusColor(sc) + "14", color: statusColor(sc) }}>{sc}</span>
-                  <span className={`${styles.listDue} ${t.overdue ? styles.listDueOv : ""}`}>{t.due}</span>
-                  <span className={styles.listHours}>{t.logged}/{t.est}h</span>
-                  <div className={styles.listBar}><div className={styles.listBarFill} style={{ width: `${pct}%`, background: t.overdue ? "#ef5350" : "#26a69a" }} /></div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* ── TIME ── */}
-        {view === "time" && (
-          <div className={styles.timeView}>
-            <div className={styles.timeSummary}>
-              <div className={styles.timeSumItem}><span className={styles.timeSumVal}>{totalLogged}h</span><span className={styles.timeSumLabel}>Total logged</span></div>
-              <div className={styles.timeSumItem}><span className={styles.timeSumVal}>${Math.round(totalLogged * 120).toLocaleString()}</span><span className={styles.timeSumLabel}>Billed value</span></div>
-              <div className={styles.timeSumItem}><span className={styles.timeSumVal}>$120</span><span className={styles.timeSumLabel}>Eff. rate</span></div>
-              <div className={styles.timeSumItem}><span className={`${styles.timeSumVal} ${styles.metricAmber}`}>14h</span><span className={styles.timeSumLabel}>Unbilled</span></div>
-            </div>
-            <div className={styles.timeTable}>
-              <div className={styles.timeTableHd}><span style={{ width: 50 }}>Date</span><span style={{ flex: 1 }}>Task</span><span style={{ width: 40, textAlign: "right" }}>Hours</span><span style={{ width: 40, textAlign: "right" }}>Rate</span><span style={{ width: 50, textAlign: "right" }}>Value</span></div>
-              {allEntries.map((e, i) => (
-                <div key={i} className={styles.timeTableRow}><span className={styles.timeDate}>{e.date}</span><span className={styles.timeTask}>{e.task}</span><span className={styles.timeHours}>{e.h}h</span><span className={styles.timeRate}>$120</span><span className={styles.timeValue}>${e.v}</span></div>
+            <button className={`${styles.listBtn} ${styles.listBtnPrimary}`}>+ Add task</button>
+            <div className={styles.viewTabs}>
+              {(["list", "board", "timeline"] as const).map(v => (
+                <button key={v} className={`${styles.viewTab} ${viewTab === v ? styles.viewTabOn : ""}`} onClick={() => setViewTab(v)}>
+                  {v === "list" ? "List" : v === "board" ? "Board" : "Timeline"}
+                </button>
               ))}
             </div>
-            <div className={styles.timeFooter}><button className={`${styles.headerBtn} ${styles.headerBtnPrimary}`}>{"\u2192"} Generate Invoice from Time</button></div>
           </div>
-        )}
-
-        {/* ── INVOICES ── */}
-        {view === "invoices" && (
-          <div className={styles.invView}>
-            {INVOICES.map(inv => (
-              <div key={inv.id} className={styles.invCard}>
-                <span className={styles.invNum}>#{inv.id}</span>
-                <span className={styles.invDesc}>{inv.desc}</span>
-                <span className={styles.invAmount} style={{ color: inv.status === "paid" ? "#26a69a" : inv.status === "draft" ? "#a5a49f" : "#1a1918" }}>${inv.amount.toLocaleString()}</span>
-                <span className={styles.invStatus} style={{ background: inv.status === "paid" ? "rgba(38,166,154,.08)" : inv.status === "pending" ? "rgba(255,152,0,.08)" : "rgba(165,164,159,.08)", color: inv.status === "paid" ? "#26a69a" : inv.status === "pending" ? "#ff9800" : "#a5a49f" }}>{inv.status}{"viewed" in inv ? ` \u00b7 ${inv.viewed}\u00d7` : ""}</span>
-                {inv.status === "pending" && <span className={styles.invAction} style={{ borderColor: "rgba(255,152,0,.15)", color: "#ff9800", background: "rgba(255,152,0,.04)" }}>remind</span>}
-                {inv.status === "draft" && <span className={styles.invAction} style={{ borderColor: "#e2e1dd", color: "#5c5b57", background: "#fff" }}>finalize</span>}
-              </div>
-            ))}
-            <div className={styles.invFooter}><span>3 invoices {"\u00b7"} $8,400 total</span><span style={{ color: "#ff9800" }}>$2,400 outstanding</span></div>
+          <div className={styles.listScroll}>
+            {SECTIONS.map(sec => {
+              const secTasks = tasks.filter(t => t.section === sec.id);
+              return (
+                <div key={sec.id} className={styles.section} onDragOver={e => e.preventDefault()} onDrop={() => handleDrop(sec.id)}>
+                  <div className={styles.sectionHd} onClick={() => toggleSection(sec.id)}>
+                    <span className={`${styles.sectionArrow} ${!collapsedSections.has(sec.id) ? styles.sectionArrowOpen : ""}`}>{"▸"}</span>
+                    <span className={styles.sectionIcon}>{sec.icon}</span>
+                    <span className={styles.sectionLabel}>{sec.label}</span>
+                    <span className={styles.sectionCount}>{secTasks.length}</span>
+                  </div>
+                  {!collapsedSections.has(sec.id) && secTasks.map(t => {
+                    const subsDone = t.subs.filter(s => s.d).length;
+                    return (
+                      <div key={t.id} draggable className={`${styles.taskRow} ${t.overdue ? styles.taskRowOv : ""} ${selected === t.id ? styles.taskRowSelected : ""} ${dragId === t.id ? styles.taskRowDragging : ""}`}
+                        onClick={() => { setSelected(selected === t.id ? null : t.id); setDwTab("detail"); }} onDragStart={() => setDragId(t.id)} onDragEnd={() => setDragId(null)}>
+                        <div className={styles.taskPri} style={{ background: priColor(t.pri) }} />
+                        <div className={`${styles.taskCheck} ${t.section === "done" ? styles.taskCheckDone : ""}`} onClick={e => e.stopPropagation()}>{t.section === "done" ? "\u2713" : ""}</div>
+                        <div className={styles.taskInfo}>
+                          <div className={styles.taskTitle}>
+                            <span className={styles.taskTitleText}>{t.title}</span>
+                            {t.subs.length > 0 && <span className={styles.taskSubs}>{"\u2610"} {subsDone}/{t.subs.length}</span>}
+                            {t.comments.length > 0 && <span className={styles.taskComments}>{"\ud83d\udcac"} {t.comments.length}</span>}
+                          </div>
+                        </div>
+                        {t.timer && <span className={styles.taskTimer}>{"\u25cf"} 1:22</span>}
+                        <span className={`${styles.taskDue} ${t.overdue ? styles.taskDueOv : ""}`}>{t.due}</span>
+                        <div className={styles.taskAvatar}>AX</div>
+                      </div>
+                    );
+                  })}
+                  {!collapsedSections.has(sec.id) && <div className={styles.addTask}>+ Add task...</div>}
+                </div>
+              );
+            })}
           </div>
-        )}
+        </div>
 
-        {/* ── FILES ── */}
-        {view === "files" && (
-          <div className={styles.filesView}>
-            {FILES.map((f, i) => (
-              <div key={i} className={styles.fileRow}>
-                <div className={styles.fileIcon} style={{ background: f.type === "design" ? "rgba(41,98,255,.08)" : f.type === "contract" ? "rgba(255,152,0,.08)" : "#f0f0ee", color: f.type === "design" ? "#2962ff" : f.type === "contract" ? "#ff9800" : "#a5a49f" }}>{f.type === "design" ? "FIG" : f.type === "contract" || f.type === "proposal" ? "PDF" : "DOC"}</div>
-                <div className={styles.fileInfo}><span className={styles.fileName}>{f.n}</span><span className={styles.fileMeta}>{f.s} {"\u00b7"} {f.d}</span></div>
-              </div>
-            ))}
-          </div>
-        )}
+        {/* Dim overlay */}
+        <div className={`${styles.drawerDim} ${selected ? styles.drawerDimShow : ""}`} onClick={() => setSelected(null)} />
 
-        {/* ── DETAIL PANEL ── */}
-        {task && (
-          <div className={styles.detail}>
-            <div className={styles.detailHd}>
-              <div className={styles.detailPri} style={{ background: priColor(task.pri) }} />
-              <span className={styles.detailTitle}>{task.title}</span>
-              <div className={styles.detailClose} onClick={() => setSelectedTask(null)}>{"\u00d7"}</div>
-            </div>
-            <div className={styles.detailBody}>
-              {/* Fields */}
-              <div className={styles.dSec}>
-                <div className={styles.dFields}>
-                  <div><span className={styles.dFieldLabel}>Status</span><div className={styles.dPill} style={{ background: statusColor(task.overdue ? "overdue" : task.status) + "14", color: statusColor(task.overdue ? "overdue" : task.status) }}>{task.overdue ? "overdue" : task.status}</div></div>
-                  <div><span className={styles.dFieldLabel}>Priority</span><div className={styles.dPill} style={{ background: priColor(task.pri) + "14", color: priColor(task.pri) }}>{task.pri}</div></div>
-                  <div><span className={styles.dFieldLabel}>Due</span><span className={styles.dFieldVal} style={{ color: task.overdue ? "#ef5350" : undefined }}>{task.due}{task.overdue ? " \u2014 overdue" : ""}</span></div>
-                  <div><span className={styles.dFieldLabel}>Time</span><span className={styles.dFieldVal}>{task.logged}h / {task.est}h</span></div>
+        {/* Slide-out drawer */}
+        <div className={`${styles.drawerWrap} ${selected ? styles.drawerWrapOpen : ""}`}>
+          {task && (
+            <div className={styles.drawer}>
+              <div className={styles.dwHd}>
+                <div className={`${styles.dwCheck} ${task.section === "done" ? styles.dwCheckDone : ""}`}>{task.section === "done" ? "✓" : ""}</div>
+                <div className={styles.dwHdInfo}>
+                  <div className={styles.dwId}>FLM-{task.id.replace("t", "")}</div>
+                  <div className={styles.dwTitle}>{task.title}</div>
+                </div>
+                <div className={styles.dwActions}>
+                  <button className={styles.dwAction}>{"📎"}</button>
+                  <button className={styles.dwAction}>{"⤢"}</button>
+                  <button className={styles.dwAction}>{"⋯"}</button>
+                  <button className={styles.dwAction} onClick={() => setSelected(null)}>{"✕"}</button>
                 </div>
               </div>
-              {/* Timer */}
-              {task.timer && <div className={styles.dSec}><div className={styles.dTimer}><span className={styles.dTimerVal}>{"\u25cf"} 1:22:14</span><button className={styles.dTimerBtn}>{"\u25a0"} Stop</button></div></div>}
-              {/* Subtasks */}
-              {task.subs.length > 0 && (
-                <div className={styles.dSec}>
-                  <span className={styles.dSecLabel}>Subtasks</span>
-                  <div className={styles.dProgress}><div className={styles.dPbar}><div className={styles.dPbarFill} style={{ width: `${(task.subs.filter(s => s.d).length / task.subs.length) * 100}%`, background: "#26a69a" }} /></div><span className={styles.dPpct}>{task.subs.filter(s => s.d).length}/{task.subs.length}</span></div>
-                  {task.subs.map((s, i) => (
-                    <div key={i} className={`${styles.dSub} ${s.d ? styles.dSubDone : ""}`}>
-                      <div className={`${styles.dSubCb} ${s.d ? styles.dSubCbChecked : ""}`}>{s.d ? "\u2713" : ""}</div>
-                      <span className={styles.dSubText}>{s.t}</span>
+
+              {task.timer && (
+                <div className={styles.dwTimer}>
+                  <div className={styles.dwTimerDot} />
+                  <span className={styles.dwTimerVal}>{fmt(timer)}</span>
+                  <span className={styles.dwTimerMoney}>${Math.floor((timer / 3600) * 120)}/hr</span>
+                  <button className={styles.dwTimerBtn}>{"■"} Stop</button>
+                </div>
+              )}
+
+              <div className={styles.dwTabs}>
+                <div className={`${styles.dwTab} ${dwTab === "detail" ? styles.dwTabOn : ""}`} onClick={() => setDwTab("detail")}>Detail</div>
+                <div className={`${styles.dwTab} ${dwTab === "comments" ? styles.dwTabOn : ""}`} onClick={() => setDwTab("comments")}>
+                  Comments{task.comments.length > 0 && <span className={styles.dwTabCt}>{task.comments.length}</span>}
+                </div>
+              </div>
+
+              <div className={styles.dwScroll}>
+                {dwTab === "detail" && <>
+                  <div className={styles.dwProps}>
+                    {[
+                      { icon: "◐", label: "Status", val: <span className={styles.dwPill} style={{ background: task.overdue ? "rgba(239,83,80,.08)" : task.section === "active" ? "rgba(255,152,0,.08)" : task.section === "done" ? "rgba(38,166,154,.08)" : "rgba(76,82,94,.06)", color: task.overdue ? "#ef5350" : task.section === "active" ? "#ff9800" : task.section === "done" ? "#26a69a" : "#7c7b77" }}>{task.overdue ? "Overdue" : task.section === "done" ? "Done" : task.section === "active" ? "In Progress" : "To Do"}</span>, key: "S" },
+                      { icon: "◎", label: "Priority", val: <span className={styles.dwPill} style={{ background: priColor(task.pri) + "14", color: priColor(task.pri) }}>{priLabel(task.pri)}</span>, key: "P" },
+                      { icon: "◉", label: "Assignee", val: <><div className={styles.dwAv} style={{ background: "rgba(38,166,154,.06)", color: "#26a69a" }}>AX</div>You</>, key: "A" },
+                      { icon: "◻", label: "Due", val: <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 12, color: task.overdue ? "#ef5350" : undefined }}>{task.due}{task.overdue ? " — overdue" : ""}</span>, key: "D" },
+                      { icon: "⏱", label: "Estimated", val: <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: "#a5a49f" }}>{task.est}</span> },
+                      { icon: "⏱", label: "Tracked", val: <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: "#26a69a" }}>{task.timer ? fmt(timer) : task.actual}</span> },
+                      ...(task.tags.length > 0 ? [{ icon: "#", label: "Labels", val: <div style={{ display: "flex", gap: 3 }}>{task.tags.map(tg => <span key={tg} className={styles.dwTag}>{tg}</span>)}</div>, key: "L" }] : []),
+                    ].map((p, i) => (
+                      <div key={i} className={styles.dwProp}>
+                        <span className={styles.dwPropIcon}>{p.icon}</span>
+                        <span className={styles.dwPropLabel}>{p.label}</span>
+                        <div className={styles.dwPropVal}>{p.val}</div>
+                        {p.key && <span className={styles.dwPropKey}>{p.key}</span>}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className={styles.dwDesc}>
+                    <div className={styles.dwSecLabel}>Description</div>
+                    {task.desc ? <div className={styles.dwDescText}>{task.desc}</div> : <div className={styles.dwDescEmpty}>What is this task about?</div>}
+                  </div>
+
+                  <div className={styles.dwSubs}>
+                    <div className={styles.dwSecLabel}>Subtasks</div>
+                    {task.subs.length > 0 && (
+                      <div className={styles.dwSubsBar}>
+                        <div className={styles.dwPbar}><div className={styles.dwPbarFill} style={{ width: `${(task.subs.filter(s => s.d).length / task.subs.length) * 100}%` }} /></div>
+                        <span className={styles.dwPbarCt}>{task.subs.filter(s => s.d).length}/{task.subs.length}</span>
+                      </div>
+                    )}
+                    {task.subs.map((s, i) => (
+                      <div key={i} className={`${styles.dwSub} ${s.d ? styles.dwSubDone : ""}`}>
+                        <div className={`${styles.dwSubCb} ${s.d ? styles.dwSubCbDone : ""}`}>{s.d ? "✓" : ""}</div>
+                        <span className={styles.dwSubText}>{s.t}</span>
+                      </div>
+                    ))}
+                    <div className={styles.dwSubAdd}>+ Add subtask</div>
+                  </div>
+                </>}
+
+                {dwTab === "comments" && (
+                  <div className={styles.dwComments}>
+                    <div className={styles.dwSecLabel}>Thread · {task.comments.length}</div>
+                    {task.comments.map((c, i) => (
+                      <div key={i} className={styles.dwComment}>
+                        <div className={styles.dwCommentAv} style={{ background: c.user === "You" ? "rgba(38,166,154,.06)" : "rgba(124,133,148,.1)", color: c.user === "You" ? "#26a69a" : "#7c8594" }}>{c.av}</div>
+                        <div className={styles.dwCommentBody}>
+                          <div className={styles.dwCommentMeta}>
+                            <span className={styles.dwCommentUser}>{c.user}</span>
+                            <span className={styles.dwCommentRole} style={{ background: c.user === "You" ? "rgba(38,166,154,.04)" : "rgba(124,133,148,.06)", color: c.user === "You" ? "#26a69a" : "#7c8594" }}>{c.user === "You" ? "you" : "client"}</span>
+                            <span className={styles.dwCommentTime}>{c.time}</span>
+                          </div>
+                          <div className={styles.dwCommentText}>{c.text}</div>
+                          {c.reactions && c.reactions.length > 0 && (
+                            <div className={styles.dwCommentReactions}>
+                              {c.reactions.map((r, ri) => <span key={ri} className={styles.dwRx}>{r}</span>)}
+                              <span className={styles.dwRxAdd}>+</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                    {task.comments.length === 0 && <div className={styles.dwDescEmpty}>No comments yet</div>}
+                    <div className={styles.dwInput}>
+                      <div className={styles.dwInputAv}>AX</div>
+                      <div className={styles.dwInputBox}>
+                        <textarea placeholder="Add a comment..." rows={1} value={commentText} onChange={e => setCommentText(e.target.value)} />
+                        <div className={styles.dwInputFt}>
+                          <button className={styles.dwInputTool}>{"☺"}</button>
+                          <button className={styles.dwInputTool}>{"@"}</button>
+                          <button className={styles.dwInputTool}>{"📎"}</button>
+                          <button className={styles.dwInputSend}>Send</button>
+                        </div>
+                      </div>
                     </div>
-                  ))}
-                </div>
-              )}
-              {/* Time entries */}
-              {task.entries.length > 0 && (
-                <div className={styles.dSec}>
-                  <span className={styles.dSecLabel}>Time Entries</span>
-                  {task.entries.map((e, i) => (
-                    <div key={i} className={styles.dEntry}><span className={styles.dEntryDate}>{e.date}</span><span className={styles.dEntryDesc}>{e.desc}</span><span className={styles.dEntryH}>{e.h}h</span><span className={styles.dEntryV}>${e.v}</span></div>
-                  ))}
-                </div>
-              )}
-              {/* Actions */}
-              <div className={styles.dSec}>
-                <div className={styles.dActions}>
-                  {!task.timer && <button className={`${styles.headerBtn} ${styles.headerBtnGhost}`}>{"\u25b6"} Start Timer</button>}
-                  <button className={`${styles.headerBtn} ${styles.headerBtnGhost}`}>Open in Editor {"\u2192"}</button>
-                  {task.overdue && <button className={`${styles.headerBtn} ${styles.headerBtnPrimary}`} style={{ background: "#ef5350", borderColor: "#ef5350" }}>Reschedule</button>}
+                  </div>
+                )}
+              </div>
+
+              <div className={styles.dwFooter}>
+                <button className={`${styles.dwFooterBtn} ${styles.dwFooterPrimary}`}>{"✓"} Complete</button>
+                <button className={`${styles.dwFooterBtn} ${styles.dwFooterGhost}`}>{"→"} Editor</button>
+                <button className={`${styles.dwFooterBtn} ${styles.dwFooterGhost}`}>{"$"} Invoice</button>
+                <div className={styles.dwFooterSpacer} />
+                <div className={styles.dwFooterCollab}>
+                  <div className={styles.dwFooterCav} style={{ background: "rgba(38,166,154,.06)", color: "#26a69a", zIndex: 2 }}>AX</div>
+                  <div className={styles.dwFooterCav} style={{ background: "rgba(124,133,148,.1)", color: "#7c8594", zIndex: 1 }}>SC</div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

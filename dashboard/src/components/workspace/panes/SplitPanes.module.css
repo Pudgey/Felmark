@@ -623,9 +623,21 @@
 }
 
 /* Pane body */
-.paneBody { flex: 1; overflow-y: auto; }
+.paneBody { flex: 1; overflow-y: auto; position: relative; }
 .paneBody::-webkit-scrollbar { width: 3px; }
 .paneBody::-webkit-scrollbar-thumb { background: var(--warm-200, #e0dfdb); border-radius: 2px; }
+
+.paneBg {
+  position: absolute;
+  bottom: 0;
+  left: -1px;
+  right: -1px;
+  height: 140px;
+  pointer-events: none;
+  z-index: 0;
+  transition: opacity .4s ease;
+  overflow: hidden;
+}
 
 /* ── Split handle — Invisible + Edge Glow ── */
 .splitHandle {

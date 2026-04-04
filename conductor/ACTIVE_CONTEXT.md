@@ -6,10 +6,10 @@ Felmark is actively building the browser-native dashboard experience in `dashboa
 
 ## Current Focus
 
-- Extract dashboard shell state and persistence from `dashboard/src/app/page.tsx`
+- Browser-verify shared terminal parity between workspace surface and editor split pane on `main`
 - Split `dashboard/src/components/workspace/canvas/Canvas.tsx` into storage, state, and render pieces
 - Harden graph block typing in `GraphDataEditor.tsx` / `GraphBlock.tsx`
-- FORGE_MAP.md rebuild (stale — reports 174 files vs ~325 actual)
+- FORGE_MAP.md rebuild (stale — actual file count is 405, map shows 335)
 - Settings page rebuild (component deleted, clean slate)
 - TerminalWelcome split pane fix — verify in browser
 
@@ -32,6 +32,9 @@ Felmark is actively building the browser-native dashboard experience in `dashboa
 
 ## Recent Completed Work
 
+- **Super-brain follow-ups** — repaired `workstation/MANIFEST.md` (removed stale `dashboard/` entry), moved `splitProjectName`/`splitClientName` lookups upstream as memoized values, extracted hydration effect to `useHydrateAppState`, moved resize handler into `useShellLayout`, extracted 3 modal mounts to `ShellModals.tsx`. `page.tsx`: 509 → 378 lines.
+- **Shared terminal session** — workspace split panes now mount the real terminal, share command/NL history with the editor split pane, keep ambient suggestions workstation-only, and the worktree branch `codex-shared-terminal` is already contained by `main`
+- **Split-pane architecture spec** — tmux-derived conductor design doc added at `conductor/FELMARK_SPLIT_PANE_ARCHITECTURE.md`
 - **Sidebar workstation-context repair** — active documents now restore their owning workstation context instead of rendering under a fake fallback Personal header
 - **Personal tab ghost bug fix** — worktree patch removes stale personal fallback creation, lets empty workstations be selected, and filters orphan tabs on hydration
 - **Quality gates** — `npm run lint` (strict), `npm run typecheck`, `npm run check`, CI workflow
@@ -39,9 +42,10 @@ Felmark is actively building the browser-native dashboard experience in `dashboa
 - **Read Before You Write rule** — added to CLAUDE.md and AGENTS.md
 - **Editor core refactor** — 1,779-line monolith → modular core/
 - **Home surface decision** — DashboardHome moved from workstation/ to components/home/
-- **Super-brain audit** — benchmarked against 5 open source exemplars
+- **Workstation super-brain refresh** — benchmarked the live Workstation shell against Dub, Formbricks, Novel, Vercel Platforms, and Papermark; current guidance is to thin `dashboard/src/app/page.tsx`, reduce prop threading, and fix manifest drift without forcing a rewrite
 
 ## Pending Manual Actions
 
+- Browser-verify shared terminal behavior on `main`
 - Run `/forge` to rebuild FORGE_MAP.md
 - Rebuild Settings page as a view in `views/` + component in `workstation/settings/`

@@ -1,31 +1,34 @@
 # Session Handoff — 2026-04-03
 
 ## What happened
-Debugged and fixed the workstation editor ghost-tab bug in a dedicated worktree, merged it onto `main`, then shipped a follow-up workstation-context repair for the remaining fake Personal sidebar state.
+Executed the three "Fix now" items from the 2026-04-03 workstation super-brain refresh:
+1. Repaired `workstation/MANIFEST.md` — removed stale `dashboard/` entry and two root-file rows for files that don't exist.
+2. Moved `splitProjectName` / `splitClientName` lookups from `views/editor.tsx` IIFEs upstream to `page.tsx` as `useMemo` values.
+3. Extracted shell composition from `page.tsx` (509 → 378 lines): hydration to `useHydrateAppState`, resize to `useShellLayout`, 3 floating modals to `ShellModals`.
+
+Note: `CreationAnimation` and `WorkstationOnboarding` are content-area replacements (not floating overlays) and were NOT moved to `ShellModals` — they remain in `page.tsx` inside the layout ternary.
 
 ### Completed
-1. **Ghost personal tab root cause isolated** — stale fallback creation in forge services plus unreconciled persisted tabs on hydration.
-2. **Fallback repair** — tab/project/workstation services now resolve last-tab fallback only against real current projects, not a stale personal project.
-3. **Empty workstation repair** — selecting a workstation with `0` projects now enters that workstation cleanly, and `New document` targets the selected workstation instead of defaulting elsewhere.
-4. **Hydration cleanup** — saved tabs are now reconciled against the live workstation/project tree, which removes orphaned ghost tabs on load.
-5. **Workstation-context repair** — active documents now restore their owning workstation context in workstation mode, and create/duplicate flows set that owner immediately.
-6. **Verification** — targeted lint and `tsc --noEmit --incremental false` passed; production webpack builds passed in the worktree.
+1. `workstation/MANIFEST.md` — stale rows removed.
+2. `views/editor.tsx` — IIFEs gone; `splitProjectName` / `splitClientName` now plain props.
+3. `forge/hooks/useHydrateAppState.ts` — new hook, full hydration logic extracted.
+4. `forge/hooks/useShellLayout.ts` — returns `onResizeHandleMouseDown`.
+5. `app/ShellModals.tsx` — new component: Launchpad, SaveTemplateModal, TemplatePicker.
+6. `forge/hooks/MANIFEST.md` — updated with new exports.
 
 ## In-progress work
 None.
 
 ## Remaining work
-- [ ] Extract dashboard shell state and persistence from `page.tsx`
+- [ ] Browser-verify shared terminal behavior on `main`
 - [ ] Split `Canvas.tsx` into storage, derived state, and render pieces
 - [ ] Replace `any`-based graph handling in `GraphDataEditor.tsx` / `GraphBlock.tsx`
-- [ ] Rebuild `FORGE_MAP.md` (stale — reports 174 files vs ~325 actual)
+- [ ] Rebuild `FORGE_MAP.md` (stale — actual 405 files, map shows 335)
 - [ ] Rebuild Settings page
 - [ ] Verify TerminalWelcome split pane in browser
-- [ ] Start splitting `types.ts` by block family once graph work lands
+- [ ] Pre-existing lint errors in `ClientHub.tsx` and `SplitPanes.tsx` (from commit `b8d1e4d`) — not touched, still open
 
 ## Gotchas
-- The ghost-tab fix was committed in worktree branch `codex-personal-tab-bug` as `f86ae89` and merged onto `main`.
-- The workstation-context follow-up was committed as `7c640a7` and merged onto `main`.
-- Worktree lint/typecheck ran with a symlinked `dashboard/node_modules`.
-- Turbopack build verification still panics on symlinked `node_modules` in a worktree. In the worktree, `./node_modules/.bin/next build --webpack` was the reliable production-build check.
-- On `main`, targeted lint and typecheck passed after merge. A direct `npm run build` retry hit an existing Next build lock (`dashboard/.next/lock`) because another build process is already running or did not exit cleanly.
+- `page.tsx` is 378 lines — under the 500 yellow threshold but still broad. Next opportunity: extract shell state into a `useShellState` hook to get it under 300.
+- `npm run typecheck` can fail in a fresh worktree before a build because `tsconfig.json` includes `.next/types/**/*.ts`; run `./node_modules/.bin/next build --webpack` first, then `./node_modules/.bin/tsc --noEmit --incremental false`.
+- Worktree verification still relies on the symlinked `dashboard/node_modules` setup.
