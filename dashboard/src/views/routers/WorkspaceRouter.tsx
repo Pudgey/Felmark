@@ -2,7 +2,8 @@
 
 import { useState, useCallback, createContext, useContext } from "react";
 import WorkspaceSidebar from "@/components/workspace/sidebar/WorkspaceSidebar";
-import SplitPanes, { HybridHeader } from "@/components/workspace/panes/SplitPanes";
+import WorkspaceTabs from "@/components/workspace/core/tabs/WorkspaceTabs";
+import SplitPanes from "@/components/workspace/panes/SplitPanes";
 import Toasts, { DEMO_TOASTS, type Toast } from "@/components/workspace/toasts/Toasts";
 import ClientHub from "@/components/workspace/hub/ClientHub";
 import NewTab from "@/components/workspace/newtab/NewTab";
@@ -165,10 +166,10 @@ export default function WorkspaceRouter() {
     setActiveView("newtab");
   }, []);
 
+  const [wsCtx, setWsCtx] = useState<{ top: number; left: number } | null>(null);
+
   const dismissGlobalCtx = useCallback(() => setWsCtx(null), []);
   const nav: WorkspaceNav = { activeView, hubTab, hubTabs, activeHubId, toolTabs, activeToolId, activeTool, openHub, closeHubTab, switchHub, openTool, closeToolTab, switchTool, goToWorkspace, openNewTab, dismissGlobalCtx };
-
-  const [wsCtx, setWsCtx] = useState<{ top: number; left: number } | null>(null);
 
   // Capture phase: dismiss ALL menus before any child handler runs
   const handleContextMenuCapture = () => {
@@ -192,7 +193,7 @@ export default function WorkspaceRouter() {
         onMouseDown={() => setWsCtx(null)}
       >
         {/* Header — always visible */}
-        <HybridHeader activeTab={activeView === "hub" ? "hub" : "workspace"} topSurface="money" bottomSurface="work" />
+        <WorkspaceTabs topSurface="money" bottomSurface="work" />
 
         {/* Workspace-level context menu */}
         {wsCtx && (
