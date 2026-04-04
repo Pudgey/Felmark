@@ -72,6 +72,18 @@ export default function Pane({
     return () => window.removeEventListener("felmark:dismiss-ctx", handleDismiss);
   }, []);
 
+  // Close menus on click outside
+  useEffect(() => {
+    if (!surfaceMenuOpen && !splitMenuOpen && !contextMenuOpen) return;
+    const handleClickOutside = (e: globalThis.MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest(`.${styles.paneDrop}`) || target.closest(`.${styles.splitDrop}`) || target.closest(`.${styles.ctxMenu}`)) return;
+      closeAllMenus();
+    };
+    const timer = setTimeout(() => window.addEventListener("pointerdown", handleClickOutside), 0);
+    return () => { clearTimeout(timer); window.removeEventListener("pointerdown", handleClickOutside); };
+  }, [surfaceMenuOpen, splitMenuOpen, contextMenuOpen]);
+
   const handlePaneContextMenu = (event: MouseEvent<HTMLDivElement>) => {
     if (!focused) return;
     event.preventDefault();
@@ -103,7 +115,7 @@ export default function Pane({
         <span className={styles.paneHdContext}>{SURFACE_CONTEXT[surface]}</span>
 
         {surfaceMenuOpen && (
-          <div className={styles.paneDrop} style={{ position: "fixed", top: surfaceMenuPosition.top, left: surfaceMenuPosition.left }}>
+          <div className={styles.paneDrop} style={{ position: "fixed", top: surfaceMenuPosition.top, left: surfaceMenuPosition.left }} onClick={(e) => e.stopPropagation()}>
             {SURFACES.map((surfaceOption, index) => (
               <div
                 key={surfaceOption.id}
@@ -129,7 +141,7 @@ export default function Pane({
         )}
 
         {splitMenuOpen && canSplit && (
-          <div className={styles.splitDrop} style={{ position: "fixed", top: splitMenuPosition.top, left: splitMenuPosition.left }}>
+          <div className={styles.splitDrop} style={{ position: "fixed", top: splitMenuPosition.top, left: splitMenuPosition.left }} onClick={(e) => e.stopPropagation()}>
             <div className={styles.splitDropOpt} onClick={() => { onSplit?.("above"); closeAllMenus(); }}>
               <div className={styles.splitDropPreview}><div className={styles.splitDropNew} /><div className={styles.splitDropCur}>{surfaceMeta.icon}</div></div>
               <div className={styles.splitDropInfo}><span className={styles.splitDropLabel}>Split above</span><span className={styles.splitDropKey}>{"\u21e7\u2191"}</span></div>
@@ -186,7 +198,7 @@ export default function Pane({
         </div>
 
         {contextMenuOpen && (
-          <div className={styles.ctxMenu} style={{ position: "fixed", top: contextMenuPosition.top, left: contextMenuPosition.left }}>
+          <div className={styles.ctxMenu} style={{ position: "fixed", top: contextMenuPosition.top, left: contextMenuPosition.left }} onClick={(e) => e.stopPropagation()}>
             <div className={styles.ctxGroup}>
               <span className={styles.ctxGroupLabel}>Switch surface</span>
               {SURFACES.map((surfaceOption) => (

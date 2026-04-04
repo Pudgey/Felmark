@@ -18,6 +18,7 @@
 
 | Agent | Task | Started | Status |
 |-------|------|---------|--------|
+| codex-main | Fix the workspace pane header regression where the black active rule shows but the surface dropdown no longer opens. | 2026-04-04 05:08 EDT | ACTIVE |
 
 ## Recent
 
