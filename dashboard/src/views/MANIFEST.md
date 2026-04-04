@@ -27,7 +27,6 @@ ViewRouter.tsx (30 lines) -- domain classifier
 | `home.tsx` | `HomeView` | workstations, overdueCount, onSelectWorkstation, onSelectProject, onNewTabInWorkstation, onNewWorkstation |
 | `forge.tsx` | `ForgeView` | tabs, activeBlocks, activeProject, workstations, onClose, onSave |
 | `editor.tsx` | `EditorView` | Full editor props (31 fields) -- see file for interface |
-| `workspace.tsx` | `WorkspaceView` | none (renders Canvas from `workspace/canvas/`) |
 
 ## Subfolders
 
