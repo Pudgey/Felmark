@@ -13,72 +13,162 @@ type AutodrawElement =
 // IMPORTANT: We cannot import nextCanvasId directly since it's a `let` in CanvasBlock.tsx.
 // Instead, accept an `allocateId: () => number` callback from the hook caller.
 
-const BOX_W = 110;
-const BOX_H = 44;
+// Shape dimensions by type — circles must be square to render correctly
+const DIMS = {
+  rect: { w: 120, h: 48 },
+  circle: { w: 60, h: 60 },
+  diamond: { w: 90, h: 60 },
+} as const;
 
 function slotCenter(col: number, row: number, canvasW: number, canvasH: number) {
-  const PAD_X = 80, PAD_Y = 60;
+  const PAD_X = 80,
+    PAD_Y = 60;
   const stepX = canvasW > PAD_X * 2 + 10 ? (canvasW - PAD_X * 2) / 4 : 100;
   const stepY = canvasH > PAD_Y * 2 + 10 ? (canvasH - PAD_Y * 2) / 3 : 80;
   return { cx: PAD_X + col * stepX, cy: PAD_Y + row * stepY };
+}
+
+// Trim arrow endpoints from center to box edge so arrows don't pierce through shapes
+function trimToBoxEdge(
+  fromCx: number,
+  fromCy: number,
+  fromHw: number,
+  fromHh: number,
+  toCx: number,
+  toCy: number,
+  toHw: number,
+  toHh: number,
+): { x1: number; y1: number; x2: number; y2: number } {
+  const dx = toCx - fromCx,
+    dy = toCy - fromCy;
+  const len = Math.sqrt(dx * dx + dy * dy);
+  if (len < 1) return { x1: fromCx, y1: fromCy, x2: toCx, y2: toCy };
+  const nx = dx / len,
+    ny = dy / len;
+  const GAP = 4;
+  const tFrom = Math.min(
+    Math.abs(nx) > 0.001 ? (fromHw + GAP) / Math.abs(nx) : Infinity,
+    Math.abs(ny) > 0.001 ? (fromHh + GAP) / Math.abs(ny) : Infinity,
+  );
+  const tTo = Math.min(
+    Math.abs(nx) > 0.001 ? (toHw + GAP) / Math.abs(nx) : Infinity,
+    Math.abs(ny) > 0.001 ? (toHh + GAP) / Math.abs(ny) : Infinity,
+  );
+  return {
+    x1: fromCx + nx * tFrom,
+    y1: fromCy + ny * tFrom,
+    x2: toCx - nx * tTo,
+    y2: toCy - ny * tTo,
+  };
 }
 
 function toCanvasElements(
   raw: AutodrawElement[],
   canvasW: number,
   canvasH: number,
-  allocateId: () => number
+  allocateId: () => number,
 ): CanvasElement[] {
-  const els: CanvasElement[] = [];
+  // Separate into three layers so SVG paint order is: shapes → arrows → labels
+  const shapes: CanvasElement[] = [];
+  const connectors: CanvasElement[] = [];
+  const labels: CanvasElement[] = [];
+
+  // Build slot→type map so arrow trimming uses accurate shape dimensions
+  const slotType = new Map<string, keyof typeof DIMS>();
+  for (const item of raw) {
+    if (item.type === "rect" || item.type === "circle" || item.type === "diamond") {
+      slotType.set(`${item.col},${item.row}`, item.type);
+    }
+  }
 
   for (const item of raw) {
     if (item.type === "rect" || item.type === "circle" || item.type === "diamond") {
       const { cx, cy } = slotCenter(item.col, item.row, canvasW, canvasH);
-      els.push({
-        id: allocateId(), type: item.type,
-        x: cx - BOX_W / 2, y: cy - BOX_H / 2, w: BOX_W, h: BOX_H,
-        strokeColor: "#2c2a25", fillColor: "transparent", strokeWidth: 1.5,
+      const { w, h } = DIMS[item.type];
+      shapes.push({
+        id: allocateId(),
+        type: item.type,
+        x: cx - w / 2,
+        y: cy - h / 2,
+        w,
+        h,
+        strokeColor: "#2c2a25",
+        fillColor: "transparent",
+        strokeWidth: 1.5,
       });
       if (item.label) {
-        els.push({
-          id: allocateId(), type: "text",
-          x: cx - BOX_W / 2 + 8, y: cy - 6,
-          strokeColor: "#2c2a25", fillColor: "transparent", strokeWidth: 0,
-          text: item.label, fontSize: 11,
+        labels.push({
+          id: allocateId(),
+          type: "text",
+          x: cx - w / 2 + 8,
+          y: cy - 7,
+          strokeColor: "#2c2a25",
+          fillColor: "transparent",
+          strokeWidth: 0,
+          text: item.label,
+          fontSize: 12,
         });
       }
     }
 
     if (item.type === "arrow") {
       const from = slotCenter(item.fromCol, item.fromRow, canvasW, canvasH);
-      const to   = slotCenter(item.toCol,   item.toRow,   canvasW, canvasH);
-      els.push({
-        id: allocateId(), type: "arrow",
-        x: from.cx, y: from.cy, w: to.cx - from.cx, h: to.cy - from.cy,
-        strokeColor: "#2c2a25", fillColor: "transparent", strokeWidth: 1.5,
+      const to = slotCenter(item.toCol, item.toRow, canvasW, canvasH);
+      const fromDims = DIMS[slotType.get(`${item.fromCol},${item.fromRow}`) ?? "rect"];
+      const toDims = DIMS[slotType.get(`${item.toCol},${item.toRow}`) ?? "rect"];
+      const { x1, y1, x2, y2 } = trimToBoxEdge(
+        from.cx,
+        from.cy,
+        fromDims.w / 2,
+        fromDims.h / 2,
+        to.cx,
+        to.cy,
+        toDims.w / 2,
+        toDims.h / 2,
+      );
+      connectors.push({
+        id: allocateId(),
+        type: "arrow",
+        x: x1,
+        y: y1,
+        w: x2 - x1,
+        h: y2 - y1,
+        strokeColor: "#2c2a25",
+        fillColor: "transparent",
+        strokeWidth: 1.5,
       });
       if (item.label) {
-        els.push({
-          id: allocateId(), type: "text",
-          x: (from.cx + to.cx) / 2 + 4, y: (from.cy + to.cy) / 2 - 14,
-          strokeColor: "#8a7e63", fillColor: "transparent", strokeWidth: 0,
-          text: item.label, fontSize: 9,
+        labels.push({
+          id: allocateId(),
+          type: "text",
+          x: (x1 + x2) / 2 + 4,
+          y: (y1 + y2) / 2 - 13,
+          strokeColor: "#8a7e63",
+          fillColor: "transparent",
+          strokeWidth: 0,
+          text: item.label,
+          fontSize: 10,
         });
       }
     }
 
     if (item.type === "text") {
       const { cx, cy } = slotCenter(item.col, item.row, canvasW, canvasH);
-      els.push({
-        id: allocateId(), type: "text",
-        x: cx, y: cy,
-        strokeColor: "#2c2a25", fillColor: "transparent", strokeWidth: 0,
-        text: item.text, fontSize: 12,
+      labels.push({
+        id: allocateId(),
+        type: "text",
+        x: cx,
+        y: cy,
+        strokeColor: "#2c2a25",
+        fillColor: "transparent",
+        strokeWidth: 0,
+        text: item.text,
+        fontSize: 13,
       });
     }
   }
 
-  return els;
+  return [...shapes, ...connectors, ...labels];
 }
 
 export interface UseAutodrawReturn {
@@ -94,7 +184,7 @@ export function useAutodraw(
   onUpdate: (data: CanvasBlockData) => void,
   pushUndo: () => void,
   svgRef: RefObject<SVGSVGElement>,
-  allocateId: () => number
+  allocateId: () => number,
 ): UseAutodrawReturn {
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -122,7 +212,7 @@ export function useAutodraw(
         throw new Error(err.error || `HTTP ${res.status}`);
       }
 
-      const { elements: raw } = await res.json() as { elements: AutodrawElement[] };
+      const { elements: raw } = (await res.json()) as { elements: AutodrawElement[] };
       if (!Array.isArray(raw) || raw.length === 0) throw new Error("No elements returned");
 
       const newEls = toCanvasElements(raw, canvasW, canvasH, allocateId);
