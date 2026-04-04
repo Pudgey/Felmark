@@ -18,14 +18,13 @@
 
 | Agent | Task | Started | Status |
 |-------|------|---------|--------|
-| codex-main | Fix the workspace pane header regression where the black active rule shows but the surface dropdown no longer opens. | 2026-04-04 05:08 EDT | ACTIVE |
 
 ## Recent
 
 | Agent | Task | Completed |
 |-------|------|-----------|
-| codex-main | Split the workspace pane shell into core tabs, layout, and surface modules in worktree `codex-workspace-core-restructure` and closed the old SplitPanes hotspot. | 2026-04-04 04:28 EDT |
-| codex-main | Drafted the workspace core restructure mission and registered it in the development brief. | 2026-04-04 03:07 EDT |
-| claude-main | Executed 3 super-brain follow-ups: repaired workstation MANIFEST, moved split lookups upstream, extracted hydration + resize + modals from page.tsx (509 → 378 lines). | 2026-04-03 |
-| codex-main | Tightened the root agent instruction docs to emphasize disciplined code over superficial brevity. | 2026-04-03 16:05 EDT |
-| codex-main | Benchmarked the Workstation surface against strong Next.js and React repos to extract only the patterns worth applying. | 2026-04-03 15:46 EDT |
+| codex-main | Implemented the pane polish kit for header chrome, Signals cards, and Work rows using the provided JSX as the spec. | 2026-04-04 05:57 EDT |
+| codex-main | Replaced the pane color experiment with the provided dark-chrome header spec: icon tint by default, active seam, and optional tinted headers. | 2026-04-04 05:38 EDT |
+| codex-main | Added a per-pane palette control so each workspace pane can carry its own accent color from the header. | 2026-04-04 05:20 EDT |
+| codex-main | Added a shared workspace pane-header style that pulls a distinct accent palette from each pane surface color. | 2026-04-04 05:11 EDT |
+| codex-main | Fixed the workspace pane header regression so the surface dropdown opens without the pane focus dismiss closing it immediately. | 2026-04-04 04:32 EDT |

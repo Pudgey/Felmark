@@ -7,8 +7,8 @@
 
 | Metric | Value | Threshold | Status |
 |--------|-------|-----------|--------|
-| Total source files | 319 | <200 OK, 200–400 caution, 400+ split | 🟡 Caution |
-| Total lines of code | ~56,616 | <50K OK, 50–100K caution, 100K+ enterprise | 🟡 Caution |
+| Total source files | 323 | <200 OK, 200–400 caution, 400+ split | 🟡 Caution |
+| Total lines of code | ~57,175 | <50K OK, 50–100K caution, 100K+ enterprise | 🟡 Caution |
 | Component directories | 22 | <30 OK, 30–50 caution, 50+ split | ✅ OK |
 | Block type folders | 40 | No limit — each lives in its own folder | ✅ OK |
 | Types in Block interface | 30+ fields | Verbose but flat — no tangled deps | ✅ OK |
@@ -92,7 +92,7 @@ This is boilerplate, not complexity. No refactor needed unless Editor.tsx itself
 | **Pipeline** | Active | `pipeline/` | Pipeline board view |
 | **Team** | Active | `team/` | Team collaboration surface |
 | **The Wire** | Needs wiring | `wire/` | Competitive intelligence surface |
-| **Workspace** | Active | `workspace/core/`, `workspace/sidebar/`, `views/routers/WorkspaceRouter.tsx` | Rail surface — tabs/layout/pane bodies are split in worktree `codex-workspace-core-restructure`; browser verify before merge |
+| **Workspace** | Active | `workspace/core/`, `workspace/sidebar/`, `views/routers/WorkspaceRouter.tsx` | Rail surface — tabs/layout/pane bodies now live under `workspace/core/`; pane chrome, Signals, and Work use the 2026-04-04 polish pass |
 | **Forge Paper** | Active | `forge-paper/` | Rail surface — owns blocks state, document view for client proposals |
 | **Terminal Welcome** | Active | `editor/TerminalWelcome.tsx` | Dead-state splash screen |
 | **History** | Active | `history/` | Version history modal |
