@@ -89,10 +89,14 @@ export default function Pane({
         <div
           className={styles.paneHdLeft}
           onClick={(event) => {
+            event.stopPropagation();
+            nav.dismissGlobalCtx();
+            onFocus?.();
             const rect = event.currentTarget.getBoundingClientRect();
             setSurfaceMenuPosition({ top: rect.bottom + 2, left: rect.left });
-            setSurfaceMenuOpen(!surfaceMenuOpen);
+            setSurfaceMenuOpen((open) => !open);
             setSplitMenuOpen(false);
+            setContextMenuOpen(false);
           }}
         >
           <span className={styles.paneIcon}>{surfaceMeta.icon}</span>
