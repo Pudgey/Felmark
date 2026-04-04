@@ -19,9 +19,7 @@ ViewRouter.tsx (30 lines) -- domain classifier
 | `calendar.tsx` | `CalendarView` | workstations, onOpenProject, scrollToProjectId, onScrollComplete |
 | `search.tsx` | `SearchView` | workstations |
 | `services.tsx` | `ServicesView` | none |
-| `pipeline.tsx` | `PipelineView` | none |
 | `templates.tsx` | `TemplatesView` | none |
-| `finance.tsx` | `FinanceView` | none |
 | `wire.tsx` | `WireView` | workstations |
 | `team.tsx` | `TeamView` | none |
 | `home.tsx` | `HomeView` | workstations, overdueCount, onSelectWorkstation, onSelectProject, onNewTabInWorkstation, onNewWorkstation |

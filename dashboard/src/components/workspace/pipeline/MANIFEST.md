@@ -9,7 +9,7 @@
 - `react` -- useState
 
 ## Imported By
-- `Editor.tsx` -- rendered when pipeline view is active
+- `views/routers/WorkspaceRouter.tsx` — rendered as workspace tool tab
 
 ## Files
 - `PipelineBoard.tsx` -- main component (325 lines)

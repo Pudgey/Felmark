@@ -6,8 +6,8 @@ import SplitPanes, { HybridHeader } from "@/components/workspace/panes/SplitPane
 import Toasts, { DEMO_TOASTS, type Toast } from "@/components/workspace/toasts/Toasts";
 import ClientHub from "@/components/workspace/hub/ClientHub";
 import NewTab from "@/components/workspace/newtab/NewTab";
-import PipelineBoard from "@/components/workstation/pipeline/PipelineBoard";
-import FinancePage from "@/components/workstation/finance/FinancePage";
+import PipelineBoard from "@/components/workspace/pipeline/PipelineBoard";
+import FinancePage from "@/components/workspace/finance/FinancePage";
 import ProductsTab from "@/components/workspace/products/ProductsTab";
 import WirePage from "@/components/workstation/wire/WirePage";
 import { WIRE_SERVICES } from "@/lib/initial-services";

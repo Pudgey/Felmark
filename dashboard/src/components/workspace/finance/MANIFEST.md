@@ -9,7 +9,7 @@
 - `react` -- useState, useEffect
 
 ## Imported By
-- `Editor.tsx` -- rendered when finance view is active
+- `views/routers/WorkspaceRouter.tsx` — rendered as workspace tool tab
 
 ## Files
 - `FinancePage.tsx` -- main component (274 lines)
