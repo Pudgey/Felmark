@@ -29,14 +29,50 @@ export function getBlockDefaults(type: BlockType): Partial<Block> {
 export function needsTrailingParagraph(type: BlockType): boolean {
   // These types are "full-width" blocks that shouldn't be typed into directly
   const fullBlocks = new Set([
-    "divider", "graph", "money", "deliverable", "deadline", "canvas", "audio",
-    "table", "accordion", "math", "gallery", "swatches", "beforeafter", "bookmark",
-    "timeline", "flow", "brandboard", "moodboard", "wireframe",
-    "pullquote", "hero-spotlight", "kinetic-type", "number-cascade",
-    "comment-thread", "mention", "question", "feedback", "decision", "poll", "handoff", "signoff", "annotation",
-    "ai-action", "pricing-config", "scope-boundary", "asset-checklist",
-    "decision-picker", "availability-picker", "progress-stream", "dependency-map", "revision-heatmap",
-    "stat-reveal", "value-counter",
+    "divider",
+    "graph",
+    "money",
+    "deliverable",
+    "deadline",
+    "canvas",
+    "audio",
+    "table",
+    "accordion",
+    "math",
+    "image",
+    "gallery",
+    "swatches",
+    "beforeafter",
+    "bookmark",
+    "timeline",
+    "flow",
+    "brandboard",
+    "moodboard",
+    "wireframe",
+    "pullquote",
+    "hero-spotlight",
+    "kinetic-type",
+    "number-cascade",
+    "comment-thread",
+    "mention",
+    "question",
+    "feedback",
+    "decision",
+    "poll",
+    "handoff",
+    "signoff",
+    "annotation",
+    "ai-action",
+    "pricing-config",
+    "scope-boundary",
+    "asset-checklist",
+    "decision-picker",
+    "availability-picker",
+    "progress-stream",
+    "dependency-map",
+    "revision-heatmap",
+    "stat-reveal",
+    "value-counter",
   ]);
   return fullBlocks.has(type);
 }
@@ -66,8 +102,12 @@ export function createEmptyDocument(): Block[] {
  * Convert an existing block to a new type.
  * Returns the updated blocks array and the ID of any new trailing block.
  */
-export function convertBlock(blocks: Block[], blockId: string, type: BlockType): { blocks: Block[]; newBlockId: string | null } {
-  const idx = blocks.findIndex(b => b.id === blockId);
+export function convertBlock(
+  blocks: Block[],
+  blockId: string,
+  type: BlockType,
+): { blocks: Block[]; newBlockId: string | null } {
+  const idx = blocks.findIndex((b) => b.id === blockId);
   if (idx === -1) return { blocks, newBlockId: null };
 
   const next = [...blocks];
@@ -90,8 +130,12 @@ export function convertBlock(blocks: Block[], blockId: string, type: BlockType):
  * Insert a new block after a given block.
  * Returns the updated blocks array and the new block's ID.
  */
-export function insertAfter(blocks: Block[], afterId: string, type: BlockType = "paragraph"): { blocks: Block[]; newBlockId: string } {
-  const idx = blocks.findIndex(b => b.id === afterId);
+export function insertAfter(
+  blocks: Block[],
+  afterId: string,
+  type: BlockType = "paragraph",
+): { blocks: Block[]; newBlockId: string } {
+  const idx = blocks.findIndex((b) => b.id === afterId);
   const newBlock = createEmptyBlock(type);
   const next = [...blocks];
   next.splice(idx + 1, 0, newBlock);
@@ -107,8 +151,8 @@ export function removeBlock(blocks: Block[], blockId: string): { blocks: Block[]
     const empty = createEmptyBlock();
     return { blocks: [{ ...empty, id: blocks[0].id }], focusId: blocks[0].id };
   }
-  const idx = blocks.findIndex(b => b.id === blockId);
-  const next = blocks.filter(b => b.id !== blockId);
+  const idx = blocks.findIndex((b) => b.id === blockId);
+  const next = blocks.filter((b) => b.id !== blockId);
   const focusIdx = Math.max(0, idx - 1);
   return { blocks: next, focusId: next[focusIdx]?.id || null };
 }
