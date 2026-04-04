@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import type { Block, GraphType, MoneyBlockType } from "@/lib/types";
+import type { Block, GraphType, MoneyBlockType, DrawingType } from "@/lib/types";
 import GraphBlockComponent, { GRAPH_TYPE_OPTIONS } from "../../../blocks/graphs/GraphBlock";
 import GraphDataEditor from "../../../blocks/graphs/GraphDataEditor";
 import graphStyles from "../../../blocks/graphs/GraphBlock.module.css";
@@ -12,6 +12,8 @@ import DeadlineBlockComponent from "../../../blocks/deadline/DeadlineBlock";
 import AudioBlockComponent from "../../../blocks/audio/AudioBlock";
 import AiBlock from "../../../blocks/ai/AiBlock";
 import CanvasBlock from "../../../blocks/canvas/CanvasBlock";
+import DrawingBlockComponent, { DRAWING_TYPE_OPTIONS } from "../../../blocks/drawing/DrawingBlock";
+import drawingStyles from "../../../blocks/drawing/DrawingBlock.module.css";
 import EditableBlock from "../../../chrome/editable-block/EditableBlock";
 import { getContentBlockMap } from "../block-registry/blockRegistry";
 import type { BlockActivity } from "../../../../../activity/ActivityMargin";
@@ -45,10 +47,13 @@ interface BlockRendererProps {
   setGraphPicker: (v: { blockId: string } | null) => void;
   moneyPicker: { blockId: string } | null;
   setMoneyPicker: (v: { blockId: string } | null) => void;
+  drawingPicker: { blockId: string } | null;
+  setDrawingPicker: (v: { blockId: string } | null) => void;
   editingGraphId: string | null;
   setEditingGraphId: (id: string | null) => void;
   selectGraphType: (graphType: GraphType) => void;
   selectMoneyType: (moneyType: MoneyBlockType) => void;
+  selectDrawingType: (drawingType: DrawingType) => void;
   commentedBlocks: Set<string>;
   setCommentedBlocks: React.Dispatch<React.SetStateAction<Set<string>>>;
   setCommentHighlight: (v: string | null) => void;
@@ -85,10 +90,13 @@ export default function BlockRenderer({
   setGraphPicker,
   moneyPicker,
   setMoneyPicker,
+  drawingPicker,
+  setDrawingPicker,
   editingGraphId,
   setEditingGraphId,
   selectGraphType,
   selectMoneyType,
+  selectDrawingType,
   commentedBlocks,
   setCommentedBlocks,
   setCommentHighlight,
@@ -281,6 +289,46 @@ export default function BlockRenderer({
               data={block.canvasData}
               onUpdate={(updated) => setBlocks(prev => prev.map(b => b.id === block.id ? { ...b, canvasData: updated } : b))}
             />
+          </div>
+        </div>
+      );
+    }
+
+    // Drawing block
+    if (block.type === "drawing" && block.drawingData) {
+      return (
+        <div key={block.id} data-block-id={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+          {renderGutter(block.id)}
+          <div style={{ flex: 1 }}>
+            <DrawingBlockComponent
+              drawingData={block.drawingData}
+              onUpdate={(updated) => setBlocks(prev => prev.map(b => b.id === block.id ? { ...b, drawingData: updated } : b))}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    // Drawing sub-picker
+    if (drawingPicker && drawingPicker.blockId === block.id && block.type !== "drawing") {
+      return (
+        <div key={block.id} data-block-id={block.id} className={styles.blockRow} onMouseEnter={() => setHoverBlock(block.id)} onMouseLeave={() => setHoverBlock(null)}>
+          {renderGutter(block.id)}
+          <div style={{ flex: 1 }}>
+            <div className={drawingStyles.dcPanel}>
+              <div className={drawingStyles.dcPanelHead}>
+                <span className={drawingStyles.dcPanelTitle}>Choose a drawing type</span>
+                <button onClick={() => setDrawingPicker(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-300)", fontSize: 14 }}>&times;</button>
+              </div>
+              <div className={drawingStyles.subPicker}>
+                {DRAWING_TYPE_OPTIONS.map(opt => (
+                  <button key={opt.type} className={drawingStyles.subPickerItem} onClick={() => selectDrawingType(opt.type)}>
+                    <span className={drawingStyles.subPickerIcon}>{opt.icon}</span>
+                    <span className={drawingStyles.subPickerLabel}>{opt.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       );

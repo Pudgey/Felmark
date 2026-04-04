@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import type { Block, BlockType, GraphType, MoneyBlockType } from "@/lib/types";
+import type { Block, BlockType, GraphType, MoneyBlockType, DrawingType } from "@/lib/types";
 import { uid, cursorTo } from "@/lib/utils";
 import { getDefaultGraphData } from "../../blocks/graphs/GraphBlock";
 import { getDefaultMoneyData } from "../../blocks/money/MoneyBlock";
 import { getDefaultDeadlineData } from "../../blocks/deadline/DeadlineBlock";
 import { getDefaultAudioData } from "../../blocks/audio/AudioBlock";
 import { getDefaultCanvasData } from "../../blocks/canvas/CanvasBlock";
+import { getDefaultDrawingData } from "../../blocks/drawing/DrawingBlock";
 import { CONTENT_DEFAULTS } from "../components/block-registry/blockDefaults";
 
 interface UseSlashMenuOptions {
@@ -32,6 +33,7 @@ export function useSlashMenu({
   const [slashIndex, setSlashIndex] = useState(0);
   const [graphPicker, setGraphPicker] = useState<{ blockId: string } | null>(null);
   const [moneyPicker, setMoneyPicker] = useState<{ blockId: string } | null>(null);
+  const [drawingPicker, setDrawingPicker] = useState<{ blockId: string } | null>(null);
   const [editingGraphId, setEditingGraphId] = useState<string | null>(null);
 
   const onSlash = useCallback((blockId: string, filter?: string) => {
@@ -62,6 +64,11 @@ export function useSlashMenu({
     }
     if (type === "money") {
       setMoneyPicker({ blockId });
+      setSlashMenu(null);
+      return;
+    }
+    if (type === "drawing") {
+      setDrawingPicker({ blockId });
       setSlashMenu(null);
       return;
     }
@@ -215,6 +222,23 @@ export function useSlashMenu({
     setMoneyPicker(null);
   }, [contentCacheRef, focusNew, moneyPicker, setBlocks]);
 
+  const selectDrawingType = useCallback((drawingType: DrawingType) => {
+    if (!drawingPicker) return;
+    const { blockId } = drawingPicker;
+    const drawingData = getDefaultDrawingData(drawingType);
+    setBlocks(prev => {
+      const idx = prev.findIndex(b => b.id === blockId);
+      const n = [...prev];
+      n[idx] = { ...n[idx], type: "drawing" as BlockType, content: "", drawingData };
+      const nid = uid();
+      contentCacheRef.current[nid] = "";
+      n.splice(idx + 1, 0, { id: nid, type: "paragraph", content: "", checked: false });
+      focusNew(nid);
+      return n;
+    });
+    setDrawingPicker(null);
+  }, [contentCacheRef, focusNew, drawingPicker, setBlocks]);
+
   return {
     slashMenu,
     setSlashMenu,
@@ -226,11 +250,14 @@ export function useSlashMenu({
     setGraphPicker,
     moneyPicker,
     setMoneyPicker,
+    drawingPicker,
+    setDrawingPicker,
     editingGraphId,
     setEditingGraphId,
     onSlash,
     selectSlashItem,
     selectGraphType,
     selectMoneyType,
+    selectDrawingType,
   };
 }

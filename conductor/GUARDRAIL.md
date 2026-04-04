@@ -1,14 +1,14 @@
 # Guardrail — Feature Inventory & Codebase Health
 
-> **Last synced**: 2026-04-03 (evening)
+> **Last synced**: 2026-04-04
 > **Auto-update rule**: This file MUST be updated in the same commit as any feature add, delete, rename, or move. This is not optional — the AI enforces it as a mandatory post-commit check.
 
 ## Codebase Pulse
 
 | Metric | Value | Threshold | Status |
 |--------|-------|-----------|--------|
-| Total source files | 405 | <200 OK, 200–400 caution, 400+ split | 🔴 Split threshold |
-| Total lines of code | ~19,900 | <50K OK, 50–100K caution, 100K+ enterprise | ✅ OK |
+| Total source files | 319 | <200 OK, 200–400 caution, 400+ split | 🟡 Caution |
+| Total lines of code | ~56,616 | <50K OK, 50–100K caution, 100K+ enterprise | 🟡 Caution |
 | Component directories | 22 | <30 OK, 30–50 caution, 50+ split | ✅ OK |
 | Block type folders | 40 | No limit — each lives in its own folder | ✅ OK |
 | Types in Block interface | 30+ fields | Verbose but flat — no tangled deps | ✅ OK |
@@ -92,7 +92,7 @@ This is boilerplate, not complexity. No refactor needed unless Editor.tsx itself
 | **Pipeline** | Active | `pipeline/` | Pipeline board view |
 | **Team** | Active | `team/` | Team collaboration surface |
 | **The Wire** | Needs wiring | `wire/` | Competitive intelligence surface |
-| **Workspace** | Active | `workspace/` | Rail surface — task/project management, list/board/timeline views |
+| **Workspace** | Active | `workspace/core/`, `workspace/sidebar/`, `views/routers/WorkspaceRouter.tsx` | Rail surface — tabs/layout/pane bodies are split in worktree `codex-workspace-core-restructure`; browser verify before merge |
 | **Forge Paper** | Active | `forge-paper/` | Rail surface — owns blocks state, document view for client proposals |
 | **Terminal Welcome** | Active | `editor/TerminalWelcome.tsx` | Dead-state splash screen |
 | **History** | Active | `history/` | Version history modal |

@@ -23,8 +23,8 @@
 
 | Agent | Task | Completed |
 |-------|------|-----------|
+| codex-main | Split the workspace pane shell into core tabs, layout, and surface modules in worktree `codex-workspace-core-restructure` and closed the old SplitPanes hotspot. | 2026-04-04 04:28 EDT |
+| codex-main | Drafted the workspace core restructure mission and registered it in the development brief. | 2026-04-04 03:07 EDT |
 | claude-main | Executed 3 super-brain follow-ups: repaired workstation MANIFEST, moved split lookups upstream, extracted hydration + resize + modals from page.tsx (509 → 378 lines). | 2026-04-03 |
 | codex-main | Tightened the root agent instruction docs to emphasize disciplined code over superficial brevity. | 2026-04-03 16:05 EDT |
 | codex-main | Benchmarked the Workstation surface against strong Next.js and React repos to extract only the patterns worth applying. | 2026-04-03 15:46 EDT |
-| claude-main | Fixed null workstation when switching rail back from Home to workstations | 2026-04-03 |
-| codex-main | Confirmed the shared terminal worktree branch was already contained by main, so no extra merge changes were needed. | 2026-04-03 15:04 EDT |

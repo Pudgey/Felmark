@@ -19,9 +19,7 @@ All block-type components live here, organized by category.
 - `drawing/` -- Drawing/sketch block
 - `graphs/` -- Chart/graph block with data editor
 - `money/` -- Financial/invoice block types
-- `quick-elements/` -- Quick-insert element blocks
 - `unique/` -- One-off specialized blocks (PricingConfig, ScopeBoundary, AssetChecklist, DecisionPicker, AvailabilityPicker, ProgressStream, DependencyMap, RevisionHeatmap)
-- `visual/` -- Visual display blocks
 
 ### Animation blocks (unbundled from AnimationBlocks.tsx)
 - `hero-spotlight/` -- Full-page hero with letter-by-letter reveal animation
@@ -63,6 +61,6 @@ All block-type components live here, organized by category.
 - `react` -- component framework
 
 ## Imported By
-- `Editor.tsx` -- all block components rendered in contentBlockMap
+- `editor/core/components/block-registry/blockRegistry.ts` -- content block map
+- `editor/core/components/block-renderer/BlockRenderer.tsx` -- graph, money, deliverable, deadline, audio, ai, canvas, drawing blocks
 - `forge/services/blocks/*.ts` -- default data factories
-- `components/paper/Paper.tsx` -- AiBlock

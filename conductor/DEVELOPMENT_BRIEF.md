@@ -2,7 +2,7 @@
 
 > **Auto-maintained**: Every session that creates a mission, completes a milestone item, or adds a strategy doc must update this file.
 >
-> **Last updated**: 2026-03-29
+> **Last updated**: 2026-04-04
 
 ---
 
@@ -87,6 +87,7 @@ Three tiers:
 | Mission | Milestone | Status | Doc |
 |---------|-----------|--------|-----|
 | MVP Launch — Extension Shell + Web App | M1 | Planning | [MISSION_MVP_LAUNCH.md](missions/MISSION_MVP_LAUNCH.md) |
+| Workspace Core Restructure — separate tabs, pane layout, and pane surfaces | M1 | Implemented in worktree | [MISSION_WORKSPACE_CORE_RESTRUCTURE.md](missions/MISSION_WORKSPACE_CORE_RESTRUCTURE.md) |
 
 ### Planning
 | Mission | Milestone | Doc |

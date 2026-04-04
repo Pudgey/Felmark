@@ -1,6 +1,6 @@
 "use client";
 
-import type { Block, BlockType, Workstation, GraphType, MoneyBlockType } from "@/lib/types";
+import type { Block, BlockType, Workstation, GraphType, MoneyBlockType, DrawingType } from "@/lib/types";
 import { STATUS } from "@/lib/constants";
 import DueDatePicker from "@/components/shared/DueDatePicker";
 import SlashMenu from "../../../chrome/slash-menu/SlashMenu";
@@ -60,6 +60,9 @@ interface DocumentSurfaceProps {
   setEditingGraphId: (id: string | null) => void;
   selectGraphType: (graphType: GraphType) => void;
   selectMoneyType: (moneyType: MoneyBlockType) => void;
+  drawingPicker: { blockId: string } | null;
+  setDrawingPicker: (v: { blockId: string } | null) => void;
+  selectDrawingType: (drawingType: DrawingType) => void;
   commentedBlocks: Set<string>;
   setCommentedBlocks: React.Dispatch<React.SetStateAction<Set<string>>>;
   setCommentHighlight: (v: string | null) => void;
@@ -116,6 +119,9 @@ export default function DocumentSurface({
   setEditingGraphId,
   selectGraphType,
   selectMoneyType,
+  drawingPicker,
+  setDrawingPicker,
+  selectDrawingType,
   commentedBlocks,
   setCommentedBlocks,
   setCommentHighlight,
@@ -181,6 +187,9 @@ export default function DocumentSurface({
           setEditingGraphId={setEditingGraphId}
           selectGraphType={selectGraphType}
           selectMoneyType={selectMoneyType}
+          drawingPicker={drawingPicker}
+          setDrawingPicker={setDrawingPicker}
+          selectDrawingType={selectDrawingType}
           commentedBlocks={commentedBlocks}
           setCommentedBlocks={setCommentedBlocks}
           setCommentHighlight={setCommentHighlight}

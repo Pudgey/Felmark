@@ -403,6 +403,9 @@ export default function EditorCore(props: EditorProps) {
                 setEditingGraphId={slash.setEditingGraphId}
                 selectGraphType={slash.selectGraphType}
                 selectMoneyType={slash.selectMoneyType}
+                drawingPicker={slash.drawingPicker}
+                setDrawingPicker={slash.setDrawingPicker}
+                selectDrawingType={slash.selectDrawingType}
                 commentedBlocks={panels.commentedBlocks}
                 setCommentedBlocks={panels.setCommentedBlocks}
                 setCommentHighlight={panels.setCommentHighlight}

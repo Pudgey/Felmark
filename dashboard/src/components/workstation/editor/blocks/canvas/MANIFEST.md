@@ -1,22 +1,33 @@
-# CanvasBlock -- Manifest
+# canvas/ -- Manifest
 
-> Auto-maintained by AI. Updated on every file change in this folder.
+> Freeform drawing/diagramming canvas block with shapes, stencils, resize, and undo.
 
 ## Exports
-- `CanvasBlock` -- Freeform drawing/diagramming canvas with shapes, stencils, and connections
-- `getDefaultCanvasData` -- factory for default canvas data
+- `CanvasBlock` (default) -- Main canvas component
+- `getDefaultCanvasData` -- Factory for default canvas data
 
 ## Dependencies
 - `@/lib/types` -- CanvasBlockData, CanvasElement
 - `./stencils` -- StencilDef, STENCIL_CATEGORIES, STENCILS
-- `./StencilPicker` -- stencil selection UI
+- `./StencilPicker` -- Stencil selection UI
+- `./geometry` -- Bounding box, hit testing, element movement
+- `./sketchy` -- Deterministic hand-drawn SVG path generators
+- `./rendering` -- SVG element + selection UI rendering
+- `./resize` -- Handle positions, resize math, element remapping
+- `./useCanvasUndo` -- Canvas-local undo/redo stack
 
 ## Imported By
-- `Editor.tsx` -- rendered for canvas block type
+- `editor/core/components/block-registry/blockRegistry.ts` -- content block map
+- `editor/core/components/block-renderer/BlockRenderer.tsx` -- direct render for canvas blocks
 
 ## Files
-- `CanvasBlock.tsx` -- main component (602 lines)
-- `CanvasBlock.module.css` -- canvas styles
-- `StencilPicker.tsx` -- stencil browser/selector (140 lines)
-- `StencilPicker.module.css` -- stencil picker styles
-- `stencils.ts` -- stencil definitions and categories
+- `CanvasBlock.tsx` -- Component shell: state, toolbar, pointer handlers, keyboard shortcuts (~310 lines)
+- `CanvasBlock.module.css` -- Canvas styles
+- `geometry.ts` -- Box interface, getBBox, hitTest, rectsIntersect, moveElement, getSelectionBBox (~65 lines)
+- `sketchy.ts` -- srand, sketchyRect/Ellipse/Diamond/Line, arrowHead, smoothPath (~55 lines)
+- `rendering.tsx` -- renderEl, renderSelectionUI (~50 lines)
+- `resize.ts` -- HandleId, handle positions/cursors, hitTestHandles, computeResizedBBox, remapElements (~70 lines)
+- `useCanvasUndo.ts` -- useCanvasUndo hook with pushUndo/undo/redo (~40 lines)
+- `StencilPicker.tsx` -- Stencil browser/selector (~140 lines)
+- `StencilPicker.module.css` -- Stencil picker styles
+- `stencils.ts` -- Stencil definitions and categories

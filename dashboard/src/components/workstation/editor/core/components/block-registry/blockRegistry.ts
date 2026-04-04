@@ -36,6 +36,7 @@ import AvailabilityPickerBlock from "../../../blocks/unique/AvailabilityPickerBl
 import ProgressStreamBlock from "../../../blocks/unique/ProgressStreamBlock";
 import DependencyMapBlock from "../../../blocks/unique/DependencyMapBlock";
 import RevisionHeatmapBlock from "../../../blocks/unique/RevisionHeatmapBlock";
+import DrawingBlock from "../../../blocks/drawing/DrawingBlock";
 
 type BlockUpdateFn = (updater: Block[] | ((prev: Block[]) => Block[])) => void;
 
@@ -81,5 +82,6 @@ export function getContentBlockMap(setBlocks: BlockUpdateFn): Record<string, (b:
     "progress-stream": (b) => b.progressStreamData ? React.createElement(ProgressStreamBlock, { data: b.progressStreamData, onUpdate: (d: Block["progressStreamData"]) => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, progressStreamData: d } : bl)) }) : null,
     "dependency-map": (b) => b.dependencyMapData ? React.createElement(DependencyMapBlock, { data: b.dependencyMapData, onUpdate: (d: Block["dependencyMapData"]) => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, dependencyMapData: d } : bl)) }) : null,
     "revision-heatmap": (b) => b.revisionHeatmapData ? React.createElement(RevisionHeatmapBlock, { data: b.revisionHeatmapData, onUpdate: (d: Block["revisionHeatmapData"]) => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, revisionHeatmapData: d } : bl)) }) : null,
+    drawing: (b) => b.drawingData ? React.createElement(DrawingBlock, { drawingData: b.drawingData, onUpdate: (d: Block["drawingData"]) => setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, drawingData: d } : bl)) }) : null,
   };
 }
