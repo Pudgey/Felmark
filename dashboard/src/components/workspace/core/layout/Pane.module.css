@@ -14,7 +14,6 @@
 .paneInactive { opacity: .55; }
 
 .paneHd {
-  position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -24,19 +23,6 @@
   background: #fff;
   flex-shrink: 0;
 }
-.paneHd::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 2px;
-  opacity: 0;
-  background: linear-gradient(90deg, rgba(var(--pane-accent-rgb), .4), rgba(var(--pane-accent-rgb), 0));
-  pointer-events: none;
-  transition: opacity .08s;
-}
-.paneFocused .paneHd::after { opacity: 1; }
 .paneTinted .paneHd {
   background: linear-gradient(180deg, color-mix(in srgb, #ffffff 94%, var(--pane-accent) 6%) 0%, color-mix(in srgb, #ffffff 97%, var(--pane-accent) 3%) 100%);
 }
