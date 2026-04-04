@@ -1,7 +1,7 @@
 "use client";
 
 import type { Workstation } from "@/lib/types";
-import SearchPage from "@/components/workstation/search/SearchPage";
+import SearchPage from "@/components/search/SearchPage";
 
 interface SearchViewProps {
   workstations: Workstation[];

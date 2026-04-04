@@ -1,7 +1,7 @@
 "use client";
 
 import type { Workstation } from "@/lib/types";
-import CalendarFull from "@/components/workstation/calendar/CalendarFull";
+import CalendarFull from "@/components/calendar/CalendarFull";
 
 interface CalendarViewProps {
   workstations: Workstation[];

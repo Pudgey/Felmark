@@ -9,7 +9,7 @@
 - `@/lib/types` -- Workspace
 
 ## Imported By
-- `Editor.tsx` -- rendered when calendar view is active
+- `views/calendar.tsx` -- view wrapper that routes the rail to CalendarFull
 
 ## Files
 - `CalendarFull.tsx` -- main component (503 lines)

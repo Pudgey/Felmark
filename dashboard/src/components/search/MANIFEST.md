@@ -9,7 +9,7 @@
 - `@/lib/types` -- Workspace
 
 ## Imported By
-- `Editor.tsx` -- rendered when search view is active
+- `views/search.tsx` -- view wrapper that routes the rail to SearchPage
 
 ## Files
 - `SearchPage.tsx` -- main component (345 lines)
