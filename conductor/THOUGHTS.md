@@ -23,8 +23,8 @@
 
 | Agent | Task | Completed |
 |-------|------|-----------|
+| codex-main | Removed the focused-pane gradient seam under the workspace pane header. | 2026-04-04 06:02 EDT |
 | codex-main | Implemented the pane polish kit for header chrome, Signals cards, and Work rows using the provided JSX as the spec. | 2026-04-04 05:57 EDT |
 | codex-main | Replaced the pane color experiment with the provided dark-chrome header spec: icon tint by default, active seam, and optional tinted headers. | 2026-04-04 05:38 EDT |
 | codex-main | Added a per-pane palette control so each workspace pane can carry its own accent color from the header. | 2026-04-04 05:20 EDT |
 | codex-main | Added a shared workspace pane-header style that pulls a distinct accent palette from each pane surface color. | 2026-04-04 05:11 EDT |
-| codex-main | Fixed the workspace pane header regression so the surface dropdown opens without the pane focus dismiss closing it immediately. | 2026-04-04 04:32 EDT |
