@@ -7,7 +7,9 @@ import styles from "./Pane.module.css";
 
 interface PaneProps {
   surface: SurfaceId;
+  accentColor?: string | null;
   onSurfaceChange: (surface: SurfaceId) => void;
+  onAccentColorChange?: (accentColor: string | null) => void;
   focused?: boolean;
   onFocus?: () => void;
   zoomed?: boolean;
@@ -19,6 +21,16 @@ interface PaneProps {
   canFSplit?: boolean;
   canRowSplit?: boolean;
 }
+
+const PANE_ACCENT_OPTIONS = [
+  { id: "surface", label: "Surface default", accentColor: null, description: "Follow the active pane surface color." },
+  { id: "mint", label: "Forge Mint", accentColor: "#26a69a", description: "Cool and neutral for general workspace flow." },
+  { id: "blue", label: "Signal Blue", accentColor: "#2962ff", description: "Sharper contrast for active working panes." },
+  { id: "amber", label: "Ledger Amber", accentColor: "#ff9800", description: "Warmer emphasis without going urgent." },
+  { id: "rose", label: "Alert Rose", accentColor: "#ef5350", description: "High-visibility color for pressure panes." },
+  { id: "violet", label: "Deep Violet", accentColor: "#7c3aed", description: "More synthetic contrast for experimentation." },
+  { id: "slate", label: "Slate", accentColor: "#5c6b73", description: "Lower-noise neutral for calm layouts." },
+] as const;
 
 function EmptyPane({ surfaceId }: { surfaceId: SurfaceId }) {
   const surface = getSurfaceMeta(surfaceId);
@@ -51,7 +63,9 @@ function hexToRgbTriplet(hexColor: string) {
 
 export default function Pane({
   surface,
+  accentColor = null,
   onSurfaceChange,
+  onAccentColorChange,
   focused = false,
   onFocus,
   zoomed = false,
@@ -66,21 +80,25 @@ export default function Pane({
   const [surfaceMenuOpen, setSurfaceMenuOpen] = useState(false);
   const [splitMenuOpen, setSplitMenuOpen] = useState(false);
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
+  const [paletteMenuOpen, setPaletteMenuOpen] = useState(false);
   const [splitMenuPosition, setSplitMenuPosition] = useState({ top: 0, left: 0 });
   const [surfaceMenuPosition, setSurfaceMenuPosition] = useState({ top: 0, left: 0 });
   const [contextMenuPosition, setContextMenuPosition] = useState({ top: 0, left: 0 });
+  const [paletteMenuPosition, setPaletteMenuPosition] = useState({ top: 0, left: 0 });
   const nav = useWorkspaceNav();
   const Content = SURFACE_COMPONENTS[surface];
   const surfaceMeta = getSurfaceMeta(surface);
+  const activeAccentColor = accentColor ?? surfaceMeta.color;
   const paneStyle = {
-    "--pane-accent": surfaceMeta.color,
-    "--pane-accent-rgb": hexToRgbTriplet(surfaceMeta.color),
+    "--pane-accent": activeAccentColor,
+    "--pane-accent-rgb": hexToRgbTriplet(activeAccentColor),
   } as CSSProperties;
 
   const closeAllMenus = () => {
     setSurfaceMenuOpen(false);
     setSplitMenuOpen(false);
     setContextMenuOpen(false);
+    setPaletteMenuOpen(false);
   };
 
   useEffect(() => {
@@ -91,15 +109,20 @@ export default function Pane({
 
   // Close menus on click outside
   useEffect(() => {
-    if (!surfaceMenuOpen && !splitMenuOpen && !contextMenuOpen) return;
+    if (!surfaceMenuOpen && !splitMenuOpen && !contextMenuOpen && !paletteMenuOpen) return;
     const handleClickOutside = (e: globalThis.MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (target.closest(`.${styles.paneDrop}`) || target.closest(`.${styles.splitDrop}`) || target.closest(`.${styles.ctxMenu}`)) return;
+      if (
+        target.closest(`.${styles.paneDrop}`) ||
+        target.closest(`.${styles.splitDrop}`) ||
+        target.closest(`.${styles.ctxMenu}`) ||
+        target.closest(`.${styles.paletteDrop}`)
+      ) return;
       closeAllMenus();
     };
     const timer = setTimeout(() => window.addEventListener("pointerdown", handleClickOutside), 0);
     return () => { clearTimeout(timer); window.removeEventListener("pointerdown", handleClickOutside); };
-  }, [surfaceMenuOpen, splitMenuOpen, contextMenuOpen]);
+  }, [surfaceMenuOpen, splitMenuOpen, contextMenuOpen, paletteMenuOpen]);
 
   const handlePaneContextMenu = (event: MouseEvent<HTMLDivElement>) => {
     if (!focused) return;
@@ -110,6 +133,7 @@ export default function Pane({
     setContextMenuOpen(true);
     setSurfaceMenuOpen(false);
     setSplitMenuOpen(false);
+    setPaletteMenuOpen(false);
   };
 
   return (
@@ -126,6 +150,7 @@ export default function Pane({
             setSurfaceMenuOpen((open) => !open);
             setSplitMenuOpen(false);
             setContextMenuOpen(false);
+            setPaletteMenuOpen(false);
           }}
         >
           <span className={styles.paneIcon}>{surfaceMeta.icon}</span>
@@ -208,13 +233,59 @@ export default function Pane({
           </div>
         )}
 
+        {paletteMenuOpen && (
+          <div className={styles.paletteDrop} style={{ position: "fixed", top: paletteMenuPosition.top, left: paletteMenuPosition.left }} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.paletteDropLabel}>Pane color</div>
+            {PANE_ACCENT_OPTIONS.map((option) => {
+              const optionAccent = option.accentColor ?? surfaceMeta.color;
+              const selected = accentColor === option.accentColor || (option.accentColor === null && accentColor === null);
+
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  className={`${styles.paletteOpt} ${selected ? styles.paletteOptActive : ""}`}
+                  onClick={() => {
+                    onAccentColorChange?.(option.accentColor);
+                    closeAllMenus();
+                  }}
+                >
+                  <span className={styles.paletteSwatch} style={{ background: optionAccent }} />
+                  <span className={styles.paletteMeta}>
+                    <span className={styles.paletteName}>{option.label}</span>
+                    <span className={styles.paletteDesc}>{option.description}</span>
+                  </span>
+                  {selected && <span className={styles.paletteCheck}>{"\u2713"}</span>}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         <div className={styles.paneHdRight}>
           <div className={styles.paneBeacon}>
             <span className={`${styles.paneBeaconLabel} ${focused ? styles.paneBeaconLabelOn : styles.paneBeaconLabelOff}`}>{focused ? "active" : "idle"}</span>
             <div className={`${styles.paneBeaconDot} ${focused ? styles.paneBeaconDotOn : styles.paneBeaconDotOff}`} />
           </div>
+          <span
+            className={`${styles.paneHdAction} ${paletteMenuOpen ? styles.paneHdActionActive : ""}`}
+            onClick={(event) => {
+              event.stopPropagation();
+              nav.dismissGlobalCtx();
+              onFocus?.();
+              const rect = event.currentTarget.getBoundingClientRect();
+              setPaletteMenuPosition({ top: rect.bottom + 2, left: rect.right - 220 });
+              setPaletteMenuOpen((open) => !open);
+              setSurfaceMenuOpen(false);
+              setSplitMenuOpen(false);
+              setContextMenuOpen(false);
+            }}
+            title="Change pane color"
+          >
+            {"\u25c9"}
+          </span>
           <span className={`${styles.paneHdAction} ${zoomed ? styles.paneHdActionActive : ""}`} onClick={(event) => { event.stopPropagation(); onZoom?.(); }} title={zoomed ? "Restore" : "Maximize"}>{zoomed ? "\u2923" : "\u2922"}</span>
-          {canSplit && !zoomed && <span className={styles.paneHdAction} onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); setSplitMenuPosition({ top: rect.bottom + 2, left: rect.right - 180 }); setSplitMenuOpen(!splitMenuOpen); setSurfaceMenuOpen(false); }} title="Split pane">{"\u2295"}</span>}
+          {canSplit && !zoomed && <span className={styles.paneHdAction} onClick={(event) => { event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect(); setSplitMenuPosition({ top: rect.bottom + 2, left: rect.right - 180 }); setSplitMenuOpen(!splitMenuOpen); setSurfaceMenuOpen(false); setPaletteMenuOpen(false); }} title="Split pane">{"\u2295"}</span>}
           {canClose && <span className={`${styles.paneHdAction} ${styles.paneHdActionClose}`} onClick={(event) => { event.stopPropagation(); onClose?.(); }} title="Close pane">{"\u00d7"}</span>}
         </div>
 
