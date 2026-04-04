@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Pane from "./Pane";
 import styles from "./PaneLayout.module.css";
 import type { SurfaceId } from "../surfaces/registry";
@@ -8,8 +8,11 @@ import type { SurfaceId } from "../surfaces/registry";
 interface PaneState {
   id: string;
   surface: SurfaceId;
-  accentColor: string | null;
 }
+
+type HeaderTreatment = "default" | "tinted";
+
+const HEADER_TREATMENT_STORAGE_KEY = "felmark-workspace-pane-header-treatment";
 
 interface StackRow {
   left: PaneState;
@@ -79,7 +82,7 @@ function allPanes(layout: WorkspacePaneLayout) {
 }
 
 function createPane(surface: SurfaceId) {
-  return { id: nextPaneId(), surface, accentColor: null };
+  return { id: nextPaneId(), surface };
 }
 
 export default function PaneLayout() {
@@ -94,6 +97,14 @@ export default function PaneLayout() {
   const [activeId, setActiveId] = useState<string>(() => layout.stack[0].left.id);
   const [zoomedId, setZoomedId] = useState<string | null>(null);
   const [activePreset, setActivePreset] = useState("daily");
+  const [headerTreatment, setHeaderTreatment] = useState<HeaderTreatment>(() => {
+    if (typeof window === "undefined") return "default";
+    return window.localStorage.getItem(HEADER_TREATMENT_STORAGE_KEY) === "tinted" ? "tinted" : "default";
+  });
+
+  useEffect(() => {
+    window.localStorage.setItem(HEADER_TREATMENT_STORAGE_KEY, headerTreatment);
+  }, [headerTreatment]);
 
   const maxPanes = 4;
   const totalPanes = countPanes(layout);
@@ -114,18 +125,6 @@ export default function PaneLayout() {
       stack: currentLayout.stack.map((row) => ({
         left: row.left.id === paneId ? { ...row.left, surface } : row.left,
         right: row.right?.id === paneId ? { ...row.right, surface } : row.right,
-      })),
-    }));
-  };
-
-  const changeAccentColor = (paneId: string, accentColor: string | null) => {
-    setLayout((currentLayout) => ({
-      ...currentLayout,
-      fLeft: currentLayout.fLeft?.id === paneId ? { ...currentLayout.fLeft, accentColor } : currentLayout.fLeft,
-      fRight: currentLayout.fRight?.id === paneId ? { ...currentLayout.fRight, accentColor } : currentLayout.fRight,
-      stack: currentLayout.stack.map((row) => ({
-        left: row.left.id === paneId ? { ...row.left, accentColor } : row.left,
-        right: row.right?.id === paneId ? { ...row.right, accentColor } : row.right,
       })),
     }));
   };
@@ -232,9 +231,9 @@ export default function PaneLayout() {
       <div key={pane.id} className={styles.paneSlot} style={{ flex: zoomed ? "1" : hidden ? "0 0 0px" : "1 1 0px", opacity: hidden ? 0 : 1 }}>
         <Pane
           surface={pane.surface}
-          accentColor={pane.accentColor}
           onSurfaceChange={(surface) => changeSurface(pane.id, surface)}
-          onAccentColorChange={(accentColor) => changeAccentColor(pane.id, accentColor)}
+          headerTreatment={headerTreatment}
+          onHeaderTreatmentChange={setHeaderTreatment}
           focused={activeId === pane.id}
           onFocus={() => focusPane(pane.id)}
           zoomed={zoomed}

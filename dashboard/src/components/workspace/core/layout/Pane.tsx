@@ -7,9 +7,9 @@ import styles from "./Pane.module.css";
 
 interface PaneProps {
   surface: SurfaceId;
-  accentColor?: string | null;
   onSurfaceChange: (surface: SurfaceId) => void;
-  onAccentColorChange?: (accentColor: string | null) => void;
+  headerTreatment?: "default" | "tinted";
+  onHeaderTreatmentChange?: (treatment: "default" | "tinted") => void;
   focused?: boolean;
   onFocus?: () => void;
   zoomed?: boolean;
@@ -23,13 +23,8 @@ interface PaneProps {
 }
 
 const PANE_ACCENT_OPTIONS = [
-  { id: "surface", label: "Surface default", accentColor: null, description: "Follow the active pane surface color." },
-  { id: "mint", label: "Forge Mint", accentColor: "#26a69a", description: "Cool and neutral for general workspace flow." },
-  { id: "blue", label: "Signal Blue", accentColor: "#2962ff", description: "Sharper contrast for active working panes." },
-  { id: "amber", label: "Ledger Amber", accentColor: "#ff9800", description: "Warmer emphasis without going urgent." },
-  { id: "rose", label: "Alert Rose", accentColor: "#ef5350", description: "High-visibility color for pressure panes." },
-  { id: "violet", label: "Deep Violet", accentColor: "#7c3aed", description: "More synthetic contrast for experimentation." },
-  { id: "slate", label: "Slate", accentColor: "#5c6b73", description: "Lower-noise neutral for calm layouts." },
+  { id: "default", label: "Default chrome", treatment: "default", description: "Monochrome dark headers with surface icon tint and an active seam." },
+  { id: "tinted", label: "Tinted headers", treatment: "tinted", description: "Mix a small amount of each surface color into the dark header background." },
 ] as const;
 
 function EmptyPane({ surfaceId }: { surfaceId: SurfaceId }) {
@@ -63,9 +58,9 @@ function hexToRgbTriplet(hexColor: string) {
 
 export default function Pane({
   surface,
-  accentColor = null,
   onSurfaceChange,
-  onAccentColorChange,
+  headerTreatment = "default",
+  onHeaderTreatmentChange,
   focused = false,
   onFocus,
   zoomed = false,
@@ -88,10 +83,9 @@ export default function Pane({
   const nav = useWorkspaceNav();
   const Content = SURFACE_COMPONENTS[surface];
   const surfaceMeta = getSurfaceMeta(surface);
-  const activeAccentColor = accentColor ?? surfaceMeta.color;
   const paneStyle = {
-    "--pane-accent": activeAccentColor,
-    "--pane-accent-rgb": hexToRgbTriplet(activeAccentColor),
+    "--pane-accent": surfaceMeta.color,
+    "--pane-accent-rgb": hexToRgbTriplet(surfaceMeta.color),
   } as CSSProperties;
 
   const closeAllMenus = () => {
@@ -137,7 +131,11 @@ export default function Pane({
   };
 
   return (
-    <div className={`${styles.pane} ${focused ? styles.paneFocused : styles.paneInactive}`} style={paneStyle} onClick={onFocus}>
+    <div
+      className={`${styles.pane} ${focused ? styles.paneFocused : styles.paneInactive} ${headerTreatment === "tinted" ? styles.paneTinted : ""}`}
+      style={paneStyle}
+      onClick={onFocus}
+    >
       <div className={styles.paneHd} onContextMenu={handlePaneContextMenu}>
         <div
           className={styles.paneHdLeft}
@@ -235,10 +233,9 @@ export default function Pane({
 
         {paletteMenuOpen && (
           <div className={styles.paletteDrop} style={{ position: "fixed", top: paletteMenuPosition.top, left: paletteMenuPosition.left }} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.paletteDropLabel}>Pane color</div>
+            <div className={styles.paletteDropLabel}>Header style</div>
             {PANE_ACCENT_OPTIONS.map((option) => {
-              const optionAccent = option.accentColor ?? surfaceMeta.color;
-              const selected = accentColor === option.accentColor || (option.accentColor === null && accentColor === null);
+              const selected = headerTreatment === option.treatment;
 
               return (
                 <button
@@ -246,11 +243,11 @@ export default function Pane({
                   type="button"
                   className={`${styles.paletteOpt} ${selected ? styles.paletteOptActive : ""}`}
                   onClick={() => {
-                    onAccentColorChange?.(option.accentColor);
+                    onHeaderTreatmentChange?.(option.treatment);
                     closeAllMenus();
                   }}
                 >
-                  <span className={styles.paletteSwatch} style={{ background: optionAccent }} />
+                  <span className={styles.paletteSwatch} style={{ background: option.treatment === "tinted" ? surfaceMeta.color : "var(--ink-400, #9598a1)" }} />
                   <span className={styles.paletteMeta}>
                     <span className={styles.paletteName}>{option.label}</span>
                     <span className={styles.paletteDesc}>{option.description}</span>
@@ -280,7 +277,7 @@ export default function Pane({
               setSplitMenuOpen(false);
               setContextMenuOpen(false);
             }}
-            title="Change pane color"
+            title="Header style"
           >
             {"\u25c9"}
           </span>
