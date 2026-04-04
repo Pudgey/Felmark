@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useCallback, createContext, useContext } from "react";
+import PaneLayout from "@/components/workspace/core/layout/PaneLayout";
 import WorkspaceSidebar from "@/components/workspace/sidebar/WorkspaceSidebar";
 import WorkspaceTabs from "@/components/workspace/core/tabs/WorkspaceTabs";
-import SplitPanes from "@/components/workspace/panes/SplitPanes";
 import Toasts, { DEMO_TOASTS, type Toast } from "@/components/workspace/toasts/Toasts";
 import ClientHub from "@/components/workspace/hub/ClientHub";
 import NewTab from "@/components/workspace/newtab/NewTab";
@@ -251,7 +251,7 @@ export default function WorkspaceRouter() {
           {activeView === "workspace" && (
             <>
               <WorkspaceSidebar />
-              <SplitPanes />
+              <PaneLayout />
             </>
           )}
           {activeView === "newtab" && <NewTab />}
@@ -266,6 +266,7 @@ export default function WorkspaceRouter() {
           )}
           {activeView === "hub" && hubTab && (
             <ClientHub
+              key={hubTab.clientId}
               clientId={hubTab.clientId}
               clientName={hubTab.clientName}
               clientAvatar={hubTab.clientAvatar}

@@ -7,7 +7,7 @@
 - None (self-contained, demo data)
 
 ## Imported By
-- `views/workspace.tsx`
+- `views/routers/WorkspaceRouter.tsx`
 
 ## Files
 - `WorkspaceSidebar.tsx` — Component with client cards, search, sparklines, health rings

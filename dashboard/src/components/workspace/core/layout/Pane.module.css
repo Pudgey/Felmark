@@ -1,0 +1,99 @@
+.pane { display: flex; flex: 1; min-height: 0; flex-direction: column; overflow: hidden; border: 1px solid var(--warm-200, #e0dfdb); border-left: none; background: #fff; transition: opacity .15s; }
+.paneInactive { opacity: .55; }
+.paneFocused .paneHd { background: rgba(38, 166, 154, .02); }
+
+.paneHd { position: relative; display: flex; align-items: center; height: 38px; padding: 0 14px; border-bottom: 1px solid var(--warm-100, #ededeb); flex-shrink: 0; }
+.paneHdLeft { display: flex; align-items: center; gap: 6px; padding: 4px 10px 4px 6px; border-radius: 6px; cursor: pointer; transition: background .06s; }
+.paneHdLeft:hover { background: rgba(0, 0, 0, .025); }
+.paneIcon { font-size: 12px; color: var(--ink-400, #a5a49f); }
+.paneLabel { font-family: 'JetBrains Mono', var(--mono, monospace); font-size: 11px; font-weight: 600; color: var(--ink-700, #3d3c38); text-transform: uppercase; letter-spacing: .05em; }
+.paneChevron { margin-left: 3px; font-size: 8px; color: var(--ink-400, #a5a49f); }
+.paneHdSep { width: 1px; height: 16px; margin: 0 10px; flex-shrink: 0; background: var(--warm-200, #e0dfdb); }
+.paneHdContext { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: 'JetBrains Mono', var(--mono, monospace); font-size: 10px; color: var(--ink-400, #a5a49f); }
+.paneHdRight { margin-left: auto; display: flex; gap: 4px; }
+
+.paneBeacon { display: flex; align-items: center; gap: 8px; margin-right: 10px; }
+.paneBeaconLabel { font-family: 'JetBrains Mono', var(--mono, monospace); font-size: 9px; letter-spacing: .03em; }
+.paneBeaconLabelOn { color: rgba(38, 166, 154, .6); }
+.paneBeaconLabelOff { color: var(--warm-300, #cccbc7); }
+.paneBeaconDot { position: relative; width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.paneBeaconDotOn { background: #26a69a; }
+.paneBeaconDotOn::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; background: #26a69a; opacity: 0; animation: beacon 3s ease infinite; }
+.paneBeaconDotOff { background: var(--warm-300, #cccbc7); }
+
+.paneHdAction { display: flex; width: 24px; height: 24px; align-items: center; justify-content: center; border-radius: 6px; font-size: 11px; color: var(--ink-400, #a5a49f); cursor: pointer; transition: all .06s; }
+.paneHdAction:hover { background: rgba(0, 0, 0, .05); color: var(--ink-700, #3d3c38); }
+.paneHdActionActive { color: #26a69a; }
+.paneHdActionActive:hover { background: rgba(38, 166, 154, .08); color: #26a69a; }
+.paneHdActionClose:hover { background: rgba(239, 83, 80, .08); color: #ef5350; }
+
+.paneDrop,
+.splitDrop,
+.ctxMenu { z-index: 9999; border: 1px solid var(--warm-200, #e0dfdb); border-radius: 10px; background: #fff; box-shadow: 0 12px 40px rgba(0, 0, 0, .12), 0 2px 8px rgba(0, 0, 0, .06); }
+
+.paneDrop { width: 320px; padding: 4px; }
+.paneDropOpt { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid transparent; border-radius: 8px; cursor: pointer; transition: all .06s; }
+.paneDropOpt:hover { background: rgba(0, 0, 0, .025); }
+.paneDropOn { background: rgba(38, 166, 154, .04); border-color: rgba(38, 166, 154, .12); }
+.paneDropIconBox { display: flex; width: 32px; height: 32px; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 8px; background: rgba(0, 0, 0, .03); font-size: 14px; color: var(--ink-400, #a5a49f); transition: all .08s; }
+.paneDropOpt:hover .paneDropIconBox { background: rgba(0, 0, 0, .06); color: var(--ink-700, #3d3c38); }
+.paneDropIconBoxOn { background: rgba(38, 166, 154, .1); color: #26a69a; }
+.paneDropInfo { flex: 1; min-width: 0; }
+.paneDropName { display: block; font-size: 13px; font-weight: 500; color: var(--ink-800, #2a2926); }
+.paneDropDesc { display: block; margin-top: 1px; font-size: 11px; color: var(--ink-400, #a5a49f); }
+.paneDropState { flex-shrink: 0; text-align: right; }
+.paneDropStateVal { display: block; font-family: 'JetBrains Mono', var(--mono, monospace); font-size: 12px; font-weight: 600; line-height: 1; }
+.paneDropStateLb { display: block; margin-top: 2px; font-family: 'JetBrains Mono', var(--mono, monospace); font-size: 8px; color: var(--ink-400, #a5a49f); }
+.paneDropKey { display: flex; min-width: 20px; height: 20px; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid var(--warm-200, #e0dfdb); border-radius: 5px; background: rgba(0, 0, 0, .03); font-family: 'JetBrains Mono', var(--mono, monospace); font-size: 9px; color: var(--ink-400, #a5a49f); padding: 0 5px; }
+
+.splitDrop { width: 180px; padding: 4px; display: flex; flex-direction: column; gap: 2px; }
+.splitDropOpt { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; cursor: pointer; transition: background .06s; }
+.splitDropOpt:hover { background: rgba(38, 166, 154, .04); }
+.splitDropPreview { display: flex; width: 28px; height: 28px; flex-shrink: 0; flex-direction: column; gap: 1px; overflow: hidden; border: 1px solid var(--warm-200, #e0dfdb); border-radius: 5px; padding: 2px; }
+.splitDropPreviewH { flex-direction: row; }
+.splitDropCur { display: flex; flex: 1; align-items: center; justify-content: center; border-radius: 2px; background: rgba(0, 0, 0, .04); font-size: 7px; color: var(--ink-400, #a5a49f); }
+.splitDropNew { flex: 1; border: 1px dashed rgba(38, 166, 154, .3); border-radius: 2px; background: rgba(38, 166, 154, .12); }
+.splitDropInfo { display: flex; flex: 1; align-items: center; justify-content: space-between; }
+.splitDropLabel { font-size: 12px; font-weight: 500; color: var(--ink-700, #3d3c38); }
+.splitDropKey { font-family: 'JetBrains Mono', var(--mono, monospace); font-size: 9px; color: var(--ink-300, #cccbc7); }
+.splitDropSep { height: 1px; margin: 2px 8px; background: var(--warm-200, #e0dfdb); }
+.splitDropCurStack { display: flex; flex: 1; flex-direction: column; gap: 1px; overflow: hidden; border-radius: 2px; }
+.splitDropCurMini { flex: 1; border-radius: 1px; background: rgba(0, 0, 0, .04); }
+
+.ctxMenu { width: 200px; padding: 4px; animation: ctxIn .08s ease; }
+.ctxGroup { padding: 2px 0; }
+.ctxGroupLabel { display: block; padding: 4px 10px 2px; font-family: 'JetBrains Mono', var(--mono, monospace); font-size: 8px; color: var(--ink-400, #a5a49f); text-transform: uppercase; letter-spacing: .08em; }
+.ctxItem { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; color: var(--ink-600, #5c5b57); transition: background .04s; }
+.ctxItem:hover { background: rgba(0, 0, 0, .03); color: var(--ink-900, #1a1918); }
+.ctxItemOn { background: rgba(0, 0, 0, .03); font-weight: 500; }
+.ctxItemIcon { width: 16px; flex-shrink: 0; text-align: center; font-size: 11px; color: var(--ink-400, #a5a49f); }
+.ctxItemLabel { flex: 1; }
+.ctxItemKey { flex-shrink: 0; font-family: 'JetBrains Mono', var(--mono, monospace); font-size: 9px; color: var(--ink-300, #cccbc7); }
+.ctxItemCheck { flex-shrink: 0; font-size: 11px; color: #26a69a; }
+.ctxSep { height: 1px; margin: 3px 8px; background: var(--warm-200, #e0dfdb); }
+.ctxItemDanger,
+.ctxItemDanger .ctxItemIcon { color: #ef5350; }
+.ctxItemDanger:hover { background: rgba(239, 83, 80, .06); color: #ef5350; }
+
+.paneBody { position: relative; flex: 1; overflow-y: auto; }
+.paneBody::-webkit-scrollbar { width: 3px; }
+.paneBody::-webkit-scrollbar-thumb { background: var(--warm-200, #e0dfdb); border-radius: 2px; }
+
+.emptyPane { display: flex; flex: 1; align-items: center; justify-content: center; padding: 24px; }
+.emptyInner { max-width: 180px; text-align: center; }
+.emptyGlyph { margin-bottom: 10px; font-size: 32px; line-height: 1; color: var(--warm-200, #e0dfdb); }
+.emptyTitle { font-family: 'JetBrains Mono', var(--mono, monospace); font-size: 12px; font-weight: 600; color: var(--ink-600, #5c5b57); text-transform: uppercase; letter-spacing: .04em; }
+.emptySub { margin-top: 4px; font-size: 12px; line-height: 1.4; color: var(--ink-400, #a5a49f); }
+.emptyAction { display: inline-flex; align-items: center; gap: 4px; margin-top: 14px; padding: 6px 14px; border: none; border-radius: 7px; background: var(--ink-900, #1a1918); color: #fff; font-size: 12px; font-weight: 500; font-family: inherit; cursor: pointer; transition: all .08s; }
+.emptyAction:hover { background: var(--ink-800, #2a2926); transform: translateY(-1px); }
+.emptyShortcut { margin-top: 8px; font-family: 'JetBrains Mono', var(--mono, monospace); font-size: 9px; color: var(--warm-300, #cccbc7); }
+
+@keyframes beacon {
+  0%, 100% { opacity: 0; transform: scale(.8); }
+  50% { opacity: .2; transform: scale(1.6); }
+}
+
+@keyframes ctxIn {
+  from { opacity: 0; transform: scale(.96); }
+  to { opacity: 1; transform: scale(1); }
+}

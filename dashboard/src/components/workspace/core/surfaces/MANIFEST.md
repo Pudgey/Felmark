@@ -13,7 +13,6 @@
 
 ## Imported By
 - `workspace/core/layout/Pane.tsx` -- renders pane bodies and surface metadata
-- `workspace/core/tabs/WorkspaceTabs.tsx` -- workspace prompt context labels
 
 ## Files
 - `registry.ts` -- surface metadata, labels, and component registry
