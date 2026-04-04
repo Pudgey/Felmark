@@ -10,9 +10,11 @@
 | `codex` | 8 | `2026-03-30_codex-skill-packaging.md`, `2026-04-01_housekeeping-sweep.md`, `2026-04-03_personal-tab-ghost-bug.md`, `2026-04-03_sidebar-workstation-context.md`, `2026-04-03_shared-terminal-session.md`, `2026-04-03_workstation-superbrain-refresh.md`, `2026-04-04_workspace-core-restructure.md`, `2026-04-04_editor-image-block.md` |
 | `conductor` | 4 | `2026-03-30_skill-library-felmark-cleanup.md`, `2026-03-30_codex-skill-packaging.md`, `2026-04-01_housekeeping-sweep.md`, `2026-04-03_split-pane-architecture.md` |
 | `architecture` | 5 | `2026-04-02_editor-core-refactor.md`, `2026-04-03_split-pane-architecture.md`, `2026-04-03_workstation-superbrain-refresh.md`, `2026-04-04_workspace-core-restructure.md`, `2026-04-04_workspace-structural-cleanup.md` |
-| `dashboard` | 1 | `2026-04-01_forge-paper-and-settings-handoff.md` |
+| `dashboard` | 2 | `2026-04-01_forge-paper-and-settings-handoff.md`, `2026-04-04_workspace-command-forge-dashboard-spec.md` |
+| `design-spec` | 1 | `2026-04-04_workspace-command-forge-dashboard-spec.md` |
+| `command-palette` | 1 | `2026-04-04_workspace-command-forge-dashboard-spec.md` |
 | `editor` | 6 | `2026-04-02_editor-core-refactor.md`, `2026-04-03_personal-tab-ghost-bug.md`, `2026-04-03_sidebar-workstation-context.md`, `2026-04-03_workstation-superbrain-refresh.md`, `2026-04-04_canvas-autodraw.md`, `2026-04-04_editor-image-block.md` |
-| `feature` | 2 | `2026-04-04_canvas-autodraw.md`, `2026-04-04_editor-image-block.md` |
+| `feature` | 3 | `2026-04-04_canvas-autodraw.md`, `2026-04-04_editor-image-block.md`, `2026-04-04_workspace-command-forge-dashboard-spec.md` |
 | `home` | 1 | `2026-04-02_editor-core-refactor.md` |
 | `refactor` | 3 | `2026-04-02_editor-core-refactor.md`, `2026-04-04_workspace-core-restructure.md`, `2026-04-04_workspace-structural-cleanup.md` |
 | `ai` | 1 | `2026-04-04_canvas-autodraw.md` |
@@ -34,7 +36,7 @@
 | `ci` | 1 | `2026-04-02_quality-gates.md` |
 | `terminal` | 1 | `2026-04-03_shared-terminal-session.md` |
 | `workstation` | 2 | `2026-04-03_workstation-superbrain-refresh.md`, `2026-04-04_editor-image-block.md` |
-| `workspace` | 3 | `2026-04-03_shared-terminal-session.md`, `2026-04-04_workspace-core-restructure.md`, `2026-04-04_workspace-structural-cleanup.md` |
+| `workspace` | 4 | `2026-04-03_shared-terminal-session.md`, `2026-04-04_workspace-core-restructure.md`, `2026-04-04_workspace-structural-cleanup.md`, `2026-04-04_workspace-command-forge-dashboard-spec.md` |
 
 ## Pattern Alerts
 
