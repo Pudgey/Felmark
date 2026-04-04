@@ -43,6 +43,7 @@ All block-type components live here, organized by category.
 - `table/` -- Editable data table
 - `accordion/` -- Collapsible accordion sections
 - `math/` -- Formula display with variables
+- `image/` -- Single-image block with caption and alt text
 - `gallery/` -- Image gallery with lightbox
 - `swatches/` -- Color swatch palette with contrast checker
 - `before-after/` -- Before/after slider comparison

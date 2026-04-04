@@ -180,8 +180,8 @@ export default function ImageBlock({ data, onChange }: ImageBlockProps) {
         <div className={styles.empty}>
           <div className={styles.emptyIcon}>▣</div>
           <div className={styles.emptyCopy}>
-            <div className={styles.emptyTitle}>Add an image</div>
-            <div className={styles.emptyText}>Upload from your device or paste a direct image URL.</div>
+            <div className={styles.emptyTitle}>Add a single image</div>
+            <div className={styles.emptyText}>Upload one image from your device or paste a direct image URL.</div>
           </div>
 
           <div className={styles.emptyActions}>

@@ -15,5 +15,5 @@
 - `forge/services/blocks/content.ts` -- forge default data factory
 
 ## Files
-- `ImageBlock.tsx` -- block component and default data factory
+- `ImageBlock.tsx` -- single-image block component and default data factory
 - `ImageBlock.module.css` -- block styles

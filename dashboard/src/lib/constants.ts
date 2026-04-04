@@ -41,9 +41,9 @@ export const BLOCK_TYPES: BlockTypeInfo[] = [
   { type: "math", label: "Formula", icon: "∑", desc: "Math with variables", section: "Blocks", shortcut: "/math" },
   {
     type: "image",
-    label: "Image",
+    label: "Single Image",
     icon: "▣",
-    desc: "Single uploaded image with caption",
+    desc: "Standalone image with caption",
     section: "Blocks",
     shortcut: "/image",
   },
