@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type MouseEvent } from "react";
+import { useEffect, useState, type CSSProperties, type MouseEvent } from "react";
 import { useWorkspaceNav } from "@/views/routers/WorkspaceRouter";
 import { SURFACES, SURFACE_COMPONENTS, SURFACE_CONTEXT, getSurfaceMeta, type SurfaceId } from "../surfaces/registry";
 import styles from "./Pane.module.css";
@@ -36,6 +36,19 @@ function EmptyPane({ surfaceId }: { surfaceId: SurfaceId }) {
   );
 }
 
+function hexToRgbTriplet(hexColor: string) {
+  const normalized = hexColor.replace("#", "");
+  const value = normalized.length === 3
+    ? normalized.split("").map((char) => char + char).join("")
+    : normalized;
+
+  const red = Number.parseInt(value.slice(0, 2), 16);
+  const green = Number.parseInt(value.slice(2, 4), 16);
+  const blue = Number.parseInt(value.slice(4, 6), 16);
+
+  return `${red}, ${green}, ${blue}`;
+}
+
 export default function Pane({
   surface,
   onSurfaceChange,
@@ -59,6 +72,10 @@ export default function Pane({
   const nav = useWorkspaceNav();
   const Content = SURFACE_COMPONENTS[surface];
   const surfaceMeta = getSurfaceMeta(surface);
+  const paneStyle = {
+    "--pane-accent": surfaceMeta.color,
+    "--pane-accent-rgb": hexToRgbTriplet(surfaceMeta.color),
+  } as CSSProperties;
 
   const closeAllMenus = () => {
     setSurfaceMenuOpen(false);
@@ -96,7 +113,7 @@ export default function Pane({
   };
 
   return (
-    <div className={`${styles.pane} ${focused ? styles.paneFocused : styles.paneInactive}`} onClick={onFocus}>
+    <div className={`${styles.pane} ${focused ? styles.paneFocused : styles.paneInactive}`} style={paneStyle} onClick={onFocus}>
       <div className={styles.paneHd} onContextMenu={handlePaneContextMenu}>
         <div
           className={styles.paneHdLeft}
