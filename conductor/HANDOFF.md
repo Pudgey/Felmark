@@ -2,75 +2,35 @@
 
 ## What happened
 
-Two sessions ran today. First: Client Hub V2 drawer, drawing block wiring, canvas improvements, housekeeping, pane dropdown investigation. Second (current close): structural cleanup — offboarded misplaced components from `workstation/` into correct permanent homes, no new features built.
+This session closed with the workspace pane system materially cleaner and the canvas block stabilized after the AI autodraw rollout. Workspace core is already merged on `main`, pane polish is on `main`, and the canvas duplicate-key / duplicate-id failure is resolved in the current main checkout with lint passing. The workstation editor Single Image block was implemented in a Codex worktree, verified there, and then cherry-picked onto `main`.
 
-## Completed (structural cleanup session)
+## Completed
 
-1. **Pipeline moved** — `workstation/pipeline/` → `workspace/pipeline/`
-2. **Finance moved** — `workstation/finance/` → `workspace/finance/`
-3. **Dead view wrappers deleted** — `views/pipeline.tsx`, `views/finance.tsx` (rail routing already removed; these were orphans)
-4. **Search moved** — `workstation/search/` → `components/search/` (cross-cutting, rail-accessible)
-5. **Calendar moved** — `workstation/calendar/` → `components/calendar/` (cross-cutting, rail-accessible)
-6. **ForgePaper rebranded to Paper** — `workstation/forge-paper/` → `components/paper/`; all component names renamed (`ForgePaper` → `Paper`, `ForgePaperOutline` → `PaperOutline`), props interfaces, internal imports, CSS module references, and `views/forge.tsx` import all updated
-7. **Team moved** — `workstation/team/` → `components/team/`; `views/team.tsx` import updated
-
-## Completed (earlier session)
-
-1. **Client Hub V2** — Replaced fixed detail panel with animated slide-out drawer (Asana-style). Live timer, Detail/Comments tabs, property rows with keyboard shortcuts, priority bars, role badges, footer actions, section collapse, view tabs, filter/sort.
-2. **Drawing block wired** — Full `/drawing` → sub-picker → 8 types → block creation flow. Added to `useSlashMenu`, `DocumentSurface`, `BlockRenderer`, `blockRegistry`, `EditorCore`.
-3. **Canvas shake fixed** — `Math.random()` → deterministic `srand(seed)` in all sketchy rendering functions.
-4. **Canvas resize handles** — 8-point selection handles, single + multi-element proportional scaling.
-5. **Canvas undo/redo** — `useCanvasUndo` hook, 50-entry stack, toolbar buttons + ⌘Z/⌘⇧Z.
-6. **Canvas split** — 779-line monolith → 6 files (geometry, sketchy, rendering, resize, useCanvasUndo, CanvasBlock at 402 lines).
-7. **Housekeeping** — 8 stale missions removed, dead `visual/` block deleted, `blocks/MANIFEST.md` fixed, `editor/MANIFEST.md` created.
-8. **Pane dropdown fix attempt** — Added click-outside handler + stopPropagation on menus. Did not resolve the issue.
+1. **Workspace pane polish** — light pane headers, tightened chrome, polished Signals cards, and compact Work rows/expansion landed on `main`
+2. **Pane seam removal** — removed the focused-pane gradient seam and kept only the clean divider under the pane header
+3. **Canvas autodraw** — `/api/canvas`, `useAutodraw`, inline prompt input, and loading state are in place
+4. **Canvas rendering fixes** — corrected label paint order, shape dimensions, arrow trimming, and text-entry save behavior
+5. **Canvas id stability** — canvas elements now derive new ids from persisted data and repair duplicate ids on read instead of relying on a module-level counter reset
+6. **Canvas undo/redo cleanup** — undo availability is state-backed and the canvas no longer reads refs during render
+7. **Quality gate** — `npm run lint` passes from `dashboard/`
 
 ## In-progress work
 
-- [ ] **Workspace core extraction** — approved plan, not yet built (see below)
+- Browser verification is still pending for the now-merged workstation editor `Single Image` block on `main`
 
 ## Remaining work (priority order)
 
-- [ ] **Fix pane surface dropdown** — browser debug required (see Known Bug below)
-- [ ] **Workspace core extraction** — split `SplitPanes.tsx` (921 lines) and `SplitPanes.module.css` (1,292 lines) into:
-  - `workspace/core/tabs/WorkspaceTabs.tsx` — HybridHeader / tab chrome
-  - `workspace/core/layout/PaneLayout.tsx` — pane layout state + split logic
-  - `workspace/core/layout/Pane.tsx` — individual pane chrome
-  - `workspace/core/surfaces/*Pane.tsx` — 7 individual surface bodies + `registry.ts`
-  - `workspace/MANIFEST.md` already reflects the target state — use it as the spec
-- [ ] **Calendar-in-workspace** — queued after core extraction. Add `"calendar"` view to `WorkspaceRouter`, thin `WorkspaceCalendarView` wrapper, scoped to the active client.
-- [ ] **Browser-verify** `codex-workspace-core-restructure` branch before merge
-- [ ] **Browser-verify** shared terminal behavior on `main`
-- [ ] **Rebuild FORGE_MAP.md** — stale; files moved and deleted this session. Run `/forge` before any dependency-sensitive work.
-- [ ] **Rebuild Settings page** — clean slate at `components/settings/` + view wrapper in `views/`
-- [ ] **Split Canvas.tsx** into storage, derived state, and render pieces
-- [ ] **Fix graph typing** in `GraphDataEditor.tsx` / `GraphBlock.tsx` (replace `any`-based handling)
-- [ ] **Verify TerminalWelcome** split pane in browser
-
-## Known Bug — Pane Surface Dropdown Broken
-
-The surface picker dropdown in workspace panes does not work. Clicking the label (e.g., "▸ Money ▾") should open a dropdown to switch surfaces but it doesn't respond or immediately closes.
-
-**What's been tried:**
-- Added `stopPropagation()` on all three menu containers (surface, split, context)
-- Added `pointerdown` click-outside handler to close menus
-- Neither fixed it
-
-**Likely root causes to investigate:**
-- The codex agent restructured `Pane.tsx` during `codex-workspace-core-restructure` — the dropdown may have lost something in the extraction from the old `SplitPanes.tsx`
-- The `felmark:dismiss-ctx` event listener may be firing on every click and closing the menu immediately
-- The `.paneInactive { opacity: .55 }` or parent overflow may be intercepting pointer events
-- Need browser DevTools to check: is the click handler firing? Is `surfaceMenuOpen` toggling? Is the dropdown rendering but invisible (z-index, clipping)?
+- Browser-verify workspace pane polish on `main`
+- Browser-verify canvas autodraw, text entry, duplicate, undo/redo, and persisted reload behavior on `main`
+- Browser-verify the workstation editor `Single Image` block on `main`
+- Rebuild `FORGE_MAP.md`
+- Rebuild the Settings surface
+- Add the workspace calendar view after verification
 
 ## Gotchas
 
-- `SplitPanes.tsx` is the next hotspot to split. At 921 lines it is well into red territory. Do not add any code to it — only extract from it.
-- `SplitPanes.module.css` at 1,292 lines must be split in the same pass as the code extraction. Each surface module gets its own `.module.css`.
-- `workspace/MANIFEST.md` was pre-updated to reflect the target folder structure. Treat it as the authoritative spec for the core extraction. Do not invent new folder names.
-- Missing MANIFESTs to create during core extraction: `workspace/hub/`, `workspace/newtab/`, `workspace/products/`, `workspace/toasts/`, `workspace/panes/`.
-- `Paper` is the canonical name — `ForgePaper` is retired. Any lingering import or reference to `ForgePaper` is stale.
-- `SplitPanes.tsx` still exists as a compatibility shim from the `codex-workspace-core-restructure` worktree; the real implementation lives under `workspace/core/` in that branch.
-- `UniqueBlocks.module.css` is NOT orphaned — 8 unique block components import it as a shared stylesheet. Do not delete.
-- Canvas `nextCanvasId` is a module-level `let` — not persisted across page reloads. Element IDs reset on remount.
-- `npm run typecheck` can fail in a fresh worktree before a build because `tsconfig.json` includes `.next/types/**/*.ts`; run `./node_modules/.bin/next build --webpack` first, then `./node_modules/.bin/tsc --noEmit --incremental false`.
-- Worktree verification still relies on the symlinked `dashboard/node_modules` setup.
+- Canvas element ids must continue to come from the current element set. Do not reintroduce a module-level `let nextId = 1` allocator.
+- The canvas now repairs duplicate persisted ids on read. If a future migration touches canvas data, preserve that invariant.
+- Turbopack rejected a symlinked worktree `node_modules` that pointed outside the project root. For build verification in a worktree, use a local `npm install` inside that worktree’s `dashboard/`.
+- The main repo is effectively clean aside from a local untracked `dashboard/.husky/` directory that was not touched in this close-out.
+- `conductor/journal/2026-04-04_canvas-autodraw.md` is the journal entry covering the autodraw + canvas stabilization session.

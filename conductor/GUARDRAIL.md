@@ -7,8 +7,8 @@
 
 | Metric | Value | Threshold | Status |
 |--------|-------|-----------|--------|
-| Total source files | 323 | <200 OK, 200–400 caution, 400+ split | 🟡 Caution |
-| Total lines of code | ~57,175 | <50K OK, 50–100K caution, 100K+ enterprise | 🟡 Caution |
+| Total source files | 327 | <200 OK, 200–400 caution, 400+ split | 🟡 Caution |
+| Total lines of code | ~59,792 | <50K OK, 50–100K caution, 100K+ enterprise | 🟡 Caution |
 | Component directories | 22 | <30 OK, 30–50 caution, 50+ split | ✅ OK |
 | Block type folders | 40 | No limit — each lives in its own folder | ✅ OK |
 | Types in Block interface | 30+ fields | Verbose but flat — no tangled deps | ✅ OK |
@@ -69,7 +69,7 @@ This is boilerplate, not complexity. No refactor needed unless Editor.tsx itself
 | Share route | `dashboard/src/app/share/[id]/page.tsx` | Public/shared project surface |
 | AI generation API | `dashboard/src/app/api/generate/route.ts` | AI request endpoint |
 | Share API | `dashboard/src/app/api/share/route.ts` | Share lookup/create/update endpoint |
-| Forge Paper | `dashboard/src/components/workstation/forge-paper/` | Rail surface — document view for client proposals |
+| Paper | `dashboard/src/components/paper/` | Rail surface — document view for client proposals |
 
 ---
 
@@ -78,7 +78,7 @@ This is boilerplate, not complexity. No refactor needed unless Editor.tsx itself
 | Feature | Status | Primary Files | Notes |
 |---------|--------|---------------|-------|
 | **Workspace shell & nav** | Active | `page.tsx`, `rail/`, `sidebar/`, `dashboard/` | Core frame, workspace switching, rail icons |
-| **Editor core** | Active | `editor/Editor.tsx`, `types.ts`, `constants.ts` | Block system, slash menu, format bar, command bar |
+| **Editor core** | Active | `editor/Editor.tsx`, `types.ts`, `constants.ts` | Block system, slash menu, format bar, command bar, plus the Single Image block |
 | **Editor margin** | Active | `editor/margin/` | Outline, multi-select, context menu, drag reorder |
 | **Activity & comments** | Active | `activity/`, `comments/` | Right-side activity margin, comment panel |
 | **Calendar** | Active | `calendar/` | Full calendar view, event creation, week view |
@@ -93,7 +93,7 @@ This is boilerplate, not complexity. No refactor needed unless Editor.tsx itself
 | **Team** | Active | `team/` | Team collaboration surface |
 | **The Wire** | Needs wiring | `wire/` | Competitive intelligence surface |
 | **Workspace** | Active | `workspace/core/`, `workspace/sidebar/`, `views/routers/WorkspaceRouter.tsx` | Rail surface — tabs/layout/pane bodies now live under `workspace/core/`; pane chrome, Signals, and Work use the 2026-04-04 polish pass |
-| **Forge Paper** | Active | `forge-paper/` | Rail surface — owns blocks state, document view for client proposals |
+| **Paper** | Active | `paper/` | Rail surface — owns blocks state, document view for client proposals |
 | **Terminal Welcome** | Active | `editor/TerminalWelcome.tsx` | Dead-state splash screen |
 | **History** | Active | `history/` | Version history modal |
 | **Conversations** | Active | `editor/ConversationPanel.tsx` | Left-side conversation panel |
@@ -106,8 +106,8 @@ This is boilerplate, not complexity. No refactor needed unless Editor.tsx itself
 ### Text (11)
 paragraph, h1, h2, h3, bullet, numbered, todo, quote, code, callout, divider
 
-### Rich Content (8)
-table, gallery, accordion, math, swatches, bookmark, canvas, audio
+### Rich Content (9)
+table, accordion, math, image, gallery, swatches, bookmark, canvas, audio
 
 ### Visual (12)
 graph, beforeafter, deadline, deliverable, visual, timeline, flow, brandboard, moodboard, wireframe, pullquote, drawing
@@ -127,7 +127,7 @@ ai, ai-action
 ### Unique (8)
 pricing-config, scope-boundary, asset-checklist, decision-picker, availability-picker, progress-stream, dependency-map, revision-heatmap
 
-**Total: 57 block types** (in 40 folders)
+**Total: 58 block types** (in 41 folders)
 
 ---
 

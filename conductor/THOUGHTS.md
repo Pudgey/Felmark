@@ -23,8 +23,8 @@
 
 | Agent | Task | Completed |
 |-------|------|-----------|
-| codex-main | Fixed the canvas duplicate-key bug by repairing element ids and syncing canvas id allocation to persisted elements. | 2026-04-04 08:34 EDT |
-| codex-main | Grounding the session with the brain protocol before any scoped implementation work. | 2026-04-04 15:43 EDT |
-| codex-main | Removed the focused-pane gradient seam under the workspace pane header. | 2026-04-04 06:02 EDT |
-| codex-main | Implemented the pane polish kit for header chrome, Signals cards, and Work rows using the provided JSX as the spec. | 2026-04-04 05:57 EDT |
-| codex-main | Replaced the pane color experiment with the provided dark-chrome header spec: icon tint by default, active seam, and optional tinted headers. | 2026-04-04 05:38 EDT |
+| claude-main | Built workspace command palette (Cmd+K) and wired sidebar search filter across WorkspaceRouter, WorkspaceTabs, WorkspaceSidebar. | 2026-04-04 |
+| claude-main | Rebuilt FORGE_MAP.md from live disk scan — workspace canvas grid gone, ForgePaper renamed to Paper, 4 drift items flagged. | 2026-04-04 |
+| codex-main | Fixed the workstation editor footer so block counts and save status stay aligned on narrow widths. | 2026-04-04 11:07 EDT |
+| codex-main | Renamed the standalone workstation image block so it is surfaced distinctly as Single Image beside Gallery. | 2026-04-04 10:20 EDT |
+| codex-main | Built a modular image block for the workstation editor in a dedicated worktree, with lint and build passing there. | 2026-04-04 10:08 EDT |
