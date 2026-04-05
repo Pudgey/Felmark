@@ -1,0 +1,370 @@
+/* ─── Debrief — Shared styles for Welcome, Agenda, Pulse ─── */
+
+/* ─── Common ─── */
+
+.debrief {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 12px;
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.mark {
+  font-size: 28px;
+  color: var(--ember-light);
+  line-height: 1;
+}
+
+.title {
+  font-family: var(--font-heading), "Cormorant Garamond", serif;
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--ink-300);
+  line-height: 1.2;
+}
+
+.titleAccent {
+  color: var(--ember-light);
+  font-style: italic;
+}
+
+.subtitle {
+  color: color-mix(in srgb, var(--ink-300) 40%, transparent);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.skipNote {
+  color: color-mix(in srgb, var(--ink-300) 25%, transparent);
+  font-size: 10px;
+  margin-top: 4px;
+}
+
+/* ─── Welcome Steps ─── */
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 4px;
+}
+
+.step {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink-300) 8%, transparent);
+}
+
+.step:last-child {
+  border-bottom: none;
+}
+
+.stepNum {
+  color: var(--ember-light);
+  font-size: 10px;
+  font-weight: 600;
+  width: 16px;
+  text-align: right;
+  flex-shrink: 0;
+  padding-top: 1px;
+}
+
+.stepBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stepTitle {
+  color: var(--ink-300);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.stepDesc {
+  color: color-mix(in srgb, var(--ink-300) 40%, transparent);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.stepCmd {
+  color: var(--ember-light);
+  font-size: 10px;
+  cursor: pointer;
+  margin-top: 3px;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  text-align: left;
+}
+
+.stepCmd:hover {
+  text-decoration: underline;
+}
+
+/* ─── Agenda ─── */
+
+.dateHeader {
+  color: color-mix(in srgb, var(--ink-300) 40%, transparent);
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.agendaTitle {
+  color: var(--ember-light);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.agendaSubtitle {
+  color: color-mix(in srgb, var(--ink-300) 40%, transparent);
+  font-size: 10px;
+}
+
+.agendaItems {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.agendaItem {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink-300) 8%, transparent);
+}
+
+.agendaItem:last-child {
+  border-bottom: none;
+}
+
+.agendaNum {
+  font-size: 12px;
+  font-weight: 600;
+  width: 14px;
+  text-align: right;
+  flex-shrink: 0;
+  color: color-mix(in srgb, var(--ink-300) 25%, transparent);
+}
+
+.agendaNumFirst {
+  color: var(--ember-light);
+}
+
+.agendaItemBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.agendaItemHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.agendaBadge {
+  font-size: 7px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+
+.agendaBadgeOverdue {
+  background: color-mix(in srgb, var(--error) 8%, transparent);
+  color: var(--error);
+}
+
+.agendaBadgeToday {
+  background: color-mix(in srgb, var(--warning) 8%, transparent);
+  color: var(--warning);
+}
+
+.agendaBadgeDefault {
+  background: color-mix(in srgb, var(--ink-300) 3%, transparent);
+  color: color-mix(in srgb, var(--ink-300) 40%, transparent);
+}
+
+.agendaItemTitle {
+  font-size: 12px;
+  color: var(--ink-300);
+  font-weight: 500;
+}
+
+.agendaClient {
+  font-size: 9px;
+  color: color-mix(in srgb, var(--ink-300) 25%, transparent);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.agendaContext {
+  font-size: 10px;
+  color: color-mix(in srgb, var(--ink-300) 40%, transparent);
+  line-height: 1.5;
+}
+
+.agendaItemMeta {
+  font-size: 9px;
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+  align-items: center;
+}
+
+.agendaTime {
+  color: color-mix(in srgb, var(--ink-300) 25%, transparent);
+}
+
+.agendaCmd {
+  color: var(--ember-light);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.agendaCmd:hover {
+  text-decoration: underline;
+}
+
+.agendaProgressBar {
+  display: flex;
+  gap: 1px;
+  align-items: center;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.agendaProgressFilled {
+  width: 8px;
+  height: 8px;
+  background: color-mix(in srgb, var(--ink-300) 30%, transparent);
+}
+
+.agendaProgressEmpty {
+  width: 8px;
+  height: 8px;
+  background: color-mix(in srgb, var(--ink-300) 8%, transparent);
+}
+
+/* ─── AI Insight Block ─── */
+
+.aiInsight {
+  padding: 8px 12px;
+  border-left: 2px solid color-mix(in srgb, var(--ember-light) 20%, transparent);
+  background: color-mix(in srgb, var(--ember-light) 3%, transparent);
+  border-radius: 0 6px 6px 0;
+  margin: 6px 0;
+  color: color-mix(in srgb, var(--ink-300) 70%, transparent);
+  line-height: 1.6;
+  font-size: 10px;
+}
+
+.aiLabel {
+  color: var(--ember-light);
+  font-size: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 3px;
+  display: block;
+}
+
+/* ─── Summary Footer ─── */
+
+.summaryFooter {
+  color: color-mix(in srgb, var(--ink-300) 30%, transparent);
+  font-size: 10px;
+  margin-top: 2px;
+}
+
+/* ─── Pulse ─── */
+
+.pulseGrid {
+  display: flex;
+  gap: 16px;
+}
+
+.pulseStat {
+  display: flex;
+  flex-direction: column;
+}
+
+.pulseStatLabel {
+  font-size: 8px;
+  color: color-mix(in srgb, var(--ink-300) 40%, transparent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.pulseStatValue {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink-300);
+  line-height: 1;
+}
+
+.pulseStatDelta {
+  font-size: 9px;
+  margin-top: 2px;
+}
+
+.pulseStatDeltaSuccess {
+  color: var(--success);
+}
+
+.pulseStatDeltaError {
+  color: var(--error);
+}
+
+.pulseStatDeltaWarning {
+  color: var(--warning);
+}
+
+.pulseStatDeltaMuted {
+  color: color-mix(in srgb, var(--ink-300) 30%, transparent);
+}
+
+.pulseAlert {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.pulseAlertDot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--error);
+  flex-shrink: 0;
+}
+
+.pulseAlertText {
+  color: var(--error);
+  font-size: 11px;
+}
+
+.pulseHint {
+  color: color-mix(in srgb, var(--ink-300) 20%, transparent);
+  font-size: 9px;
+  margin-top: 4px;
+}

@@ -5,6 +5,9 @@ import { useTerminalContext } from "./TerminalProvider";
 import { COMMAND_REGISTRY } from "@/lib/terminal/commands";
 import type { TerminalBlock, NLResponseData } from "@/lib/terminal/types";
 import { ThinkingDots, ScanLine } from "./AIThink";
+import WelcomeSetup from "./debrief/WelcomeSetup";
+import DebriefAgenda from "./debrief/DebriefAgenda";
+import DebriefPulse from "./debrief/DebriefPulse";
 import styles from "./Terminal.module.css";
 
 const AI_SUGGESTIONS: Record<string, string> = {
@@ -22,14 +25,6 @@ function getAiSuggestion(lastCommand: string): string {
   }
   return AI_SUGGESTIONS[""];
 }
-
-const WELCOME_HINTS = [
-  { cmd: "/status", desc: "project overview" },
-  { cmd: "/rate", desc: "effective rate" },
-  { cmd: "/client", desc: "client lookup" },
-  { cmd: "/pipeline", desc: "project pipeline" },
-  { cmd: "/wire", desc: "Wire signals" },
-];
 
 interface TerminalProps {
   onClose?: () => void;
@@ -129,6 +124,14 @@ export default function Terminal({ onClose }: TerminalProps) {
 
   const inputRef = useRef<HTMLInputElement>(null);
   const outputRef = useRef<HTMLDivElement>(null);
+
+  // Debrief command handler
+  const handleRunCommand = useCallback(
+    (cmd: string) => {
+      executeCommand(cmd);
+    },
+    [executeCommand],
+  );
 
   // Auto-scroll to bottom on new blocks
   useEffect(() => {
@@ -510,26 +513,30 @@ export default function Terminal({ onClose }: TerminalProps) {
 
       {/* Scrollable output */}
       <div className={styles.output} ref={outputRef}>
-        {/* Welcome block */}
-        {blocks.length === 0 && (
-          <div className={styles.welcomeBlock}>
-            <div className={styles.welcomeLogo}>
-              <span className={styles.welcomeLogoMark}>&#9670;</span>
-              <span className={styles.welcomeTitle}>
-                Felmark Terminal
-                <span className={styles.welcomeVersion}>v1.0</span>
-              </span>
-            </div>
-            <div className={styles.welcomeHints}>
-              {WELCOME_HINTS.map((h) => (
-                <div key={h.cmd} className={styles.welcomeHint}>
-                  <span className={styles.welcomeHintCmd}>{h.cmd}</span>
-                  <span>{h.desc}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Debrief / Welcome system */}
+        {blocks.length === 0 &&
+          (() => {
+            const welcomed =
+              typeof window !== "undefined" && localStorage.getItem("felmark_terminal_welcomed") === "true";
+            const today = new Date().toISOString().slice(0, 10);
+            const lastDebrief =
+              typeof window !== "undefined" ? localStorage.getItem("felmark_terminal_last_debrief") : null;
+
+            if (!welcomed) {
+              return <WelcomeSetup onRunCommand={handleRunCommand} />;
+            }
+
+            if (lastDebrief === today) {
+              return <DebriefPulse onRunCommand={handleRunCommand} />;
+            }
+
+            // First visit today — mark it and show agenda
+            if (typeof window !== "undefined") {
+              localStorage.setItem("felmark_terminal_last_debrief", today);
+            }
+
+            return <DebriefAgenda onRunCommand={handleRunCommand} />;
+          })()}
 
         {/* All blocks — commands, insights, NL responses */}
         {blocks.map((block) => renderBlock(block))}
