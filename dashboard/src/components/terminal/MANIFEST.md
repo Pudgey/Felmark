@@ -29,3 +29,4 @@
 - `AIThink.tsx` -- thinking animations (287 lines)
 - `AIThink.module.css` -- animation styles
 - `mounts/` -- shared session provider + workstation/workspace mount adapters
+- `debrief/` -- welcome/debrief system (WelcomeSetup, DebriefAgenda, DebriefPulse)
