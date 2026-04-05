@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import type { CanvasBlock, CanvasRow, LayoutBlock, GhostPosition, CellPosition } from "../types";
 import { layoutRows } from "../layout";
-import { BLOCK_DEFS, COLS, CELL, GAP, MAX_PER_ROW, findTargetRow } from "../registry";
+import { BLOCK_DEFS, COLS, CELL, GAP, MAX_PER_ROW, ROW_STEP, findTargetRow } from "../registry";
 
 /* ── Types ── */
 
@@ -54,7 +54,7 @@ export function useDragPlace(props: UseDragPlaceProps): UseDragPlaceReturn {
       const y = clientY - rect.top;
       if (x < -20 || y < -20) return null;
       const col = Math.round(x / (CELL + GAP));
-      const row = Math.round(y / (CELL + GAP));
+      const row = Math.round(y / ROW_STEP);
       return { col: Math.max(0, Math.min(COLS - 1, col)), row: Math.max(0, row) };
     },
     [gridRef],

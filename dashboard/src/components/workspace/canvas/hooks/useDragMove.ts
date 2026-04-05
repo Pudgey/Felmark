@@ -3,7 +3,15 @@
 import { useCallback, useState } from "react";
 import type { CanvasBlock, CanvasRow, LayoutBlock } from "../types";
 import { layoutRows } from "../layout";
-import { BLOCK_DEFS, COLS, CELL, GAP, GRID_W, canFitInRow } from "../registry";
+import {
+  BLOCK_DEFS,
+  COLS,
+  GRID_W,
+  canFitInRow,
+  colToPx,
+  rowToPx,
+  spanHeightPx,
+} from "../registry";
 
 const MOVE_PREVIEW_ID = "__move_preview__";
 const MOVE_PREVIEW_ROW_ID = "__move_preview_row__";
@@ -127,15 +135,15 @@ export function useDragMove({
       if (rowLayoutBlocks.length === 0) continue;
 
       const rowHeight = rowLayoutBlocks[0].h;
-      const rowTop = yOffset * (CELL + GAP);
-      const rowHeightPx = rowHeight * CELL + (rowHeight - 1) * GAP;
+      const rowTop = rowToPx(yOffset);
+      const rowHeightPx = spanHeightPx(rowHeight);
       const rowBottom = rowTop + rowHeightPx;
       const rowMid = rowTop + rowHeightPx / 2;
 
       if (canFitInRow(row, currentBlocks, moving.w) && y >= rowTop - 20 && y <= rowBottom + 20) {
         const boundaries = [0, ...rowLayoutBlocks.map((lb) => lb.x + lb.w)];
         for (let insertIdx = 0; insertIdx < boundaries.length; insertIdx++) {
-          const left = Math.min(boundaries[insertIdx] * (CELL + GAP), GRID_W);
+          const left = Math.min(colToPx(boundaries[insertIdx]), GRID_W);
           const score = Math.abs(x - left) + Math.abs(y - rowMid) * 0.18;
           if (score < bestScore && Math.abs(x - left) <= 44) {
             bestScore = score;
@@ -152,7 +160,7 @@ export function useDragMove({
       }
 
       yOffset += rowHeight;
-      considerRowTarget(rowIdx + 1, yOffset * (CELL + GAP));
+      considerRowTarget(rowIdx + 1, rowToPx(yOffset));
     }
 
     return bestTarget;
@@ -185,8 +193,8 @@ export function useDragMove({
     const movingLayout = layoutRef.current.find((lb) => lb.id === blockId);
     if (gridRef.current && movingLayout) {
       const gridRect = gridRef.current.getBoundingClientRect();
-      const blockLeft = gridRect.left + movingLayout.x * (CELL + GAP);
-      const blockTop = gridRect.top + movingLayout.y * (CELL + GAP);
+      const blockLeft = gridRect.left + colToPx(movingLayout.x);
+      const blockTop = gridRect.top + rowToPx(movingLayout.y);
       setMoveOffset({ x: clientX - blockLeft, y: clientY - blockTop });
     } else {
       setMoveOffset({ x: 28, y: 18 });
