@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { useTerminalContext } from "../TerminalProvider";
-import { COMMAND_REGISTRY } from "@/lib/terminal/commands";
+import WelcomeSetup from "../debrief/WelcomeSetup";
+import DebriefAgenda from "../debrief/DebriefAgenda";
+import DebriefPulse from "../debrief/DebriefPulse";
 import styles from "./TerminalOutput.module.css";
 
 function blockStyle(type: string): string {
@@ -27,7 +29,7 @@ function blockStyle(type: string): string {
 }
 
 export default function TerminalOutput() {
-  const { blocks } = useTerminalContext();
+  const { blocks, executeCommand } = useTerminalContext();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -36,21 +38,47 @@ export default function TerminalOutput() {
     }
   }, [blocks]);
 
+  const handleRunCommand = useCallback(
+    (cmd: string) => {
+      executeCommand(cmd);
+    },
+    [executeCommand],
+  );
+
   if (blocks.length === 0) {
-    const commandNames = Object.keys(COMMAND_REGISTRY);
+    const welcomed =
+      typeof window !== "undefined" &&
+      localStorage.getItem("felmark_terminal_welcomed") === "true";
+    const today = new Date().toISOString().slice(0, 10);
+    const lastDebrief =
+      typeof window !== "undefined"
+        ? localStorage.getItem("felmark_terminal_last_debrief")
+        : null;
+
+    if (!welcomed) {
+      return (
+        <div className={styles.container} ref={scrollRef}>
+          <WelcomeSetup onRunCommand={handleRunCommand} />
+        </div>
+      );
+    }
+
+    if (lastDebrief === today) {
+      return (
+        <div className={styles.container} ref={scrollRef}>
+          <DebriefPulse onRunCommand={handleRunCommand} />
+        </div>
+      );
+    }
+
+    // First visit today
+    if (typeof window !== "undefined") {
+      localStorage.setItem("felmark_terminal_last_debrief", today);
+    }
+
     return (
       <div className={styles.container} ref={scrollRef}>
-        <div className={styles.welcome}>
-          <div className={styles.welcomeTitle}>Felmark Terminal</div>
-          <div className={styles.welcomeDesc}>Type a slash command or ask a question in natural language.</div>
-          <div className={styles.welcomeCommands}>
-            {commandNames.map((name) => (
-              <span key={name} className={styles.commandTag}>
-                /{name}
-              </span>
-            ))}
-          </div>
-        </div>
+        <DebriefAgenda onRunCommand={handleRunCommand} />
       </div>
     );
   }
@@ -59,11 +87,17 @@ export default function TerminalOutput() {
     <div className={styles.container} ref={scrollRef}>
       {blocks.map((block) => (
         <div key={block.id} className={blockStyle(block.type)}>
-          {block.type === "command" && <span className={styles.prompt}>&gt; </span>}
+          {block.type === "command" && (
+            <span className={styles.prompt}>&gt; </span>
+          )}
           {block.type === "command" ? block.command : null}
-          {block.type === "loading" && <span className={styles.dots}>thinking...</span>}
+          {block.type === "loading" && (
+            <span className={styles.dots}>thinking...</span>
+          )}
           {block.type !== "command" && block.type !== "loading" && block.content}
-          {block.type === "nl-response" && block.nlData && <div className={styles.nlText}>{block.nlData.text}</div>}
+          {block.type === "nl-response" && block.nlData && (
+            <div className={styles.nlText}>{block.nlData.text}</div>
+          )}
         </div>
       ))}
     </div>

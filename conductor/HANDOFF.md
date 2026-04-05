@@ -2,27 +2,17 @@
 
 ## What happened
 
-### 1. Cloud rail icon — SHIPPED
-Added a cloud storage icon to `Rail.tsx` after Team, before the separator. Fires `onItemClick("cloud")` which falls through to dashboard domain → renders home. No new surface built yet — placeholder for future Supabase Storage feature.
+### 1. Theme Color Migration — SHIPPED
 
-Commit on `main`. MANIFEST.md updated.
+Extended `FelmarkTheme` with `card`, `cardTint`, `bg`, `border`, `borderLight` (10 themes) + workspace semantic fields (`positive`, `urgent`, `signal`, `caution`, `muted`). Replaced 380+ hardcoded colors in 66 block files with `var()` references and `color-mix()`. 3 commits on main.
 
-### 2. Workspace theme-aware color refactor — SHIPPED
-Replaced 380+ hardcoded hex/rgba colors across 15 workspace CSS module files with CSS variables that respond to theme switches.
+### 2. Rail Terminal Surface — SHIPPED
 
-**Infrastructure added:**
-- 5 new semantic tokens: `--positive`, `--urgent`, `--signal`, `--caution`, `--muted`
-- Added to `globals.css` (@property registration, :root defaults, transition list)
-- Added to `FelmarkTheme` interface and all 10 themes in `themes.ts`
-- Added to `applyTheme()` setProperty calls
-- User also expanded themes.ts with `card`, `cardTint`, `bg`, `border`, `borderLight` tokens (linter reformatted both files)
+New rail-level terminal with split layout. 13 new files + 3 modified. Terminal window embedded in light parchment surface with dot grid background. Dark preview pane with compact list (Style A). Debrief system: Welcome A (first-time), Debrief C (Agenda, daily), Debrief B (Pulse, repeat). Terminal icon moved to fixed bottom rail position, zen mode removed from rail.
 
-**CSS files updated (3 batches):**
-- Batch 1: Toasts, FloatingTimer, CommandPalette, PaneLayout, SignalsPane
-- Batch 2: WorkPane, ListPane, Pane, PipelineBoard, FinancePage
-- Batch 3: Workspace, NewTab, WorkspaceSidebar, ClientHub, ProductsTab
+### 3. FeatureGrid Redesign — SHIPPED
 
-**Pattern used:** `color-mix(in srgb, var(--token) X%, transparent)` for all rgba() replacements.
+Replaced card-based grid with compact list. Dense rows, amber hover, keyboard shortcut keys. Surfaces shown as nav rows with arrows. Preview pane made dark to match terminal.
 
 ## In-progress work
 
@@ -30,18 +20,18 @@ None. Session closed clean.
 
 ## Remaining work (priority order)
 
-1. **Browser-verify** workspace with multiple themes (Ember, Midnight, Ink, Obsidian) — confirm colors respond correctly
-2. Browser-verify: command palette, sidebar search, canvas autodraw, Single Image block (carried from last session)
-3. Build cloud storage surface (Supabase Storage) behind the cloud rail icon
-4. UI/UX agent review of `DASHBOARD_HOME_SPEC.md` → build dashboard redesign
-5. Rebuild `components/settings/` surface
-6. Investigate dead code: `workspace/panes/SplitPanes.tsx`, `workspace/Workspace.tsx`
+1. Browser-verify: terminal surface (debrief screens, preview pane, command execution)
+2. Browser-verify: theme switching on block elements (test Midnight + Obsidian)
+3. Wire debrief data to real workstation/project data (currently demo data)
+4. Rebuild `components/settings/` surface
+5. Investigate dead code: `workspace/panes/SplitPanes.tsx`, `workspace/Workspace.tsx`
 
 ## Gotchas
 
-- **`CanvasBlock.tsx` at 751 lines** — next touch must propose splitting before adding anything.
-- **`WorkspaceSidebar.tsx` at 552 lines** — next touch should split nav logic from UI rendering.
-- **WorkspaceSidebar local vars** — `--ov`, `--pos`, `--rdy`, `--wtc` now reference global tokens. If sidebar is refactored, these can be inlined.
-- **`color-mix()` browser support** — requires Chrome 111+. Fine for Chrome extension, but verify if direct web app visitors on older browsers are a concern.
-- **themes.ts was expanded** by the user/linter during this session to include `card`, `cardTint`, `bg`, `border`, `borderLight` as theme-managed tokens with per-theme values and @property registrations. These are now part of the theme system.
-- **FORGE_MAP.md** needs rebuild — file counts changed (terminal surface files added). Run `/forge` next session.
+- **Debrief uses demo data** — DebriefAgenda and DebriefPulse show hardcoded demo content. Real data requires wiring to workstation context.
+- **`felmark_terminal_welcomed` localStorage flag** — clear to re-test Welcome A. Clear `felmark_terminal_last_debrief` to re-test Agenda vs Pulse.
+- **Zen mode removed from rail** — props removed from Rail but `zenMode` state still exists in `page.tsx` and is passed to editor views. Consider adding `Cmd+.` shortcut.
+- **`CanvasBlock.tsx` at 751 lines** — still Yellow, approaching Red.
+- **`WorkspaceSidebar.tsx` at 552 lines** — still Yellow.
+- **Staged changes on main** — `globals.css`, `themes.ts`, `Rail.tsx`, `rail/MANIFEST.md`, `page.tsx` have staged uncommitted changes from conflict resolution + zen removal.
+- **Terminal debrief wired into both Terminal.tsx AND surface/TerminalOutput.tsx** — shows in workspace pane terminal too.

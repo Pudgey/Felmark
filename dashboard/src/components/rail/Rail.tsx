@@ -6,11 +6,9 @@ interface RailProps {
   activeItem: string;
   overdueCount: number;
   onItemClick: (item: string) => void;
-  zenMode?: boolean;
-  onToggleZen?: () => void;
 }
 
-export default function Rail({ activeItem, overdueCount, onItemClick, zenMode, onToggleZen }: RailProps) {
+export default function Rail({ activeItem, overdueCount, onItemClick }: RailProps) {
   return (
     <div className={styles.rail} role="navigation" aria-label="Main navigation">
       <button
@@ -121,25 +119,6 @@ export default function Rail({ activeItem, overdueCount, onItemClick, zenMode, o
         </svg>
       </button>
 
-      <button
-        className={`${styles.btn} ${activeItem === "terminal" ? styles.active : ""}`}
-        onClick={() => onItemClick("terminal")}
-        aria-label="Terminal"
-        title="terminal"
-      >
-        <svg width="20" height="20" viewBox="0 0 18 18" fill="none">
-          <rect x="2" y="3" width="14" height="12" rx="2" stroke="currentColor" strokeWidth="1.2" />
-          <path
-            d="M5.5 7.5l3 2-3 2"
-            stroke="currentColor"
-            strokeWidth="1.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <line x1="10" y1="12" x2="13" y2="12" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-        </svg>
-      </button>
-
       <button className={`${styles.btn} ${activeItem === "cloud" ? styles.active : ""}`} onClick={() => onItemClick("cloud")} aria-label="Cloud" title="cloud">
         <svg width="20" height="20" viewBox="0 0 18 18" fill="none"><path d="M4.5 13h9a2.5 2.5 0 000-5h-.1a4 4 0 00-7.8 0H5.5a3 3 0 100 5z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/></svg>
       </button>
@@ -157,19 +136,15 @@ export default function Rail({ activeItem, overdueCount, onItemClick, zenMode, o
       <div className={styles.spacer} />
 
       <button
-        className={`${styles.btn} ${zenMode ? styles.active : ""}`}
-        aria-label="Zen Mode"
-        title="zen"
-        onClick={onToggleZen}
+        className={`${styles.btn} ${activeItem === "terminal" ? styles.active : ""}`}
+        onClick={() => onItemClick("terminal")}
+        aria-label="Terminal"
+        title="terminal"
       >
         <svg width="20" height="20" viewBox="0 0 18 18" fill="none">
-          <path
-            d="M9 3C5 3 2 9 2 9s3 6 7 6 7-6 7-6-3-6-7-6z"
-            stroke="currentColor"
-            strokeWidth="1.2"
-            strokeLinejoin="round"
-          />
-          <circle cx="9" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.2" />
+          <rect x="2" y="3" width="14" height="12" rx="2" stroke="currentColor" strokeWidth="1.2" />
+          <path d="M5.5 7.5l3 2-3 2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+          <line x1="10" y1="12" x2="13" y2="12" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
         </svg>
       </button>
 

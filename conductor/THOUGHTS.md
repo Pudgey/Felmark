@@ -23,8 +23,8 @@
 
 | Agent | Task | Completed |
 |-------|------|-----------|
+| codex-main | Tightened the workstation editor footer so the save status stays on the same row instead of dropping below the block stats. | 2026-04-05 11:07 EDT |
+| claude-main | Built rail terminal surface with split layout, compact list preview, debrief/welcome system, and moved terminal icon to fixed bottom rail position. | 2026-04-05 |
+| claude-main | Migrated 380+ hardcoded colors across 66 block files to theme-aware CSS variables and color-mix() expressions. | 2026-04-05 |
 | claude-main | Added cloud rail icon and replaced 380+ hardcoded colors across 15 workspace CSS files with theme-aware CSS variables. | 2026-04-05 |
 | claude-main | Built workspace command palette (Cmd+K) and wired sidebar search filter across WorkspaceRouter, WorkspaceTabs, WorkspaceSidebar. | 2026-04-04 |
-| claude-main | Rebuilt FORGE_MAP.md from live disk scan — workspace canvas grid gone, ForgePaper renamed to Paper, 4 drift items flagged. | 2026-04-04 |
-| codex-main | Fixed the workstation editor footer so block counts and save status stay aligned on narrow widths. | 2026-04-04 11:07 EDT |
-| codex-main | Renamed the standalone workstation image block so it is surfaced distinctly as Single Image beside Gallery. | 2026-04-04 10:20 EDT |

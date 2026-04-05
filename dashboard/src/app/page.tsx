@@ -188,8 +188,6 @@ export default function Dashboard() {
             setSidebarOpen(true);
           }
         }}
-        zenMode={zenMode}
-        onToggleZen={() => setZenMode(true)}
       />}
       {showSidebar && (
         <EditorSidebar
