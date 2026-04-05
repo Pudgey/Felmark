@@ -1,20 +1,20 @@
 /* ═══ Workspace Sidebar V2 ═══ */
 
 .sb {
-  --ov: #d9453a;
-  --ov-bg: #fef2f1;
-  --ov-bd: #fcd5d2;
-  --pos: #2d8a4e;
-  --pos-bg: #edf7f0;
-  --rdy: #2d7dd2;
-  --rdy-bg: #edf4fc;
-  --wtc: #c07a1e;
-  --wtc-bg: #fdf5e9;
+  --ov: var(--urgent);
+  --ov-bg: color-mix(in srgb, var(--urgent) 6%, transparent);
+  --ov-bd: color-mix(in srgb, var(--urgent) 15%, transparent);
+  --pos: var(--success);
+  --pos-bg: color-mix(in srgb, var(--success) 6%, transparent);
+  --rdy: var(--signal);
+  --rdy-bg: color-mix(in srgb, var(--signal) 6%, transparent);
+  --wtc: var(--caution);
+  --wtc-bg: color-mix(in srgb, var(--caution) 6%, transparent);
   width: 280px;
   min-width: 280px;
   display: flex;
   flex-direction: column;
-  background: #fff;
+  background: var(--card);
   border-right: 1px solid var(--warm-200, #e0dfdb);
   overflow: hidden;
   flex-shrink: 0;
@@ -29,7 +29,7 @@
 .sbHd {
   height: 38px;
   padding: 0 14px;
-  background: #fff;
+  background: var(--card);
   border-bottom: 1px solid var(--warm-200, #e2e1dd);
   flex-shrink: 0;
   display: flex;
@@ -79,7 +79,7 @@
 }
 
 .sbIco:hover {
-  background: rgba(0, 0, 0, 0.04);
+  background: color-mix(in srgb, var(--ink-900) 4%, transparent);
   color: var(--ink-600, #5c5b57);
 }
 
@@ -115,7 +115,7 @@
   font-family: "JetBrains Mono", var(--mono, monospace);
   font-size: 20px;
   font-weight: 700;
-  color: #26a69a;
+  color: var(--positive);
   letter-spacing: -0.03em;
   line-height: 1;
   margin-top: 2px;
@@ -161,8 +161,8 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #fff;
-  border: 1.5px solid #26a69a;
+  background: var(--card);
+  border: 1.5px solid var(--positive);
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
@@ -202,7 +202,7 @@
   font-family: "JetBrains Mono", var(--mono, monospace);
   font-size: 16px;
   font-weight: 700;
-  color: #ef5350;
+  color: var(--urgent);
   letter-spacing: -0.02em;
 }
 
@@ -222,22 +222,22 @@
 }
 
 .outClient:hover {
-  background: rgba(0, 0, 0, 0.025);
+  background: color-mix(in srgb, var(--ink-900) 2.5%, transparent);
 }
 
 .outClientOv {
-  background: rgba(239, 83, 80, 0.03);
+  background: color-mix(in srgb, var(--urgent) 3%, transparent);
 }
 
 .outClientOv:hover {
-  background: rgba(239, 83, 80, 0.06);
+  background: color-mix(in srgb, var(--urgent) 6%, transparent);
 }
 
 .outClientAv {
   width: 20px;
   height: 20px;
   border-radius: 5px;
-  background: rgba(0, 0, 0, 0.04);
+  background: color-mix(in srgb, var(--ink-900) 4%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -249,8 +249,8 @@
 }
 
 .outClientAvOv {
-  background: rgba(239, 83, 80, 0.08);
-  color: #ef5350;
+  background: color-mix(in srgb, var(--urgent) 8%, transparent);
+  color: var(--urgent);
 }
 
 .outClientName {
@@ -329,8 +329,8 @@
 .tasksOv {
   padding: 5px 6px;
   border-radius: 5px;
-  background: rgba(239, 83, 80, 0.04);
-  border: 1px solid rgba(239, 83, 80, 0.08);
+  background: color-mix(in srgb, var(--urgent) 4%, transparent);
+  border: 1px solid color-mix(in srgb, var(--urgent) 8%, transparent);
   margin-bottom: 4px;
 }
 
@@ -345,7 +345,7 @@
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #ef5350;
+  background: var(--urgent);
   animation: ovPulse 2s ease infinite;
 }
 
@@ -362,7 +362,7 @@
 .tasksOvLabel {
   font-family: var(--mono, "IBM Plex Mono", monospace);
   font-size: 8px;
-  color: #ef5350;
+  color: var(--urgent);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   flex: 1;
@@ -371,7 +371,7 @@
 .tasksOvCount {
   font-family: "JetBrains Mono", var(--mono, monospace);
   font-size: 9px;
-  color: rgba(239, 83, 80, 0.4);
+  color: color-mix(in srgb, var(--urgent) 40%, transparent);
 }
 
 /* Task items */
@@ -395,13 +395,13 @@
 }
 
 .taskPriUrgent {
-  background: #ef5350;
+  background: var(--urgent);
 }
 .taskPriHigh {
-  background: #ff9800;
+  background: var(--caution);
 }
 .taskPriMed {
-  background: #2962ff;
+  background: var(--signal);
 }
 
 .taskName {
@@ -414,13 +414,13 @@
 }
 
 .taskNameOv {
-  color: #ef5350;
+  color: var(--urgent);
 }
 
 .taskTimer {
   font-family: "JetBrains Mono", var(--mono, monospace);
   font-size: 8px;
-  color: #26a69a;
+  color: var(--positive);
   flex-shrink: 0;
   animation: taskTimerPulse 2s ease infinite;
 }
@@ -448,7 +448,7 @@
 .taskBarFill {
   height: 100%;
   border-radius: 1.5px;
-  background: #26a69a;
+  background: var(--positive);
 }
 
 .taskDue {
@@ -461,7 +461,7 @@
 }
 
 .taskDueOv {
-  color: #ef5350;
+  color: var(--urgent);
 }
 
 .tasksFt {
@@ -541,14 +541,14 @@
   padding: 8px 12px;
   border-radius: 8px;
   border: 1px solid var(--warm-200, #e2e1dd);
-  background: #fff;
+  background: var(--card);
   transition: all 0.1s;
   flex-shrink: 0;
 }
 
 .sbSearch:focus-within {
   border-color: var(--ink-900, #1a1918);
-  box-shadow: 0 0 0 3px rgba(26, 25, 22, 0.03);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ink-900) 3%, transparent);
 }
 
 .sbSearchIcon {
@@ -585,7 +585,7 @@
   padding: 0 4px;
   border-radius: 4px;
   border: 1px solid var(--warm-200, #e2e1dd);
-  background: rgba(0, 0, 0, 0.025);
+  background: color-mix(in srgb, var(--ink-900) 2.5%, transparent);
   color: var(--ink-400, #a5a49f);
   display: flex;
   align-items: center;
@@ -619,7 +619,7 @@
 }
 
 .sbSec:hover {
-  background: rgba(0, 0, 0, 0.025);
+  background: color-mix(in srgb, var(--ink-900) 2.5%, transparent);
 }
 
 .sbSecArrow {
@@ -660,10 +660,10 @@
 }
 
 .clMain:hover {
-  background: rgba(0, 0, 0, 0.025);
+  background: color-mix(in srgb, var(--ink-900) 2.5%, transparent);
 }
 .clOn .clMain {
-  background: rgba(0, 0, 0, 0.025);
+  background: color-mix(in srgb, var(--ink-900) 2.5%, transparent);
 }
 
 .clAv {
@@ -701,7 +701,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  border: 2px solid #fff;
+  border: 2px solid var(--card);
 }
 
 .clInfo {
@@ -747,7 +747,7 @@
   align-items: center;
   justify-content: center;
   padding: 0 5px;
-  background: rgba(0, 0, 0, 0.025);
+  background: color-mix(in srgb, var(--ink-900) 2.5%, transparent);
   border: 1px solid var(--warm-100, #f0f0ee);
   color: var(--ink-500, #7c7b77);
 }
@@ -791,7 +791,7 @@
 }
 
 .clTask:hover {
-  background: rgba(0, 0, 0, 0.025);
+  background: color-mix(in srgb, var(--ink-900) 2.5%, transparent);
 }
 
 .clTaskDot {
@@ -866,11 +866,11 @@
 .clBtnInvoice {
   color: var(--ink-600, #5c5b57);
   border-color: var(--warm-200, #e2e1dd);
-  background: #fff;
+  background: var(--card);
 }
 
 .clBtnInvoice:hover {
-  background: rgba(0, 0, 0, 0.025);
+  background: color-mix(in srgb, var(--ink-900) 2.5%, transparent);
   border-color: var(--warm-300, #d0cfcb);
 }
 
@@ -882,11 +882,11 @@
 
 .clBtnRemind:hover {
   background: var(--ov);
-  color: #fff;
+  color: var(--card);
 }
 
 .clBtnPropose {
-  color: #fff;
+  color: var(--card);
   border-color: var(--ink-900, #1a1918);
   background: var(--ink-900, #1a1918);
 }
@@ -914,7 +914,7 @@
 .clAdd:hover {
   border-color: var(--ink-900, #1a1918);
   color: var(--ink-900, #1a1918);
-  background: rgba(0, 0, 0, 0.025);
+  background: color-mix(in srgb, var(--ink-900) 2.5%, transparent);
 }
 
 .clAddIcon {
@@ -932,7 +932,7 @@
 }
 
 .sig:hover {
-  background: rgba(0, 0, 0, 0.025);
+  background: color-mix(in srgb, var(--ink-900) 2.5%, transparent);
 }
 
 .sigDot {
@@ -988,7 +988,7 @@
   padding: 8px;
   border-radius: 7px;
   border: 1px solid var(--warm-200, #e2e1dd);
-  background: #fff;
+  background: var(--card);
   font-size: 12px;
   font-family: inherit;
   font-weight: 500;
@@ -998,7 +998,7 @@
 }
 
 .sbQaBtn:hover {
-  background: rgba(0, 0, 0, 0.025);
+  background: color-mix(in srgb, var(--ink-900) 2.5%, transparent);
   border-color: var(--warm-300, #d0cfcb);
 }
 
@@ -1054,12 +1054,12 @@
 
 .ctxMenu {
   width: 190px;
-  background: #fff;
+  background: var(--card);
   border: 1px solid var(--warm-200, #e0dfdb);
   border-radius: 10px;
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.12),
-    0 2px 8px rgba(0, 0, 0, 0.06);
+    0 8px 32px color-mix(in srgb, var(--ink-900) 12%, transparent),
+    0 2px 8px color-mix(in srgb, var(--ink-900) 6%, transparent);
   z-index: 9999;
   padding: 4px;
   animation: sbCtxIn 0.08s ease;
@@ -1098,7 +1098,7 @@
 }
 
 .ctxItem:hover {
-  background: rgba(0, 0, 0, 0.03);
+  background: color-mix(in srgb, var(--ink-900) 3%, transparent);
   color: var(--ink-900, #1a1918);
 }
 
@@ -1121,12 +1121,12 @@
 }
 
 .ctxItemDanger {
-  color: #ef5350;
+  color: var(--urgent);
 }
 .ctxItemDanger .ctxIcon {
-  color: #ef5350;
+  color: var(--urgent);
 }
 .ctxItemDanger:hover {
-  background: rgba(239, 83, 80, 0.06);
-  color: #ef5350;
+  background: color-mix(in srgb, var(--urgent) 6%, transparent);
+  color: var(--urgent);
 }

@@ -3,7 +3,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: #f5f5f3;
+  background: var(--warm-50);
   overflow: hidden;
 }
 .layout {
@@ -16,8 +16,8 @@
 /* ── Hub Sidebar ── */
 .nav {
   width: 240px;
-  background: #fff;
-  border-right: 1px solid #e2e1dd;
+  background: var(--card);
+  border-right: 1px solid var(--warm-200);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
@@ -27,12 +27,12 @@
   align-items: center;
   gap: 6px;
   padding: 12px 14px;
-  border-bottom: 1px solid #f0f0ee;
+  border-bottom: 1px solid var(--warm-100);
 }
 .navHdTitle {
   font-size: 14px;
   font-weight: 600;
-  color: #1a1918;
+  color: var(--ink-900);
   flex: 1;
 }
 .navHdTool {
@@ -43,19 +43,19 @@
   align-items: center;
   justify-content: center;
   font-size: 11px;
-  color: #d0cfcb;
+  color: var(--warm-300);
   cursor: pointer;
   transition: all 0.06s;
 }
 .navHdTool:hover {
-  background: #f0f0ee;
-  color: #7c7b77;
+  background: var(--warm-100);
+  color: var(--ink-500);
 }
 .navHdCreate {
   padding: 5px 12px;
   border-radius: 6px;
-  background: #1a1918;
-  color: #fff;
+  background: var(--ink-900);
+  color: var(--card);
   font-size: 11px;
   font-weight: 500;
   cursor: pointer;
@@ -67,7 +67,7 @@
   transition: all 0.06s;
 }
 .navHdCreate:hover {
-  background: #2a2926;
+  background: var(--ink-800);
 }
 .navScroll {
   flex: 1;
@@ -78,14 +78,14 @@
   width: 3px;
 }
 .navScroll::-webkit-scrollbar-thumb {
-  background: #e2e1dd;
+  background: var(--warm-200);
   border-radius: 2px;
 }
 
 /* Nav items */
 .navItems {
   padding: 4px 0;
-  border-bottom: 1px solid #f0f0ee;
+  border-bottom: 1px solid var(--warm-100);
 }
 .navItem {
   display: flex;
@@ -96,11 +96,11 @@
   transition: all 0.04s;
 }
 .navItem:hover {
-  background: #fafaf8;
+  background: var(--warm-50);
 }
 .navItemOn {
-  background: #f5f5f3;
-  border-left: 2px solid #1a1918;
+  background: var(--warm-50);
+  border-left: 2px solid var(--ink-900);
   padding-left: 12px;
 }
 .navItemIcon {
@@ -108,25 +108,25 @@
   width: 18px;
   text-align: center;
   flex-shrink: 0;
-  color: #d0cfcb;
+  color: var(--warm-300);
 }
 .navItemOn .navItemIcon {
-  color: #1a1918;
+  color: var(--ink-900);
 }
 .navItem:hover .navItemIcon {
-  color: #a5a49f;
+  color: var(--ink-400);
 }
 .navItemLabel {
   font-size: 13px;
-  color: #a5a49f;
+  color: var(--ink-400);
   flex: 1;
 }
 .navItemOn .navItemLabel {
-  color: #1a1918;
+  color: var(--ink-900);
   font-weight: 500;
 }
 .navItem:hover .navItemLabel {
-  color: #3d3c38;
+  color: var(--ink-800);
 }
 .navItemCt {
   font-family: "JetBrains Mono", monospace;
@@ -140,16 +140,16 @@
   flex-shrink: 0;
 }
 .navCt_blue {
-  background: rgba(41, 98, 255, 0.06);
-  color: #2962ff;
+  background: color-mix(in srgb, var(--signal) 6%, transparent);
+  color: var(--signal);
 }
 .navCt_grey {
-  background: #f0f0ee;
-  color: #a5a49f;
+  background: var(--warm-100);
+  color: var(--ink-400);
 }
 .navCt_red {
-  background: rgba(239, 83, 80, 0.06);
-  color: #ef5350;
+  background: color-mix(in srgb, var(--urgent) 6%, transparent);
+  color: var(--urgent);
 }
 
 /* Sections */
@@ -165,7 +165,7 @@
 .navSecLabel {
   font-family: "JetBrains Mono", monospace;
   font-size: 9px;
-  color: #d0cfcb;
+  color: var(--warm-300);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   flex: 1;
@@ -178,19 +178,19 @@
   align-items: center;
   justify-content: center;
   font-size: 10px;
-  color: #d0cfcb;
+  color: var(--warm-300);
   cursor: pointer;
-  border: 1px dashed #e2e1dd;
+  border: 1px dashed var(--warm-200);
   transition: all 0.06s;
 }
 .navSecBtn:hover {
-  border-color: #a5a49f;
-  color: #7c7b77;
+  border-color: var(--ink-400);
+  color: var(--ink-500);
 }
 .navSignalTime {
   font-family: "JetBrains Mono", monospace;
   font-size: 8px;
-  color: #d0cfcb;
+  color: var(--warm-300);
   flex-shrink: 0;
 }
 
@@ -204,7 +204,7 @@
   transition: all 0.04s;
 }
 .navClient:hover {
-  background: #fafaf8;
+  background: var(--warm-50);
 }
 .navClientAv {
   width: 22px;
@@ -223,7 +223,7 @@
 }
 .navClientName {
   font-size: 13px;
-  color: #3d3c38;
+  color: var(--ink-800);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -231,12 +231,12 @@
 .navClientMeta {
   font-family: "JetBrains Mono", monospace;
   font-size: 9px;
-  color: #d0cfcb;
+  color: var(--warm-300);
   margin-top: 1px;
 }
 .navClientArrow {
   font-size: 7px;
-  color: #d0cfcb;
+  color: var(--warm-300);
   width: 10px;
   text-align: center;
   flex-shrink: 0;
@@ -260,12 +260,12 @@
   align-items: center;
   justify-content: center;
   font-size: 8px;
-  color: #d0cfcb;
+  color: var(--warm-300);
   cursor: pointer;
 }
 .navClientTool:hover {
-  background: #f0f0ee;
-  color: #7c7b77;
+  background: var(--warm-100);
+  color: var(--ink-500);
 }
 
 /* Project rows */
@@ -278,47 +278,47 @@
   transition: all 0.04s;
 }
 .navProj:hover {
-  background: #fafaf8;
+  background: var(--warm-50);
 }
 .navProjOn {
-  background: #f5f5f3;
+  background: var(--warm-50);
 }
 .navProjIcon {
   font-size: 10px;
-  color: #d0cfcb;
+  color: var(--warm-300);
   width: 14px;
   text-align: center;
   flex-shrink: 0;
 }
 .navProjOn .navProjIcon {
-  color: #1a1918;
+  color: var(--ink-900);
 }
 .navProjName {
   font-size: 12px;
-  color: #a5a49f;
+  color: var(--ink-400);
   flex: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .navProjOn .navProjName {
-  color: #1a1918;
+  color: var(--ink-900);
   font-weight: 500;
 }
 .navProj:hover .navProjName {
-  color: #3d3c38;
+  color: var(--ink-800);
 }
 .navProjCt {
   font-family: "JetBrains Mono", monospace;
   font-size: 9px;
-  color: #d0cfcb;
+  color: var(--warm-300);
   flex-shrink: 0;
 }
 
 /* Footer */
 .navFt {
   padding: 8px 14px;
-  border-top: 1px solid #f0f0ee;
+  border-top: 1px solid var(--warm-100);
   display: flex;
   gap: 4px;
 }
@@ -326,9 +326,9 @@
   flex: 1;
   padding: 7px;
   border-radius: 6px;
-  border: 1.5px dashed #e2e1dd;
+  border: 1.5px dashed var(--warm-200);
   font-size: 10px;
-  color: #d0cfcb;
+  color: var(--warm-300);
   cursor: pointer;
   text-align: center;
   font-family: inherit;
@@ -336,9 +336,9 @@
   transition: all 0.06s;
 }
 .navFtBtn:hover {
-  border-color: #a5a49f;
-  color: #7c7b77;
-  background: #fafaf8;
+  border-color: var(--ink-400);
+  color: var(--ink-500);
+  background: var(--warm-50);
 }
 
 /* ── Task List ── */
@@ -347,12 +347,12 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-right: 1px solid #e2e1dd;
+  border-right: 1px solid var(--warm-200);
 }
 .listHd {
   padding: 14px 20px;
-  background: #fff;
-  border-bottom: 1px solid #f0f0ee;
+  background: var(--card);
+  border-bottom: 1px solid var(--warm-100);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -376,12 +376,12 @@
 .listTitle {
   font-size: 16px;
   font-weight: 600;
-  color: #1a1918;
+  color: var(--ink-900);
   letter-spacing: -0.01em;
 }
 .listMeta {
   font-size: 11px;
-  color: #a5a49f;
+  color: var(--ink-400);
   margin-top: 1px;
 }
 .listMetrics {
@@ -401,7 +401,7 @@
 .listMetricLabel {
   font-family: "JetBrains Mono", monospace;
   font-size: 8px;
-  color: #a5a49f;
+  color: var(--ink-400);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   margin-top: 1px;
@@ -409,25 +409,25 @@
 .listBtn {
   padding: 6px 12px;
   border-radius: 6px;
-  border: 1px solid #e2e1dd;
-  background: #fff;
+  border: 1px solid var(--warm-200);
+  background: var(--card);
   font-size: 11px;
-  color: #7c7b77;
+  color: var(--ink-500);
   cursor: pointer;
   font-family: inherit;
   transition: all 0.06s;
 }
 .listBtn:hover {
-  background: #fafaf8;
-  border-color: #d0cfcb;
+  background: var(--warm-50);
+  border-color: var(--warm-300);
 }
 .listBtnPrimary {
-  background: #1a1918;
-  color: #fff;
-  border-color: #1a1918;
+  background: var(--ink-900);
+  color: var(--card);
+  border-color: var(--ink-900);
 }
 .listBtnPrimary:hover {
-  background: #2a2926;
+  background: var(--ink-800);
 }
 
 /* Channel tabs */
@@ -435,8 +435,8 @@
   display: flex;
   align-items: center;
   padding: 0 16px;
-  border-bottom: 1px solid #f0f0ee;
-  background: #fff;
+  border-bottom: 1px solid var(--warm-100);
+  background: var(--card);
   flex-shrink: 0;
   position: relative;
 }
@@ -446,18 +446,18 @@
   gap: 5px;
   padding: 8px 12px;
   font-size: 13px;
-  color: #d0cfcb;
+  color: var(--warm-300);
   cursor: pointer;
   border-bottom: 2px solid transparent;
   transition: all 0.06s;
   font-weight: 500;
 }
 .viewTab:hover {
-  color: #7c7b77;
+  color: var(--ink-500);
 }
 .viewTabOn {
-  color: #1a1918;
-  border-bottom-color: #1a1918;
+  color: var(--ink-900);
+  border-bottom-color: var(--ink-900);
 }
 .viewTabIcon {
   font-size: 11px;
@@ -468,7 +468,7 @@
 }
 .viewTabClose {
   font-size: 10px;
-  color: #d0cfcb;
+  color: var(--warm-300);
   margin-left: 2px;
   width: 14px;
   height: 14px;
@@ -483,8 +483,8 @@
   opacity: 1;
 }
 .viewTabClose:hover {
-  background: #f0f0ee;
-  color: #ef5350;
+  background: var(--warm-100);
+  color: var(--urgent);
 }
 .viewTabAdd {
   width: 24px;
@@ -494,16 +494,16 @@
   align-items: center;
   justify-content: center;
   font-size: 13px;
-  color: #d0cfcb;
+  color: var(--warm-300);
   cursor: pointer;
-  border: 1px dashed #e2e1dd;
+  border: 1px dashed var(--warm-200);
   margin-left: 4px;
   transition: all 0.06s;
 }
 .viewTabAdd:hover {
-  border-color: #a5a49f;
-  color: #7c7b77;
-  background: #fafaf8;
+  border-color: var(--ink-400);
+  color: var(--ink-500);
+  background: var(--warm-50);
 }
 .channelMenu {
   position: absolute;
@@ -511,10 +511,10 @@
   left: auto;
   right: 16px;
   margin-top: 4px;
-  background: #fff;
-  border: 1px solid #e2e1dd;
+  background: var(--card);
+  border: 1px solid var(--warm-200);
   border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--ink-900) 8%, transparent);
   padding: 4px;
   z-index: 20;
   min-width: 140px;
@@ -525,18 +525,18 @@
   gap: 8px;
   padding: 7px 10px;
   font-size: 12px;
-  color: #7c7b77;
+  color: var(--ink-500);
   cursor: pointer;
   border-radius: 5px;
   transition: all 0.04s;
 }
 .channelMenuItem:hover {
-  background: #f5f5f3;
-  color: #1a1918;
+  background: var(--warm-50);
+  color: var(--ink-900);
 }
 .channelMenuIcon {
   font-size: 11px;
-  color: #a5a49f;
+  color: var(--ink-400);
   width: 16px;
   text-align: center;
 }
@@ -548,8 +548,8 @@
   gap: 6px;
   padding: 0 16px;
   height: 44px;
-  border-bottom: 1px solid #f0f0ee;
-  background: #fff;
+  border-bottom: 1px solid var(--warm-100);
+  background: var(--card);
   flex-shrink: 0;
 }
 .stripPill {
@@ -558,10 +558,10 @@
   gap: 3px;
   padding: 4px 10px;
   border-radius: 6px;
-  border: 1px solid #e2e1dd;
+  border: 1px solid var(--warm-200);
   font-family: "JetBrains Mono", monospace;
   font-size: 10px;
-  color: #a5a49f;
+  color: var(--ink-400);
   cursor: pointer;
   transition: all 0.06s;
   height: 28px;
@@ -569,17 +569,17 @@
   user-select: none;
 }
 .stripPill:hover {
-  border-color: #d0cfcb;
-  color: #7c7b77;
-  background: #fafaf8;
+  border-color: var(--warm-300);
+  color: var(--ink-500);
+  background: var(--warm-50);
 }
 .stripPillOn {
-  border-color: rgba(41, 98, 255, 0.15);
-  color: #2962ff;
-  background: rgba(41, 98, 255, 0.03);
+  border-color: color-mix(in srgb, var(--signal) 15%, transparent);
+  color: var(--signal);
+  background: color-mix(in srgb, var(--signal) 3%, transparent);
 }
 .stripPillVal {
-  color: #3d3c38;
+  color: var(--ink-800);
   font-weight: 500;
 }
 .stripChev {
@@ -590,13 +590,13 @@
 .stripClear {
   font-family: "JetBrains Mono", monospace;
   font-size: 9px;
-  color: #ef5350;
+  color: var(--urgent);
   cursor: pointer;
   padding: 4px 6px;
   border-radius: 4px;
 }
 .stripClear:hover {
-  background: rgba(239, 83, 80, 0.04);
+  background: color-mix(in srgb, var(--urgent) 4%, transparent);
 }
 .stripSpacer {
   flex: 1;
@@ -604,7 +604,7 @@
 .stripCount {
   font-family: "JetBrains Mono", monospace;
   font-size: 10px;
-  color: #a5a49f;
+  color: var(--ink-400);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -612,22 +612,22 @@
 }
 .stripCountVal {
   font-weight: 500;
-  color: #3d3c38;
+  color: var(--ink-800);
 }
 .stripCountRed {
-  color: #ef5350;
+  color: var(--urgent);
   font-weight: 500;
 }
 .stripDot {
   width: 3px;
   height: 3px;
   border-radius: 50%;
-  background: #d0cfcb;
+  background: var(--warm-300);
 }
 .stripSep {
   width: 1px;
   height: 16px;
-  background: #f0f0ee;
+  background: var(--warm-100);
   flex-shrink: 0;
   margin: 0 4px;
 }
@@ -646,7 +646,7 @@
   font-weight: 600;
   flex-shrink: 0;
   margin-left: -4px;
-  border: 2px solid #fff;
+  border: 2px solid var(--card);
   cursor: pointer;
   transition: all 0.08s;
   position: relative;
@@ -659,7 +659,7 @@
   z-index: 2;
 }
 .stripAvOn {
-  box-shadow: 0 0 0 2px rgba(41, 98, 255, 0.3);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--signal) 30%, transparent);
   z-index: 3;
 }
 .stripSearch {
@@ -676,23 +676,23 @@
   overflow: hidden;
 }
 .stripSearch:hover {
-  border-color: #e2e1dd;
-  background: #fafaf8;
+  border-color: var(--warm-200);
+  background: var(--warm-50);
 }
 .stripSearchOpen {
   width: 160px;
   padding: 0 8px;
-  border-color: #e2e1dd;
+  border-color: var(--warm-200);
   cursor: text;
   justify-content: flex-start;
 }
 .stripSearchOpen:focus-within {
-  border-color: #1a1918;
-  box-shadow: 0 0 0 3px rgba(26, 25, 24, 0.03);
+  border-color: var(--ink-900);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ink-900) 3%, transparent);
 }
 .stripSearchIcon {
   font-size: 11px;
-  color: #d0cfcb;
+  color: var(--warm-300);
   flex-shrink: 0;
 }
 .stripSearch input {
@@ -700,12 +700,12 @@
   outline: none;
   font-size: 11px;
   font-family: inherit;
-  color: #2a2926;
+  color: var(--ink-800);
   background: transparent;
   width: 100%;
 }
 .stripSearch input::placeholder {
-  color: #e2e1dd;
+  color: var(--warm-200);
 }
 .stripTool {
   width: 28px;
@@ -715,27 +715,27 @@
   align-items: center;
   justify-content: center;
   font-size: 11px;
-  color: #d0cfcb;
+  color: var(--warm-300);
   cursor: pointer;
   transition: all 0.06s;
   border: 1px solid transparent;
   flex-shrink: 0;
 }
 .stripTool:hover {
-  background: #fafaf8;
-  color: #7c7b77;
-  border-color: #e2e1dd;
+  background: var(--warm-50);
+  color: var(--ink-500);
+  border-color: var(--warm-200);
 }
 .listScroll {
   flex: 1;
   overflow-y: auto;
-  background: #fafaf8;
+  background: var(--warm-50);
 }
 .listScroll::-webkit-scrollbar {
   width: 4px;
 }
 .listScroll::-webkit-scrollbar-thumb {
-  background: #e2e1dd;
+  background: var(--warm-200);
   border-radius: 2px;
 }
 
@@ -750,13 +750,13 @@
   padding: 12px 16px 6px;
   position: sticky;
   top: 0;
-  background: #fafaf8;
+  background: var(--warm-50);
   z-index: 2;
   cursor: pointer;
 }
 .sectionArrow {
   font-size: 9px;
-  color: #a5a49f;
+  color: var(--ink-400);
   transition: transform 0.15s;
   flex-shrink: 0;
 }
@@ -765,19 +765,19 @@
 }
 .sectionIcon {
   font-size: 11px;
-  color: #a5a49f;
+  color: var(--ink-400);
 }
 .sectionLabel {
   font-size: 13px;
   font-weight: 600;
-  color: #3d3c38;
+  color: var(--ink-800);
   flex: 1;
 }
 .sectionCount {
   font-family: "JetBrains Mono", monospace;
   font-size: 10px;
-  color: #d0cfcb;
-  background: #f0f0ee;
+  color: var(--warm-300);
+  background: var(--warm-100);
   padding: 1px 7px;
   border-radius: 4px;
 }
@@ -788,14 +788,14 @@
   align-items: center;
   padding: 0 20px;
   height: 32px;
-  border-bottom: 1px solid #f0f0ee;
-  background: #fafaf8;
+  border-bottom: 1px solid var(--warm-100);
+  background: var(--warm-50);
   flex-shrink: 0;
 }
 .colCell {
   font-family: "JetBrains Mono", monospace;
   font-size: 9px;
-  color: #a5a49f;
+  color: var(--ink-400);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   display: flex;
@@ -806,7 +806,7 @@
   padding: 0 4px;
 }
 .colCell:hover {
-  color: #3d3c38;
+  color: var(--ink-800);
 }
 .colSort {
   font-size: 7px;
@@ -824,15 +824,15 @@
   align-items: center;
   justify-content: center;
   font-size: 11px;
-  color: #d0cfcb;
+  color: var(--warm-300);
   cursor: pointer;
-  border: 1px dashed #e2e1dd;
+  border: 1px dashed var(--warm-200);
   margin-left: 4px;
   transition: all 0.06s;
 }
 .colAdd:hover {
-  border-color: #a5a49f;
-  color: #a5a49f;
+  border-color: var(--ink-400);
+  color: var(--ink-400);
 }
 
 /* Column widths */
@@ -873,18 +873,18 @@
   min-height: 38px;
   cursor: pointer;
   transition: all 0.04s;
-  border-bottom: 1px solid #f7f7f5;
+  border-bottom: 1px solid var(--warm-50);
   border-left: 3px solid transparent;
-  background: #fff;
+  background: var(--card);
 }
 .taskRow:hover {
-  background: #fafaf8;
+  background: var(--warm-50);
 }
 .taskRowSelected {
-  background: #f5f5f3;
+  background: var(--warm-50);
 }
 .taskRowOv {
-  border-left-color: #ef5350;
+  border-left-color: var(--urgent);
 }
 .taskRowDone {
   opacity: 0.5;
@@ -914,7 +914,7 @@
   width: 17px;
   height: 17px;
   border-radius: 50%;
-  border: 1.5px solid #d0cfcb;
+  border: 1.5px solid var(--warm-300);
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -925,27 +925,27 @@
   transition: all 0.08s;
 }
 .taskCheck:hover {
-  border-color: #26a69a;
-  background: rgba(38, 166, 154, 0.04);
+  border-color: var(--positive);
+  background: color-mix(in srgb, var(--positive) 4%, transparent);
 }
 .taskCheckDone {
-  background: #26a69a;
-  border-color: #26a69a;
-  color: #fff;
+  background: var(--positive);
+  border-color: var(--positive);
+  color: var(--card);
 }
 .taskTitleText {
   font-size: 13px;
-  color: #2a2926;
+  color: var(--ink-800);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .taskRowOv .taskTitleText {
-  color: #ef5350;
+  color: var(--urgent);
 }
 .taskRowDone .taskTitleText {
   text-decoration: line-through;
-  color: #a5a49f;
+  color: var(--ink-400);
 }
 .taskRowSelected .taskTitleText {
   font-weight: 500;
@@ -953,13 +953,13 @@
 .taskSubs {
   font-family: "JetBrains Mono", monospace;
   font-size: 9px;
-  color: #d0cfcb;
+  color: var(--warm-300);
   flex-shrink: 0;
 }
 .taskTimer {
   font-family: "JetBrains Mono", monospace;
   font-size: 10px;
-  color: #26a69a;
+  color: var(--positive);
   display: flex;
   align-items: center;
   gap: 3px;
@@ -989,17 +989,17 @@
 }
 .tcAvName {
   font-size: 11px;
-  color: #7c7b77;
+  color: var(--ink-500);
 }
 
 /* Due cell */
 .tcDue {
   font-family: "JetBrains Mono", monospace;
   font-size: 11px;
-  color: #a5a49f;
+  color: var(--ink-400);
 }
 .tcDueOv {
-  color: #ef5350;
+  color: var(--urgent);
   font-weight: 500;
 }
 
@@ -1036,52 +1036,52 @@
 .tcHours {
   font-family: "JetBrains Mono", monospace;
   font-size: 10px;
-  color: #a5a49f;
+  color: var(--ink-400);
 }
 .tcHoursSep {
-  color: #d0cfcb;
+  color: var(--warm-300);
 }
 
 /* Comment cell */
 .tcCmt {
   font-family: "JetBrains Mono", monospace;
   font-size: 9px;
-  color: #d0cfcb;
+  color: var(--warm-300);
 }
 
 /* Add task + new status */
 .addTask {
   padding: 6px 20px 12px 55px;
   font-size: 12px;
-  color: #e2e1dd;
+  color: var(--warm-200);
   cursor: pointer;
   transition: color 0.06s;
   gap: 4px;
 }
 .addTask:hover {
-  color: #7c7b77;
+  color: var(--ink-500);
 }
 .newStatus {
   padding: 8px 20px;
   font-size: 12px;
-  color: #d0cfcb;
+  color: var(--warm-300);
   cursor: pointer;
   transition: color 0.06s;
   display: flex;
   align-items: center;
   gap: 4px;
-  border-top: 1px solid #f0f0ee;
+  border-top: 1px solid var(--warm-100);
   margin-top: 4px;
 }
 .newStatus:hover {
-  color: #2962ff;
+  color: var(--signal);
 }
 
 /* ── Dim Overlay ── */
 .drawerDim {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.08);
+  background: color-mix(in srgb, var(--ink-900) 8%, transparent);
   z-index: 5;
   opacity: 0;
   pointer-events: none;
@@ -1110,12 +1110,12 @@
 }
 .drawer {
   flex: 1;
-  background: #fff;
-  border-left: 1px solid #e2e1dd;
+  background: var(--card);
+  border-left: 1px solid var(--warm-200);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: -6px 0 24px rgba(0, 0, 0, 0.06);
+  box-shadow: -6px 0 24px color-mix(in srgb, var(--ink-900) 6%, transparent);
 }
 
 /* Drawer header */
@@ -1124,14 +1124,14 @@
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
-  border-bottom: 1px solid #f0f0ee;
+  border-bottom: 1px solid var(--warm-100);
   flex-shrink: 0;
 }
 .dwCheck {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  border: 2px solid #d0cfcb;
+  border: 2px solid var(--warm-300);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1142,13 +1142,13 @@
   transition: all 0.08s;
 }
 .dwCheck:hover {
-  border-color: #26a69a;
-  background: rgba(38, 166, 154, 0.06);
+  border-color: var(--positive);
+  background: color-mix(in srgb, var(--positive) 6%, transparent);
 }
 .dwCheckDone {
-  background: #26a69a;
-  border-color: #26a69a;
-  color: #fff;
+  background: var(--positive);
+  border-color: var(--positive);
+  color: var(--card);
 }
 .dwHdInfo {
   flex: 1;
@@ -1157,12 +1157,12 @@
 .dwId {
   font-family: "JetBrains Mono", monospace;
   font-size: 9px;
-  color: #d0cfcb;
+  color: var(--warm-300);
 }
 .dwTitle {
   font-size: 15px;
   font-weight: 600;
-  color: #1a1918;
+  color: var(--ink-900);
   letter-spacing: -0.01em;
   line-height: 1.3;
 }
@@ -1178,15 +1178,15 @@
   align-items: center;
   justify-content: center;
   font-size: 11px;
-  color: #a5a49f;
+  color: var(--ink-400);
   cursor: pointer;
   border: none;
   background: none;
   transition: all 0.06s;
 }
 .dwAction:hover {
-  background: #f0f0ee;
-  color: #3d3c38;
+  background: var(--warm-100);
+  color: var(--ink-800);
 }
 
 /* Timer bar */
@@ -1197,14 +1197,14 @@
   padding: 8px 12px;
   margin: 8px 16px 0;
   border-radius: 7px;
-  background: rgba(38, 166, 154, 0.04);
-  border: 1px solid rgba(38, 166, 154, 0.08);
+  background: color-mix(in srgb, var(--positive) 4%, transparent);
+  border: 1px solid color-mix(in srgb, var(--positive) 8%, transparent);
 }
 .dwTimerDot {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #26a69a;
+  background: var(--positive);
   flex-shrink: 0;
   animation: tp 2s ease infinite;
 }
@@ -1212,20 +1212,20 @@
   font-family: "JetBrains Mono", monospace;
   font-size: 15px;
   font-weight: 700;
-  color: #26a69a;
+  color: var(--positive);
   flex: 1;
 }
 .dwTimerMoney {
   font-family: "JetBrains Mono", monospace;
   font-size: 10px;
-  color: rgba(38, 166, 154, 0.5);
+  color: color-mix(in srgb, var(--positive) 50%, transparent);
 }
 .dwTimerBtn {
   padding: 4px 10px;
   border-radius: 5px;
-  border: 1px solid rgba(38, 166, 154, 0.15);
-  background: rgba(38, 166, 154, 0.04);
-  color: #26a69a;
+  border: 1px solid color-mix(in srgb, var(--positive) 15%, transparent);
+  background: color-mix(in srgb, var(--positive) 4%, transparent);
+  color: var(--positive);
   font-family: "JetBrains Mono", monospace;
   font-size: 10px;
   cursor: pointer;
@@ -1236,14 +1236,14 @@
   display: flex;
   padding: 0 16px;
   margin-top: 8px;
-  border-bottom: 1px solid #f0f0ee;
+  border-bottom: 1px solid var(--warm-100);
   flex-shrink: 0;
 }
 .dwTab {
   font-family: "JetBrains Mono", monospace;
   font-size: 10px;
   padding: 8px 10px;
-  color: #a5a49f;
+  color: var(--ink-400);
   cursor: pointer;
   border-bottom: 2px solid transparent;
   text-transform: uppercase;
@@ -1254,11 +1254,11 @@
   gap: 4px;
 }
 .dwTab:hover {
-  color: #7c7b77;
+  color: var(--ink-500);
 }
 .dwTabOn {
-  color: #1a1918;
-  border-bottom-color: #1a1918;
+  color: var(--ink-900);
+  border-bottom-color: var(--ink-900);
   font-weight: 500;
 }
 .dwTabCt {
@@ -1266,15 +1266,15 @@
   min-width: 14px;
   height: 14px;
   border-radius: 3px;
-  background: #f0f0ee;
+  background: var(--warm-100);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #a5a49f;
+  color: var(--ink-400);
 }
 .dwTabOn .dwTabCt {
-  background: rgba(26, 25, 24, 0.06);
-  color: #7c7b77;
+  background: color-mix(in srgb, var(--ink-900) 6%, transparent);
+  color: var(--ink-500);
 }
 
 /* Drawer scroll */
@@ -1287,14 +1287,14 @@
   width: 3px;
 }
 .dwScroll::-webkit-scrollbar-thumb {
-  background: #e2e1dd;
+  background: var(--warm-200);
   border-radius: 2px;
 }
 
 /* Properties */
 .dwProps {
   padding: 12px 0;
-  border-bottom: 1px solid #f0f0ee;
+  border-bottom: 1px solid var(--warm-100);
 }
 .dwProp {
   display: flex;
@@ -1307,30 +1307,30 @@
   transition: background 0.04s;
 }
 .dwProp:hover {
-  background: rgba(0, 0, 0, 0.015);
+  background: color-mix(in srgb, var(--ink-900) 1.5%, transparent);
 }
 .dwPropIcon {
   font-size: 10px;
-  color: #d0cfcb;
+  color: var(--warm-300);
   width: 14px;
   text-align: center;
   flex-shrink: 0;
 }
 .dwProp:hover .dwPropIcon {
-  color: #a5a49f;
+  color: var(--ink-400);
 }
 .dwPropLabel {
   font-size: 12px;
-  color: #a5a49f;
+  color: var(--ink-400);
   width: 80px;
   flex-shrink: 0;
 }
 .dwProp:hover .dwPropLabel {
-  color: #7c7b77;
+  color: var(--ink-500);
 }
 .dwPropVal {
   font-size: 13px;
-  color: #2a2926;
+  color: var(--ink-800);
   flex: 1;
   display: flex;
   align-items: center;
@@ -1342,8 +1342,8 @@
   width: 18px;
   height: 18px;
   border-radius: 4px;
-  border: 1px solid #e2e1dd;
-  color: #e2e1dd;
+  border: 1px solid var(--warm-200);
+  color: var(--warm-200);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1352,8 +1352,8 @@
   transition: all 0.06s;
 }
 .dwProp:hover .dwPropKey {
-  border-color: #d0cfcb;
-  color: #a5a49f;
+  border-color: var(--warm-300);
+  color: var(--ink-400);
 }
 .dwPill {
   padding: 2px 8px;
@@ -1378,31 +1378,31 @@
   border-radius: 3px;
   font-family: "JetBrains Mono", monospace;
   font-size: 9px;
-  background: #f0f0ee;
-  color: #7c7b77;
+  background: var(--warm-100);
+  color: var(--ink-500);
 }
 
 /* Description */
 .dwDesc {
   padding: 12px 0;
-  border-bottom: 1px solid #f0f0ee;
+  border-bottom: 1px solid var(--warm-100);
 }
 .dwSecLabel {
   font-family: "JetBrains Mono", monospace;
   font-size: 8px;
-  color: #d0cfcb;
+  color: var(--warm-300);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   margin-bottom: 6px;
 }
 .dwDescText {
   font-size: 13px;
-  color: #5c5b57;
+  color: var(--ink-600);
   line-height: 1.65;
 }
 .dwDescEmpty {
   font-size: 13px;
-  color: #d0cfcb;
+  color: var(--warm-300);
   font-style: italic;
   padding: 8px 0;
 }
@@ -1410,7 +1410,7 @@
 /* Subtasks */
 .dwSubs {
   padding: 12px 0;
-  border-bottom: 1px solid #f0f0ee;
+  border-bottom: 1px solid var(--warm-100);
 }
 .dwSubsBar {
   display: flex;
@@ -1421,7 +1421,7 @@
 .dwPbar {
   flex: 1;
   height: 3px;
-  background: #f0f0ee;
+  background: var(--warm-100);
   border-radius: 1.5px;
   overflow: hidden;
   max-width: 60px;
@@ -1429,12 +1429,12 @@
 .dwPbarFill {
   height: 100%;
   border-radius: 1.5px;
-  background: #26a69a;
+  background: var(--positive);
 }
 .dwPbarCt {
   font-family: "JetBrains Mono", monospace;
   font-size: 9px;
-  color: #a5a49f;
+  color: var(--ink-400);
 }
 .dwSub {
   display: flex;
@@ -1447,13 +1447,13 @@
   transition: background 0.04s;
 }
 .dwSub:hover {
-  background: rgba(0, 0, 0, 0.015);
+  background: color-mix(in srgb, var(--ink-900) 1.5%, transparent);
 }
 .dwSubCb {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  border: 1.5px solid #d0cfcb;
+  border: 1.5px solid var(--warm-300);
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -1464,25 +1464,25 @@
   transition: all 0.06s;
 }
 .dwSubCb:hover {
-  border-color: #26a69a;
+  border-color: var(--positive);
 }
 .dwSubCbDone {
-  background: #26a69a;
-  border-color: #26a69a;
-  color: #fff;
+  background: var(--positive);
+  border-color: var(--positive);
+  color: var(--card);
 }
 .dwSubText {
   font-size: 12px;
-  color: #3d3c38;
+  color: var(--ink-800);
   line-height: 1.4;
 }
 .dwSubDone .dwSubText {
   text-decoration: line-through;
-  color: #a5a49f;
+  color: var(--ink-400);
 }
 .dwSubAdd {
   font-size: 11px;
-  color: #d0cfcb;
+  color: var(--warm-300);
   cursor: pointer;
   padding: 4px 6px;
   margin: 2px -6px 0;
@@ -1490,8 +1490,8 @@
   transition: all 0.06s;
 }
 .dwSubAdd:hover {
-  color: #7c7b77;
-  background: rgba(0, 0, 0, 0.015);
+  color: var(--ink-500);
+  background: color-mix(in srgb, var(--ink-900) 1.5%, transparent);
 }
 
 /* Comments */
@@ -1502,7 +1502,7 @@
   display: flex;
   gap: 8px;
   padding: 10px 0;
-  border-bottom: 1px solid #f0f0ee;
+  border-bottom: 1px solid var(--warm-100);
 }
 .dwComment:last-of-type {
   border-bottom: none;
@@ -1531,7 +1531,7 @@
 .dwCommentUser {
   font-size: 12px;
   font-weight: 600;
-  color: #1a1918;
+  color: var(--ink-900);
 }
 .dwCommentRole {
   font-family: "JetBrains Mono", monospace;
@@ -1541,12 +1541,12 @@
 }
 .dwCommentTime {
   font-size: 10px;
-  color: #d0cfcb;
+  color: var(--warm-300);
   margin-left: auto;
 }
 .dwCommentText {
   font-size: 13px;
-  color: #5c5b57;
+  color: var(--ink-600);
   line-height: 1.55;
 }
 .dwCommentReactions {
@@ -1558,26 +1558,26 @@
   font-size: 11px;
   padding: 2px 8px;
   border-radius: 5px;
-  background: #f0f0ee;
-  border: 1px solid #e2e1dd;
+  background: var(--warm-100);
+  border: 1px solid var(--warm-200);
   cursor: pointer;
   transition: all 0.06s;
 }
 .dwRx:hover {
-  background: #e2e1dd;
+  background: var(--warm-200);
 }
 .dwRxAdd {
   padding: 2px 6px;
-  border: 1px dashed #e2e1dd;
+  border: 1px dashed var(--warm-200);
   border-radius: 5px;
   cursor: pointer;
   font-size: 10px;
-  color: #d0cfcb;
+  color: var(--warm-300);
   transition: all 0.06s;
 }
 .dwRxAdd:hover {
-  border-color: #a5a49f;
-  color: #a5a49f;
+  border-color: var(--ink-400);
+  color: var(--ink-400);
 }
 
 /* Comment input */
@@ -1585,32 +1585,32 @@
   display: flex;
   gap: 8px;
   padding: 10px 0 0;
-  border-top: 1px solid #f0f0ee;
+  border-top: 1px solid var(--warm-100);
   margin-top: 4px;
 }
 .dwInputAv {
   width: 26px;
   height: 26px;
   border-radius: 7px;
-  background: rgba(38, 166, 154, 0.08);
+  background: color-mix(in srgb, var(--positive) 8%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 8px;
   font-weight: 600;
-  color: #26a69a;
+  color: var(--positive);
   flex-shrink: 0;
   margin-top: 2px;
 }
 .dwInputBox {
   flex: 1;
-  border: 1px solid #e2e1dd;
+  border: 1px solid var(--warm-200);
   border-radius: 7px;
   overflow: hidden;
   transition: border-color 0.08s;
 }
 .dwInputBox:focus-within {
-  border-color: #1a1918;
+  border-color: var(--ink-900);
 }
 .dwInputBox textarea {
   border: none;
@@ -1618,7 +1618,7 @@
   padding: 8px 12px;
   font-size: 12px;
   font-family: inherit;
-  color: #2a2926;
+  color: var(--ink-800);
   background: transparent;
   resize: none;
   min-height: 36px;
@@ -1626,13 +1626,13 @@
   display: block;
 }
 .dwInputBox textarea::placeholder {
-  color: #d0cfcb;
+  color: var(--warm-300);
 }
 .dwInputFt {
   display: flex;
   align-items: center;
   padding: 3px 6px;
-  border-top: 1px solid #f0f0ee;
+  border-top: 1px solid var(--warm-100);
   gap: 1px;
 }
 .dwInputTool {
@@ -1643,14 +1643,14 @@
   align-items: center;
   justify-content: center;
   font-size: 10px;
-  color: #d0cfcb;
+  color: var(--warm-300);
   cursor: pointer;
   border: none;
   background: none;
 }
 .dwInputTool:hover {
-  color: #7c7b77;
-  background: rgba(0, 0, 0, 0.02);
+  color: var(--ink-500);
+  background: color-mix(in srgb, var(--ink-900) 2%, transparent);
 }
 .dwInputSend {
   margin-left: auto;
@@ -1660,8 +1660,8 @@
   font-family: "JetBrains Mono", monospace;
   font-size: 9px;
   cursor: pointer;
-  background: #f0f0ee;
-  color: #a5a49f;
+  background: var(--warm-100);
+  color: var(--ink-400);
 }
 
 /* Drawer footer */
@@ -1669,7 +1669,7 @@
   display: flex;
   align-items: center;
   padding: 8px 16px;
-  border-top: 1px solid #f0f0ee;
+  border-top: 1px solid var(--warm-100);
   flex-shrink: 0;
   gap: 4px;
 }
@@ -1686,21 +1686,21 @@
   gap: 4px;
 }
 .dwFooterPrimary {
-  background: #1a1918;
-  color: #fff;
-  border-color: #1a1918;
+  background: var(--ink-900);
+  color: var(--card);
+  border-color: var(--ink-900);
 }
 .dwFooterPrimary:hover {
-  background: #2a2926;
+  background: var(--ink-800);
 }
 .dwFooterGhost {
   background: transparent;
-  color: #a5a49f;
-  border-color: #e2e1dd;
+  color: var(--ink-400);
+  border-color: var(--warm-200);
 }
 .dwFooterGhost:hover {
-  background: #fafaf8;
-  color: #7c7b77;
+  background: var(--warm-50);
+  color: var(--ink-500);
 }
 .dwFooterSpacer {
   flex: 1;
@@ -1720,5 +1720,5 @@
   font-size: 7px;
   font-weight: 600;
   margin-left: -3px;
-  border: 2px solid #fff;
+  border: 2px solid var(--card);
 }
