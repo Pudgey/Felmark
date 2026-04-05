@@ -11,8 +11,51 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
+  background:
+    radial-gradient(circle, var(--warm-300) 0.5px, transparent 0.5px) 0 0 / 20px 20px,
+    var(--parchment);
+  padding: 16px 16px 16px 20px;
+}
+
+/* Embedded dark terminal window */
+.terminalWindow {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   background: var(--rail-bg);
-  color: var(--ink-300);
+  border-radius: var(--radius-xl);
+  border: 1px solid color-mix(in srgb, var(--ink-900) 10%, transparent);
+  box-shadow: 0 2px 12px color-mix(in srgb, var(--ink-900) 8%, transparent);
+  overflow: hidden;
+}
+
+/* Terminal chrome bar (macOS-style dots) */
+.terminalChrome {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink-300) 8%, transparent);
+  flex-shrink: 0;
+}
+
+.chromeDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.chromeDotRed { background: #f55; }
+.chromeDotYellow { background: #fb3; }
+.chromeDotGreen { background: #5d5; }
+
+.chromeTitle {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: color-mix(in srgb, var(--ink-300) 40%, transparent);
+  margin-left: 8px;
+  letter-spacing: 0.02em;
 }
 
 .previewPane {

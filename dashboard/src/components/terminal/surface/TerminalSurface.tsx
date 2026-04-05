@@ -28,8 +28,16 @@ export default function TerminalSurface() {
     >
       <div className={styles.surface}>
         <div className={styles.terminalPane}>
-          <TerminalOutput />
-          <TerminalInput currentInput={currentInput} onInputChange={setCurrentInput} />
+          <div className={styles.terminalWindow}>
+            <div className={styles.terminalChrome}>
+              <span className={`${styles.chromeDot} ${styles.chromeDotRed}`} />
+              <span className={`${styles.chromeDot} ${styles.chromeDotYellow}`} />
+              <span className={`${styles.chromeDot} ${styles.chromeDotGreen}`} />
+              <span className={styles.chromeTitle}>felmark terminal</span>
+            </div>
+            <TerminalOutput />
+            <TerminalInput currentInput={currentInput} onInputChange={setCurrentInput} />
+          </div>
         </div>
         <div className={styles.previewPane}>
           <TerminalPreview currentInput={currentInput} onTypeCommand={handleTypeCommand} />

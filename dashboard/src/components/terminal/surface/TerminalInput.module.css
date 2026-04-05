@@ -1,7 +1,7 @@
 .inputBar {
   position: relative;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  background: var(--rail-bg);
+  border-top: 1px solid color-mix(in srgb, var(--ink-300) 8%, transparent);
+  background: transparent;
 }
 
 .inputRow {
@@ -41,7 +41,7 @@
   left: 0;
   right: 0;
   background: var(--rail-bg);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid color-mix(in srgb, var(--ink-300) 8%, transparent);
   max-height: 240px;
   overflow-y: auto;
   padding: 4px 0;
@@ -65,7 +65,7 @@
 
 .paletteItem:hover,
 .paletteActive {
-  background: rgba(255, 255, 255, 0.06);
+  background: color-mix(in srgb, var(--ink-300) 6%, transparent);
 }
 
 .paletteIcon {
