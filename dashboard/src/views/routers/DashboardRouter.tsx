@@ -6,6 +6,7 @@ import CalendarView from "../calendar";
 import SearchView from "../search";
 import TemplatesView from "../templates";
 import TeamView from "../team";
+import TerminalView from "../terminal";
 
 export interface DashboardRouterProps {
   workstations: Workstation[];
@@ -22,9 +23,7 @@ export interface DashboardRouterProps {
 
 export default function DashboardRouter({ railActive, ...props }: DashboardRouterProps & { railActive: string }) {
   const wrap = (child: React.ReactNode) => (
-    <div style={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex" }}>
-      {child}
-    </div>
+    <div style={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex" }}>{child}</div>
   );
 
   switch (railActive) {
@@ -37,7 +36,7 @@ export default function DashboardRouter({ railActive, ...props }: DashboardRoute
           onSelectProject={props.onSelectProject}
           onNewTabInWorkstation={props.onNewTabInWorkstation}
           onNewWorkstation={props.onNewWorkstation}
-        />
+        />,
       );
     case "calendar":
       return wrap(
@@ -46,7 +45,7 @@ export default function DashboardRouter({ railActive, ...props }: DashboardRoute
           onOpenProject={props.onCalendarOpenProject}
           scrollToProjectId={props.calendarScrollTarget}
           onScrollComplete={props.onCalendarScrollComplete}
-        />
+        />,
       );
     case "search":
       return wrap(<SearchView workstations={props.workstations} />);
@@ -54,6 +53,8 @@ export default function DashboardRouter({ railActive, ...props }: DashboardRoute
       return wrap(<TemplatesView />);
     case "team":
       return wrap(<TeamView />);
+    case "terminal":
+      return wrap(<TerminalView />);
     default:
       return wrap(
         <HomeView
@@ -63,7 +64,7 @@ export default function DashboardRouter({ railActive, ...props }: DashboardRoute
           onSelectProject={props.onSelectProject}
           onNewTabInWorkstation={props.onNewTabInWorkstation}
           onNewWorkstation={props.onNewWorkstation}
-        />
+        />,
       );
   }
 }

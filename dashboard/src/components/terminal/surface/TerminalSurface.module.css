@@ -1,0 +1,27 @@
+.surface {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.terminalPane {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--rail-bg);
+  color: var(--ink-300);
+}
+
+.previewPane {
+  width: 380px;
+  min-width: 300px;
+  max-width: 440px;
+  flex-shrink: 0;
+  background: var(--warm-50);
+  border-left: 1px solid var(--warm-200);
+  overflow-y: auto;
+  padding: 20px;
+}
