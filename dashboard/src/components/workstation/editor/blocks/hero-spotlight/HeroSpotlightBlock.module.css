@@ -14,7 +14,7 @@
 
 .inlineInputLarge {
   composes: inlineInput;
-  font-family: var(--font-heading), 'Cormorant Garamond', serif;
+  font-family: var(--font-heading), "Cormorant Garamond", serif;
   font-size: 56px;
   font-weight: 600;
   letter-spacing: 0.06em;
@@ -30,7 +30,7 @@
   border: 1px solid var(--warm-200);
   border-radius: 14px;
   overflow: hidden;
-  background: #fff;
+  background: var(--card);
 }
 
 .spotlightPre {
@@ -57,7 +57,7 @@
 }
 
 .spotlightLetter {
-  font-family: var(--font-heading), 'Cormorant Garamond', serif;
+  font-family: var(--font-heading), "Cormorant Garamond", serif;
   font-size: 56px;
   font-weight: 600;
   color: var(--ink-900);

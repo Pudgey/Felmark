@@ -1,11 +1,64 @@
 /* TABLE */
-.tableWrap { border: 1px solid var(--warm-200); border-radius: var(--radius-lg); overflow: hidden; margin: 8px 0; }
-.table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.table th { text-align: left; padding: 10px 14px; background: var(--warm-50); border-bottom: 1px solid var(--warm-200); font-family: var(--mono); font-size: 10px; color: var(--ink-400); text-transform: uppercase; letter-spacing: .06em; font-weight: 500; }
-.table td { padding: 9px 14px; border-bottom: 1px solid var(--warm-100); color: var(--ink-600); cursor: pointer; transition: background .06s; }
-.table td:hover { background: var(--warm-50); }
-.editing { background: var(--ember-bg) !important; padding: 4px 8px !important; }
-.mono { font-family: var(--mono); font-size: 12px; }
-.tableInput { width: 100%; padding: 5px 6px; border: 1px solid var(--ember); border-radius: var(--radius-sm); font-family: inherit; font-size: 13px; color: var(--ink-800); outline: none; background: #fff; }
-.tableFooter { display: flex; justify-content: space-between; padding: 6px 14px; font-family: var(--mono); font-size: 10px; color: var(--ink-300); }
-.table tr:last-child td { border-bottom: none; }
+.tableWrap {
+  border: 1px solid var(--warm-200);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin: 8px 0;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.table th {
+  text-align: left;
+  padding: 10px 14px;
+  background: var(--warm-50);
+  border-bottom: 1px solid var(--warm-200);
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-400);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+}
+.table td {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--warm-100);
+  color: var(--ink-600);
+  cursor: pointer;
+  transition: background 0.06s;
+}
+.table td:hover {
+  background: var(--warm-50);
+}
+.editing {
+  background: var(--ember-bg) !important;
+  padding: 4px 8px !important;
+}
+.mono {
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.tableInput {
+  width: 100%;
+  padding: 5px 6px;
+  border: 1px solid var(--ember);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--ink-800);
+  outline: none;
+  background: var(--card);
+}
+.tableFooter {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 14px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-300);
+}
+.table tr:last-child td {
+  border-bottom: none;
+}

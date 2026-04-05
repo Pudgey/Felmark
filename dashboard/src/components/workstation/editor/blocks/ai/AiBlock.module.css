@@ -132,9 +132,9 @@
 
 /* ── Terminal ── */
 .terminal {
-  background: #1e1d1b;
+  background: var(--ink-900);
   border-radius: var(--radius-lg);
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border: 1px solid color-mix(in srgb, var(--card) 4%, transparent);
   overflow: hidden;
 }
 
@@ -153,13 +153,13 @@
 .termLabel {
   font-family: var(--mono);
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.4);
+  color: color-mix(in srgb, var(--card) 40%, transparent);
 }
 
 .termProgress {
   flex: 1;
   height: 3px;
-  background: rgba(255, 255, 255, 0.04);
+  background: color-mix(in srgb, var(--card) 4%, transparent);
   border-radius: 2px;
   overflow: hidden;
   margin-left: 8px;
@@ -177,13 +177,13 @@
   align-items: center;
   gap: 8px;
   padding: 4px 16px 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid color-mix(in srgb, var(--card) 3%, transparent);
 }
 
 .termPromptText {
   font-family: var(--mono);
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.7);
+  color: color-mix(in srgb, var(--card) 70%, transparent);
 }
 
 .termOutput {
@@ -201,12 +201,12 @@
   gap: 8px;
   font-family: var(--mono);
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.3);
+  color: color-mix(in srgb, var(--card) 30%, transparent);
   animation: lineIn 0.2s ease;
 }
 
 .termCheck {
-  color: #5a9a3c;
+  color: var(--success);
   font-size: 10px;
   flex-shrink: 0;
 }
@@ -229,7 +229,7 @@
 }
 
 .termBlockContent {
-  color: rgba(255, 255, 255, 0.4);
+  color: color-mix(in srgb, var(--card) 40%, transparent);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -243,11 +243,22 @@
 }
 
 @keyframes lineIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
 }

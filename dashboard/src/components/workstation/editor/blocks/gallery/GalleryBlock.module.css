@@ -1,15 +1,110 @@
 /* GALLERY */
-.gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 8px 0; }
-.galleryItem { aspect-ratio: 4/3; border-radius: var(--radius-lg); overflow: hidden; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all .12s; border: 1px solid var(--warm-200); }
-.galleryItem:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.04); }
-.galleryPlaceholder { font-size: 28px; color: var(--ink-300); margin-bottom: 4px; }
-.galleryCaption { font-size: 11px; color: var(--ink-400); }
-.lightbox { position: fixed; inset: 0; background: rgba(44,42,37,.8); backdrop-filter: blur(4px); z-index: 200; display: flex; align-items: center; justify-content: center; }
-.lightboxInner { width: 560px; background: var(--parchment); border-radius: 12px; overflow: hidden; position: relative; box-shadow: 0 16px 48px rgba(0,0,0,.2); }
-.lightboxImg { height: 320px; display: flex; align-items: center; justify-content: center; }
-.lightboxInfo { padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; }
-.lightboxCaption { font-size: 14px; font-weight: 500; color: var(--ink-800); }
-.lightboxMeta { font-family: var(--mono); font-size: 11px; color: var(--ink-300); }
-.lightboxClose { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; border-radius: var(--radius-md); border: none; background: rgba(0,0,0,.3); color: #fff; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.lightboxNav { position: absolute; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; border-radius: var(--radius-md); border: none; background: rgba(0,0,0,.2); color: #fff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.left { left: 12px; } .right { right: 12px; }
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 8px 0;
+}
+.galleryItem {
+  aspect-ratio: 4/3;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s;
+  border: 1px solid var(--warm-200);
+}
+.galleryItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--ink-900) 4%, transparent);
+}
+.galleryPlaceholder {
+  font-size: 28px;
+  color: var(--ink-300);
+  margin-bottom: 4px;
+}
+.galleryCaption {
+  font-size: 11px;
+  color: var(--ink-400);
+}
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, var(--ink-900) 80%, transparent);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.lightboxInner {
+  width: 560px;
+  background: var(--parchment);
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 16px 48px color-mix(in srgb, var(--ink-900) 20%, transparent);
+}
+.lightboxImg {
+  height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.lightboxInfo {
+  padding: 14px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.lightboxCaption {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-800);
+}
+.lightboxMeta {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-300);
+}
+.lightboxClose {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: color-mix(in srgb, var(--ink-900) 30%, transparent);
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.lightboxNav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: color-mix(in srgb, var(--ink-900) 20%, transparent);
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.left {
+  left: 12px;
+}
+.right {
+  right: 12px;
+}

@@ -21,9 +21,9 @@
   gap: 8px;
   padding: 8px 16px;
   border-radius: var(--radius-md);
-  border: 1px solid rgba(194, 75, 56, 0.2);
-  background: rgba(194, 75, 56, 0.04);
-  color: #c24b38;
+  border: 1px solid color-mix(in srgb, var(--error) 20%, transparent);
+  background: color-mix(in srgb, var(--error) 4%, transparent);
+  color: var(--error);
   font-family: var(--mono);
   font-size: 12px;
   font-weight: 500;
@@ -32,15 +32,15 @@
 }
 
 .recBtn:hover {
-  background: rgba(194, 75, 56, 0.08);
-  border-color: rgba(194, 75, 56, 0.3);
+  background: color-mix(in srgb, var(--error) 8%, transparent);
+  border-color: color-mix(in srgb, var(--error) 30%, transparent);
 }
 
 .recDot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #c24b38;
+  background: var(--error);
 }
 
 .hint {
@@ -51,9 +51,9 @@
 
 /* ── Terminal ── */
 .terminal {
-  background: #1e1d1b;
+  background: var(--ink-900);
   border-radius: var(--radius-lg);
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border: 1px solid color-mix(in srgb, var(--card) 4%, transparent);
   overflow: hidden;
 }
 
@@ -72,19 +72,19 @@
 }
 
 .termRec {
-  color: #c24b38;
+  color: var(--error);
   animation: recPulse 1.2s ease infinite;
 }
 
 .termPaused {
-  color: #b07d4f;
+  color: var(--ember);
 }
 
 .termDone {
   font-family: var(--mono);
   font-size: 10px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.3);
+  color: color-mix(in srgb, var(--card) 30%, transparent);
   letter-spacing: 0.08em;
 }
 
@@ -92,14 +92,14 @@
   font-family: var(--mono);
   font-size: 18px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.8);
+  color: color-mix(in srgb, var(--card) 80%, transparent);
   letter-spacing: 0.02em;
 }
 
 .termDb {
   font-family: var(--mono);
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.15);
+  color: color-mix(in srgb, var(--card) 15%, transparent);
   margin-left: auto;
 }
 
@@ -120,7 +120,7 @@
   flex: 1;
   min-width: 2px;
   max-width: 4px;
-  background: #5a9a3c;
+  background: var(--success);
   border-radius: 1px;
   transition: height 0.05s ease;
 }
@@ -128,7 +128,7 @@
 .waveCursor {
   width: 2px;
   height: 100%;
-  background: #c24b38;
+  background: var(--error);
   border-radius: 1px;
   flex-shrink: 0;
   animation: cursorBlink 0.8s ease infinite;
@@ -147,9 +147,9 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid color-mix(in srgb, var(--card) 10%, transparent);
+  background: color-mix(in srgb, var(--card) 4%, transparent);
+  color: color-mix(in srgb, var(--card) 70%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -159,7 +159,7 @@
 }
 
 .playBtn:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, var(--card) 8%, transparent);
   color: #fff;
 }
 
@@ -175,7 +175,7 @@
 .playTime {
   font-family: var(--mono);
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.4);
+  color: color-mix(in srgb, var(--card) 40%, transparent);
   flex-shrink: 0;
   min-width: 40px;
   text-align: right;
@@ -187,7 +187,7 @@
   align-items: center;
   gap: 6px;
   padding: 8px 16px 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  border-top: 1px solid color-mix(in srgb, var(--card) 3%, transparent);
 }
 
 .termBtn {
@@ -196,9 +196,9 @@
   gap: 6px;
   padding: 5px 12px;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid color-mix(in srgb, var(--card) 6%, transparent);
   background: none;
-  color: rgba(255, 255, 255, 0.5);
+  color: color-mix(in srgb, var(--card) 50%, transparent);
   font-family: var(--mono);
   font-size: 11px;
   cursor: pointer;
@@ -206,28 +206,28 @@
 }
 
 .termBtn:hover {
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 255, 255, 0.7);
+  background: color-mix(in srgb, var(--card) 4%, transparent);
+  color: color-mix(in srgb, var(--card) 70%, transparent);
 }
 
 .stopIcon {
   width: 8px;
   height: 8px;
-  background: #c24b38;
+  background: var(--error);
   border-radius: 1px;
 }
 
 .pauseIcon {
   width: 8px;
   height: 8px;
-  border-left: 2.5px solid rgba(255, 255, 255, 0.5);
-  border-right: 2.5px solid rgba(255, 255, 255, 0.5);
+  border-left: 2.5px solid color-mix(in srgb, var(--card) 50%, transparent);
+  border-right: 2.5px solid color-mix(in srgb, var(--card) 50%, transparent);
 }
 
 .playIcon {
   width: 0;
   height: 0;
-  border-left: 7px solid rgba(255, 255, 255, 0.5);
+  border-left: 7px solid color-mix(in srgb, var(--card) 50%, transparent);
   border-top: 4px solid transparent;
   border-bottom: 4px solid transparent;
 }
@@ -242,7 +242,7 @@
   gap: 6px;
   font-family: var(--mono);
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.25);
+  color: color-mix(in srgb, var(--card) 25%, transparent);
   cursor: pointer;
 }
 
@@ -258,7 +258,7 @@
   border: none;
   font-family: var(--mono);
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.25);
+  color: color-mix(in srgb, var(--card) 25%, transparent);
   cursor: pointer;
   padding: 2px 4px;
   border-radius: var(--radius-sm);
@@ -266,13 +266,13 @@
 }
 
 .termSmallBtn:hover {
-  color: rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.04);
+  color: color-mix(in srgb, var(--card) 50%, transparent);
+  background: color-mix(in srgb, var(--card) 4%, transparent);
 }
 
 /* ── Transcript ── */
 .transcriptWrap {
-  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  border-top: 1px solid color-mix(in srgb, var(--card) 3%, transparent);
   padding: 10px 16px 14px;
 }
 
@@ -286,25 +286,25 @@
 .transcriptLabel {
   font-family: var(--mono);
   font-size: 9px;
-  color: rgba(255, 255, 255, 0.15);
+  color: color-mix(in srgb, var(--card) 15%, transparent);
   letter-spacing: 0.1em;
 }
 
 .transcriptText {
   font-family: var(--mono);
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.45);
+  color: color-mix(in srgb, var(--card) 45%, transparent);
   line-height: 1.6;
 }
 
 .transcriptEdit {
   width: 100%;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: color-mix(in srgb, var(--card) 3%, transparent);
+  border: 1px solid color-mix(in srgb, var(--card) 6%, transparent);
   border-radius: var(--radius-sm);
   font-family: var(--mono);
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
+  color: color-mix(in srgb, var(--card) 60%, transparent);
   line-height: 1.6;
   padding: 8px 10px;
   resize: vertical;
@@ -317,11 +317,21 @@
 
 /* ── Animations ── */
 @keyframes recPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 
 @keyframes cursorBlink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.2; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.2;
+  }
 }

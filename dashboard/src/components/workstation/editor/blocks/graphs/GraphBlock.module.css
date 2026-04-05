@@ -1,17 +1,19 @@
 /* Graph block container */
 .gb {
-  background: #fff;
+  background: var(--card);
   border: 1px solid var(--warm-200);
   border-radius: 10px;
   overflow: hidden;
   margin: 8px 0;
-  transition: border-color 0.12s, box-shadow 0.12s;
+  transition:
+    border-color 0.12s,
+    box-shadow 0.12s;
   max-width: 100%;
   width: 100%;
 }
 .gb:hover {
   border-color: var(--warm-300);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 2px 12px color-mix(in srgb, var(--ink-900) 3%, transparent);
 }
 
 .gbHead {
@@ -26,7 +28,7 @@
   color: var(--ink-800);
 }
 .gbBadge {
-  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), "JetBrains Mono", monospace;
   font-size: 9px;
   color: var(--ink-300);
   background: var(--warm-100);
@@ -66,7 +68,7 @@
   transform-origin: bottom;
 }
 .barLabel {
-  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), "JetBrains Mono", monospace;
   font-size: 9px;
   color: var(--ink-300);
 }
@@ -83,7 +85,7 @@
   color: #fff;
   padding: 4px 10px;
   border-radius: 6px;
-  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), "JetBrains Mono", monospace;
   font-size: 11px;
   white-space: nowrap;
   z-index: 5;
@@ -91,14 +93,14 @@
   flex-direction: column;
   align-items: center;
   gap: 1px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--ink-900) 15%, transparent);
 }
 .barTtVal {
   font-weight: 500;
 }
 .barTtSub {
   font-size: 9px;
-  color: rgba(255, 255, 255, 0.4);
+  color: color-mix(in srgb, var(--card) 40%, transparent);
 }
 
 /* ── Line chart ── */
@@ -129,14 +131,14 @@
   justify-content: center;
 }
 .donutCenterVal {
-  font-family: var(--font-heading), 'Cormorant Garamond', serif;
+  font-family: var(--font-heading), "Cormorant Garamond", serif;
   font-size: 22px;
   font-weight: 600;
   color: var(--ink-900);
   line-height: 1;
 }
 .donutCenterLabel {
-  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), "JetBrains Mono", monospace;
   font-size: 9px;
   color: var(--ink-400);
   text-transform: uppercase;
@@ -173,13 +175,13 @@
   flex: 1;
 }
 .donutLegVal {
-  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), "JetBrains Mono", monospace;
   font-size: 11px;
   color: var(--ink-700);
   font-weight: 500;
 }
 .donutLegPct {
-  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), "JetBrains Mono", monospace;
   font-size: 10px;
   color: var(--ink-300);
   min-width: 28px;
@@ -223,7 +225,7 @@
   transition: all 0.3s ease;
 }
 .hbarVal {
-  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), "JetBrains Mono", monospace;
   font-size: 12px;
   color: var(--ink-700);
   font-weight: 500;
@@ -255,23 +257,23 @@
   flex-shrink: 0;
 }
 .sparkVal {
-  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), "JetBrains Mono", monospace;
   font-size: 13px;
   font-weight: 500;
   min-width: 48px;
   text-align: right;
 }
 .sparkChange {
-  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), "JetBrains Mono", monospace;
   font-size: 10px;
   min-width: 36px;
   text-align: right;
 }
 .sparkUp {
-  color: #5a9a3c;
+  color: var(--success);
 }
 .sparkDown {
-  color: #c24b38;
+  color: var(--error);
 }
 
 /* ── Stacked area legend ── */
@@ -304,7 +306,7 @@
   color: var(--ink-500);
 }
 .areaLegVal {
-  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), "JetBrains Mono", monospace;
   font-size: 11px;
   color: var(--ink-700);
   font-weight: 500;
@@ -332,19 +334,19 @@
   margin-bottom: 4px;
 }
 .metricLabel {
-  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), "JetBrains Mono", monospace;
   font-size: 9px;
   color: var(--ink-400);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
 .metricChange {
-  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), "JetBrains Mono", monospace;
   font-size: 10px;
   font-weight: 500;
 }
 .metricVal {
-  font-family: var(--font-heading), 'Cormorant Garamond', serif;
+  font-family: var(--font-heading), "Cormorant Garamond", serif;
   font-size: 28px;
   font-weight: 600;
   line-height: 1;
@@ -378,7 +380,7 @@
   padding: 10px 6px;
   border-radius: 6px;
   border: 1px solid var(--warm-200);
-  background: #fff;
+  background: var(--card);
   cursor: pointer;
   transition: all 0.1s;
   font-family: inherit;

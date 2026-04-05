@@ -71,22 +71,22 @@
 }
 .colorOn {
   border-color: var(--ink-900);
-  box-shadow: 0 0 0 1px #fff inset;
+  box-shadow: 0 0 0 1px var(--card) inset;
 }
 
 .delBtn {
   padding: 3px 8px;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(194, 75, 56, 0.2);
-  background: rgba(194, 75, 56, 0.04);
-  color: #c24b38;
+  border: 1px solid color-mix(in srgb, var(--error) 20%, transparent);
+  background: color-mix(in srgb, var(--error) 4%, transparent);
+  color: var(--error);
   font-family: var(--mono);
   font-size: 10px;
   cursor: pointer;
 }
 
 .delBtn:hover {
-  background: rgba(194, 75, 56, 0.08);
+  background: color-mix(in srgb, var(--error) 8%, transparent);
 }
 
 .count {
@@ -135,7 +135,7 @@
 
 .autodrawInput:focus {
   border-color: var(--ember);
-  background: #fff;
+  background: var(--card);
 }
 
 .autodrawInput:disabled {
@@ -149,7 +149,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(250, 248, 245, 0.72);
+  background: color-mix(in srgb, var(--parchment) 72%, transparent);
   backdrop-filter: blur(2px);
 }
 
@@ -172,7 +172,7 @@
 
 .autodrawErr {
   font-size: 10px;
-  color: var(--coral, #c24b38);
+  color: var(--coral, var(--error));
   max-width: 160px;
   overflow: hidden;
   text-overflow: ellipsis;

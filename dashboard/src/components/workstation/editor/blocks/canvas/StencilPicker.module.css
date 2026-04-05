@@ -9,7 +9,7 @@
   max-height: 240px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--ink-900) 8%, transparent);
 }
 
 .tabs {
@@ -21,7 +21,9 @@
   flex-shrink: 0;
 }
 
-.tabs::-webkit-scrollbar { height: 0; }
+.tabs::-webkit-scrollbar {
+  height: 0;
+}
 
 .tab {
   padding: 4px 10px;
@@ -39,8 +41,14 @@
   gap: 4px;
 }
 
-.tab:hover { color: var(--ink-700); background: var(--warm-50); }
-.tabOn { color: var(--ink-900); background: var(--warm-100); }
+.tab:hover {
+  color: var(--ink-700);
+  background: var(--warm-50);
+}
+.tabOn {
+  color: var(--ink-900);
+  background: var(--warm-100);
+}
 
 .tabIcon {
   font-size: 11px;
@@ -56,8 +64,13 @@
   min-height: 0;
 }
 
-.grid::-webkit-scrollbar { width: 4px; }
-.grid::-webkit-scrollbar-thumb { background: var(--warm-200); border-radius: 2px; }
+.grid::-webkit-scrollbar {
+  width: 4px;
+}
+.grid::-webkit-scrollbar-thumb {
+  background: var(--warm-200);
+  border-radius: 2px;
+}
 
 .item {
   display: flex;
@@ -115,4 +128,7 @@
   border-radius: var(--radius-sm);
 }
 
-.close:hover { background: var(--warm-100); color: var(--ink-700); }
+.close:hover {
+  background: var(--warm-100);
+  color: var(--ink-700);
+}

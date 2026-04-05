@@ -1,30 +1,157 @@
 /* ── Shared ── */
-.block { border: 1px solid var(--warm-200); border-radius: var(--radius-lg); overflow: hidden; margin: 8px 0; }
-.blockHeader { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--warm-50); border-bottom: 1px solid var(--warm-100); }
-.blockIcon { font-size: 14px; flex-shrink: 0; width: 32px; height: 32px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; }
-.blockBody { padding: 14px 16px; }
-.blockInput { width: 100%; padding: 8px 12px; border: 1px solid var(--warm-200); border-radius: var(--radius-md); font-family: inherit; font-size: 14px; color: var(--ink-800); outline: none; background: var(--parchment); transition: border-color 0.1s; }
-.blockInput:focus { border-color: var(--ember); }
-.blockInput::placeholder { color: var(--warm-400); }
-.blockTextarea { composes: blockInput; min-height: 60px; resize: vertical; line-height: 1.5; font-size: 13.5px; }
-.blockBtn { padding: 6px 14px; border-radius: var(--radius-md); border: 1px solid var(--warm-200); background: none; font-family: inherit; font-size: 13px; color: var(--ink-600); cursor: pointer; transition: all 0.08s; display: flex; align-items: center; gap: 6px; }
-.blockBtn:hover { background: var(--warm-100); color: var(--ink-800); }
-.blockBtnPrimary { background: var(--ember); border-color: var(--ember); color: #fff; }
-.blockBtnPrimary:hover { background: var(--ember-light, #c89360); }
-.blockBtnSmall { padding: 4px 10px; font-size: 12px; }
-.blockActions { display: flex; gap: 6px; margin-top: 12px; }
-.blockTag { font-family: var(--mono); font-size: 11px; padding: 2px 8px; border-radius: var(--radius-sm); display: inline-flex; align-items: center; gap: 4px; }
+.block {
+  border: 1px solid var(--warm-200);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin: 8px 0;
+}
+.blockHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--warm-50);
+  border-bottom: 1px solid var(--warm-100);
+}
+.blockIcon {
+  font-size: 14px;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.blockBody {
+  padding: 14px 16px;
+}
+.blockInput {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--warm-200);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--ink-800);
+  outline: none;
+  background: var(--parchment);
+  transition: border-color 0.1s;
+}
+.blockInput:focus {
+  border-color: var(--ember);
+}
+.blockInput::placeholder {
+  color: var(--warm-400);
+}
+.blockTextarea {
+  composes: blockInput;
+  min-height: 60px;
+  resize: vertical;
+  line-height: 1.5;
+  font-size: 13.5px;
+}
+.blockBtn {
+  padding: 6px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--warm-200);
+  background: none;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--ink-600);
+  cursor: pointer;
+  transition: all 0.08s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.blockBtn:hover {
+  background: var(--warm-100);
+  color: var(--ink-800);
+}
+.blockBtnPrimary {
+  background: var(--ember);
+  border-color: var(--ember);
+  color: #fff;
+}
+.blockBtnPrimary:hover {
+  background: var(--ember-light, var(--ember-light));
+}
+.blockBtnSmall {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+.blockActions {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+}
+.blockTag {
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
 
 /* ── Feedback Request ── */
-.feedback { composes: block; border-color: rgba(91, 127, 164, 0.3); }
-.feedbackHeader { composes: blockHeader; background: rgba(91, 127, 164, 0.04); }
-.feedbackIcon { composes: blockIcon; background: rgba(91, 127, 164, 0.1); color: #5b7fa4; }
-.feedbackLabel { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #5b7fa4; }
-.feedbackStatus { composes: blockTag; font-weight: 500; }
-.feedbackStatusPending { background: var(--warm-100); color: var(--ink-400); }
-.feedbackStatusInProgress { background: rgba(176, 125, 79, 0.08); color: var(--ember); }
-.feedbackStatusApproved { background: rgba(90, 154, 60, 0.08); color: #5a9a3c; }
-.feedbackStatusChanges { background: rgba(194, 75, 56, 0.08); color: #c24b38; }
-.feedbackRow { display: flex; gap: 12px; margin-bottom: 10px; }
-.feedbackField { flex: 1; }
-.feedbackFieldLabel { font-family: var(--mono); font-size: 11px; color: var(--ink-400); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; display: block; }
+.feedback {
+  composes: block;
+  border-color: color-mix(in srgb, var(--info) 30%, transparent);
+}
+.feedbackHeader {
+  composes: blockHeader;
+  background: color-mix(in srgb, var(--info) 4%, transparent);
+}
+.feedbackIcon {
+  composes: blockIcon;
+  background: color-mix(in srgb, var(--info) 10%, transparent);
+  color: var(--info);
+}
+.feedbackLabel {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--info);
+}
+.feedbackStatus {
+  composes: blockTag;
+  font-weight: 500;
+}
+.feedbackStatusPending {
+  background: var(--warm-100);
+  color: var(--ink-400);
+}
+.feedbackStatusInProgress {
+  background: color-mix(in srgb, var(--ember) 8%, transparent);
+  color: var(--ember);
+}
+.feedbackStatusApproved {
+  background: color-mix(in srgb, var(--success) 8%, transparent);
+  color: var(--success);
+}
+.feedbackStatusChanges {
+  background: color-mix(in srgb, var(--error) 8%, transparent);
+  color: var(--error);
+}
+.feedbackRow {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.feedbackField {
+  flex: 1;
+}
+.feedbackFieldLabel {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-400);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+  display: block;
+}

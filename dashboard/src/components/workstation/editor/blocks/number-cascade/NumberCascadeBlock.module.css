@@ -14,7 +14,7 @@
 
 .inlineInputNum {
   composes: inlineInput;
-  font-family: var(--font-heading), 'Cormorant Garamond', serif;
+  font-family: var(--font-heading), "Cormorant Garamond", serif;
   font-size: 36px;
   font-weight: 700;
   color: var(--ember);
@@ -37,7 +37,7 @@
   border: 1px solid var(--warm-200);
   border-radius: 14px;
   overflow: hidden;
-  background: #fff;
+  background: var(--card);
 }
 
 .cascadeGrid {
@@ -63,7 +63,7 @@
 }
 
 .cascadeNum {
-  font-family: var(--font-heading), 'Cormorant Garamond', serif;
+  font-family: var(--font-heading), "Cormorant Garamond", serif;
   font-size: 36px;
   font-weight: 700;
   color: var(--ember);
@@ -87,7 +87,9 @@
   color: var(--ink-400);
   font-size: 13px;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 
 .cascadeAdd:hover {

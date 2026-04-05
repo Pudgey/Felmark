@@ -6,7 +6,9 @@
   border: 1px solid var(--warm-200);
   border-radius: 8px;
   margin: 6px 0;
-  transition: border-color 0.12s, background 0.12s;
+  transition:
+    border-color 0.12s,
+    background 0.12s;
 }
 
 .check {
@@ -31,9 +33,9 @@
   background: var(--ember-bg);
 }
 .checkDone {
-  border-color: #5a9a3c;
-  background: rgba(90, 154, 60, 0.08);
-  color: #5a9a3c;
+  border-color: var(--success);
+  background: color-mix(in srgb, var(--success) 8%, transparent);
+  color: var(--success);
 }
 
 .body {
@@ -83,7 +85,7 @@
   align-items: center;
 }
 .dateDisplay {
-  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), "JetBrains Mono", monospace;
   font-size: 11px;
   font-weight: 500;
   padding: 2px 8px;
@@ -105,17 +107,17 @@
 }
 
 .daysLeft {
-  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), "JetBrains Mono", monospace;
   font-size: 10px;
   font-weight: 500;
 }
 
 .doneLabel {
-  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), "JetBrains Mono", monospace;
   font-size: 10px;
   font-weight: 500;
-  color: #5a9a3c;
-  background: rgba(90, 154, 60, 0.06);
+  color: var(--success);
+  background: color-mix(in srgb, var(--success) 6%, transparent);
   padding: 1px 6px;
   border-radius: 3px;
 }
