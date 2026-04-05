@@ -1,14 +1,21 @@
-.signals { display: flex; flex-direction: column; }
+.signals {
+  display: flex;
+  flex-direction: column;
+}
 
 .signalCard {
   position: relative;
   padding: 12px 14px;
   border-bottom: 1px solid var(--warm-100, #f0f0ee);
-  transition: background .04s;
+  transition: background 0.04s;
 }
 
-.signalCard:last-child { border-bottom: none; }
-.signalCard:hover { background: #fafaf8; }
+.signalCard:last-child {
+  border-bottom: none;
+}
+.signalCard:hover {
+  background: var(--warm-50);
+}
 
 .signalUrgent::before {
   content: "";
@@ -20,10 +27,18 @@
   border-radius: 0 2px 2px 0;
 }
 
-.signalUrgentRed::before { background: #ef5350; }
-.signalUrgentAmber::before { background: #ff9800; }
+.signalUrgentRed::before {
+  background: var(--urgent);
+}
+.signalUrgentAmber::before {
+  background: var(--caution);
+}
 
-.signalTop { display: flex; align-items: flex-start; gap: 10px; }
+.signalTop {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
 
 .signalAvatar {
   width: 28px;
@@ -37,14 +52,33 @@
   font-weight: 600;
 }
 
-.signalAvatarSlate { background: rgba(124, 133, 148, .08); color: #7c8594; }
-.signalAvatarMoney { background: rgba(38, 166, 154, .06); color: #26a69a; }
-.signalAvatarWarning { background: rgba(255, 152, 0, .06); color: #ff9800; }
-.signalAvatarInfo { background: rgba(41, 98, 255, .06); color: #2962ff; }
+.signalAvatarSlate {
+  background: color-mix(in srgb, var(--muted) 8%, transparent);
+  color: var(--muted);
+}
+.signalAvatarMoney {
+  background: color-mix(in srgb, var(--positive) 6%, transparent);
+  color: var(--positive);
+}
+.signalAvatarWarning {
+  background: color-mix(in srgb, var(--caution) 6%, transparent);
+  color: var(--caution);
+}
+.signalAvatarInfo {
+  background: color-mix(in srgb, var(--signal) 6%, transparent);
+  color: var(--signal);
+}
 
-.signalBody { flex: 1; min-width: 0; }
+.signalBody {
+  flex: 1;
+  min-width: 0;
+}
 
-.signalTitleRow { display: flex; align-items: center; gap: 6px; }
+.signalTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 
 .signalTitle {
   display: flex;
@@ -57,10 +91,10 @@
 }
 
 .signalAmount {
-  font-family: 'JetBrains Mono', var(--mono, monospace);
+  font-family: "JetBrains Mono", var(--mono, monospace);
   font-size: 11px;
   font-weight: 600;
-  color: #26a69a;
+  color: var(--positive);
 }
 
 .signalDesc {
@@ -73,32 +107,62 @@
 .signalTime {
   flex-shrink: 0;
   margin-top: 2px;
-  font-family: 'JetBrains Mono', var(--mono, monospace);
+  font-family: "JetBrains Mono", var(--mono, monospace);
   font-size: 9px;
-  color: #d0cfcb;
+  color: var(--warm-300);
 }
 
-.signalActions { display: flex; gap: 4px; margin-top: 8px; margin-left: 38px; }
+.signalActions {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+  margin-left: 38px;
+}
 
 .signalBtn {
   padding: 4px 10px;
   border: 1px solid;
   border-radius: 5px;
-  font-family: 'JetBrains Mono', var(--mono, monospace);
+  font-family: "JetBrains Mono", var(--mono, monospace);
   font-size: 10px;
   font-weight: 500;
   cursor: pointer;
-  transition: all .06s;
+  transition: all 0.06s;
 }
 
-.signalBtnFollow { border-color: rgba(239, 83, 80, .12); color: #ef5350; background: rgba(239, 83, 80, .03); }
-.signalBtnFollow:hover { background: rgba(239, 83, 80, .08); }
+.signalBtnFollow {
+  border-color: color-mix(in srgb, var(--urgent) 12%, transparent);
+  color: var(--urgent);
+  background: color-mix(in srgb, var(--urgent) 3%, transparent);
+}
+.signalBtnFollow:hover {
+  background: color-mix(in srgb, var(--urgent) 8%, transparent);
+}
 
-.signalBtnInvoice { border-color: rgba(38, 166, 154, .12); color: #26a69a; background: rgba(38, 166, 154, .03); }
-.signalBtnInvoice:hover { background: rgba(38, 166, 154, .08); }
+.signalBtnInvoice {
+  border-color: color-mix(in srgb, var(--positive) 12%, transparent);
+  color: var(--positive);
+  background: color-mix(in srgb, var(--positive) 3%, transparent);
+}
+.signalBtnInvoice:hover {
+  background: color-mix(in srgb, var(--positive) 8%, transparent);
+}
 
-.signalBtnNudge { border-color: rgba(255, 152, 0, .12); color: #ff9800; background: rgba(255, 152, 0, .03); }
-.signalBtnNudge:hover { background: rgba(255, 152, 0, .08); }
+.signalBtnNudge {
+  border-color: color-mix(in srgb, var(--caution) 12%, transparent);
+  color: var(--caution);
+  background: color-mix(in srgb, var(--caution) 3%, transparent);
+}
+.signalBtnNudge:hover {
+  background: color-mix(in srgb, var(--caution) 8%, transparent);
+}
 
-.signalBtnGhost { border-color: var(--warm-200, #e2e1dd); color: var(--ink-400, #a5a49f); background: transparent; }
-.signalBtnGhost:hover { background: #fafaf8; color: var(--ink-600, #5c5b57); }
+.signalBtnGhost {
+  border-color: var(--warm-200, #e2e1dd);
+  color: var(--ink-400, #a5a49f);
+  background: transparent;
+}
+.signalBtnGhost:hover {
+  background: var(--warm-50);
+  color: var(--ink-600, #5c5b57);
+}

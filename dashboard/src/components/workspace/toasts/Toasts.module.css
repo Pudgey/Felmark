@@ -19,9 +19,11 @@
   gap: 10px;
   padding: 12px 14px;
   border-radius: 10px;
-  background: #fff;
+  background: var(--card);
   border: 1px solid var(--warm-200, #e0dfdb);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, .08), 0 1px 4px rgba(0, 0, 0, .04);
+  box-shadow:
+    0 4px 20px color-mix(in srgb, var(--ink-900) 8%, transparent),
+    0 1px 4px color-mix(in srgb, var(--ink-900) 4%, transparent);
   position: relative;
   overflow: hidden;
   pointer-events: auto;
@@ -37,28 +39,48 @@
   width: 3px;
 }
 
-.success::before { background: #26a69a; }
-.alert::before { background: #ef5350; }
-.info::before { background: #2962ff; }
-.neutral::before { background: var(--ink-400, #a5a49f); }
+.success::before {
+  background: var(--positive);
+}
+.alert::before {
+  background: var(--urgent);
+}
+.info::before {
+  background: var(--signal);
+}
+.neutral::before {
+  background: var(--ink-400, #a5a49f);
+}
 
 /* Enter / exit animations */
 .toastEnter {
-  animation: toastIn .25s ease;
+  animation: toastIn 0.25s ease;
 }
 
 .toastExit {
-  animation: toastOut .2s ease forwards;
+  animation: toastOut 0.2s ease forwards;
 }
 
 @keyframes toastIn {
-  from { opacity: 0; transform: translateX(20px) scale(.96); }
-  to { opacity: 1; transform: translateX(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateX(20px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
 }
 
 @keyframes toastOut {
-  from { opacity: 1; transform: translateX(0) scale(1); }
-  to { opacity: 0; transform: translateX(30px) scale(.94); }
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(30px) scale(0.94);
+  }
 }
 
 /* Icon */
@@ -73,10 +95,22 @@
   flex-shrink: 0;
 }
 
-.iconSuccess { background: rgba(38, 166, 154, .08); color: #26a69a; }
-.iconAlert { background: rgba(239, 83, 80, .08); color: #ef5350; }
-.iconInfo { background: rgba(41, 98, 255, .08); color: #2962ff; }
-.iconNeutral { background: rgba(0, 0, 0, .04); color: var(--ink-500, #7c7b77); }
+.iconSuccess {
+  background: color-mix(in srgb, var(--positive) 8%, transparent);
+  color: var(--positive);
+}
+.iconAlert {
+  background: color-mix(in srgb, var(--urgent) 8%, transparent);
+  color: var(--urgent);
+}
+.iconInfo {
+  background: color-mix(in srgb, var(--signal) 8%, transparent);
+  color: var(--signal);
+}
+.iconNeutral {
+  background: color-mix(in srgb, var(--ink-900) 4%, transparent);
+  color: var(--ink-500, #7c7b77);
+}
 
 /* Body */
 .toastBody {
@@ -109,19 +143,19 @@
   font-weight: 500;
   font-family: inherit;
   color: var(--ink-600, #5c5b57);
-  background: #fff;
+  background: var(--card);
   cursor: pointer;
-  transition: all .06s;
+  transition: all 0.06s;
 }
 
 .toastAction:hover {
   border-color: var(--ink-900, #1a1918);
   color: var(--ink-900, #1a1918);
-  background: rgba(0, 0, 0, .02);
+  background: color-mix(in srgb, var(--ink-900) 2%, transparent);
 }
 
 .toastTime {
-  font-family: 'JetBrains Mono', var(--mono, monospace);
+  font-family: "JetBrains Mono", var(--mono, monospace);
   font-size: 9px;
   color: var(--ink-400, #a5a49f);
   margin-top: 4px;
@@ -141,10 +175,10 @@
   font-size: 11px;
   color: var(--ink-400, #a5a49f);
   cursor: pointer;
-  transition: all .06s;
+  transition: all 0.06s;
 }
 
 .toastClose:hover {
-  background: rgba(0, 0, 0, .05);
+  background: color-mix(in srgb, var(--ink-900) 5%, transparent);
   color: var(--ink-700, #3d3c38);
 }

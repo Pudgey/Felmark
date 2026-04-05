@@ -1,7 +1,7 @@
 .backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.35);
+  background: color-mix(in srgb, var(--ink-900) 35%, transparent);
   z-index: 9999;
   display: flex;
   align-items: flex-start;
@@ -11,15 +11,15 @@
 
 .modal {
   width: 560px;
-  background: #fff;
+  background: var(--card);
   border-radius: 12px;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 24px 64px color-mix(in srgb, var(--ink-900) 18%, transparent);
   overflow: hidden;
 }
 
 .inputRow {
   padding: 16px 20px;
-  border-bottom: 1px solid #eeede9;
+  border-bottom: 1px solid var(--warm-200);
   display: flex;
   gap: 12px;
   align-items: center;
@@ -27,7 +27,7 @@
 
 .searchIcon {
   font-size: 14px;
-  color: #cccbc7;
+  color: var(--warm-300);
 }
 
 .input {
@@ -39,12 +39,12 @@
     "Inter",
     -apple-system,
     sans-serif;
-  color: #3d3c39;
+  color: var(--ink-800);
   background: transparent;
 }
 
 .input::placeholder {
-  color: #cccbc7;
+  color: var(--warm-300);
 }
 
 .results {
@@ -58,7 +58,7 @@
   font-family: "JetBrains Mono", monospace;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #a5a49f;
+  color: var(--ink-400);
 }
 
 .item {
@@ -68,21 +68,21 @@
   gap: 12px;
   cursor: pointer;
   font-size: 13px;
-  color: #5c5b57;
+  color: var(--ink-600);
   transition: background 0.04s;
 }
 
 .item:hover {
-  background: rgba(0, 0, 0, 0.04);
+  background: color-mix(in srgb, var(--ink-900) 4%, transparent);
 }
 
 .itemSelected {
-  background: rgba(0, 0, 0, 0.04);
+  background: color-mix(in srgb, var(--ink-900) 4%, transparent);
 }
 
 .itemIcon {
   font-size: 12px;
-  color: #a5a49f;
+  color: var(--ink-400);
   width: 20px;
   text-align: center;
   flex-shrink: 0;
@@ -94,12 +94,12 @@
 
 .itemHint {
   font-size: 10px;
-  color: #cccbc7;
+  color: var(--warm-300);
 }
 
 .empty {
   text-align: center;
-  color: #cccbc7;
+  color: var(--warm-300);
   padding: 32px;
   font-size: 13px;
   font-family:
@@ -110,10 +110,10 @@
 
 .footer {
   padding: 8px 20px;
-  border-top: 1px solid #eeede9;
+  border-top: 1px solid var(--warm-200);
   display: flex;
   gap: 16px;
   font-size: 9px;
   font-family: "JetBrains Mono", monospace;
-  color: #cccbc7;
+  color: var(--warm-300);
 }
