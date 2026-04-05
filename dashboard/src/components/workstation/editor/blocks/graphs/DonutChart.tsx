@@ -10,7 +10,15 @@ export interface DonutDataPoint {
   color?: string;
 }
 
-export default function DonutChart({ title, data, size = 140 }: { title: string; data: DonutDataPoint[]; size?: number }) {
+export default function DonutChart({
+  title,
+  data,
+  size = 140,
+}: {
+  title: string;
+  data: DonutDataPoint[];
+  size?: number;
+}) {
   const [hovered, setHovered] = useState<number | null>(null);
   const total = data.reduce((s, d) => s + (d.value || 0), 0) || 1; // guard against 0
   const cx = size / 2;
@@ -23,7 +31,7 @@ export default function DonutChart({ title, data, size = 140 }: { title: string;
   const segmentOffsets: number[] = [];
   {
     let cur = circ * 0.25;
-    data.forEach(d => {
+    data.forEach((d) => {
       segmentOffsets.push(cur);
       cur -= circ * ((d.value || 0) / total);
     });
@@ -38,14 +46,26 @@ export default function DonutChart({ title, data, size = 140 }: { title: string;
       <div className={styles.donutLayout}>
         <div className={styles.donutRingWrap} style={{ width: size, height: size }}>
           <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-            <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(0,0,0,0.03)" strokeWidth={strokeW} />
+            <circle
+              cx={cx}
+              cy={cy}
+              r={r}
+              fill="none"
+              stroke="color-mix(in srgb, var(--ink-900) 3%, transparent)"
+              strokeWidth={strokeW}
+            />
             {data.map((d, i) => {
               const pct = (d.value || 0) / total;
               const dash = circ * pct;
               const gap = circ - dash;
               const thisOffset = segmentOffsets[i];
               return (
-                <circle key={i} cx={cx} cy={cy} r={r} fill="none"
+                <circle
+                  key={i}
+                  cx={cx}
+                  cy={cy}
+                  r={r}
+                  fill="none"
                   stroke={d.color || PALETTE[i]}
                   strokeWidth={hovered === i ? strokeW + 4 : strokeW}
                   strokeDasharray={`${dash - 2} ${gap + 2}`}
@@ -77,8 +97,12 @@ export default function DonutChart({ title, data, size = 140 }: { title: string;
         </div>
         <div className={styles.donutLegend}>
           {data.map((d, i) => (
-            <div key={i} className={`${styles.donutLegItem}${hovered === i ? ` ${styles.donutLegItemOn}` : ""}`}
-              onMouseEnter={() => setHovered(i)} onMouseLeave={() => setHovered(null)}>
+            <div
+              key={i}
+              className={`${styles.donutLegItem}${hovered === i ? ` ${styles.donutLegItemOn}` : ""}`}
+              onMouseEnter={() => setHovered(i)}
+              onMouseLeave={() => setHovered(null)}
+            >
               <span className={styles.donutLegDot} style={{ background: d.color || PALETTE[i] }} />
               <span className={styles.donutLegLabel}>{d.label}</span>
               <span className={styles.donutLegVal}>${((d.value || 0) / 1000).toFixed(1)}k</span>

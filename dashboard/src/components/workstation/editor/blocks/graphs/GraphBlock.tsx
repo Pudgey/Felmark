@@ -17,7 +17,8 @@ export default function GraphBlock({ graphData }: GraphBlockProps) {
   const { graphType, title, data, height } = graphData;
 
   // Guard: no data or wrong shape — show placeholder
-  if (!data) return <div style={{ padding: 16, color: "var(--ink-400)", fontStyle: "italic" }}>Click to add chart data</div>;
+  if (!data)
+    return <div style={{ padding: 16, color: "var(--ink-400)", fontStyle: "italic" }}>Click to add chart data</div>;
 
   const safeArray = Array.isArray(data) ? data : [];
 
@@ -39,7 +40,9 @@ export default function GraphBlock({ graphData }: GraphBlockProps) {
     case "metrics":
       return <MetricCards metrics={safeArray as MetricData[]} />;
     default:
-      return <div style={{ padding: 16, color: "var(--ink-400)", fontStyle: "italic" }}>Unknown graph type: {graphType}</div>;
+      return (
+        <div style={{ padding: 16, color: "var(--ink-400)", fontStyle: "italic" }}>Unknown graph type: {graphType}</div>
+      );
   }
 }
 
@@ -51,9 +54,9 @@ export function getDefaultGraphData(graphType: GraphType): GraphBlockData {
         graphType: "bar",
         title: "Monthly Revenue",
         data: [
-          { label: "Jan", value: 4200, color: "#b07d4f" },
-          { label: "Feb", value: 5800, color: "#b07d4f" },
-          { label: "Mar", value: 7400, color: "#b07d4f", current: true },
+          { label: "Jan", value: 4200, color: "var(--ember)" },
+          { label: "Feb", value: 5800, color: "var(--ember)" },
+          { label: "Mar", value: 7400, color: "var(--ember)", current: true },
         ],
       };
     case "line":
@@ -61,9 +64,12 @@ export function getDefaultGraphData(graphType: GraphType): GraphBlockData {
         graphType: "line",
         title: "Growth Trend",
         data: [
-          { label: "Oct", value: 3200 }, { label: "Nov", value: 5400 },
-          { label: "Dec", value: 4800 }, { label: "Jan", value: 6200 },
-          { label: "Feb", value: 5100 }, { label: "Mar", value: 7200 },
+          { label: "Oct", value: 3200 },
+          { label: "Nov", value: 5400 },
+          { label: "Dec", value: 4800 },
+          { label: "Jan", value: 6200 },
+          { label: "Feb", value: 5100 },
+          { label: "Mar", value: 7200 },
         ],
       };
     case "donut":
@@ -71,7 +77,7 @@ export function getDefaultGraphData(graphType: GraphType): GraphBlockData {
         graphType: "donut",
         title: "Revenue by Client",
         data: [
-          { label: "Client A", value: 8400, color: "#7c8594" },
+          { label: "Client A", value: 8400, color: "var(--muted)" },
           { label: "Client B", value: 4800, color: "#8a7e63" },
           { label: "Client C", value: 3200, color: "#a08472" },
         ],
@@ -81,7 +87,7 @@ export function getDefaultGraphData(graphType: GraphType): GraphBlockData {
         graphType: "hbar",
         title: "Hours by Project",
         data: [
-          { label: "Brand Guidelines", value: 32, unit: "h", color: "#7c8594" },
+          { label: "Brand Guidelines", value: 32, unit: "h", color: "var(--muted)" },
           { label: "Website Redesign", value: 24, unit: "h", color: "#8a7e63" },
           { label: "Content Strategy", value: 18, unit: "h", color: "#a08472" },
         ],
@@ -91,8 +97,14 @@ export function getDefaultGraphData(graphType: GraphType): GraphBlockData {
         graphType: "sparkline",
         title: "This Week",
         data: [
-          { label: "Revenue", values: [800, 1200, 900, 1400, 1800], current: "$6.1k", change: 22, color: "#5a9a3c" },
-          { label: "Hours", values: [4, 6, 5, 7, 8], current: "30h", change: 12, color: "#b07d4f" },
+          {
+            label: "Revenue",
+            values: [800, 1200, 900, 1400, 1800],
+            current: "$6.1k",
+            change: 22,
+            color: "var(--success)",
+          },
+          { label: "Hours", values: [4, 6, 5, 7, 8], current: "30h", change: 12, color: "var(--ember)" },
         ],
       };
     case "area":
@@ -102,8 +114,8 @@ export function getDefaultGraphData(graphType: GraphType): GraphBlockData {
         data: {
           labels: ["Oct", "Nov", "Dec", "Jan", "Feb", "Mar"],
           series: [
-            { label: "Design", color: "#b07d4f", values: [4200, 5400, 4800, 6200, 5100, 7200] },
-            { label: "Copy", color: "#5a9a3c", values: [1800, 2400, 2200, 3200, 2800, 3600] },
+            { label: "Design", color: "var(--ember)", values: [4200, 5400, 4800, 6200, 5100, 7200] },
+            { label: "Copy", color: "var(--success)", values: [1800, 2400, 2200, 3200, 2800, 3600] },
           ],
         },
       };
@@ -112,7 +124,7 @@ export function getDefaultGraphData(graphType: GraphType): GraphBlockData {
         graphType: "metrics",
         title: "Key Metrics",
         data: [
-          { label: "Revenue", value: 14800, prefix: "$", color: "#5a9a3c", change: 40, sub: "this month" },
+          { label: "Revenue", value: 14800, prefix: "$", color: "var(--success)", change: 40, sub: "this month" },
           { label: "Projects", value: 8, color: "var(--ink-900)", change: 12, sub: "active" },
           { label: "Avg Rate", value: 95, prefix: "$", suffix: "/hr", color: "var(--ember)", change: 5 },
         ],

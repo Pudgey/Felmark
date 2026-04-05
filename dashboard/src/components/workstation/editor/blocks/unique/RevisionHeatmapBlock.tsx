@@ -8,7 +8,7 @@ interface Props {
   onUpdate: (data: RevisionHeatmapData) => void;
 }
 
-const AUTHOR_COLORS: Record<string, string> = { A: "#b07d4f", J: "#7c8594", S: "#8a7e63", Y: "#5b7fa4" };
+const AUTHOR_COLORS: Record<string, string> = { A: "var(--ember)", J: "var(--muted)", S: "#8a7e63", Y: "var(--info)" };
 
 export function getDefaultRevisionHeatmapData(): RevisionHeatmapData {
   return {
@@ -25,25 +25,34 @@ export function getDefaultRevisionHeatmapData(): RevisionHeatmapData {
 }
 
 function heatColor(heat: number) {
-  if (heat >= 80) return "#c24b38";
-  if (heat >= 50) return "#c89360";
-  if (heat >= 25) return "#5b7fa4";
-  return "#b8b3a8";
+  if (heat >= 80) return "var(--error)";
+  if (heat >= 50) return "var(--ember-light)";
+  if (heat >= 25) return "var(--info)";
+  return "var(--warm-400)";
 }
 
 function heatBg(heat: number) {
-  if (heat >= 80) return "rgba(194,75,56,0.04)";
-  if (heat >= 50) return "rgba(200,147,96,0.04)";
+  if (heat >= 80) return "color-mix(in srgb, var(--error) 4%, transparent)";
+  if (heat >= 50) return "color-mix(in srgb, var(--ember-light) 4%, transparent)";
   return "transparent";
 }
 
 export default function RevisionHeatmapBlock({ data }: Props) {
-  const maxEdits = Math.max(...data.sections.map(s => s.edits));
+  const maxEdits = Math.max(...data.sections.map((s) => s.edits));
 
   return (
     <div className={styles.card}>
       <div className={styles.header}>
-        <span className={styles.badge} style={{ color: "#c24b38", background: "rgba(194,75,56,0.04)", borderColor: "rgba(194,75,56,0.08)" }}>Revisions</span>
+        <span
+          className={styles.badge}
+          style={{
+            color: "var(--error)",
+            background: "color-mix(in srgb, var(--error) 4%, transparent)",
+            borderColor: "color-mix(in srgb, var(--error) 8%, transparent)",
+          }}
+        >
+          Revisions
+        </span>
         <span className={styles.title}>Edit heatmap</span>
         <span className={styles.subtitle}>Hotter = more recent edits</span>
       </div>
@@ -66,19 +75,39 @@ export default function RevisionHeatmapBlock({ data }: Props) {
               </div>
               <div className={styles.heatAuthors}>
                 {s.authors.map((a, j) => (
-                  <span key={j} className={styles.heatAuthor} style={{ background: AUTHOR_COLORS[a] || "#9b988f" }}>{a}</span>
+                  <span
+                    key={j}
+                    className={styles.heatAuthor}
+                    style={{ background: AUTHOR_COLORS[a] || "var(--ink-400)" }}
+                  >
+                    {a}
+                  </span>
                 ))}
               </div>
-              <div className={styles.heatCount} style={{ color }}>{s.edits}</div>
+              <div className={styles.heatCount} style={{ color }}>
+                {s.edits}
+              </div>
             </div>
           );
         })}
       </div>
       <div className={styles.heatLegend}>
-        <span className={styles.heatLegendItem}><span className={styles.heatLegendDot} style={{ background: "#c24b38" }} />Hot (active now)</span>
-        <span className={styles.heatLegendItem}><span className={styles.heatLegendDot} style={{ background: "#c89360" }} />Warm (today)</span>
-        <span className={styles.heatLegendItem}><span className={styles.heatLegendDot} style={{ background: "#5b7fa4" }} />Cool (this week)</span>
-        <span className={styles.heatLegendItem}><span className={styles.heatLegendDot} style={{ background: "#b8b3a8" }} />Cold (stale)</span>
+        <span className={styles.heatLegendItem}>
+          <span className={styles.heatLegendDot} style={{ background: "var(--error)" }} />
+          Hot (active now)
+        </span>
+        <span className={styles.heatLegendItem}>
+          <span className={styles.heatLegendDot} style={{ background: "var(--ember-light)" }} />
+          Warm (today)
+        </span>
+        <span className={styles.heatLegendItem}>
+          <span className={styles.heatLegendDot} style={{ background: "var(--info)" }} />
+          Cool (this week)
+        </span>
+        <span className={styles.heatLegendItem}>
+          <span className={styles.heatLegendDot} style={{ background: "var(--warm-400)" }} />
+          Cold (stale)
+        </span>
       </div>
     </div>
   );

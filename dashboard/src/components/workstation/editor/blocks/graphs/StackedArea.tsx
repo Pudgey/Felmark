@@ -10,7 +10,17 @@ export interface AreaSeries {
   values: number[];
 }
 
-export default function StackedArea({ title, labels, series, height = 160 }: { title: string; labels: string[]; series: AreaSeries[]; height?: number }) {
+export default function StackedArea({
+  title,
+  labels,
+  series,
+  height = 160,
+}: {
+  title: string;
+  labels: string[];
+  series: AreaSeries[];
+  height?: number;
+}) {
   const [hovered, setHovered] = useState<number | null>(null);
   const w = 500;
   const h = height;
@@ -39,34 +49,76 @@ export default function StackedArea({ title, labels, series, height = 160 }: { t
       </div>
       <svg className={styles.lineSvg} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="xMidYMid meet">
         {[0, 0.25, 0.5, 0.75, 1].map((frac, i) => (
-          <line key={i} x1={pad.left} y1={pad.top + chartH * (1 - frac)} x2={w - pad.right} y2={pad.top + chartH * (1 - frac)} stroke="rgba(0,0,0,0.03)" strokeWidth="1" />
+          <line
+            key={i}
+            x1={pad.left}
+            y1={pad.top + chartH * (1 - frac)}
+            x2={w - pad.right}
+            y2={pad.top + chartH * (1 - frac)}
+            stroke="color-mix(in srgb, var(--ink-900) 3%, transparent)"
+            strokeWidth="1"
+          />
         ))}
         {stacked.map((s, si) => {
-          const topPts = s.stackedValues.map((sv, vi) => `${pad.left + (vi / (n - 1)) * chartW},${getY(sv.top)}`).join(" ");
-          const bottomPts = [...s.stackedValues].reverse().map((sv, vi) => `${pad.left + ((n - 1 - vi) / (n - 1)) * chartW},${getY(sv.base)}`).join(" ");
+          const topPts = s.stackedValues
+            .map((sv, vi) => `${pad.left + (vi / (n - 1)) * chartW},${getY(sv.top)}`)
+            .join(" ");
+          const bottomPts = [...s.stackedValues]
+            .reverse()
+            .map((sv, vi) => `${pad.left + ((n - 1 - vi) / (n - 1)) * chartW},${getY(sv.base)}`)
+            .join(" ");
           return (
-            <polygon key={si} points={`${topPts} ${bottomPts}`}
-              fill={s.color || PALETTE[si]} opacity={hovered !== null && hovered !== si ? 0.15 : 0.25}
+            <polygon
+              key={si}
+              points={`${topPts} ${bottomPts}`}
+              fill={s.color || PALETTE[si]}
+              opacity={hovered !== null && hovered !== si ? 0.15 : 0.25}
               style={{ transition: "opacity 0.2s", cursor: "pointer" }}
-              onMouseEnter={() => setHovered(si)} onMouseLeave={() => setHovered(null)} />
+              onMouseEnter={() => setHovered(si)}
+              onMouseLeave={() => setHovered(null)}
+            />
           );
         })}
         {stacked.map((s, si) => {
-          const path = s.stackedValues.map((sv, vi) => `${vi === 0 ? "M" : "L"}${pad.left + (vi / (n - 1)) * chartW},${getY(sv.top)}`).join(" ");
+          const path = s.stackedValues
+            .map((sv, vi) => `${vi === 0 ? "M" : "L"}${pad.left + (vi / (n - 1)) * chartW},${getY(sv.top)}`)
+            .join(" ");
           return (
-            <path key={si} d={path} fill="none" stroke={s.color || PALETTE[si]}
-              strokeWidth={hovered === si ? 2.5 : 1.5} strokeLinecap="round" strokeLinejoin="round"
-              opacity={hovered !== null && hovered !== si ? 0.3 : 0.8} style={{ transition: "all 0.2s" }} />
+            <path
+              key={si}
+              d={path}
+              fill="none"
+              stroke={s.color || PALETTE[si]}
+              strokeWidth={hovered === si ? 2.5 : 1.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity={hovered !== null && hovered !== si ? 0.3 : 0.8}
+              style={{ transition: "all 0.2s" }}
+            />
           );
         })}
         {labels.map((l, i) => (
-          <text key={i} x={pad.left + (i / (n - 1)) * chartW} y={h - 4} textAnchor="middle" fill="#9b988f" fontSize="10" fontFamily="'JetBrains Mono', monospace">{l}</text>
+          <text
+            key={i}
+            x={pad.left + (i / (n - 1)) * chartW}
+            y={h - 4}
+            textAnchor="middle"
+            fill="var(--ink-400)"
+            fontSize="10"
+            fontFamily="'JetBrains Mono', monospace"
+          >
+            {l}
+          </text>
         ))}
       </svg>
       <div className={styles.areaLegend}>
         {series.map((s, i) => (
-          <div key={i} className={`${styles.areaLeg}${hovered === i ? ` ${styles.areaLegOn}` : ""}`}
-            onMouseEnter={() => setHovered(i)} onMouseLeave={() => setHovered(null)}>
+          <div
+            key={i}
+            className={`${styles.areaLeg}${hovered === i ? ` ${styles.areaLegOn}` : ""}`}
+            onMouseEnter={() => setHovered(i)}
+            onMouseLeave={() => setHovered(null)}
+          >
             <span className={styles.areaLegDot} style={{ background: s.color || PALETTE[i] }} />
             <span className={styles.areaLegLabel}>{s.label}</span>
             <span className={styles.areaLegVal}>${(s.values.reduce((a, b) => a + b, 0) / 1000).toFixed(1)}k</span>

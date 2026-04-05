@@ -2,7 +2,12 @@
 
 import { useState } from "react";
 import type { DeadlineBlockData } from "@/lib/types";
-import { getDaysLeft as daysLeft, formatDueShort as formatDue, getDueLabel as getDueLabelFromDate, getDueColor as getDueColorFromDate } from "@/lib/due-dates";
+import {
+  getDaysLeft as daysLeft,
+  formatDueShort as formatDue,
+  getDueLabel as getDueLabelFromDate,
+  getDueColor as getDueColorFromDate,
+} from "@/lib/due-dates";
 import styles from "./DeadlineBlock.module.css";
 
 interface DeadlineBlockProps {
@@ -19,13 +24,30 @@ export default function DeadlineBlock({ data, onUpdate }: DeadlineBlockProps) {
   const isDueSoon = dl !== null && dl >= 0 && dl <= 3;
   const isDueToday = dl === 0;
 
-  const status = data.completed ? "done" : isOverdue ? "overdue" : isDueToday ? "today" : isDueSoon ? "soon" : "upcoming";
+  const status = data.completed
+    ? "done"
+    : isOverdue
+      ? "overdue"
+      : isDueToday
+        ? "today"
+        : isDueSoon
+          ? "soon"
+          : "upcoming";
 
   const statusStyles: Record<string, { border: string; bg: string }> = {
-    done: { border: "rgba(90,154,60,0.3)", bg: "rgba(90,154,60,0.03)" },
-    overdue: { border: "rgba(194,75,56,0.3)", bg: "rgba(194,75,56,0.03)" },
+    done: {
+      border: "color-mix(in srgb, var(--success) 30%, transparent)",
+      bg: "color-mix(in srgb, var(--success) 3%, transparent)",
+    },
+    overdue: {
+      border: "color-mix(in srgb, var(--error) 30%, transparent)",
+      bg: "color-mix(in srgb, var(--error) 3%, transparent)",
+    },
     today: { border: "var(--ember)", bg: "var(--ember-bg)" },
-    soon: { border: "rgba(176,125,79,0.3)", bg: "rgba(176,125,79,0.03)" },
+    soon: {
+      border: "color-mix(in srgb, var(--ember) 30%, transparent)",
+      bg: "color-mix(in srgb, var(--ember) 3%, transparent)",
+    },
     upcoming: { border: "var(--warm-200)", bg: "transparent" },
   };
 
@@ -54,14 +76,23 @@ export default function DeadlineBlock({ data, onUpdate }: DeadlineBlockProps) {
               className={styles.titleInput}
               value={titleValue}
               autoFocus
-              onChange={e => setTitleValue(e.target.value)}
+              onChange={(e) => setTitleValue(e.target.value)}
               onBlur={saveTitle}
-              onKeyDown={e => { if (e.key === "Enter") saveTitle(); if (e.key === "Escape") { setTitleValue(data.title); setEditingTitle(false); } }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") saveTitle();
+                if (e.key === "Escape") {
+                  setTitleValue(data.title);
+                  setEditingTitle(false);
+                }
+              }}
             />
           ) : (
             <span
               className={`${styles.title} ${data.completed ? styles.titleDone : ""}`}
-              onDoubleClick={() => { setTitleValue(data.title); setEditingTitle(true); }}
+              onDoubleClick={() => {
+                setTitleValue(data.title);
+                setEditingTitle(true);
+              }}
             >
               {data.title}
             </span>
@@ -69,14 +100,17 @@ export default function DeadlineBlock({ data, onUpdate }: DeadlineBlockProps) {
         </div>
 
         <div className={styles.meta}>
-          <label className={styles.datePicker} onClick={e => e.stopPropagation()}>
-            <span className={styles.dateDisplay} style={{ color: data.completed ? "#5a9a3c" : getDueColorFromDate(data.due) }}>
+          <label className={styles.datePicker} onClick={(e) => e.stopPropagation()}>
+            <span
+              className={styles.dateDisplay}
+              style={{ color: data.completed ? "var(--success)" : getDueColorFromDate(data.due) }}
+            >
               {data.due ? formatDue(data.due) : "Set date"}
             </span>
             <input
               type="date"
               value={data.due || ""}
-              onChange={e => onUpdate({ ...data, due: e.target.value || null })}
+              onChange={(e) => onUpdate({ ...data, due: e.target.value || null })}
               className={styles.dateHidden}
             />
           </label>

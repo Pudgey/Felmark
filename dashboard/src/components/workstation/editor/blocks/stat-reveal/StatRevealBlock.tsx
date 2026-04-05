@@ -8,9 +8,23 @@ import styles from "./StatRevealBlock.module.css";
 export function getDefaultStatReveal(): StatRevealData {
   return {
     stats: [
-      { value: 340, prefix: "", suffix: "%", label: "ROI", sub: "Return on brand investment", color: "#5a9a3c" },
-      { value: 23, prefix: "", suffix: "\u00d7", label: "Revenue", sub: "Multiplier from identity work", color: "var(--ember)" },
-      { value: 71, prefix: "", suffix: "%", label: "Recognition", sub: "Brand recall improvement", color: "#5b7fa4" },
+      { value: 340, prefix: "", suffix: "%", label: "ROI", sub: "Return on brand investment", color: "var(--success)" },
+      {
+        value: 23,
+        prefix: "",
+        suffix: "\u00d7",
+        label: "Revenue",
+        sub: "Multiplier from identity work",
+        color: "var(--ember)",
+      },
+      {
+        value: 71,
+        prefix: "",
+        suffix: "%",
+        label: "Recognition",
+        sub: "Brand recall improvement",
+        color: "var(--info)",
+      },
     ],
     footer: "Why brand identity is a revenue investment, not a cost.",
   };
@@ -52,12 +66,31 @@ export default function StatRevealBlock({ data, onChange }: StatRevealProps) {
     <div className={styles.statReveal} ref={ref}>
       <div className={styles.statRevealGrid}>
         {data.stats.map((stat, i) => (
-          <StatRevealCard key={i} stat={stat} index={i} visible={visible} editField={editField} draft={draft} setDraft={setDraft} startEdit={startEdit} commitEdit={commitEdit} />
+          <StatRevealCard
+            key={i}
+            stat={stat}
+            index={i}
+            visible={visible}
+            editField={editField}
+            draft={draft}
+            setDraft={setDraft}
+            startEdit={startEdit}
+            commitEdit={commitEdit}
+          />
         ))}
       </div>
       <div className={visible ? styles.statRevealFooterVisible : styles.statRevealFooter}>
         {editField?.field === "footer" ? (
-          <input className={styles.inlineInput} value={draft} onChange={e => setDraft(e.target.value)} onBlur={commitEdit} onKeyDown={e => { if (e.key === "Enter") commitEdit(); }} autoFocus />
+          <input
+            className={styles.inlineInput}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onBlur={commitEdit}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") commitEdit();
+            }}
+            autoFocus
+          />
         ) : (
           <span onDoubleClick={startEditFooter}>{data.footer}</span>
         )}
@@ -77,7 +110,16 @@ interface StatRevealCardProps {
   commitEdit: () => void;
 }
 
-function StatRevealCard({ stat, index, visible, editField, draft, setDraft, startEdit, commitEdit }: StatRevealCardProps) {
+function StatRevealCard({
+  stat,
+  index,
+  visible,
+  editField,
+  draft,
+  setDraft,
+  startEdit,
+  commitEdit,
+}: StatRevealCardProps) {
   const [displayVal, setDisplayVal] = useState(0);
   const rafRef = useRef<number>(0);
 
@@ -97,7 +139,9 @@ function StatRevealCard({ stat, index, visible, editField, draft, setDraft, star
         // quartic ease-out: 1 - (1-t)^4
         const eased = 1 - Math.pow(1 - t, 4);
         setDisplayVal(Math.round(eased * stat.value));
-        if (t < 1) { rafRef.current = requestAnimationFrame(step); }
+        if (t < 1) {
+          rafRef.current = requestAnimationFrame(step);
+        }
       };
       rafRef.current = requestAnimationFrame(step);
     }, delay);
@@ -117,21 +161,56 @@ function StatRevealCard({ stat, index, visible, editField, draft, setDraft, star
     <div className={visible ? styles.statCardVisible : styles.statCard} style={{ transitionDelay: `${index * 200}ms` }}>
       <svg width="48" height="48" viewBox="0 0 48 48" className={styles.statRing}>
         <circle cx="24" cy="24" r="20" fill="none" stroke="var(--warm-200)" strokeWidth="3" />
-        <circle cx="24" cy="24" r="20" fill="none" stroke={stat.color} strokeWidth="3" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={dashOffset} style={{ transform: "rotate(-90deg)", transformOrigin: "center", transition: "stroke-dashoffset 0.1s linear" }} />
+        <circle
+          cx="24"
+          cy="24"
+          r="20"
+          fill="none"
+          stroke={stat.color}
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={dashOffset}
+          style={{
+            transform: "rotate(-90deg)",
+            transformOrigin: "center",
+            transition: "stroke-dashoffset 0.1s linear",
+          }}
+        />
       </svg>
       <div className={styles.statValue} style={{ color: stat.color }}>
-        {stat.prefix}{displayVal}{stat.suffix}
+        {stat.prefix}
+        {displayVal}
+        {stat.suffix}
       </div>
       <div className={styles.statLabel}>
         {editField?.idx === index && editField.field === "label" ? (
-          <input className={styles.inlineInput} value={draft} onChange={e => setDraft(e.target.value)} onBlur={commitEdit} onKeyDown={e => { if (e.key === "Enter") commitEdit(); }} autoFocus />
+          <input
+            className={styles.inlineInput}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onBlur={commitEdit}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") commitEdit();
+            }}
+            autoFocus
+          />
         ) : (
           <span onDoubleClick={() => startEdit(index, "label")}>{stat.label}</span>
         )}
       </div>
       <div className={styles.statSub}>
         {editField?.idx === index && editField.field === "sub" ? (
-          <input className={styles.inlineInput} value={draft} onChange={e => setDraft(e.target.value)} onBlur={commitEdit} onKeyDown={e => { if (e.key === "Enter") commitEdit(); }} autoFocus />
+          <input
+            className={styles.inlineInput}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onBlur={commitEdit}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") commitEdit();
+            }}
+            autoFocus
+          />
         ) : (
           <span onDoubleClick={() => startEdit(index, "sub")}>{stat.sub}</span>
         )}

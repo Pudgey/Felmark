@@ -7,16 +7,52 @@ export function getDefaultTimeline(): TimelineBlockData {
   return {
     title: "Brand Guidelines v2 Timeline",
     phases: [
-      { label: "Discovery", date: "Mar 1 - 7", status: "done", items: ["Client questionnaire", "Competitor audit", "Mood board review"], color: "#5a9a3c" },
-      { label: "Concept", date: "Mar 8 - 18", status: "done", items: ["3 logo directions", "Color palette exploration", "Typography shortlist"], color: "#5a9a3c" },
-      { label: "Design", date: "Mar 19 - 28", status: "current", items: ["Primary logo refinement", "Brand board assembly", "Collateral templates"], color: "#b07d4f" },
-      { label: "Review", date: "Mar 29 - Apr 3", status: "upcoming", items: ["Client presentation", "Revision round 1", "Final sign-off"], color: "#7c8594" },
-      { label: "Deliver", date: "Apr 4 - 7", status: "upcoming", items: ["Export all assets", "Style guide PDF", "Handoff meeting"], color: "#7c8594" },
+      {
+        label: "Discovery",
+        date: "Mar 1 - 7",
+        status: "done",
+        items: ["Client questionnaire", "Competitor audit", "Mood board review"],
+        color: "var(--success)",
+      },
+      {
+        label: "Concept",
+        date: "Mar 8 - 18",
+        status: "done",
+        items: ["3 logo directions", "Color palette exploration", "Typography shortlist"],
+        color: "var(--success)",
+      },
+      {
+        label: "Design",
+        date: "Mar 19 - 28",
+        status: "current",
+        items: ["Primary logo refinement", "Brand board assembly", "Collateral templates"],
+        color: "var(--ember)",
+      },
+      {
+        label: "Review",
+        date: "Mar 29 - Apr 3",
+        status: "upcoming",
+        items: ["Client presentation", "Revision round 1", "Final sign-off"],
+        color: "var(--muted)",
+      },
+      {
+        label: "Deliver",
+        date: "Apr 4 - 7",
+        status: "upcoming",
+        items: ["Export all assets", "Style guide PDF", "Handoff meeting"],
+        color: "var(--muted)",
+      },
     ],
   };
 }
 
-export default function TimelineBlock({ data, onChange }: { data: TimelineBlockData; onChange: (d: TimelineBlockData) => void }) {
+export default function TimelineBlock({
+  data,
+  onChange,
+}: {
+  data: TimelineBlockData;
+  onChange: (d: TimelineBlockData) => void;
+}) {
   const toggleItem = (phaseIdx: number, itemIdx: number) => {
     const phases = data.phases.map((p, pi) => {
       if (pi !== phaseIdx) return p;
@@ -41,17 +77,16 @@ export default function TimelineBlock({ data, onChange }: { data: TimelineBlockD
       <div className={styles.timelineBody}>
         <div className={styles.timelinePhases}>
           {data.phases.map((phase, pi) => {
-            const dotClass = phase.status === "done"
-              ? styles.timelineDotDone
-              : phase.status === "current"
-                ? styles.timelineDotCurrent
-                : styles.timelineDotUpcoming;
+            const dotClass =
+              phase.status === "done"
+                ? styles.timelineDotDone
+                : phase.status === "current"
+                  ? styles.timelineDotCurrent
+                  : styles.timelineDotUpcoming;
             const phaseClass = phase.status === "upcoming" ? styles.timelinePhaseUpcoming : "";
             return (
               <div key={pi} className={`${styles.timelinePhase} ${phaseClass}`}>
-                <div className={`${styles.timelineDot} ${dotClass}`}>
-                  {phase.status === "done" && "\u2713"}
-                </div>
+                <div className={`${styles.timelineDot} ${dotClass}`}>{phase.status === "done" && "\u2713"}</div>
                 <div className={styles.timelineLine} />
                 <span className={styles.timelinePhaseLabel}>{phase.label}</span>
                 <span className={styles.timelinePhaseDate}>{phase.date}</span>
@@ -64,7 +99,9 @@ export default function TimelineBlock({ data, onChange }: { data: TimelineBlockD
                         <span className={`${styles.timelineItemCheck} ${isDone ? styles.timelineItemCheckDone : ""}`}>
                           {isDone && "\u2713"}
                         </span>
-                        <span className={`${styles.timelineItemText} ${isDone ? styles.timelineItemTextDone : ""}`}>{text}</span>
+                        <span className={`${styles.timelineItemText} ${isDone ? styles.timelineItemTextDone : ""}`}>
+                          {text}
+                        </span>
                       </li>
                     );
                   })}

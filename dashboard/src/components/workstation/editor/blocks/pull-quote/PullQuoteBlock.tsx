@@ -9,12 +9,18 @@ export function getDefaultPullQuote(): PullQuoteData {
     author: "Sarah Chen",
     role: "Founder, Meridian Studio",
     avatarLetter: "S",
-    avatarColor: "#5b7fa4",
+    avatarColor: "var(--info)",
     rating: 5,
   };
 }
 
-export default function PullQuoteBlock({ data, onChange: _onChange }: { data: PullQuoteData; onChange: (d: PullQuoteData) => void }) {
+export default function PullQuoteBlock({
+  data,
+  onChange: _onChange,
+}: {
+  data: PullQuoteData;
+  onChange: (d: PullQuoteData) => void;
+}) {
   return (
     <div className={styles.pq}>
       <div className={styles.pqHeader}>
@@ -33,7 +39,7 @@ export default function PullQuoteBlock({ data, onChange: _onChange }: { data: Pu
             <div className={styles.pqRole}>{data.role}</div>
           </div>
           <div className={styles.pqStars}>
-            {[1, 2, 3, 4, 5].map(star => (
+            {[1, 2, 3, 4, 5].map((star) => (
               <span key={star} className={`${styles.pqStar} ${star <= data.rating ? styles.pqStarFilled : ""}`}>
                 &#x2605;
               </span>

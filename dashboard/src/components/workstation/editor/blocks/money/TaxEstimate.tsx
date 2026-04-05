@@ -2,7 +2,11 @@
 
 import styles from "./MoneyBlock.module.css";
 
-export interface TaxData { annualEarnings: number; taxRate: number; quarterlyPayments: [number, number, number, number] }
+export interface TaxData {
+  annualEarnings: number;
+  taxRate: number;
+  quarterlyPayments: [number, number, number, number];
+}
 
 const QUARTERS = ["Q1 (Jan\u2013Mar)", "Q2 (Apr\u2013Jun)", "Q3 (Jul\u2013Sep)", "Q4 (Oct\u2013Dec)"];
 
@@ -17,7 +21,9 @@ export default function TaxEstimate({ data }: { data: TaxData }) {
   return (
     <div className={styles.mb}>
       <div className={styles.head}>
-        <span className={styles.icon} style={{ color: "#7c6b9e" }}>&sect;</span>
+        <span className={styles.icon} style={{ color: "var(--muted)" }}>
+          &sect;
+        </span>
         <span className={styles.label}>Tax Estimate</span>
         <span className={styles.headVal}>{Math.round(taxRate * 100)}% rate</span>
       </div>
@@ -37,22 +43,37 @@ export default function TaxEstimate({ data }: { data: TaxData }) {
           const due = quarterly;
           const isCurrent = i === currentQ;
           const status = paid >= due ? "paid" : isCurrent ? "due" : i < currentQ ? "overdue" : "upcoming";
-          const cfg = { paid: { color: "#5a9a3c", label: "Paid" }, due: { color: "#b07d4f", label: "Due Apr 15" }, overdue: { color: "#c24b38", label: "Overdue" }, upcoming: { color: "var(--ink-300)", label: "Upcoming" } }[status]!;
+          const cfg = {
+            paid: { color: "var(--success)", label: "Paid" },
+            due: { color: "var(--ember)", label: "Due Apr 15" },
+            overdue: { color: "var(--error)", label: "Overdue" },
+            upcoming: { color: "var(--ink-300)", label: "Upcoming" },
+          }[status]!;
           return (
             <div key={i} className={`${styles.taxQ}${status === "due" ? ` ${styles.taxQDue}` : ""}`}>
               <div className={styles.taxQHead}>
                 <span className={styles.taxQName}>{q}</span>
-                <span className={styles.taxQStatus} style={{ color: cfg.color }}>{cfg.label}</span>
+                <span className={styles.taxQStatus} style={{ color: cfg.color }}>
+                  {cfg.label}
+                </span>
               </div>
-              <div className={styles.taxQBar}><div className={styles.taxQFill} style={{ width: `${Math.min((paid / (due || 1)) * 100, 100)}%`, background: cfg.color }} /></div>
-              <div className={styles.taxQVals}><span>${paid.toLocaleString()} paid</span><span>${due.toLocaleString()} due</span></div>
+              <div className={styles.taxQBar}>
+                <div
+                  className={styles.taxQFill}
+                  style={{ width: `${Math.min((paid / (due || 1)) * 100, 100)}%`, background: cfg.color }}
+                />
+              </div>
+              <div className={styles.taxQVals}>
+                <span>${paid.toLocaleString()} paid</span>
+                <span>${due.toLocaleString()} due</span>
+              </div>
             </div>
           );
         })}
       </div>
       <div className={styles.taxFooter}>
         <span>Based on ${annualEarnings.toLocaleString()} projected annual income</span>
-        <span style={{ color: remaining > 0 ? "#c24b38" : "#5a9a3c" }}>
+        <span style={{ color: remaining > 0 ? "var(--error)" : "var(--success)" }}>
           {remaining > 0 ? `$${remaining.toLocaleString()} remaining this year` : "Fully paid for the year"}
         </span>
       </div>

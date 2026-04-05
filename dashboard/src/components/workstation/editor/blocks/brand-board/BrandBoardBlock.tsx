@@ -10,11 +10,11 @@ export function getDefaultBrandBoard(): BrandBoardData {
     logoName: "Meridian",
     logoSub: "Design Studio",
     colors: [
-      { hex: "#2c2a25", name: "Charcoal", type: "Primary" },
-      { hex: "#b07d4f", name: "Amber", type: "Accent" },
-      { hex: "#5b7fa4", name: "Slate Blue", type: "Secondary" },
-      { hex: "#faf9f7", name: "Parchment", type: "Background" },
-      { hex: "#5a9a3c", name: "Forest", type: "Success" },
+      { hex: "var(--ink-900)", name: "Charcoal", type: "Primary" },
+      { hex: "var(--ember)", name: "Amber", type: "Accent" },
+      { hex: "var(--info)", name: "Slate Blue", type: "Secondary" },
+      { hex: "var(--parchment)", name: "Parchment", type: "Background" },
+      { hex: "var(--success)", name: "Forest", type: "Success" },
     ],
     fonts: [
       { family: "Cormorant Garamond", role: "Heading", weight: "700" },
@@ -25,7 +25,13 @@ export function getDefaultBrandBoard(): BrandBoardData {
   };
 }
 
-export default function BrandBoardBlock({ data, onChange: _onChange }: { data: BrandBoardData; onChange: (d: BrandBoardData) => void }) {
+export default function BrandBoardBlock({
+  data,
+  onChange: _onChange,
+}: {
+  data: BrandBoardData;
+  onChange: (d: BrandBoardData) => void;
+}) {
   return (
     <div className={styles.brand}>
       <div className={styles.brandHeader}>
@@ -40,9 +46,18 @@ export default function BrandBoardBlock({ data, onChange: _onChange }: { data: B
             <div className={styles.brandLogoName}>{data.logoName}</div>
             <div className={styles.brandLogoSub}>{data.logoSub}</div>
             <div className={styles.brandLogoVariants}>
-              <div className={styles.brandLogoVariant} style={{ background: "#2c2a25", color: "#fff" }}>{data.logoLetter}</div>
-              <div className={styles.brandLogoVariant} style={{ background: "#faf9f7", color: "#2c2a25", border: "1px solid #e8e3db" }}>{data.logoLetter}</div>
-              <div className={styles.brandLogoVariant} style={{ background: "#b07d4f", color: "#fff" }}>{data.logoLetter}</div>
+              <div className={styles.brandLogoVariant} style={{ background: "var(--ink-900)", color: "#fff" }}>
+                {data.logoLetter}
+              </div>
+              <div
+                className={styles.brandLogoVariant}
+                style={{ background: "var(--parchment)", color: "var(--ink-900)", border: "1px solid #e8e3db" }}
+              >
+                {data.logoLetter}
+              </div>
+              <div className={styles.brandLogoVariant} style={{ background: "var(--ember)", color: "#fff" }}>
+                {data.logoLetter}
+              </div>
             </div>
           </div>
         </div>
@@ -75,7 +90,9 @@ export default function BrandBoardBlock({ data, onChange: _onChange }: { data: B
         </div>
         <div className={styles.brandKeywords}>
           {data.keywords.map((kw, i) => (
-            <span key={i} className={styles.brandKeyword}>{kw}</span>
+            <span key={i} className={styles.brandKeyword}>
+              {kw}
+            </span>
           ))}
         </div>
       </div>

@@ -1,17 +1,49 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import type { DeliverableData, DeliverableStatus, DeliverableFile, DeliverableComment, DeliverableActivity, DeliverableSubtask } from "@/lib/types";
+import type {
+  DeliverableData,
+  DeliverableStatus,
+  DeliverableFile,
+  DeliverableComment,
+  DeliverableActivity,
+  DeliverableSubtask,
+} from "@/lib/types";
 import styles from "./DeliverableBlock.module.css";
 
 const uid = () => Math.random().toString(36).slice(2, 10);
 
 const STATUS_CONFIG: Record<DeliverableStatus, { label: string; color: string; bg: string; icon: string }> = {
-  "todo": { label: "To Do", color: "#9b988f", bg: "rgba(155,152,143,0.06)", icon: "○" },
-  "in-progress": { label: "In Progress", color: "#b07d4f", bg: "rgba(176,125,79,0.06)", icon: "◐" },
-  "review": { label: "In Review", color: "#5b7fa4", bg: "rgba(91,127,164,0.06)", icon: "◎" },
-  "changes": { label: "Changes Req.", color: "#c24b38", bg: "rgba(194,75,56,0.06)", icon: "↻" },
-  "approved": { label: "Approved", color: "#5a9a3c", bg: "rgba(90,154,60,0.06)", icon: "✓" },
+  todo: {
+    label: "To Do",
+    color: "var(--ink-400)",
+    bg: "color-mix(in srgb, var(--ink-400) 6%, transparent)",
+    icon: "○",
+  },
+  "in-progress": {
+    label: "In Progress",
+    color: "var(--ember)",
+    bg: "color-mix(in srgb, var(--ember) 6%, transparent)",
+    icon: "◐",
+  },
+  review: {
+    label: "In Review",
+    color: "var(--info)",
+    bg: "color-mix(in srgb, var(--info) 6%, transparent)",
+    icon: "◎",
+  },
+  changes: {
+    label: "Changes Req.",
+    color: "var(--error)",
+    bg: "color-mix(in srgb, var(--error) 6%, transparent)",
+    icon: "↻",
+  },
+  approved: {
+    label: "Approved",
+    color: "var(--success)",
+    bg: "color-mix(in srgb, var(--success) 6%, transparent)",
+    icon: "✓",
+  },
 };
 
 const STATUSES: DeliverableStatus[] = ["todo", "in-progress", "review", "changes", "approved"];
@@ -76,7 +108,8 @@ export default function DeliverableBlock({ data, onChange, onCommentAdded }: Del
     if (!showStatusMenu) return;
     const handler = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (!target.closest(`.${styles.statusIcon}`) && !target.closest(`.${styles.statusMenu}`)) setShowStatusMenu(false);
+      if (!target.closest(`.${styles.statusIcon}`) && !target.closest(`.${styles.statusMenu}`))
+        setShowStatusMenu(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -107,8 +140,12 @@ export default function DeliverableBlock({ data, onChange, onCommentAdded }: Del
   const addComment = () => {
     if (!commentText.trim()) return;
     const newComment: DeliverableComment = {
-      id: uid(), user: "You", avatar: "A", color: "#b07d4f",
-      text: commentText.trim(), time: "now",
+      id: uid(),
+      user: "You",
+      avatar: "A",
+      color: "var(--ember)",
+      text: commentText.trim(),
+      time: "now",
     };
     onChange({ ...data, comments: [...data.comments, newComment] });
     onCommentAdded?.(commentText.trim(), data.title);
@@ -117,8 +154,12 @@ export default function DeliverableBlock({ data, onChange, onCommentAdded }: Del
 
   const addMockFile = () => {
     const newFile: DeliverableFile = {
-      id: uid(), name: "uploaded-file.pdf", size: "2.4 MB",
-      fileType: "pdf", uploadedBy: "You", uploadedAt: "Just now",
+      id: uid(),
+      name: "uploaded-file.pdf",
+      size: "2.4 MB",
+      fileType: "pdf",
+      uploadedBy: "You",
+      uploadedAt: "Just now",
     };
     onChange({
       ...data,
@@ -129,7 +170,7 @@ export default function DeliverableBlock({ data, onChange, onCommentAdded }: Del
   };
 
   const removeFile = (fileId: string) => {
-    onChange({ ...data, files: data.files.filter(f => f.id !== fileId) });
+    onChange({ ...data, files: data.files.filter((f) => f.id !== fileId) });
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -148,12 +189,15 @@ export default function DeliverableBlock({ data, onChange, onCommentAdded }: Del
   };
 
   const approve = () => {
-    const existing = data.approvals.find(a => a.user === "You");
+    const existing = data.approvals.find((a) => a.user === "You");
     const updatedApprovals = existing
-      ? data.approvals.map(a => a.user === "You" ? { ...a, status: "approved" as const, time: "now" } : a)
-      : [...data.approvals, { user: "You", avatar: "A", color: "#b07d4f", status: "approved" as const, time: "now" }];
+      ? data.approvals.map((a) => (a.user === "You" ? { ...a, status: "approved" as const, time: "now" } : a))
+      : [
+          ...data.approvals,
+          { user: "You", avatar: "A", color: "var(--ember)", status: "approved" as const, time: "now" },
+        ];
 
-    const allApproved = updatedApprovals.length > 0 && updatedApprovals.every(a => a.status === "approved");
+    const allApproved = updatedApprovals.length > 0 && updatedApprovals.every((a) => a.status === "approved");
     const newActivities = addActivity("Approved by You", activities);
     onChange({
       ...data,
@@ -177,19 +221,19 @@ export default function DeliverableBlock({ data, onChange, onCommentAdded }: Del
 
   const handleTaskDrop = (column: "todo" | "doing" | "done") => {
     if (!draggedTask) return;
-    const updated = subtasks.map(t => t.id === draggedTask ? { ...t, column } : t);
+    const updated = subtasks.map((t) => (t.id === draggedTask ? { ...t, column } : t));
     onChange({ ...data, subtasks: updated });
     setDraggedTask(null);
   };
 
   const COLS: ("todo" | "doing" | "done")[] = ["todo", "doing", "done"];
   const moveTask = (taskId: string, direction: -1 | 1) => {
-    const task = subtasks.find(t => t.id === taskId);
+    const task = subtasks.find((t) => t.id === taskId);
     if (!task) return;
     const idx = COLS.indexOf(task.column);
     const nextIdx = idx + direction;
     if (nextIdx < 0 || nextIdx >= COLS.length) return;
-    const updated = subtasks.map(t => t.id === taskId ? { ...t, column: COLS[nextIdx] } : t);
+    const updated = subtasks.map((t) => (t.id === taskId ? { ...t, column: COLS[nextIdx] } : t));
     onChange({ ...data, subtasks: updated });
   };
 
@@ -199,16 +243,25 @@ export default function DeliverableBlock({ data, onChange, onCommentAdded }: Del
   };
 
   return (
-    <div className={`${styles.block} ${expanded ? styles.blockExpanded : ""} ${styles[`status_${data.status.replace("-", "_")}`]}`}>
+    <div
+      className={`${styles.block} ${expanded ? styles.blockExpanded : ""} ${styles[`status_${data.status.replace("-", "_")}`]}`}
+    >
       {/* Collapsed row */}
       <div className={styles.row} onClick={() => setExpanded(!expanded)}>
-        <div className={styles.statusIcon} style={{ background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.color}20` }}
-          role="button" aria-label={`Status: ${cfg.label}. Click to change`}
-          onClick={e => { e.stopPropagation(); setShowStatusMenu(!showStatusMenu); }}>
+        <div
+          className={styles.statusIcon}
+          style={{ background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.color}20` }}
+          role="button"
+          aria-label={`Status: ${cfg.label}. Click to change`}
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowStatusMenu(!showStatusMenu);
+          }}
+        >
           {cfg.icon}
           {showStatusMenu && (
-            <div className={styles.statusMenu} onClick={e => e.stopPropagation()}>
-              {STATUSES.map(s => {
+            <div className={styles.statusMenu} onClick={(e) => e.stopPropagation()}>
+              {STATUSES.map((s) => {
                 const sc = STATUS_CONFIG[s];
                 return (
                   <div key={s} className={styles.statusOption} onClick={() => updateStatus(s)}>
@@ -227,30 +280,63 @@ export default function DeliverableBlock({ data, onChange, onCommentAdded }: Del
               ref={titleRef}
               className={styles.titleInput}
               value={titleDraft}
-              onChange={e => setTitleDraft(e.target.value)}
+              onChange={(e) => setTitleDraft(e.target.value)}
               onBlur={commitTitle}
-              onKeyDown={e => { if (e.key === "Enter") commitTitle(); if (e.key === "Escape") { setTitleDraft(data.title); setEditingTitle(false); } }}
-              onClick={e => e.stopPropagation()}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") commitTitle();
+                if (e.key === "Escape") {
+                  setTitleDraft(data.title);
+                  setEditingTitle(false);
+                }
+              }}
+              onClick={(e) => e.stopPropagation()}
             />
           ) : (
-            <div className={styles.title} onDoubleClick={e => { e.stopPropagation(); setEditingTitle(true); setTitleDraft(data.title); }}>
+            <div
+              className={styles.title}
+              onDoubleClick={(e) => {
+                e.stopPropagation();
+                setEditingTitle(true);
+                setTitleDraft(data.title);
+              }}
+            >
               {data.title}
             </div>
           )}
           <div className={styles.meta}>
             <span className={styles.assignee}>
-              <span className={styles.assigneeAv} style={{ background: data.assigneeColor }}>{data.assigneeAvatar}</span>
+              <span className={styles.assigneeAv} style={{ background: data.assigneeColor }}>
+                {data.assigneeAvatar}
+              </span>
               {data.assignee}
             </span>
             <span className={styles.due}>Due {data.dueDate}</span>
-            {data.files.length > 0 && <span className={styles.count}>
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5.5 2.5v4.5a1.5 1.5 0 01-3 0V3a2 2 0 014 0v4.5a.5.5 0 01-1 0V3.5" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" /></svg>
-              {data.files.length}
-            </span>}
-            {data.comments.length > 0 && <span className={styles.count}>
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M8.5 6.5c0 .4-.3.8-.6.8H3.5l-1.7 1.7V2.8c0-.4.3-.8.6-.8h5.5c.3 0 .6.4.6.8v3.7z" stroke="currentColor" strokeWidth="0.8" strokeLinejoin="round" /></svg>
-              {data.comments.length}
-            </span>}
+            {data.files.length > 0 && (
+              <span className={styles.count}>
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                  <path
+                    d="M5.5 2.5v4.5a1.5 1.5 0 01-3 0V3a2 2 0 014 0v4.5a.5.5 0 01-1 0V3.5"
+                    stroke="currentColor"
+                    strokeWidth="0.8"
+                    strokeLinecap="round"
+                  />
+                </svg>
+                {data.files.length}
+              </span>
+            )}
+            {data.comments.length > 0 && (
+              <span className={styles.count}>
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                  <path
+                    d="M8.5 6.5c0 .4-.3.8-.6.8H3.5l-1.7 1.7V2.8c0-.4.3-.8.6-.8h5.5c.3 0 .6.4.6.8v3.7z"
+                    stroke="currentColor"
+                    strokeWidth="0.8"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                {data.comments.length}
+              </span>
+            )}
           </div>
         </div>
 
@@ -264,7 +350,9 @@ export default function DeliverableBlock({ data, onChange, onCommentAdded }: Del
               ))}
             </div>
           )}
-          <span className={styles.arrow} style={{ transform: expanded ? "rotate(90deg)" : "rotate(0deg)" }}>▶</span>
+          <span className={styles.arrow} style={{ transform: expanded ? "rotate(90deg)" : "rotate(0deg)" }}>
+            ▶
+          </span>
         </div>
       </div>
 
@@ -278,28 +366,55 @@ export default function DeliverableBlock({ data, onChange, onCommentAdded }: Del
                 ref={descRef}
                 className={styles.descTextarea}
                 value={descDraft}
-                onChange={e => setDescDraft(e.target.value)}
+                onChange={(e) => setDescDraft(e.target.value)}
                 onBlur={commitDesc}
-                onKeyDown={e => { if (e.key === "Escape") { setDescDraft(data.description); setEditingDesc(false); } }}
-                onClick={e => e.stopPropagation()}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") {
+                    setDescDraft(data.description);
+                    setEditingDesc(false);
+                  }
+                }}
+                onClick={(e) => e.stopPropagation()}
                 rows={3}
               />
             </div>
           ) : (
-            <div className={styles.desc} onClick={() => { setEditingDesc(true); setDescDraft(data.description); }}>
-              {data.description || <span style={{ color: "var(--warm-400)", fontStyle: "italic" }}>Click to add a description...</span>}
+            <div
+              className={styles.desc}
+              onClick={() => {
+                setEditingDesc(true);
+                setDescDraft(data.description);
+              }}
+            >
+              {data.description || (
+                <span style={{ color: "var(--warm-400)", fontStyle: "italic" }}>Click to add a description...</span>
+              )}
             </div>
           )}
 
           <div className={styles.tabs}>
-            <button className={`${styles.tab} ${activeTab === "files" ? styles.tabOn : ""}`} onClick={() => setActiveTab("files")}>
+            <button
+              className={`${styles.tab} ${activeTab === "files" ? styles.tabOn : ""}`}
+              onClick={() => setActiveTab("files")}
+            >
               Files <span className={styles.tabCount}>{data.files.length}</span>
             </button>
-            <button className={`${styles.tab} ${activeTab === "comments" ? styles.tabOn : ""}`} onClick={() => setActiveTab("comments")}>
+            <button
+              className={`${styles.tab} ${activeTab === "comments" ? styles.tabOn : ""}`}
+              onClick={() => setActiveTab("comments")}
+            >
               Discussion <span className={styles.tabCount}>{data.comments.length}</span>
             </button>
-            <button className={`${styles.tab} ${activeTab === "approvals" ? styles.tabOn : ""}`} onClick={() => setActiveTab("approvals")}>
-              Approvals <span className={styles.tabCount}>{data.approvals.length === 0 ? "—" : `${data.approvals.filter(a => a.status === "approved").length}/${data.approvals.length}`}</span>
+            <button
+              className={`${styles.tab} ${activeTab === "approvals" ? styles.tabOn : ""}`}
+              onClick={() => setActiveTab("approvals")}
+            >
+              Approvals{" "}
+              <span className={styles.tabCount}>
+                {data.approvals.length === 0
+                  ? "—"
+                  : `${data.approvals.filter((a) => a.status === "approved").length}/${data.approvals.length}`}
+              </span>
             </button>
           </div>
 
@@ -307,14 +422,18 @@ export default function DeliverableBlock({ data, onChange, onCommentAdded }: Del
             {/* Files — rich cards */}
             {activeTab === "files" && (
               <>
-                {data.files.map(f => (
+                {data.files.map((f) => (
                   <div key={f.id} className={styles.fileCard}>
                     <div className={styles.fileCardIcon}>{getFileTypeIcon(f)}</div>
                     <div className={styles.fileCardInfo}>
                       <div className={styles.fileCardName}>{f.name}</div>
-                      <div className={styles.fileCardMeta}>{f.size} · {f.uploadedBy} · {f.uploadedAt}</div>
+                      <div className={styles.fileCardMeta}>
+                        {f.size} · {f.uploadedBy} · {f.uploadedAt}
+                      </div>
                     </div>
-                    <button className={styles.fileCardRemove} title="Remove" onClick={() => removeFile(f.id)}>×</button>
+                    <button className={styles.fileCardRemove} title="Remove" onClick={() => removeFile(f.id)}>
+                      ×
+                    </button>
                   </div>
                 ))}
                 {/* Drop zone */}
@@ -334,9 +453,11 @@ export default function DeliverableBlock({ data, onChange, onCommentAdded }: Del
             {activeTab === "comments" && (
               <>
                 {data.comments.length === 0 && <div className={styles.empty}>No comments yet</div>}
-                {data.comments.map(c => (
+                {data.comments.map((c) => (
                   <div key={c.id} className={styles.comment}>
-                    <div className={styles.commentAv} style={{ background: c.color }}>{c.avatar}</div>
+                    <div className={styles.commentAv} style={{ background: c.color }}>
+                      {c.avatar}
+                    </div>
                     <div className={styles.commentBody}>
                       <div className={styles.commentHead}>
                         <span className={styles.commentAuthor}>{c.user}</span>
@@ -347,10 +468,18 @@ export default function DeliverableBlock({ data, onChange, onCommentAdded }: Del
                   </div>
                 ))}
                 <div className={styles.commentInput}>
-                  <input className={styles.commentField} placeholder="Add a comment..." value={commentText}
-                    onChange={e => setCommentText(e.target.value)}
-                    onKeyDown={e => { if (e.key === "Enter") addComment(); }} />
-                  <button className={styles.commentSend} onClick={addComment} disabled={!commentText.trim()}>Post</button>
+                  <input
+                    className={styles.commentField}
+                    placeholder="Add a comment..."
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") addComment();
+                    }}
+                  />
+                  <button className={styles.commentSend} onClick={addComment} disabled={!commentText.trim()}>
+                    Post
+                  </button>
                 </div>
               </>
             )}
@@ -361,7 +490,9 @@ export default function DeliverableBlock({ data, onChange, onCommentAdded }: Del
                 {data.approvals.length === 0 && <div className={styles.empty}>No approvals requested</div>}
                 {data.approvals.map((a, i) => (
                   <div key={i} className={styles.approvalRow}>
-                    <div className={styles.approvalAv} style={{ background: a.color }}>{a.avatar}</div>
+                    <div className={styles.approvalAv} style={{ background: a.color }}>
+                      {a.avatar}
+                    </div>
                     <div className={styles.approvalInfo}>
                       <div className={styles.approvalName}>{a.user}</div>
                       {a.time && <div className={styles.approvalTime}>{a.time}</div>}
@@ -373,7 +504,15 @@ export default function DeliverableBlock({ data, onChange, onCommentAdded }: Del
                 ))}
                 {data.status === "review" && (
                   <button className={styles.approveBtn} onClick={approve}>
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                      <path
+                        d="M2 6l3 3 5-5"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
                     Approve
                   </button>
                 )}
@@ -391,7 +530,7 @@ export default function DeliverableBlock({ data, onChange, onCommentAdded }: Del
             {activityOpen && (
               <div className={styles.collapsibleBody}>
                 {activities.length === 0 && <div className={styles.empty}>No activity yet</div>}
-                {activities.map(a => (
+                {activities.map((a) => (
                   <div key={a.id} className={styles.activityEntry}>
                     <span className={styles.activityBullet}>•</span>
                     <span className={styles.activityText}>{a.text}</span>
@@ -411,44 +550,56 @@ export default function DeliverableBlock({ data, onChange, onCommentAdded }: Del
             </div>
             {subtasksOpen && (
               <div className={styles.kanban}>
-                {(["todo", "doing", "done"] as const).map(col => (
+                {(["todo", "doing", "done"] as const).map((col) => (
                   <div
                     key={col}
                     className={styles.kanbanCol}
-                    onDragOver={e => e.preventDefault()}
+                    onDragOver={(e) => e.preventDefault()}
                     onDrop={() => handleTaskDrop(col)}
                   >
                     <div className={styles.kanbanColHeader}>
                       {col === "todo" ? "To Do" : col === "doing" ? "Doing" : "Done"}
                     </div>
-                    {subtasks.filter(t => t.column === col).map(t => (
-                      <div
-                        key={t.id}
-                        className={styles.kanbanCard}
-                        draggable
-                        tabIndex={0}
-                        role="button"
-                        aria-label={`${t.title} — ${col === "todo" ? "To Do" : col === "doing" ? "Doing" : "Done"}. Arrow keys to move.`}
-                        onDragStart={() => handleTaskDragStart(t.id)}
-                        onKeyDown={e => {
-                          if (e.key === "ArrowRight") { e.preventDefault(); moveTask(t.id, 1); }
-                          if (e.key === "ArrowLeft") { e.preventDefault(); moveTask(t.id, -1); }
-                        }}
-                      >
-                        {t.title}
-                      </div>
-                    ))}
+                    {subtasks
+                      .filter((t) => t.column === col)
+                      .map((t) => (
+                        <div
+                          key={t.id}
+                          className={styles.kanbanCard}
+                          draggable
+                          tabIndex={0}
+                          role="button"
+                          aria-label={`${t.title} — ${col === "todo" ? "To Do" : col === "doing" ? "Doing" : "Done"}. Arrow keys to move.`}
+                          onDragStart={() => handleTaskDragStart(t.id)}
+                          onKeyDown={(e) => {
+                            if (e.key === "ArrowRight") {
+                              e.preventDefault();
+                              moveTask(t.id, 1);
+                            }
+                            if (e.key === "ArrowLeft") {
+                              e.preventDefault();
+                              moveTask(t.id, -1);
+                            }
+                          }}
+                        >
+                          {t.title}
+                        </div>
+                      ))}
                     {col === "todo" && (
                       <div className={styles.kanbanAdd}>
                         <input
                           className={styles.kanbanAddInput}
                           placeholder="New task..."
                           value={newTaskTitle}
-                          onChange={e => setNewTaskTitle(e.target.value)}
-                          onKeyDown={e => { if (e.key === "Enter") addSubtask(); }}
-                          onClick={e => e.stopPropagation()}
+                          onChange={(e) => setNewTaskTitle(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") addSubtask();
+                          }}
+                          onClick={(e) => e.stopPropagation()}
                         />
-                        <button className={styles.kanbanAddBtn} onClick={addSubtask} disabled={!newTaskTitle.trim()}>+</button>
+                        <button className={styles.kanbanAddBtn} onClick={addSubtask} disabled={!newTaskTitle.trim()}>
+                          +
+                        </button>
                       </div>
                     )}
                   </div>

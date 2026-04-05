@@ -17,7 +17,16 @@ interface CanvasBlockProps {
   onUpdate: (data: CanvasBlockData) => void;
 }
 
-const COLORS = ["#2c2a25", "#b07d4f", "#c24b38", "#5a9a3c", "#5b7fa4", "#7c6b9e", "#8a7e63", "#b8b3a8"];
+const COLORS = [
+  "var(--ink-900)",
+  "var(--ember)",
+  "var(--error)",
+  "var(--success)",
+  "var(--info)",
+  "var(--muted)",
+  "#8a7e63",
+  "var(--warm-400)",
+];
 const TOOLS = [
   { id: "select", icon: "↖" },
   { id: "rect", icon: "□" },
@@ -84,7 +93,7 @@ export function getDefaultCanvasData(): CanvasBlockData {
 export default function CanvasBlock({ data, onUpdate }: CanvasBlockProps) {
   const elements = ensureUniqueCanvasElementIds(data.elements);
   const [tool, setTool] = useState("draw");
-  const [color, setColor] = useState("#2c2a25");
+  const [color, setColor] = useState("var(--ink-900)");
   const [drawing, setDrawing] = useState(false);
   const [current, setCurrent] = useState<CanvasElement | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());

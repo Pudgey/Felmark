@@ -9,9 +9,9 @@ interface Props {
 }
 
 const STATUS_CFG: Record<string, { color: string; icon: string }> = {
-  done: { color: "#5a9a3c", icon: "✓" },
-  active: { color: "#b07d4f", icon: "●" },
-  upcoming: { color: "#9b988f", icon: "○" },
+  done: { color: "var(--success)", icon: "✓" },
+  active: { color: "var(--ember)", icon: "●" },
+  upcoming: { color: "var(--ink-400)", icon: "○" },
 };
 
 export function getDefaultScopeBoundaryData(): ScopeBoundaryData {
@@ -38,7 +38,16 @@ export default function ScopeBoundaryBlock({ data }: Props) {
   return (
     <div className={styles.card}>
       <div className={styles.header}>
-        <span className={styles.badge} style={{ color: "#5a9a3c", background: "rgba(90,154,60,0.06)", borderColor: "rgba(90,154,60,0.1)" }}>Scope</span>
+        <span
+          className={styles.badge}
+          style={{
+            color: "var(--success)",
+            background: "color-mix(in srgb, var(--success) 6%, transparent)",
+            borderColor: "color-mix(in srgb, var(--success) 10%, transparent)",
+          }}
+        >
+          Scope
+        </span>
         <span className={styles.title}>Scope boundary</span>
       </div>
       <div className={styles.scopeGrid}>
@@ -51,7 +60,9 @@ export default function ScopeBoundaryBlock({ data }: Props) {
             const st = STATUS_CFG[s.status || "upcoming"];
             return (
               <div key={i} className={styles.scopeItem}>
-                <span className={styles.scopeStatus} style={{ color: st.color }}>{st.icon}</span>
+                <span className={styles.scopeStatus} style={{ color: st.color }}>
+                  {st.icon}
+                </span>
                 <span className={styles.scopeText}>{s.item}</span>
               </div>
             );
