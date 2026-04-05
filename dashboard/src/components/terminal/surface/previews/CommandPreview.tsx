@@ -153,5 +153,5 @@ export default function CommandPreview({ command }: CommandPreviewProps) {
     }
   }, [command, workstations]);
 
-  return <div>{content}</div>;
+  return <div style={{ padding: "14px 0" }}>{content}</div>;
 }

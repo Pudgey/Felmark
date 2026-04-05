@@ -3,7 +3,7 @@
 Preview components for the terminal surface right pane.
 
 ## Exports
-- `FeatureGrid` — default grid of Felmark features
+- `FeatureGrid` — compact list of commands and surfaces (dark, dense rows with amber hover)
 - `CommandPreview` — per-command contextual preview
 
 ## Dependencies
@@ -15,6 +15,6 @@ Preview components for the terminal surface right pane.
 - `../TerminalPreview.tsx`
 
 ## Files
-- `FeatureGrid.tsx` — Categorized feature card grid
+- `FeatureGrid.tsx` — Compact command list with sections and surfaces
 - `CommandPreview.tsx` — Per-command preview cards
 - `previews.module.css` — Shared preview styles
