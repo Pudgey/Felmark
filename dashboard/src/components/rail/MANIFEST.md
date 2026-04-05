@@ -3,7 +3,7 @@
 > Auto-maintained by AI. Updated on every file change in this folder.
 
 ## Exports
-- `Rail` -- Vertical icon navigation rail (home, search, calendar, etc.) with zen mode toggle
+- `Rail` -- Vertical icon navigation rail (home, workspace, workstations, search, calendar, forge, team, cloud, contacts) with zen mode toggle
 
 ## Dependencies
 - (none beyond React)

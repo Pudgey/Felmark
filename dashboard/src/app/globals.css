@@ -141,6 +141,31 @@
   inherits: true;
   initial-value: #d4a34a;
 }
+@property --positive {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #26a69a;
+}
+@property --urgent {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #ef5350;
+}
+@property --signal {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #2962ff;
+}
+@property --caution {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #ff9800;
+}
+@property --muted {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #7c8594;
+}
 @property --card {
   syntax: "<color>";
   inherits: true;
@@ -212,6 +237,13 @@
   --info: #5b7fa4;
   --warning: #d4a34a;
 
+  /* Workspace semantic — vibrant status palette */
+  --positive: #26a69a;
+  --urgent: #ef5350;
+  --signal: #2962ff;
+  --caution: #ff9800;
+  --muted: #7c8594;
+
   /* Surface tokens (theme-managed) */
   --card: #fff;
   --card-tint: #f9f8f5;
@@ -269,6 +301,11 @@
     --error 0.5s ease,
     --info 0.5s ease,
     --warning 0.5s ease,
+    --positive 0.5s ease,
+    --urgent 0.5s ease,
+    --signal 0.5s ease,
+    --caution 0.5s ease,
+    --muted 0.5s ease,
     --card 0.5s ease,
     --card-tint 0.5s ease,
     --bg 0.5s ease,

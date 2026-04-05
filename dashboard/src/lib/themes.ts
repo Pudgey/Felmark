@@ -39,6 +39,12 @@ export interface FelmarkTheme {
   error: string;
   info: string;
   warning: string;
+  // Workspace semantic — vibrant status palette
+  positive: string;
+  urgent: string;
+  signal: string;
+  caution: string;
+  muted: string;
   // Surface
   card: string;
   cardTint: string;
@@ -85,6 +91,7 @@ export const THEMES: Record<string, FelmarkTheme> = {
     error: "#c24b38",
     info: "#5b7fa4",
     warning: "#d4a34a",
+    positive: "#26a69a", urgent: "#ef5350", signal: "#2962ff", caution: "#ff9800", muted: "#7c8594",
     card: "#fff",
     cardTint: "#f9f8f5",
     bg: "#f2f0ec",
@@ -124,6 +131,7 @@ export const THEMES: Record<string, FelmarkTheme> = {
     error: "#f87171",
     info: "#60a5fa",
     warning: "#fbbf24",
+    positive: "#2dd4bf", urgent: "#fb7185", signal: "#818cf8", caution: "#fbbf24", muted: "#94a3b8",
     card: "#1a2332",
     cardTint: "#1f2b3f",
     bg: "#151b27",
@@ -163,6 +171,7 @@ export const THEMES: Record<string, FelmarkTheme> = {
     error: "#c0534f",
     info: "#5e89a8",
     warning: "#c9a84e",
+    positive: "#34d399", urgent: "#e57373", signal: "#64b5f6", caution: "#ffb74d", muted: "#8a9e8a",
     card: "#f0f5ee",
     cardTint: "#eef2ec",
     bg: "#e8ede5",
@@ -202,6 +211,7 @@ export const THEMES: Record<string, FelmarkTheme> = {
     error: "#c25050",
     info: "#6889a4",
     warning: "#c9a050",
+    positive: "#26a69a", urgent: "#e57373", signal: "#7986cb", caution: "#ffb74d", muted: "#9e8e80",
     card: "#faf6f3",
     cardTint: "#f7f0ea",
     bg: "#f0e8e0",
@@ -241,6 +251,7 @@ export const THEMES: Record<string, FelmarkTheme> = {
     error: "#e5484d",
     info: "#5b8def",
     warning: "#e5a336",
+    positive: "#2dd4bf", urgent: "#f87171", signal: "#818cf8", caution: "#fbbf24", muted: "#8892a6",
     card: "#fafbfe",
     cardTint: "#f5f7fc",
     bg: "#f0f2f7",
@@ -283,6 +294,7 @@ export const THEMES: Record<string, FelmarkTheme> = {
     error: "#fb7185",
     info: "#60a5fa",
     warning: "#facc15",
+    positive: "#2dd4bf", urgent: "#fb7185", signal: "#818cf8", caution: "#facc15", muted: "#94a3b8",
     card: "#1a1918",
     cardTint: "#232220",
     bg: "#151413",
@@ -322,6 +334,7 @@ export const THEMES: Record<string, FelmarkTheme> = {
     error: "#c44a3a",
     info: "#5a87a8",
     warning: "#d4a030",
+    positive: "#26a69a", urgent: "#e57373", signal: "#7986cb", caution: "#ffb74d", muted: "#96886a",
     card: "#faf5ea",
     cardTint: "#f7f0e0",
     bg: "#f0e8d5",
@@ -361,6 +374,7 @@ export const THEMES: Record<string, FelmarkTheme> = {
     error: "#171717",
     info: "#525252",
     warning: "#6b6b6b",
+    positive: "#525252", urgent: "#404040", signal: "#525252", caution: "#6b6b6b", muted: "#8a8a8a",
     card: "#ffffff",
     cardTint: "#f8f8f8",
     bg: "#f0f0f0",
@@ -400,6 +414,7 @@ export const THEMES: Record<string, FelmarkTheme> = {
     error: "#b84a42",
     info: "#4f7a8c",
     warning: "#c4923a",
+    positive: "#4db6ac", urgent: "#e57373", signal: "#64b5f6", caution: "#ffb74d", muted: "#949080",
     card: "#f7f5f0",
     cardTint: "#f2efe8",
     bg: "#ece9e3",
@@ -439,6 +454,7 @@ export const THEMES: Record<string, FelmarkTheme> = {
     error: "#f472b6",
     info: "#818cf8",
     warning: "#fbbf24",
+    positive: "#2dd4bf", urgent: "#f472b6", signal: "#818cf8", caution: "#fbbf24", muted: "#8e89a6",
     card: "#fcfbfe",
     cardTint: "#f7f5fb",
     bg: "#f3f1f8",
@@ -495,6 +511,13 @@ export function applyTheme(theme: FelmarkTheme): void {
   root.setProperty("--error", theme.error);
   root.setProperty("--info", theme.info);
   root.setProperty("--warning", theme.warning);
+
+  // Workspace semantic
+  root.setProperty("--positive", theme.positive);
+  root.setProperty("--urgent", theme.urgent);
+  root.setProperty("--signal", theme.signal);
+  root.setProperty("--caution", theme.caution);
+  root.setProperty("--muted", theme.muted);
 
   // Surface
   root.setProperty("--card", theme.card);

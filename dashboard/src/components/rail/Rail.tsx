@@ -46,6 +46,10 @@ export default function Rail({ activeItem, overdueCount, onItemClick, zenMode, o
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="7" cy="6" r="2.5" stroke="currentColor" strokeWidth="1.2"/><path d="M3 14c0-2.2 1.8-4 4-4s4 1.8 4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/><circle cx="13" cy="7" r="2" stroke="currentColor" strokeWidth="1" opacity="0.5"/><path d="M12 14c0-1.7 1-3 2.5-3" stroke="currentColor" strokeWidth="1" strokeLinecap="round" opacity="0.5"/></svg>
       </button>
 
+      <button className={`${styles.btn} ${activeItem === "cloud" ? styles.active : ""}`} onClick={() => onItemClick("cloud")} aria-label="Cloud" title="cloud">
+        <svg width="20" height="20" viewBox="0 0 18 18" fill="none"><path d="M4.5 13h9a2.5 2.5 0 000-5h-.1a4 4 0 00-7.8 0H5.5a3 3 0 100 5z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/></svg>
+      </button>
+
       <div className={styles.sep} />
 
       <button className={styles.btn} aria-label="Contacts" title="contacts">
