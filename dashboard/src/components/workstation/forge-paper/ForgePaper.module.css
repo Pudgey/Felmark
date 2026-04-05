@@ -1,4 +1,4 @@
-.page { display: flex; flex-direction: column; height: 100%; background: #e8e5de; font-family: 'Outfit', sans-serif; color: var(--ink-700); }
+.page { display: flex; flex: 1; flex-direction: column; width: 100%; min-width: 0; min-height: 0; height: 100%; background: #e8e5de; font-family: 'Outfit', sans-serif; color: var(--ink-700); }
 
 /* ═══ Top Bar ═══ */
 .topBar { padding: 8px 20px; background: #fff; border-bottom: 1px solid var(--warm-200); display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
@@ -24,7 +24,7 @@
 .draftToggleBtnOn .draftToggleDot { left: 14px; }
 
 /* ═══ Layout ═══ */
-.layout { flex: 1; display: flex; overflow: hidden; }
+.layout { flex: 1; display: flex; width: 100%; min-width: 0; min-height: 0; overflow: hidden; }
 
 /* ═══ Outline ═══ */
 .outline { width: 180px; background: #fff; border-right: 1px solid var(--warm-200); padding: 12px 8px; overflow-y: auto; flex-shrink: 0; }
@@ -42,12 +42,12 @@
 .outlineEmpty { font-size: 11px; color: var(--ink-300); padding: 12px 8px; text-align: center; }
 
 /* ═══ Paper scroll ═══ */
-.scroll { flex: 1; overflow-y: auto; display: flex; justify-content: center; align-items: flex-start; padding: 32px 20px 80px; padding-left: 70px; background: #e8e5de; }
+.scroll { flex: 1; min-width: 0; min-height: 0; overflow-y: auto; display: flex; justify-content: center; align-items: flex-start; padding: 32px 36px 80px 44px; background: #e8e5de; }
 .scroll::-webkit-scrollbar { width: 6px; }
 .scroll::-webkit-scrollbar-thumb { background: var(--warm-400); border-radius: 3px; }
 
 /* ═══ The Paper ═══ */
-.paper { width: 100%; max-width: 900px; background: #ffffff; border-radius: 3px; box-shadow: 0 2px 16px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.02); position: relative; }
+.paper { width: min(100%, 980px); background: #ffffff; border-radius: 3px; box-shadow: 0 2px 16px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.02); position: relative; }
 
 /* ═══ Header ═══ */
 .header { padding: 48px 64px 0; }

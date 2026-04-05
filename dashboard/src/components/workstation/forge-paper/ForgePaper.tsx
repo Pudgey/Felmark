@@ -28,11 +28,12 @@ const FORGE_PAPER_SLASH_TYPES: BlockType[] = [
 ];
 
 interface ForgePaperProps {
+  projectId: string;
   initialBlocks: Block[];
   workstation?: Workstation | null;
   projectName: string;
   onClose: () => void;
-  onSave: (blocks: Block[]) => void;
+  onSave: (projectId: string, blocks: Block[]) => void;
 }
 
 function mergeCachedContent(blocks: Block[], cache: Record<string, string>): Block[] {
@@ -125,7 +126,7 @@ function PaperBlock({ block, sectionNum, isFocused, onFocus, onInput, onBlurFlus
   }
 }
 
-export default function ForgePaper({ initialBlocks, workstation, projectName, onClose, onSave }: ForgePaperProps) {
+export default function ForgePaper({ projectId, initialBlocks, workstation, projectName, onClose, onSave }: ForgePaperProps) {
   // ── ForgePaper owns its blocks state ──
   const [blocks, setBlocks] = useState<Block[]>(initialBlocks);
   const [sent, setSent] = useState(false);
@@ -140,6 +141,10 @@ export default function ForgePaper({ initialBlocks, workstation, projectName, on
   const paperRef = useRef<HTMLDivElement>(null);
   const contentCache = useRef<Record<string, string>>({});
   const outlineTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const blocksRef = useRef(blocks);
+  const onSaveRef = useRef(onSave);
+  const dirtyRef = useRef(false);
+  const didPersistRef = useRef(false);
 
   // Tracks content changes for the outline — debounced so it doesn't fire every keystroke
   const [contentVersion, setContentVersion] = useState(0);
@@ -154,10 +159,19 @@ export default function ForgePaper({ initialBlocks, workstation, projectName, on
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const outlineBlocks = useMemo(() => mergeCachedContent(blocks, contentCache.current), [blocks, contentVersion]);
 
+  useEffect(() => {
+    blocksRef.current = blocks;
+  }, [blocks]);
+
+  useEffect(() => {
+    onSaveRef.current = onSave;
+  }, [onSave]);
+
   // Flush cached content into local state
   const flushContent = useCallback(() => {
     const cache = contentCache.current;
     if (Object.keys(cache).length === 0) return;
+    dirtyRef.current = true;
     setBlocks(prev => mergeCachedContent(prev, cache));
     contentCache.current = {};
   }, []);
@@ -175,13 +189,27 @@ export default function ForgePaper({ initialBlocks, workstation, projectName, on
     return () => { if (outlineTimer.current) clearTimeout(outlineTimer.current); };
   }, []);
 
+  const persistCurrentBlocks = useCallback(() => {
+    const final = mergeCachedContent(blocksRef.current, contentCache.current);
+    contentCache.current = {};
+    dirtyRef.current = false;
+    didPersistRef.current = true;
+    onSaveRef.current(projectId, final);
+  }, [projectId]);
+
   // ── Save & close ──
   const handleSaveAndClose = useCallback(() => {
-    const final = mergeCachedContent(blocks, contentCache.current);
-    contentCache.current = {};
-    onSave(final);
+    persistCurrentBlocks();
     onClose();
-  }, [blocks, onClose, onSave]);
+  }, [onClose, persistCurrentBlocks]);
+
+  useEffect(() => {
+    return () => {
+      if (didPersistRef.current) return;
+      if (!dirtyRef.current && Object.keys(contentCache.current).length === 0) return;
+      onSaveRef.current(projectId, mergeCachedContent(blocksRef.current, contentCache.current));
+    };
+  }, [projectId]);
 
   // ── Draft line ──
   const updateDraftLine = useCallback(() => {
@@ -222,6 +250,7 @@ export default function ForgePaper({ initialBlocks, workstation, projectName, on
   // ── Block operations (all local state) ──
   const addBlockAfter = useCallback((afterId: string, type: BlockType = "paragraph") => {
     flushContent();
+    dirtyRef.current = true;
     const result = insertAfter(getWorkingBlocks(), afterId, type);
     setBlocks(result.blocks);
     setTimeout(() => focusEditableBlock(result.newBlockId), 50);
@@ -229,6 +258,7 @@ export default function ForgePaper({ initialBlocks, workstation, projectName, on
 
   const handleDeleteBlock = useCallback((blockId: string) => {
     flushContent();
+    dirtyRef.current = true;
     const result = removeBlock(getWorkingBlocks(), blockId);
     delete contentCache.current[blockId];
     setBlocks(result.blocks);
@@ -236,6 +266,7 @@ export default function ForgePaper({ initialBlocks, workstation, projectName, on
   }, [flushContent, getWorkingBlocks]);
 
   const handleAiGenerate = useCallback((blockId: string, generatedBlocks: Block[]) => {
+    dirtyRef.current = true;
     delete contentCache.current[blockId];
     setBlocks(prev => {
       const idx = prev.findIndex(block => block.id === blockId);
@@ -263,6 +294,7 @@ export default function ForgePaper({ initialBlocks, workstation, projectName, on
   }, [focusEditableBlock]);
 
   const handleBlockInput = (blockId: string, html: string, text: string) => {
+    dirtyRef.current = true;
     contentCache.current[blockId] = html;
 
     // Debounced outline refresh — 300ms after last keystroke
@@ -293,6 +325,7 @@ export default function ForgePaper({ initialBlocks, workstation, projectName, on
       return;
     }
 
+    dirtyRef.current = true;
     // Clear the slash text
     const el = paperRef.current?.querySelector(`[data-block-id="${blockId}"] [contenteditable]`) as HTMLElement;
     if (el) el.innerHTML = "";
@@ -360,19 +393,6 @@ export default function ForgePaper({ initialBlocks, workstation, projectName, on
       </div>
 
       <div className={styles.layout}>
-        {/* Forge Paper dedicated outline */}
-        <ForgePaperOutline
-          blocks={outlineBlocks}
-          focusedBlock={focusedBlock}
-          hoveredBlock={hoveredBlock}
-          onScrollTo={(id) => {
-            setFocusedBlock(id);
-            paperRef.current?.querySelector(`[data-block-id="${id}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" });
-          }}
-          onHoverSection={(id) => setHoveredBlock(id)}
-          clientName={workstation?.client || "Client"}
-        />
-
         {/* Paper */}
         <div className={styles.scroll}>
           <div className={styles.paper} ref={paperRef}>
@@ -445,6 +465,19 @@ export default function ForgePaper({ initialBlocks, workstation, projectName, on
             {draftLineOn && draftLineY > 0 && <div className={styles.draftLine} style={{ top: draftLineY }}><div className={styles.draftLineInner} /><div className={styles.draftLineMarker}>▸</div></div>}
           </div>
         </div>
+
+        {/* Forge Paper dedicated outline */}
+        <ForgePaperOutline
+          blocks={outlineBlocks}
+          focusedBlock={focusedBlock}
+          hoveredBlock={hoveredBlock}
+          onScrollTo={(id) => {
+            setFocusedBlock(id);
+            paperRef.current?.querySelector(`[data-block-id="${id}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+          }}
+          onHoverSection={(id) => setHoveredBlock(id)}
+          clientName={workstation?.client || "Client"}
+        />
       </div>
 
       {/* Slash menu */}

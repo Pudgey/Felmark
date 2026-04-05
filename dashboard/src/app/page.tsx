@@ -328,6 +328,7 @@ export default function Dashboard() {
     const currentActiveTab = tabs.find(tab => tab.active);
     if (currentActiveTab) {
       setActiveWorkstationId(null);
+      updateActiveProject(currentActiveTab.id);
       setRailActive("forge");
       return;
     }
@@ -641,9 +642,9 @@ export default function Dashboard() {
           onCalendarOpenProject={calendarOpenProject}
           onCalendarScrollComplete={() => setCalendarScrollTarget(null)}
           onForgeClose={restoreWorkstationContext}
-          onForgeSave={(newBlocks) => {
-            if (activeProject) {
-              updateBlocksMap(prev => ({ ...prev, [activeProject]: newBlocks }));
+          onForgeSave={(projectId, newBlocks) => {
+            if (projectId) {
+              updateBlocksMap(prev => ({ ...prev, [projectId]: newBlocks }));
             }
           }}
         />

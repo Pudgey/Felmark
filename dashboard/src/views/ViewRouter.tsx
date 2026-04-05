@@ -61,7 +61,7 @@ export interface ViewRouterProps {
   onCalendarOpenProject: (projectId: string) => void;
   onCalendarScrollComplete: () => void;
   onForgeClose: () => void;
-  onForgeSave: (blocks: Block[]) => void;
+  onForgeSave: (projectId: string, blocks: Block[]) => void;
 }
 
 export default function ViewRouter(props: ViewRouterProps) {
@@ -94,7 +94,7 @@ export default function ViewRouter(props: ViewRouterProps) {
     case "home":
       return wrap(<HomeView workstations={props.workstations} overdueCount={props.overdueCount} onSelectWorkstation={props.onSelectWorkstationHome} onSelectProject={props.onSelectProject} onNewTabInWorkstation={props.onNewTabInWorkstation} onNewWorkstation={props.onNewWorkstation} />);
     case "forge":
-      return wrap(<ForgeView tabs={props.tabs} activeBlocks={props.activeBlocks} activeProject={props.activeProject} workstations={props.workstations} onClose={props.onForgeClose} onSave={props.onForgeSave} />);
+      return wrap(<ForgeView tabs={props.tabs} blocksMap={props.blocksMap} workstations={props.workstations} onClose={props.onForgeClose} onSave={props.onForgeSave} />);
     default:
       break;
   }

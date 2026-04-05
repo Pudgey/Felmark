@@ -5,21 +5,23 @@ import ForgePaper from "@/components/workstation/forge-paper/ForgePaper";
 
 interface ForgeViewProps {
   tabs: Tab[];
-  activeBlocks: Block[];
-  activeProject: string;
+  blocksMap: Record<string, Block[]>;
   workstations: Workstation[];
   onClose: () => void;
-  onSave: (blocks: Block[]) => void;
+  onSave: (projectId: string, blocks: Block[]) => void;
 }
 
-export default function ForgeView({ tabs, activeBlocks, activeProject, workstations, onClose, onSave }: ForgeViewProps) {
+export default function ForgeView({ tabs, blocksMap, workstations, onClose, onSave }: ForgeViewProps) {
   const activeTab = tabs.find(t => t.active);
 
   if (activeTab) {
+    const projectId = activeTab.id;
     return (
       <ForgePaper
-        initialBlocks={activeBlocks}
-        workstation={workstations.find(w => w.projects.some(p => p.id === activeProject))}
+        key={projectId}
+        projectId={projectId}
+        initialBlocks={blocksMap[projectId] || []}
+        workstation={workstations.find(w => w.projects.some(p => p.id === projectId))}
         projectName={activeTab.name || "Untitled"}
         onClose={onClose}
         onSave={onSave}
