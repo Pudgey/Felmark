@@ -23,8 +23,8 @@
 
 | Agent | Task | Completed |
 |-------|------|-----------|
+| claude-main | Added cloud rail icon and replaced 380+ hardcoded colors across 15 workspace CSS files with theme-aware CSS variables. | 2026-04-05 |
 | claude-main | Built workspace command palette (Cmd+K) and wired sidebar search filter across WorkspaceRouter, WorkspaceTabs, WorkspaceSidebar. | 2026-04-04 |
 | claude-main | Rebuilt FORGE_MAP.md from live disk scan — workspace canvas grid gone, ForgePaper renamed to Paper, 4 drift items flagged. | 2026-04-04 |
 | codex-main | Fixed the workstation editor footer so block counts and save status stay aligned on narrow widths. | 2026-04-04 11:07 EDT |
 | codex-main | Renamed the standalone workstation image block so it is surfaced distinctly as Single Image beside Gallery. | 2026-04-04 10:20 EDT |
-| codex-main | Built a modular image block for the workstation editor in a dedicated worktree, with lint and build passing there. | 2026-04-04 10:08 EDT |
